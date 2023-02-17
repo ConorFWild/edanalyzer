@@ -25,7 +25,7 @@ def download_dataset(options: Options):
     logger.info(f"Downloading structure factors to: {data_dir}/{datatype}")
     p = subprocess.Popen(
         constants.RSYNC_COMMAND.format(
-            datatype=datatype,
+            datatype_dir=datatype,
             data_dir=data_dir
 
         )
