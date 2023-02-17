@@ -3,21 +3,34 @@ from pathlib import Path
 import subprocess
 from data import Dataset, Options, Data
 import constants
+from loguru import logger
 
 
 def download_dataset(options: Options):
-    for datatype in [
-        "structures/divided/pdb",
-        "structures/divided/structure_factors"
-    ]:
-        p = subprocess.Popen(
-            constants.RSYNC_COMMAND.format(
-                datatype=datatype,
-                data_dir=Path(options.working_dir) / constants.DATA_DIR
 
-            )
+    data_dir = Path(options.working_dir) / constants.DATA_DIR
+
+    datatype = "structures/divided/pdb"
+    logger.info(f"Downloading pdbs to: {data_dir}/{datatype}")
+    p = subprocess.Popen(
+        constants.RSYNC_COMMAND.format(
+            datatype=datatype,
+            data_dir=data_dir
+
         )
-        p.communicate()
+    )
+    p.communicate()
+
+    datatype = "structures/divided/structure_factors"
+    logger.info(f"Downloading structure factors to: {data_dir}/{datatype}")
+    p = subprocess.Popen(
+        constants.RSYNC_COMMAND.format(
+            datatype=datatype,
+            data_dir=data_dir
+
+        )
+    )
+    p.communicate()
 
 
 def parse_dataset(options: Options, ):
