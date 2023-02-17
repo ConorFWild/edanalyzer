@@ -77,6 +77,7 @@ class CLI:
 
     def download_dataset(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
+        download_dataset(options)
 
     def parse_dataset(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
