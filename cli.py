@@ -7,7 +7,6 @@ from loguru import logger
 
 
 def download_dataset(options: Options):
-
     data_dir = Path(options.working_dir) / constants.DATA_DIR
 
     datatype = "structures/divided/pdb"
@@ -46,12 +45,14 @@ def parse_dataset(options: Options, ):
     pdbs = {}
     sfs = {}
 
-    for entry in sfs_dir.glob("*"):
-        sfs[entry.name] = entry
+    for sub in sfs_dir.glob("*"):
+        for entry in sub.glob("*"):
+            sfs[entry.stem] = entry
 
-    for entry in pdbs_dir.glob("*"):
-        if entry.name in sfs:
-            pdbs[entry.name] = entry
+    for sub in pdbs_dir.glob("*"):
+        for entry in sub.glob("*"):
+            if entry.stem in sfs:
+                pdbs[entry.stem] = entry
 
     datas = []
     id = 0
@@ -75,11 +76,13 @@ def parse_dataset(options: Options, ):
     dataset.save(options.working_dir)
     # return Dataset(datas)
 
+
 def parse_ligand(structure_template, ligand_residue):
     structure = structure_template.clone()
     # cleaned_structure =
 
     mol = pybel.readstring("pdb", "CCCC")
+
 
 def get_structure_ligands(data: Data):
     structure = gemmi.read_structure(data.pdb_path)
@@ -93,12 +96,14 @@ def get_structure_ligands(data: Data):
                 )
     return structure_ligands
 
+
 def generate_smiles(options: Options, dataset: Dataset):
     for data in dataset.data:
         ligands = get_structure_ligands(data)
         data.ligands = ligands
 
     dataset.save(options.working_dir)
+
 
 def partition_dataset(options: Options, dataset: Dataset):
     ...
