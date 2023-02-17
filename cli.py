@@ -17,7 +17,10 @@ def download_dataset(options: Options):
             datatype_dir=datatype,
             data_dir=data_dir
 
-        )
+        ),
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
     )
     p.communicate()
 
@@ -28,7 +31,10 @@ def download_dataset(options: Options):
             datatype_dir=datatype,
             data_dir=data_dir
 
-        )
+        ),
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
     )
     p.communicate()
 
