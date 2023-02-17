@@ -69,10 +69,30 @@ def parse_dataset(options: Options, ):
     dataset.save(options.working_dir)
     # return Dataset(datas)
 
+def parse_ligand(structure_template, ligand_residue):
+    structure = structure_template.clone()
+    # cleaned_structure =
+
+    mol = pybel.readstring("pdb", "CCCC")
+
+def get_structure_ligands(data: Data):
+    structure = gemmi.read_structure(data.pdb_path)
+    structure_ligands = []
+    for model in structure:
+        for chain in model:
+            ligands = chain.get_ligands()
+            for ligand in ligands:
+                structure_ligands.append(
+                    parse_ligand(ligand)
+                )
+    return structure_ligands
 
 def generate_smiles(options: Options, dataset: Dataset):
-    ...
+    for data in dataset.data:
+        ligands = get_structure_ligands(data)
+        data.ligands = ligands
 
+    dataset.save(options.working_dir)
 
 def partition_dataset(options: Options, dataset: Dataset):
     ...
