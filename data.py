@@ -26,7 +26,7 @@ class Ligand(BaseModel):
     # conformers: list[Conformer]
 
 
-class Data(BaseModel):
+class StructureReflectionsData(BaseModel):
     id: int
     name: str
     pdb_path: str
@@ -35,8 +35,8 @@ class Data(BaseModel):
     partition: int
 
 
-class Dataset(BaseModel):
-    data: list[Data]
+class StructureReflectionsDataset(BaseModel):
+    data: list[StructureReflectionsData]
 
     @classmethod
     def load(cls, path):
