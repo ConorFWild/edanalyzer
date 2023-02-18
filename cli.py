@@ -145,6 +145,7 @@ def parse_ligand(structure_template, chain, ligand_residue):
     pybel_mol = pybel.readstring("pdb", pdb_string)
 
     smiles = pybel_mol.write("can")
+    print(smiles)
 
     # smiles = Chem.MolToSmiles(mol)
 
