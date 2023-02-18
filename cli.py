@@ -138,8 +138,8 @@ def parse_ligand(structure_template, chain, ligand_residue):
 
                 # model.remove_chain(_chain.name)
     for model in structure:
-        for _chain in chains_to_remove:
-            model.remove_chain(_chain.name)
+        for _chain_name in chains_to_remove:
+            model.remove_chain(_chain_name)
 
     new_chain = gemmi.Chain(chain.name)
     new_chain.add_residue(ligand_residue)
