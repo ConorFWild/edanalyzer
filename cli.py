@@ -130,10 +130,16 @@ def parse_dataset(options: Options, ):
 
 def parse_ligand(structure_template, chain, ligand_residue):
     structure = structure_template.clone()
+    chains_to_remove = []
     for model in structure:
         for _chain in chain:
-            if _chain.name != chain.name:
-                model.remove_chain(_chain.name)
+            chains_to_remove.append(chain.name)
+            # if _chain.name != chain.name:
+
+                # model.remove_chain(_chain.name)
+    for model in structure:
+        for _chain in chains_to_remove:
+            model.remove_chain(_chain.name)
 
     new_chain = gemmi.Chain(chain.name)
     new_chain.add_residue(ligand_residue)
