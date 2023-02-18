@@ -135,8 +135,7 @@ def parse_ligand(structure_template, chain, ligand_residue):
             if _chain.name != chain.name:
                 model.remove_chain(_chain.name)
 
-    new_chain = gemmi.Chain()
-    new_chain.name = chain.name
+    new_chain = gemmi.Chain(chain.name)
     new_chain.add_residue(ligand_residue)
 
     pdb_string = structure.make_minimal_pdb()
