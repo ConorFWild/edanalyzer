@@ -71,7 +71,7 @@ def parse_dataset(options: Options, ):
         for entry in sub.glob("*"):
             match = re.match(constants.MTZ_REGEX, entry.name)
             print(entry.name)
-            print(match)
+            print(match.group(1))
             sfs[entry.stem] = entry
     logger.info(f"Found {len(sfs)} structure factors...")
 
