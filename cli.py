@@ -132,7 +132,7 @@ def parse_ligand(structure_template, chain, ligand_residue):
     structure = structure_template.clone()
     chains_to_remove = []
     for model in structure:
-        for _chain in chain:
+        for _chain in model:
             chains_to_remove.append(chain.name)
             # if _chain.name != chain.name:
 
