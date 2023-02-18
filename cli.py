@@ -51,6 +51,7 @@ def get_structure_factors(dt: StructureReflectionsData):
     rblocks = gemmi.as_refln_blocks(doc)
     rblock = rblocks[0]
     cols = rblock.column_labels()
+    print(cols)
 
     for col in cols:
         for f, phi in constants.STRUCTURE_FACTORS:
