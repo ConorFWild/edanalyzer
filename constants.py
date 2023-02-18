@@ -7,7 +7,8 @@ STRUCTURE_FACTORS = (
     ("2FOFCWT", "PH2FOFCWT"),
     ("2FOFCWT_iso-fill", "PH2FOFCWT_iso-fill"),
     ("2FOFCWT_fill", "PH2FOFCWT_fill",),
-    ("2FOFCWT", "PHI2FOFCWT")
+    ("2FOFCWT", "PHI2FOFCWT"),
+    ('pdbx_FWT', 'pdbx_PHWT')
 )
 PDB_REGEX = "pdb([a-zA-Z0-9]+)\.ent\.gz"
 MTZ_REGEX = "r([a-zA-Z0-9]+)sf\.ent\.gz"
