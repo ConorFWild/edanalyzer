@@ -1,3 +1,5 @@
+import re
+
 import fire
 from pathlib import Path
 import subprocess
@@ -67,11 +69,15 @@ def parse_dataset(options: Options, ):
 
     for sub in sfs_dir.glob("*"):
         for entry in sub.glob("*"):
+            match = re.match(constants.PDB_REGEX, entry.name)
+            print(match)
             sfs[entry.stem] = entry
     logger.info(f"Found {len(sfs)} structure factors...")
 
     for sub in pdbs_dir.glob("*"):
         for entry in sub.glob("*"):
+            match = re.match(constants.MTZ_REGEX, entry.name)
+            print(match)
             if entry.stem in sfs:
                 pdbs[entry.stem] = entry
     logger.info(f"Found {len(pdbs)} that could be associated with structure factors...")
