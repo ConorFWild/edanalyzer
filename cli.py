@@ -8,7 +8,7 @@ from openbabel import pybel
 import gemmi
 # from rdkit import Chem
 from numpy.random import default_rng
-from torch_dataset import *
+# from torch_dataset import *
 
 
 def download_dataset(options: Options):
