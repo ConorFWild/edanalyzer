@@ -70,17 +70,16 @@ def parse_dataset(options: Options, ):
     for sub in sfs_dir.glob("*"):
         for entry in sub.glob("*"):
             match = re.match(constants.MTZ_REGEX, entry.name)
-            print(entry.name)
-            print(match.group(1))
-            sfs[entry.stem] = entry
+            code = match.group(1)
+            sfs[code] = entry
     logger.info(f"Found {len(sfs)} structure factors...")
 
     for sub in pdbs_dir.glob("*"):
         for entry in sub.glob("*"):
             match = re.match(constants.PDB_REGEX, entry.name)
-            print(match)
-            if entry.stem in sfs:
-                pdbs[entry.stem] = entry
+            code = match.group(1)
+            if code in sfs:
+                pdbs[code] = entry
     logger.info(f"Found {len(pdbs)} that could be associated with structure factors...")
 
     datas = []
