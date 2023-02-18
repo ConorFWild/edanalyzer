@@ -33,7 +33,8 @@ class StructureReflectionsData(BaseModel):
     mtz_path: str
     ligands: list[Ligand]
     partition: int
-
+    f: str
+    phi: str
 
 class StructureReflectionsDataset(BaseModel):
     data: list[StructureReflectionsData]
