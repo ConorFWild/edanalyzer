@@ -137,6 +137,8 @@ def parse_ligand(structure_template, chain, ligand_residue):
 
     new_chain = gemmi.Chain(chain.name)
     new_chain.add_residue(ligand_residue)
+    for model in structure:
+        model.add_chain(new_chain)
 
     pdb_string = structure.make_minimal_pdb()
 
