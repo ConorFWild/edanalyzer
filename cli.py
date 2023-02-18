@@ -70,6 +70,7 @@ def parse_dataset(options: Options, ):
     for sub in sfs_dir.glob("*"):
         for entry in sub.glob("*"):
             match = re.match(constants.PDB_REGEX, entry.name)
+            print(entry.name)
             print(match)
             sfs[entry.stem] = entry
     logger.info(f"Found {len(sfs)} structure factors...")
