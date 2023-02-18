@@ -9,5 +9,5 @@ STRUCTURE_FACTORS = (
     ("2FOFCWT_fill", "PH2FOFCWT_fill",),
     ("2FOFCWT", "PHI2FOFCWT")
 )
-PDB_REGEX = "pdb([a-zA-Z0-9]).ent.gz"
-MTZ_REGEX = "r([a-zA-Z0-9])sf.ent.gz"
+PDB_REGEX = "pdb([a-zA-Z0-9]+).ent.gz"
+MTZ_REGEX = "r([a-zA-Z0-9]+)sf.ent.gz"
