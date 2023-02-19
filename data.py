@@ -24,6 +24,10 @@ class Ligand(BaseModel):
     chain: str
     residue: int
     # conformers: list[Conformer]
+    num_atoms: int
+    x: float
+    y: float
+    z: float
 
 
 class StructureReflectionsData(BaseModel):
