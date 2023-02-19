@@ -86,8 +86,10 @@ def parse_dataset(options: Options, ):
 
     datas = []
     id = 0
+    j = 0
     for entry_name, path in sfs.items():
-        logger.debug(f"Processing dataset: {entry_name}")
+        j += 1
+        logger.debug(f"Processing dataset: {entry_name}: {j} / {len(sfs)}")
         if entry_name in pdbs:
             pdb = pdbs[entry_name]
         else:
