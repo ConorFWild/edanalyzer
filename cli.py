@@ -11,7 +11,7 @@ import gemmi
 # from rdkit import Chem
 from numpy.random import default_rng
 # from torch_dataset import *
-
+import numpy as np
 
 def download_dataset(options: Options):
     data_dir = Path(options.working_dir) / constants.DATA_DIR
@@ -157,6 +157,23 @@ def parse_ligand(structure_template, chain, ligand_residue):
 
     return smiles
 
+def get_ligand_num_atoms(ligand):
+    num_atoms = 0
+    for atom in ligand:
+        num_atoms += 1
+
+    return num_atoms
+
+def get_ligand_centroid(ligand):
+    poss = []
+    for atom in ligand:
+        pos = atom.pos
+        poss.append([pos.x, pos.y, pos.z])
+
+    pos_array = np.array(poss)
+
+    return np.mean(pos_array, axis=0)
+
 
 def get_structure_ligands(data: StructureReflectionsData):
     # logger.info(f"")
@@ -169,6 +186,10 @@ def get_structure_ligands(data: StructureReflectionsData):
             for ligand in ligands:
                 # structure_ligands.append(
 
+                num_atoms = get_ligand_num_atoms(ligand)
+
+                ligand_centroid = get_ligand_centroid(ligand)
+
                 smiles = parse_ligand(
                     structure,
                     chain,
@@ -178,7 +199,11 @@ def get_structure_ligands(data: StructureReflectionsData):
                     id=id,
                     smiles=smiles,
                     chain=chain.name,
-                    residue=ligand.seqid.num
+                    residue=ligand.seqid.num,
+                    num_atoms = num_atoms,
+                    x=ligand_centroid[0],
+                    y=ligand_centroid[1],
+                    z=ligand_centroid[2]
                 )
                 id += 1
                 structure_ligands.append(lig)
