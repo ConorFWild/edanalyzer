@@ -12,6 +12,7 @@ import gemmi
 from numpy.random import default_rng
 # from torch_dataset import *
 import numpy as np
+import traceback
 
 def download_dataset(options: Options):
     data_dir = Path(options.working_dir) / constants.DATA_DIR
@@ -102,7 +103,12 @@ def parse_dataset(options: Options, ):
             phi=""
         )
         # Check structure factors
-        f, phi = get_structure_factors(dt)
+        try:
+            f, phi = get_structure_factors(dt)
+        except Exception as e:
+            logger.debug(f"Could not get structure factors, skipping!")
+            logger.debug(traceback.format_exc())
+            continue
         if f is None:
             logger.debug(f"No recognisable structure factors!")
             continue
@@ -111,7 +117,12 @@ def parse_dataset(options: Options, ):
         dt.phi = phi
 
         # Get ligands
-        ligands = get_structure_ligands(dt)
+        try:
+            ligands = get_structure_ligands(dt)
+        except Exception as e:
+            logger.debug("Could not get ligands, skipping!")
+            logger.debug(traceback.format_exc())
+            continue
         if len(ligands) ==0:
             logger.debug("Did not find any ligands!")
             continue
