@@ -162,7 +162,7 @@ def parse_ligand(structure_template, chain, ligand_residue):
     pybel_mol = pybel.readstring("pdb", pdb_string)
 
     smiles = pybel_mol.write("can")
-    print(smiles)
+    # print(smiles)
 
     # smiles = Chem.MolToSmiles(mol)
 
@@ -206,6 +206,9 @@ def get_structure_ligands(data: StructureReflectionsData):
                     chain,
                     ligand,
                 )
+                logger.debug(f"Ligand smiles: {smiles}")
+                logger.debug(f"Num atoms: {num_atoms}")
+                logger.debug(f"Centroid: {ligand_centroid}")
                 lig = Ligand(
                     id=id,
                     smiles=smiles,
