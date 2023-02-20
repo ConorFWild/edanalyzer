@@ -477,7 +477,7 @@ def split_dataset_on(dataset, f, fraction):
     positive_events = [event for event in dataset.pandda_events if event.ligand]
     num_dataset = len(positive_events)
     clss = []
-    for data in dataset.data:
+    for data in dataset.pandda_events:
         cls = f(data)
         clss.append(cls)
 
