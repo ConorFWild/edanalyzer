@@ -453,7 +453,7 @@ def parse_pandda_dataset(options: Options):
 
     logger.info(f"Found {len(pandda_events)} events!")
     num_events_with_ligands = len([event for event in pandda_events if event.ligand is not None])
-    logger.info(f"Found {len(num_events_with_ligands)} events with ligands modelled!")
+    logger.info(f"Found {num_events_with_ligands} events with ligands modelled!")
 
     pandda_dataset = PanDDAEventDataset(pandda_events=pandda_events)
     pandda_dataset.save(options.working_dir)
