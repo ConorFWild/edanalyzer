@@ -372,7 +372,8 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
     return event
 
 
-def parse_pandda_inspect_table(pandda_inspect_table_file,
+def parse_pandda_inspect_table(
+        pandda_inspect_table_file,
                                potential_pandda_dir,
                                pandda_processed_datasets_dir,
                                model_building_dir,
@@ -388,7 +389,7 @@ def parse_pandda_inspect_table(pandda_inspect_table_file,
 
     events_with_models = len([event for event in events if event.ligand is not None])
 
-    if events_with_models:
+    if events_with_models > 0:
         return events
     else:
         return None
@@ -440,7 +441,9 @@ def parse_pandda_dataset(options: Options):
                 )
                 if potential_pandda_data:
                     pandda_events += potential_pandda_data
-                    logger.info(f"Found {len(potential_pandda_data)} events with models!")
+                    logger.info(f"Found {len(potential_pandda_data)} events!")
+                    num_events_with_ligands = len([event for event in potential_pandda_data if event.ligand is not None])
+                    logger.info(f"Events which are modelled: {num_events_with_ligands}")
 
                 else:
                     logger.debug(f"Discovered no events with models: skipping!")
