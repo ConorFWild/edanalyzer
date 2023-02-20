@@ -463,7 +463,7 @@ def parse_pandda_dataset(options: Options):
     logger.info(f"Found {num_events_with_ligands} events with ligands modelled!")
 
     pandda_dataset = PanDDAEventDataset(pandda_events=pandda_events)
-    pandda_dataset.save(options.working_dir)
+    pandda_dataset.save(Path(options.working_dir))
 
 
 def partition_pandda_dataset(dataset):
