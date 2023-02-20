@@ -386,7 +386,9 @@ def parse_pandda_inspect_table(pandda_inspect_table_file,
         if possible_event:
             events.append(possible_event)
 
-    if len(events) > 0:
+    events_with_models = len([event for event in events if event.ligand is not None])
+
+    if events_with_models:
         return events
     else:
         return None
