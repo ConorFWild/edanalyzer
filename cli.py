@@ -1,3 +1,4 @@
+import os
 import re
 
 import fire
@@ -402,6 +403,8 @@ def parse_potential_pandda_dir(potential_pandda_dir, model_building_dir):
     pandda_analysis_dir = potential_pandda_dir / constants.PANDDA_ANALYSIS_DIR
     pandda_inspect_table_file = pandda_analysis_dir / constants.PANDDA_INSPECT_TABLE_FILE
     pandda_processed_datasets_dir = potential_pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
+    if not os.access(pandda_analysis_dir, os.R_OK):
+        return None
     if pandda_analysis_dir.exists():
         if pandda_inspect_table_file.exists():
             events = parse_pandda_inspect_table(
