@@ -357,10 +357,18 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         ligand = None
         inspect_model_path_string = None
 
+    hyphens = [pos for pos, char in enumerate(dtag) if char == "-"]
+    if len(hyphens) == 0:
+        return None
+    else:
+        last_hypen_pos = hyphens[-1]
+        system_name = dtag[:last_hypen_pos+1]
+
     event = PanDDAEvent(
         id=0,
         pandda_dir=str(pandda_dir),
         model_building_dir=str(model_building_dir),
+        system_name=,
         dtag=dtag,
         event_idx=int(event_idx),
         event_map=str(event_map_path),
@@ -468,7 +476,9 @@ def parse_pandda_dataset(options: Options):
 
 def partition_pandda_dataset(dataset):
     system_split = get_system_split(dataset, 0.2)
-    smiles_split = get_smiles_split(dataset, 0.2)
+    # smiles_split = get_smiles_split(dataset, 0.2)
+
+
 
 
 class CLI:

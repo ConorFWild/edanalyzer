@@ -34,6 +34,7 @@ class PanDDAEvent(BaseModel):
     id: int
     pandda_dir: str
     model_building_dir: str
+    system_name: str
     dtag: str
     event_idx: int
     event_map: str
