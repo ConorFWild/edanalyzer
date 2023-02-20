@@ -4,7 +4,7 @@ import re
 import fire
 from pathlib import Path
 import subprocess
-from data import StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEvent, PanDDAEventDataset
+from data import StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEvent, PanDDAEventDataset, PanDDAEventAnnotations, PanDDAEventAnnotation
 import constants
 from loguru import logger
 from openbabel import pybel
@@ -505,11 +505,20 @@ def split_dataset_on(dataset, f, fraction):
 
 def partition_pandda_dataset(options, dataset):
     system_split = split_dataset_on(dataset, lambda data: data.system_name, 0.2)
-    print(system_split)
-    events_in_split = [event for event in dataset.pandda_events if event in system_split]
-    events_not_in_split = [event for event in dataset.pandda_events if event not in system_split]
-    print(len(events_in_split))
-    print(len(events_not_in_split))
+    logger.info(system_split)
+    events_in_split = [event for event in dataset.pandda_events if event.system_name in system_split]
+    events_not_in_split = [event for event in dataset.pandda_events if event.system_name not in system_split]
+    logger.info(len(events_in_split))
+    logger.info(len(events_not_in_split))
+
+    annotations = []
+    for event in dataset.pandda_events:
+        if event.system_name in system_split:
+            annotations.append(PanDDAEventAnnotation(annotation=True))
+        else:
+            annotations.append(PanDDAEventAnnotation(annotation=False))
+
+    PanDDAEventAnnotations(annotations=annotations).save(Path(options.working_dir))
 
     # smiles_split = get_smiles_split(dataset, 0.2)
 

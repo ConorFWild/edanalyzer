@@ -14,6 +14,7 @@ PDB_REGEX = "pdb([a-zA-Z0-9]+)\.ent\.gz"
 MTZ_REGEX = "r([a-zA-Z0-9]+)sf\.ent\.gz"
 
 PANDDA_DATASET_FILE = "pandda_dataset.json"
+PANNDA_ANNOTATIONS_FILE = "pandda_annotations.json"
 PANDDA_DATA_ROOT_DIR = "/dls/labxchem/data"
 DIAMOND_PROCESSING_DIR = "processing"
 DIAMOND_ANALYSIS_DIR = "analysis"

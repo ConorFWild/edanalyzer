@@ -44,6 +44,18 @@ class PanDDAEvent(BaseModel):
     hit: bool
     ligand: Ligand | None
 
+class PanDDAEventAnnotation(BaseModel):
+    annotation: bool
+
+class PanDDAEventAnnotations(BaseModel):
+    annotations: list[PanDDAEventAnnotation]
+
+    def save(self, path):
+        save_model(path / constants.PANNDA_ANNOTATIONS_FILE, self)
+
+    @classmethod
+    def load(cls, path):
+        return load_model(path / constants.PANNDA_ANNOTATIONS_FILE, cls)
 
 # class PanDDAData(BaseModel):
 #     events: list[PanDDAEvent]
