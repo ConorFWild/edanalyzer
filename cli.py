@@ -403,7 +403,7 @@ def parse_potential_pandda_dir(potential_pandda_dir, model_building_dir):
 
 def parse_pandda_dataset(options: Options):
 
-    pandda_data_root_dir = constants.PANDDA_DATA_ROOT_DIR
+    pandda_data_root_dir = Path(constants.PANDDA_DATA_ROOT_DIR)
     logger.info(f"Looking for PanDDAs under dir: {pandda_data_root_dir}")
 
     pandda_events = []
