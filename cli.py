@@ -297,7 +297,7 @@ def test(options: Options, dataset: StructureReflectionsDataset):
 
 
 def get_event_ligand(inspect_model_path, x, y, z, cutoff=5.0):
-    structure_ligands = get_structure_ligands(inspect_model_path)
+    structure_ligands = get_structure_ligands(str(inspect_model_path))
 
     ligand_distances = {}
     ligand_dict = {}
