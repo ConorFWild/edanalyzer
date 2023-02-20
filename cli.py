@@ -508,8 +508,8 @@ def partition_pandda_dataset(options, dataset):
     print(system_split)
     events_in_split = [event for event in dataset.pandda_events if event in system_split]
     events_not_in_split = [event for event in dataset.pandda_events if event not in system_split]
-    print(even)
     print(len(events_in_split))
+    print(len(events_not_in_split))
 
     # smiles_split = get_smiles_split(dataset, 0.2)
 
