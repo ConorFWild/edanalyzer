@@ -373,7 +373,7 @@ def parse_pandda_inspect_table(pandda_inspect_table_file,
     pandda_inspect_table = pd.read_csv(pandda_inspect_table_file)
 
     events = []
-    for index, row in pandda_inspect_table.iterrow():
+    for index, row in pandda_inspect_table.iterrows():
         possible_event = parse_inspect_table_row(
             row, potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir)
         if possible_event:
