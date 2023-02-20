@@ -368,6 +368,7 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         ligand=ligand
     )
 
+
     return event
 
 
