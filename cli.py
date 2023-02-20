@@ -488,9 +488,13 @@ def split_dataset_on(dataset, f, fraction):
         rng = default_rng()
         choice = rng.choice(cls_set, size=int(fraction*len(cls_set)), replace=False)
         logger.debug(f"Choice: {choice}")
+        choice_events = [data for data in positive_events if (data.system_name in choice)]
+
+        logger.debug(f"Num choice events: {len(choice_events)}")
         not_choice = [x for x in cls_set if x not in choice]
         logger.debug(f"Not choice: {not_choice}")
-        choice_events = [data for data in positive_events if (data.system_name in choice)]
+        non_choice_events = [data for data in positive_events if (data.system_name not in choice)]
+        logger.debug(f"Num non-choice events: {len(non_choice_events)}")
 
         choice_fraction = float(len(choice_events)) / num_dataset
         logger.debug(f"Choice fraction: {choice_fraction}")
