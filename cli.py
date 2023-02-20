@@ -136,7 +136,7 @@ def parse_dataset(options: Options, ):
 
     logger.info(f"Found {len(datas)} complete datasets!")
 
-    dataset = StructureReflectionsDataset(datas)
+    dataset = StructureReflectionsDataset(data=datas)
     dataset.save(options.working_dir)
     # return Dataset(datas)
 
