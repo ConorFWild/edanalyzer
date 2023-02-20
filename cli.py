@@ -368,7 +368,7 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         id=0,
         pandda_dir=str(pandda_dir),
         model_building_dir=str(model_building_dir),
-        system_name=,
+        system_name=system_name,
         dtag=dtag,
         event_idx=int(event_idx),
         event_map=str(event_map_path),
