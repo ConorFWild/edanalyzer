@@ -318,7 +318,7 @@ def get_event_ligand(inspect_model_path, x, y, z, cutoff=5.0):
 
 
 def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, model_building_dir):
-    dtag = row[constants.PANDDA_INSPECT_DTAG]
+    dtag = str(row[constants.PANDDA_INSPECT_DTAG])
     event_idx = row[constants.PANDDA_INSPECT_EVENT_IDX]
     bdc = row[constants.PANDDA_INSPECT_BDC]
     x = row[constants.PANDDA_INSPECT_X]
