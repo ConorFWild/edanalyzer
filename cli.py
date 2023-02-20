@@ -473,9 +473,35 @@ def parse_pandda_dataset(options: Options):
     pandda_dataset = PanDDAEventDataset(pandda_events=pandda_events)
     pandda_dataset.save(Path(options.working_dir))
 
+def split_dataset_on(dataset, f, fraction):
+    positive_events = [event for event in dataset.pandda_events if event.ligand]
+    num_dataset = len(positive_events)
+    clss = []
+    for data in dataset.data:
+        cls = f(data)
+        clss.append(cls)
 
-def partition_pandda_dataset(dataset):
-    system_split = get_system_split(dataset, 0.2)
+    cls_set = set(clss)
+
+    while True:
+        rng = default_rng()
+        choice = rng.choice(cls_set, size=int(fraction)*len(clss), replace=False)
+        choice_events = [data for data in positive_events if (data.system_name in choice)]
+        choice_fraction = len(choice_events) / num_dataset
+        logger.debug(f"Choice fraction: {choice_fraction}")
+
+        if np.abs(choice_fraction-fraction) < 0.05:
+            return choice
+
+
+def partition_pandda_dataset(options, dataset):
+    system_split = split_dataset_on(dataset, lambda data: data.system_name, 0.2)
+    print(system_split)
+    events_in_split = [event for event in dataset.pandda_events if event in system_split]
+    events_not_in_split = [event for event in dataset.pandda_events if event not in system_split]
+    print(even)
+    print(len(events_in_split))
+
     # smiles_split = get_smiles_split(dataset, 0.2)
 
 
@@ -524,6 +550,9 @@ class CLI:
         parse_pandda_dataset(options)
 
     def partition_pandda_dataset(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+        dataset = PanDDAEventDataset.load(options.working_dir)
+        partition_pandda_dataset(options, dataset)
         ...
 
     def train_pandda(self, options_json_path: str = "./options.json"):
