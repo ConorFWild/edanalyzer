@@ -482,10 +482,11 @@ def split_dataset_on(dataset, f, fraction):
         clss.append(cls)
 
     cls_set = list(set(clss))
+    logger.debug(f"Num systems: {cls_set}")
 
     while True:
         rng = default_rng()
-        choice = rng.choice(cls_set, size=int(fraction*len(clss)), replace=False)
+        choice = rng.choice(cls_set, size=int(fraction*len(cls_set)), replace=False)
         logger.debug(choice)
         choice_events = [data for data in positive_events if (data.system_name in choice)]
 
