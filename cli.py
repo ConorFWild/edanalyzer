@@ -341,12 +341,15 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
     inspect_model_path = inspect_model_dir / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
     # initial_model = processed_dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)
 
-    ligand = get_event_ligand(
-        inspect_model_path,
-        x,
-        y,
-        z,
-    )
+    if inspect_model_path.exists():
+        ligand = get_event_ligand(
+            inspect_model_path,
+            x,
+            y,
+            z,
+        )
+    else:
+        ligand = None
 
     event = PanDDAEvent(
         id=0,
