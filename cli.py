@@ -493,7 +493,7 @@ def split_dataset_on(dataset, f, fraction):
         choice_fraction = float(len(choice_events)) / num_dataset
         logger.debug(f"Choice fraction: {choice_fraction}")
 
-        if np.abs(choice_fraction-fraction) < 0.05:
+        if np.abs(choice_fraction-fraction) < 0.025:
             return choice
 
 
