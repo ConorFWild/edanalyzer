@@ -348,8 +348,10 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
             y,
             z,
         )
+        inspect_model_path_string = str(inspect_model_path)
     else:
         ligand = None
+        inspect_model_path_string = None
 
     event = PanDDAEvent(
         id=0,
@@ -362,6 +364,7 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         y=float(y),
         z=float(z),
         hit=hit_confidence_class,
+        inspect_model_path=inspect_model_path_string,
         ligand=ligand
     )
 
