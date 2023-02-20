@@ -3,7 +3,7 @@ import re
 import fire
 from pathlib import Path
 import subprocess
-from data import StructureReflectionsDataset, Options, StructureReflectionsData, Ligand
+from data import StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEvent, PanDDAEventDataset
 import constants
 from loguru import logger
 from openbabel import pybel
@@ -13,6 +13,8 @@ from numpy.random import default_rng
 # from torch_dataset import *
 import numpy as np
 import traceback
+import pandas as pd
+
 
 def download_dataset(options: Options):
     data_dir = Path(options.working_dir) / constants.DATA_DIR
@@ -47,6 +49,7 @@ def download_dataset(options: Options):
 
     logger.info(f"RSYNC'd all pdb data and structure factors!")
 
+
 def get_structure_factors(dt: StructureReflectionsData):
     doc = gemmi.cif.read(dt.mtz_path)
     rblocks = gemmi.as_refln_blocks(doc)
@@ -60,6 +63,7 @@ def get_structure_factors(dt: StructureReflectionsData):
                 return f, phi
 
     return None, None
+
 
 def parse_dataset(options: Options, ):
     logger.info(f"Parsing dataset...")
@@ -120,12 +124,12 @@ def parse_dataset(options: Options, ):
 
         # Get ligands
         try:
-            ligands = get_structure_ligands(dt)
+            ligands = get_structure_ligands(dt.pdb_path)
         except Exception as e:
             logger.debug("Could not get ligands, skipping!")
             logger.debug(traceback.format_exc())
             continue
-        if len(ligands) ==0:
+        if len(ligands) == 0:
             logger.debug("Did not find any ligands!")
             continue
         logger.debug(f"Found {len(ligands)} ligands")
@@ -149,7 +153,7 @@ def parse_ligand(structure_template, chain, ligand_residue):
             chains_to_remove.append(_chain.name)
             # if _chain.name != chain.name:
 
-                # model.remove_chain(_chain.name)
+            # model.remove_chain(_chain.name)
     for model in structure:
         for _chain_name in chains_to_remove:
             model.remove_chain(_chain_name)
@@ -170,12 +174,14 @@ def parse_ligand(structure_template, chain, ligand_residue):
 
     return smiles
 
+
 def get_ligand_num_atoms(ligand):
     num_atoms = 0
     for atom in ligand:
         num_atoms += 1
 
     return num_atoms
+
 
 def get_ligand_centroid(ligand):
     poss = []
@@ -188,9 +194,9 @@ def get_ligand_centroid(ligand):
     return np.mean(pos_array, axis=0)
 
 
-def get_structure_ligands(data: StructureReflectionsData):
+def get_structure_ligands(pdb_path):
     # logger.info(f"")
-    structure = gemmi.read_structure(data.pdb_path)
+    structure = gemmi.read_structure(pdb_path)
     structure_ligands = []
     id = 0
     for model in structure:
@@ -216,7 +222,7 @@ def get_structure_ligands(data: StructureReflectionsData):
                     smiles=smiles,
                     chain=chain.name,
                     residue=ligand.seqid.num,
-                    num_atoms = num_atoms,
+                    num_atoms=num_atoms,
                     x=ligand_centroid[0],
                     y=ligand_centroid[1],
                     z=ligand_centroid[2]
@@ -290,6 +296,154 @@ def test(options: Options, dataset: StructureReflectionsDataset):
     ...
 
 
+def get_event_ligand(inspect_model_path, x, y, z, cutoff=5.0):
+    structure_ligands = get_structure_ligands(inspect_model_path)
+
+    ligand_distances = {}
+    ligand_dict = {}
+    for lig in structure_ligands:
+        ligand_distances[lig.id] = gemmi.Position(lig.x, lig.y, lig.z).dist(gemmi.Position(x, y, z))
+
+        ligand_dict[lig.id] = lig
+
+    if len(ligand_dict) == 0:
+        return None
+
+    min_dist_id = min(ligand_distances, key=lambda _id: ligand_distances[_id])
+
+    if ligand_distances[min_dist_id] < cutoff:
+        return ligand_dict[min_dist_id]
+    else:
+        return None
+
+
+def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, model_building_dir):
+    dtag = row[constants.PANDDA_INSPECT_DTAG]
+    event_idx = row[constants.PANDDA_INSPECT_EVENT_IDX]
+    bdc = row[constants.PANDDA_INSPECT_BDC]
+    x = row[constants.PANDDA_INSPECT_X]
+    y = row[constants.PANDDA_INSPECT_Y]
+    z = row[constants.PANDDA_INSPECT_Z]
+
+    hit_confidence = row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
+    if hit_confidence == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
+        hit_confidence_class = True
+    else:
+        hit_confidence_class = False
+
+    processed_dataset_dir = pandda_processed_datasets_dir / dtag
+    inspect_model_dir = processed_dataset_dir / constants.PANDDA_INSPECT_MODEL_DIR
+    event_map_path = processed_dataset_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+        dtag=dtag,
+        event_idx=event_idx,
+        bdc=bdc
+    )
+    inspect_model_path = inspect_model_dir / constants.PANDDA_MODEL_FILE
+    # initial_model = processed_dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)
+
+    ligand = get_event_ligand(
+        inspect_model_path,
+        x,
+        y,
+        z,
+    )
+
+    event = PanDDAEvent(
+        id=0,
+        pandda_dir=str(pandda_dir),
+        model_building_dir=str(model_building_dir),
+        dtag=dtag,
+        event_idx=int(event_idx),
+        event_map=str(event_map_path),
+        x=float(x),
+        y=float(y),
+        z=float(z),
+        hit=hit_confidence_class,
+        ligand=ligand
+    )
+
+    return event
+
+
+def parse_pandda_inspect_table(pandda_inspect_table_file,
+                               potential_pandda_dir,
+                               pandda_processed_datasets_dir,
+                               model_building_dir,
+                               ):
+    pandda_inspect_table = pd.read_csv(pandda_inspect_table_file)
+
+    events = []
+    for index, row in pandda_inspect_table.iterrow():
+        possible_event = parse_inspect_table_row(
+            row, potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir)
+        if possible_event:
+            events.append(possible_event)
+
+    if len(events) > 0:
+        return events
+    else:
+        return None
+
+
+def parse_potential_pandda_dir(potential_pandda_dir, model_building_dir):
+    pandda_analysis_dir = potential_pandda_dir / constants.PANDDA_ANALYSIS_DIR
+    pandda_inspect_table_file = pandda_analysis_dir / constants.PANDDA_INSPECT_TABLE_FILE
+    pandda_processed_datasets_dir = pandda_analysis_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
+    if pandda_analysis_dir.exists():
+        if pandda_inspect_table_file.exists():
+            events = parse_pandda_inspect_table(
+                pandda_inspect_table_file,
+                potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir
+
+            )
+            return events
+
+    return None
+
+
+def parse_pandda_dataset(options: Options):
+
+    pandda_data_root_dir = constants.PANDDA_DATA_ROOT_DIR
+    logger.info(f"Looking for PanDDAs under dir: {pandda_data_root_dir}")
+
+    pandda_events = []
+    for year_dir_or_project_superdir in pandda_data_root_dir.glob("*"):
+        logger.info(f"Checking superdir: {year_dir_or_project_superdir}")
+        for project_dir in year_dir_or_project_superdir.glob("*"):
+            logger.info(f"Checking project dir: {project_dir}")
+
+            analysis_dir = project_dir / constants.DIAMOND_PROCESSING_DIR / constants.DIAMOND_ANALYSIS_DIR
+
+            model_building_dir = analysis_dir / constants.DIAMOND_MODEL_BUILDING_DIR_NEW
+            if not model_building_dir.exists():
+                model_building_dir = analysis_dir / constants.DIAMOND_MODEL_BUILDING_DIR_OLD
+                if not model_building_dir.exists():
+                    logger.debug(f"No model building dir: skipping!")
+                    continue
+
+            logger.debug(f"Model building dir is: {model_building_dir}")
+
+            for potential_pandda_dir in analysis_dir.glob("*"):
+                logger.debug(f"Checking folder {potential_pandda_dir} ")
+                potential_pandda_data = parse_potential_pandda_dir(
+                    potential_pandda_dir,
+                    model_building_dir,
+                )
+                logger.info(f"Found {len(potential_pandda_data)} events with models!")
+                if potential_pandda_data:
+                    pandda_events += potential_pandda_data
+                else:
+                    logger.debug(f"Discovered no events with models: skipping!")
+
+    pandda_dataset = PanDDAEventDataset(pandda_events=pandda_events)
+    pandda_dataset.save(options.working_dir)
+
+
+def partition_pandda_dataset(dataset):
+    system_split = get_system_split(dataset, 0.2)
+    smiles_split = get_smiles_split(dataset, 0.2)
+
+
 class CLI:
 
     def download_dataset(self, options_json_path: str = "./options.json"):
@@ -327,6 +481,28 @@ class CLI:
     def test(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
         dataset = StructureReflectionsDataset.load(options.working_dir)
+
+    def parse_pandda_dataset(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+        parse_pandda_dataset(options)
+
+    def partition_pandda_dataset(self, options_json_path: str = "./options.json"):
+        ...
+
+    def train_pandda(self, options_json_path: str = "./options.json"):
+        ...
+
+    def test_pandda(self, options_json_path: str = "./options.json"):
+        ...
+
+    def generate_reannotate_table(self):
+        ...
+
+    def reannotate(self):
+        ...
+
+    def parse_reannotations(self):
+        ...
 
 
 if __name__ == "__main__":

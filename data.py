@@ -30,6 +30,40 @@ class Ligand(BaseModel):
     z: float
 
 
+class PanDDAEvent(BaseModel):
+    id: int
+    pandda_dir: str
+    model_building_dir: str
+    dtag: str
+    event_idx: int
+    event_map: str
+    x: float
+    y: float
+    z: float
+    hit: bool
+    ligand: Ligand | None
+
+
+# class PanDDAData(BaseModel):
+#     events: list[PanDDAEvent]
+#
+class PanDDAEventDataset(BaseModel):
+    pandda_events: list[PanDDAEvent]
+
+    def save(self, path):
+        save_model(path / constants.PANDDA_DATASET_FILE, self)
+
+    @classmethod
+    def load(cls, path):
+        return load_model(path / constants.PANDDA_DATASET_FILE, cls)
+
+
+class PanDDAEventReannotation(BaseModel):
+    reannotation: bool
+
+class PanDDAEventReannotations(BaseModel):
+    reannotations: list[PanDDAEventReannotation]
+
 class StructureReflectionsData(BaseModel):
     id: int
     name: str
@@ -40,6 +74,7 @@ class StructureReflectionsData(BaseModel):
     f: str
     phi: str
 
+
 class StructureReflectionsDataset(BaseModel):
     data: list[StructureReflectionsData]
 
@@ -49,6 +84,7 @@ class StructureReflectionsDataset(BaseModel):
 
     def save(self, path):
         save_model(path / constants.DATASET_FILE, self)
+
 
 class Options(BaseModel):
     working_dir: str
