@@ -382,7 +382,11 @@ def parse_pandda_inspect_table(
                                pandda_processed_datasets_dir,
                                model_building_dir,
                                ):
-    pandda_inspect_table = pd.read_csv(pandda_inspect_table_file)
+    try:
+        pandda_inspect_table = pd.read_csv(pandda_inspect_table_file)
+    except Exception as e:
+        logger.warning(f"Failed to read table: {pandda_inspect_table_file} : {e}")
+        return None
 
     events = []
     for index, row in pandda_inspect_table.iterrows():
