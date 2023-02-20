@@ -18,7 +18,7 @@ PANDDA_DATA_ROOT_DIR = "/dls/labxchem/data"
 DIAMOND_PROCESSING_DIR = "processing"
 DIAMOND_ANALYSIS_DIR = "analysis"
 DIAMOND_MODEL_BUILDING_DIR_NEW = "model_building"
-DIAMOND_MODEL_BUILDING_DIR_OLD = "initial_models"
+DIAMOND_MODEL_BUILDING_DIR_OLD = "initial_model"
 
 PANDDA_ANALYSIS_DIR = "analyses"
 PANDDA_INSPECT_TABLE_FILE = "pandda_inspect_events.csv"

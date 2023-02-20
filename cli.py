@@ -429,9 +429,10 @@ def parse_pandda_dataset(options: Options):
                     potential_pandda_dir,
                     model_building_dir,
                 )
-                logger.info(f"Found {len(potential_pandda_data)} events with models!")
                 if potential_pandda_data:
                     pandda_events += potential_pandda_data
+                    logger.info(f"Found {len(potential_pandda_data)} events with models!")
+
                 else:
                     logger.debug(f"Discovered no events with models: skipping!")
 
