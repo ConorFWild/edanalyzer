@@ -481,7 +481,7 @@ def split_dataset_on(dataset, f, fraction):
         cls = f(data)
         clss.append(cls)
 
-    cls_set = set(clss)
+    cls_set = list(set(clss))
 
     while True:
         rng = default_rng()
