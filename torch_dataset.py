@@ -2,7 +2,7 @@ from data import StructureReflectionsDataset, Options, StructureReflectionsData,
     PanDDAEvent, PanDDAEventAnnotations, PanDDAEventAnnotation
 from numpy.random import default_rng
 import numpy as np
-import scipy
+from scipy.spatial.transform import Rotation as R
 from loguru import logger
 import gemmi
 
@@ -114,7 +114,7 @@ def get_sample_transform_from_event(event: PanDDAEvent,
     ])
 
     # Generate rotation matrix
-    rotation_matrix = scipy.Rotation.random().tomatrix()
+    rotation_matrix = R.random().as_matrix()
     rotation_transform = gemmi.Transform()
     rotation_transform.mat.fromlist(rotation_matrix.tolist())
 
