@@ -151,7 +151,7 @@ def get_sample_transform_from_event(event: PanDDAEvent,
     corner_n = gemmi.Position(float(n),float(n),float(n))
     logger.debug(f"Corners: {transform.apply(corner_0)} : {transform.apply(corner_n)}")
 
-    return transform, np.zeros((n,n,n))
+    return transform, np.zeros((n,n,n), dtype=np.float32)
 
 
 def get_image_from_event(event: PanDDAEvent):
