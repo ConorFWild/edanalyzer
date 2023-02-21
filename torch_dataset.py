@@ -155,6 +155,7 @@ def get_sample_transform_from_event(event: PanDDAEvent,
     event_centroid = (event.x, event.y, event.z)
     logger.debug(f"Centroid: {event_centroid}")
     logger.debug(f"Corners: {corner_0} : {corner_n} : average: {average_pos}")
+    logger.debug(f"Distance from centroid to average: {gemmi.Position(*average_pos).dist(gemmi.Position(*event_centroid))}")
 
     return transform, np.zeros((n,n,n), dtype=np.float32)
 
