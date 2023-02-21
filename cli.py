@@ -574,7 +574,7 @@ def train_pandda(
         for image, annotation in train_dataloader:
             # print(image)
             print(annotation)
-            print(image)
+            print(image.shape)
 
 
             # forward + backward + optimize
