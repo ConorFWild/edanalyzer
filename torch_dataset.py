@@ -103,7 +103,7 @@ def get_sample_transform_from_event(event: PanDDAEvent,
     initial_transform.mat.fromlist(scale_matrix.tolist())
 
     # Get sample grid centroid
-    sample_grid_centroid = np.array([n, n, n]) * sample_distance
+    sample_grid_centroid = (np.array([n, n, n]) * sample_distance) / 2
     sample_grid_centroid_pos = gemmi.Position(*sample_grid_centroid)
 
     # Get centre grid transform
@@ -149,7 +149,12 @@ def get_sample_transform_from_event(event: PanDDAEvent,
         )
     )
     corner_0_pos = transform.apply(gemmi.Position(0.0,0.0,0.0))
-    corner_n_pos = transform.apply(gemmi.Position(float(n),float(n),float(n)))
+    corner_n_pos = transform.apply(gemmi.Position(
+        float(n),
+        float(n),
+        float(n),
+    )
+    )
     corner_0 = (corner_0_pos.x, corner_0_pos.y, corner_0_pos.z)
     corner_n = (corner_n_pos.x, corner_n_pos.y, corner_n_pos.z)
     average_pos = [c0 + (cn - c0)/2 for c0, cn in zip(corner_0, corner_n)]
