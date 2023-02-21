@@ -10,7 +10,7 @@ import constants
 from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation
 
 from loguru import logger
-from openbabel import pybel
+# from openbabel import pybel
 import gemmi
 # from rdkit import Chem
 from numpy.random import default_rng
