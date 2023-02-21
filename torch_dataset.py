@@ -142,7 +142,7 @@ def get_sample_transform_from_event(event: PanDDAEvent,
     transform = random_translation_transform.combine(
         event_centre_transform.combine(
             rotation_transform.combine(
-                event_centre_transform.combine(
+                centre_grid_transform.combine(
                     initial_transform
                 )
             )
