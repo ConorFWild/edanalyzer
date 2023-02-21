@@ -523,25 +523,17 @@ def partition_pandda_dataset(options, dataset):
 
     # smiles_split = get_smiles_split(dataset, 0.2)
 
-def train(options: Options, dataset: PanDDAEventDataset, annotations: PanDDAEventAnnotations):
+def train_pandda(
+        options: Options,
+                 dataset: PanDDAEventDataset,
+        annotations: PanDDAEventAnnotations):
     # Get the dataset
-    sample_event = lambda __data: generate_ligand_sample(
-        __data,
-        get_ligand_decoy_transform,
-        sample_xmap_from_data
-    )
-
-    transform = lambda event: sample_event_density(
-            event,
-            lambda _event: get_annotation_pandda(_event, 0.5),
-            lambda _event, _annotation: get_image_pandda(
-                _event,
-                sample_event=sample_event,
-            )
-        )
     dataset_torch = PanDDAEventDatasetTorch(
         dataset,
-        transform=transform,
+        annotations,
+        transform=get_image_from_event,
+        transform_annotation=get_annotation_from_event_annotation
+
     )
 
     # Get the dataloader
@@ -601,7 +593,11 @@ class CLI:
         partition_pandda_dataset(options, dataset)
 
     def train_pandda(self, options_json_path: str = "./options.json"):
-        ...
+        options = Options.load(options_json_path)
+        dataset = PanDDAEventDataset.load(Path(options.working_dir))
+        annotations = PanDDAEventAnnotations.load(Path(options.working_dir))
+
+        train_pandda(options, dataset, annotations)
 
     def test_pandda(self, options_json_path: str = "./options.json"):
         ...
