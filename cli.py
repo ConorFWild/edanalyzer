@@ -630,9 +630,9 @@ def train_pandda(
                 print("Loss at epoch {}, iteration {} is {}".format(epoch,
                                                                     i,
                                                                     running_loss / i) + "\n")
-                for model_annotation_np, annotations_np in zip(model_annotations_np, annotations_np):
+                for model_annotation_np, annotation_np in zip(model_annotations_np, annotations_np):
 
-                    print(f"{model_annotation_np[1]} : {annotations_np[1]}")
+                    print(f"{model_annotation_np[1]} : {annotation_np[1]}")
                     # print("{}".format() + "\n")
                 print("#################################################" + "\n")
 
