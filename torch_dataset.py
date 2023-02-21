@@ -133,7 +133,8 @@ def get_sample_transform_from_event(event: PanDDAEvent,
 
     # Generate random translation transform
     rng = default_rng()
-    random_translation = (rng.random(3) - 0.5) * 2 * translation
+    # random_translation = (rng.random(3) - 0.5) * 2 * translation
+    random_translation = np.array([0.0,0.0,0.0])
     logger.debug(f"Random translation: {random_translation}")
     random_translation_transform = gemmi.Transform()
     random_translation_transform.vec.fromlist(random_translation.tolist())
