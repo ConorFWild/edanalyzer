@@ -520,14 +520,38 @@ def partition_pandda_dataset(options, dataset):
     logger.info(len(events_in_split))
     logger.info(len(events_not_in_split))
 
-    annotations = []
-    for event in dataset.pandda_events:
-        if event.system_name in system_split:
-            annotations.append(PanDDAEventAnnotation(annotation=True))
-        else:
-            annotations.append(PanDDAEventAnnotation(annotation=False))
+    # annotations = []
+    # for event in dataset.pandda_events:
+    #     if event.system_name in system_split:
+    #         annotations.append(PanDDAEventAnnotation(annotation=True))
+    #     else:
+    #         annotations.append(PanDDAEventAnnotation(annotation=False))
 
-    PanDDAEventAnnotations(annotations=annotations).save(Path(options.working_dir))
+
+    train_set = PanDDAEventDataset(pandda_events=events_not_in_split)
+    train_set_annotations = []
+    for event in train_set.pandda_events:
+        if event.hit:
+            train_set_annotations.append(PanDDAEventAnnotation(annotation=True))
+        else:
+            train_set_annotations.append(PanDDAEventAnnotation(annotation=False))
+
+    train_set.save(Path(options.working_dir) / constants.TRAIN_SET_FILE)
+
+    PanDDAEventAnnotations(annotations=train_set_annotations).save(Path(options.working_dir) / constants.TRAIN_SET_ANNOTATION_FILE)
+
+
+    test_set = PanDDAEventDataset(pandda_events=events_in_split)
+    test_set_annotations = []
+    for event in train_set.pandda_events:
+        if event.hit:
+            test_set_annotations.append(PanDDAEventAnnotation(annotation=True))
+        else:
+            test_set_annotations.append(PanDDAEventAnnotation(annotation=False))
+
+    test_set.save(Path(options.working_dir) / constants.TEST_SET_FILE)
+
+    PanDDAEventAnnotations(annotations=test_set_annotations).save(Path(options.working_dir) / constants.TEST_SET_ANNOTATION_FILE)
 
     # smiles_split = get_smiles_split(dataset, 0.2)
 
@@ -656,8 +680,8 @@ class CLI:
 
     def train_pandda(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
-        dataset = PanDDAEventDataset.load(Path(options.working_dir))
-        annotations = PanDDAEventAnnotations.load(Path(options.working_dir))
+        dataset = PanDDAEventDataset.load(Path(options.working_dir) / constants.TRAIN_SET_FILE)
+        annotations = PanDDAEventAnnotations.load(Path(options.working_dir) / constants.TRAIN_SET_ANNOTATION_FILE)
 
         train_pandda(options, dataset, annotations)
 

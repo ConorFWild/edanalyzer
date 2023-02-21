@@ -54,11 +54,11 @@ class PanDDAEventAnnotations(BaseModel):
     annotations: list[PanDDAEventAnnotation]
 
     def save(self, path):
-        save_model(path / constants.PANNDA_ANNOTATIONS_FILE, self)
+        save_model(path , self)
 
     @classmethod
     def load(cls, path):
-        return load_model(path / constants.PANNDA_ANNOTATIONS_FILE, cls)
+        return load_model(path , cls)
 
 
 # class PanDDAData(BaseModel):
@@ -68,11 +68,11 @@ class PanDDAEventDataset(BaseModel):
     pandda_events: list[PanDDAEvent]
 
     def save(self, path):
-        save_model(path / constants.PANDDA_DATASET_FILE, self)
+        save_model(path , self)
 
     @classmethod
     def load(cls, path):
-        return load_model(path / constants.PANDDA_DATASET_FILE, cls)
+        return load_model(path , cls)
 
 
 class PanDDAEventReannotation(BaseModel):
