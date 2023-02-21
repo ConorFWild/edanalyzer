@@ -625,11 +625,15 @@ def train_pandda(
             i+=1
             if i % 100 == 99:  # print every 100 mini-batches
 
+                model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]
+                annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
                 print("Loss at epoch {}, iteration {} is {}".format(epoch,
                                                                     i,
                                                                     running_loss / i) + "\n")
-                print("{}".format([x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]) + "\n")
-                print("{}".format([x.to(torch.device("cpu")).detach().numpy() for x in annotation]) + "\n")
+                for model_annotation_np, annotations_np in zip(model_annotations_np, annotations_np):
+
+                    print(f"{model_annotation_np[1]} : {annotations_np[1]}")
+                    # print("{}".format() + "\n")
                 print("#################################################" + "\n")
 
 class CLI:
