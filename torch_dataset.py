@@ -183,9 +183,9 @@ def get_image_from_event(event: PanDDAEvent):
 
 def get_annotation_from_event_annotation(annotation: PanDDAEventAnnotation):
     if annotation.annotation:
-        return np.array([0.0, 1.0])
+        return np.array([0.0, 1.0], dtype=np.float32)
     else:
-        return np.array([1.0, 0.0])
+        return np.array([1.0, 0.0], dtype=np.float32)
 
 
 class PanDDAEventDatasetTorch(Dataset):
