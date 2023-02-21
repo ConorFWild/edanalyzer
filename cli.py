@@ -580,9 +580,10 @@ def train_pandda(
     for epoch in range(num_epochs):
         i = 0
         for image, annotation in train_dataloader:
+            print(f"\tBatch: {i}")
             # print(image)
-            print(annotation)
-            print(image.shape)
+            # print(annotation)
+            # print(image.shape)
             image_c = image.to(dev)
             annotation_c = annotation.to(dev)
 
@@ -596,6 +597,7 @@ def train_pandda(
             # RECORD LOSS
             running_loss += loss.item()
             # print statistics per epoch
+            i+=1
             if i % 100 == 99:  # print every 100 mini-batches
 
                 print("Loss at epoch {}, iteration {} is {}".format(epoch,
