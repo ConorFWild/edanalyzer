@@ -19,6 +19,9 @@ import numpy as np
 import traceback
 import pandas as pd
 from torch.utils.data import DataLoader
+import torch.nn as nn
+import torch.optim as optim
+from torch_network import squeezenet1_1
 
 
 def download_dataset(options: Options):
@@ -542,12 +545,49 @@ def train_pandda(
     # Get the dataloader
     train_dataloader = DataLoader(dataset_torch, batch_size=1, shuffle=True)
 
-    # Trainloop
-    for image, annotation in train_dataloader:
-        # print(image)
-        print(annotation)
+    model = squeezenet1_1()
 
-    ...
+    model = model.train()
+
+
+    # Define loss function
+    criterion = nn.BCELoss()
+
+    # Define optimizer
+    optimizer = optim.Adam(model.parameters(),
+                           lr=0.00001)
+
+    optimizer.zero_grad()
+
+    running_loss = 0
+
+
+    # Trainloop
+
+    for epoch in range(num_epochs):
+        i = 0
+        for image, annotation in train_dataloader:
+            # print(image)
+            print(annotation)
+
+            # forward + backward + optimize
+            model_annotation = model(image)
+            # print(outputs.to("cpu").detach().numpy())
+            loss = criterion(model_annotation, annotation)
+            loss.backward()
+            optimizer.step()
+
+            # RECORD LOSS
+            running_loss += loss.item()
+            # print statistics per epoch
+            if i % 100 == 99:  # print every 100 mini-batches
+
+                print("Loss at epoch {}, iteration {} is {}".format(epoch,
+                                                                    i,
+                                                                    running_loss / i) + "\n")
+                print("{}".format([x.detach().numpy() for x in model_annotation]) + "\n")
+                print("{}".format([x.detach().numpy() for x in annotation]) + "\n")
+                print("#################################################" + "\n")
 
 
 
