@@ -568,8 +568,10 @@ def train_pandda(
     running_loss = 0
 
     if torch.cuda.is_available():
+        logger.info(f"Using cuda!")
         dev = "cuda:0"
     else:
+        logger.info(f"Using cpu!Kπ")
         dev = "cpu"
 
     model.to(dev)
@@ -581,7 +583,7 @@ def train_pandda(
             # print(image)
             print(annotation)
             print(image.shape)
-            image_c = image.to(device)
+            image_c = image.to(dev)
             annotation_c = annotation.to(dev)
 
             # forward + backward + optimize
