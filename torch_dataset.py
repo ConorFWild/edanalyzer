@@ -174,7 +174,7 @@ def get_image_from_event(event: PanDDAEvent):
                                                                      0.5,
                                                                      30,
                                                                      3.5
-            π                                                         )
+                                                                     )
 
     image = sample_xmap(xmap, sample_transform, sample_array)
 
