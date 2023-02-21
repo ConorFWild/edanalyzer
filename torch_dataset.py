@@ -178,7 +178,7 @@ def get_image_from_event(event: PanDDAEvent):
 
     image = sample_xmap(xmap, sample_transform, sample_array)
 
-    return image
+    return np.expand_dims(image, axis=0)
 
 
 def get_annotation_from_event_annotation(annotation: PanDDAEventAnnotation):
