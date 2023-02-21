@@ -5,6 +5,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation as R
 from loguru import logger
 import gemmi
+from torch.utils.data import Dataset
 
 
 
