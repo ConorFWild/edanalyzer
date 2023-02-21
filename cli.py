@@ -571,7 +571,7 @@ def train_pandda(
         logger.info(f"Using cuda!")
         dev = "cuda:0"
     else:
-        logger.info(f"Using cpu!Kπ")
+        logger.info(f"Using cpu!")
         dev = "cpu"
 
     model.to(dev)
@@ -604,8 +604,6 @@ def train_pandda(
                 print("{}".format([x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]) + "\n")
                 print("{}".format([x.to(torch.device("cpu")).detach().numpy() for x in annotation]) + "\n")
                 print("#################################################" + "\n")
-
-
 
 class CLI:
 
