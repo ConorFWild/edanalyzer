@@ -601,8 +601,8 @@ def train_pandda(
                 print("Loss at epoch {}, iteration {} is {}".format(epoch,
                                                                     i,
                                                                     running_loss / i) + "\n")
-                print("{}".format([x.detach().numpy() for x in model_annotation]) + "\n")
-                print("{}".format([x.detach().numpy() for x in annotation]) + "\n")
+                print("{}".format([x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]) + "\n")
+                print("{}".format([x.to(torch.device("cpu")).detach().numpy() for x in annotation]) + "\n")
                 print("#################################################" + "\n")
 
 
