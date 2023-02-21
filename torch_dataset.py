@@ -188,7 +188,7 @@ class PanDDAEventDatasetTorch(Dataset):
         self.transform_annotation = transform_annotation
 
     def __len__(self):
-        return len(self.pandda_event_dataset.data)
+        return len(self.pandda_event_dataset.pandda_events)
 
     def __getitem__(self, idx: int):
         event = self.pandda_event_dataset.data[idx]
