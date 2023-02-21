@@ -86,9 +86,9 @@ class StructureReflectionsDatasetTorch(Dataset):
 
 
 def get_xmap_from_event(event: PanDDAEvent):
-    ccp4 = gemmi.CCP4Map(event.event_map)
+    ccp4 = gemmi.Ccp4Map(event.event_map)
+    ccp4.setup(float('nan'))
     m = ccp4.grid
-    m.setup()
 
     return m
 
