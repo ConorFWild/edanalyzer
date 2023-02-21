@@ -561,6 +561,7 @@ def train_pandda(
         annotations: PanDDAEventAnnotations):
 
     num_epochs = 3
+    logger.info(f"Training on {len(dataset.pandda_events)} events!")
 
 
     # Get the dataset
