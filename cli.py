@@ -541,7 +541,9 @@ def train_pandda(
     train_dataloader = DataLoader(dataset_torch, batch_size=1, shuffle=True)
 
     # Trainloop
-
+    for image, annotation in train_dataloader:
+        print(image)
+        print(annotation)
 
     ...
 
