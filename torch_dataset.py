@@ -179,12 +179,12 @@ class PanDDAEventDatasetTorch(Dataset):
     def __init__(self,
                  pandda_event_dataset: PanDDAEventDataset,
                  annotations: PanDDAEventAnnotations,
-                 transform=lambda x: x,
+                 transform_image=lambda x: x,
                  transform_annotation=lambda x: x
                  ):
         self.pandda_event_dataset = pandda_event_dataset
         self.annotations = annotations
-        self.transform = transform
+        self.transform_image = transform_image
         self.transform_annotation = transform_annotation
 
     def __len__(self):

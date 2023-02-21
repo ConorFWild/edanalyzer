@@ -534,7 +534,7 @@ def train_pandda(
     dataset_torch = PanDDAEventDatasetTorch(
         dataset,
         annotations,
-        transform=get_image_from_event,
+        transform_image=get_image_from_event,
         transform_annotation=get_annotation_from_event_annotation
 
     )
