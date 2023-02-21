@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from torch.utils.data import Dataset
 
 import constants
 
