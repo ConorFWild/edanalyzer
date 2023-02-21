@@ -81,7 +81,6 @@ def parse_dataset(options: Options, ):
     pdbs = {}
     sfs = {}
 
-    num_epochs = 3
 
     for sub in sfs_dir.glob("*"):
         for entry in sub.glob("*"):
@@ -535,6 +534,10 @@ def train_pandda(
         options: Options,
                  dataset: PanDDAEventDataset,
         annotations: PanDDAEventAnnotations):
+
+    num_epochs = 3
+
+
     # Get the dataset
     dataset_torch = PanDDAEventDatasetTorch(
         dataset,
