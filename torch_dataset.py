@@ -151,8 +151,10 @@ def get_sample_transform_from_event(event: PanDDAEvent,
     corner_n_pos = transform.apply(gemmi.Position(float(n),float(n),float(n)))
     corner_0 = (corner_0_pos.x, corner_0_pos.y, corner_0_pos.z)
     corner_n = (corner_n_pos.x, corner_n_pos.y, corner_n_pos.z)
-    logger.debug(f"Centroid: ")
-    logger.debug(f"Corners: {corner_0} : {corner_n}")
+    average_pos = [c0 + (cn - c0)/2 for c0, cn in zip(corner_0, corner_n)]
+    event_centroid = (event.x, event.y, event.z)
+    logger.debug(f"Centroid: {event_centroid}")
+    logger.debug(f"Corners: {corner_0} : {corner_n} : average: {average_pos}")
 
     return transform, np.zeros((n,n,n), dtype=np.float32)
 
