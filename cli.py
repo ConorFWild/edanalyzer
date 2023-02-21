@@ -7,6 +7,8 @@ import subprocess
 from data import StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEvent, \
     PanDDAEventDataset, PanDDAEventAnnotations, PanDDAEventAnnotation
 import constants
+from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation
+
 from loguru import logger
 from openbabel import pybel
 import gemmi
