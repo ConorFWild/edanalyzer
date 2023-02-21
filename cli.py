@@ -550,7 +550,7 @@ def train_pandda(
     # Get the dataloader
     train_dataloader = DataLoader(dataset_torch, batch_size=1, shuffle=True)
 
-    model = squeezenet1_1()
+    model = squeezenet1_1(num_classes=2)
 
     model = model.train()
 
