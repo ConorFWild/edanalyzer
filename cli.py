@@ -18,6 +18,7 @@ from numpy.random import default_rng
 import numpy as np
 import traceback
 import pandas as pd
+import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.optim as optim
@@ -566,8 +567,13 @@ def train_pandda(
 
     running_loss = 0
 
+    if torch.cuda.is_available():
+        dev = "cuda:0"
+    else:
+        dev = "cpu"
 
-    # Trainloop
+    model.to(dev)
+        # Trainloop
 
     for epoch in range(num_epochs):
         i = 0
@@ -575,12 +581,13 @@ def train_pandda(
             # print(image)
             print(annotation)
             print(image.shape)
-
+            image_c = image.to(device)
+            annotation_c = annotation.to(dev)
 
             # forward + backward + optimize
-            model_annotation = model(image)
+            model_annotation = model(image_c)
             # print(outputs.to("cpu").detach().numpy())
-            loss = criterion(model_annotation, annotation)
+            loss = criterion(model_annotation, annotation_c)
             loss.backward()
             optimizer.step()
 
