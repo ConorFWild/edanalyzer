@@ -44,8 +44,10 @@ class PanDDAEvent(BaseModel):
     hit: bool
     ligand: Ligand | None
 
+
 class PanDDAEventAnnotation(BaseModel):
     annotation: bool
+
 
 class PanDDAEventAnnotations(BaseModel):
     annotations: list[PanDDAEventAnnotation]
@@ -56,6 +58,7 @@ class PanDDAEventAnnotations(BaseModel):
     @classmethod
     def load(cls, path):
         return load_model(path / constants.PANNDA_ANNOTATIONS_FILE, cls)
+
 
 # class PanDDAData(BaseModel):
 #     events: list[PanDDAEvent]
@@ -74,8 +77,10 @@ class PanDDAEventDataset(BaseModel):
 class PanDDAEventReannotation(BaseModel):
     reannotation: bool
 
+
 class PanDDAEventReannotations(BaseModel):
     reannotations: list[PanDDAEventReannotation]
+
 
 class StructureReflectionsData(BaseModel):
     id: int

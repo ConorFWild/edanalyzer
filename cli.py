@@ -4,7 +4,8 @@ import re
 import fire
 from pathlib import Path
 import subprocess
-from data import StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEvent, PanDDAEventDataset, PanDDAEventAnnotations, PanDDAEventAnnotation
+from data import StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEvent, \
+    PanDDAEventDataset, PanDDAEventAnnotations, PanDDAEventAnnotation
 import constants
 from loguru import logger
 from openbabel import pybel
@@ -362,7 +363,7 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         return None
     else:
         last_hypen_pos = hyphens[-1]
-        system_name = dtag[:last_hypen_pos+1]
+        system_name = dtag[:last_hypen_pos + 1]
 
     event = PanDDAEvent(
         id=0,
@@ -380,16 +381,15 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         ligand=ligand
     )
 
-
     return event
 
 
 def parse_pandda_inspect_table(
         pandda_inspect_table_file,
-                               potential_pandda_dir,
-                               pandda_processed_datasets_dir,
-                               model_building_dir,
-                               ):
+        potential_pandda_dir,
+        pandda_processed_datasets_dir,
+        model_building_dir,
+):
     try:
         pandda_inspect_table = pd.read_csv(pandda_inspect_table_file)
     except Exception as e:
@@ -430,7 +430,6 @@ def parse_potential_pandda_dir(potential_pandda_dir, model_building_dir):
 
 
 def parse_pandda_dataset(options: Options):
-
     pandda_data_root_dir = Path(constants.PANDDA_DATA_ROOT_DIR)
     logger.info(f"Looking for PanDDAs under dir: {pandda_data_root_dir}")
 
@@ -460,7 +459,8 @@ def parse_pandda_dataset(options: Options):
                 if potential_pandda_data:
                     pandda_events += potential_pandda_data
                     logger.info(f"Found {len(potential_pandda_data)} events!")
-                    num_events_with_ligands = len([event for event in potential_pandda_data if event.ligand is not None])
+                    num_events_with_ligands = len(
+                        [event for event in potential_pandda_data if event.ligand is not None])
                     logger.info(f"Events which are modelled: {num_events_with_ligands}")
 
                 else:
@@ -472,6 +472,7 @@ def parse_pandda_dataset(options: Options):
 
     pandda_dataset = PanDDAEventDataset(pandda_events=pandda_events)
     pandda_dataset.save(Path(options.working_dir))
+
 
 def split_dataset_on(dataset, f, fraction):
     positive_events = [event for event in dataset.pandda_events if event.ligand]
@@ -486,7 +487,7 @@ def split_dataset_on(dataset, f, fraction):
 
     while True:
         rng = default_rng()
-        choice = rng.choice(cls_set, size=int(fraction*len(cls_set)), replace=False)
+        choice = rng.choice(cls_set, size=int(fraction * len(cls_set)), replace=False)
         logger.debug(f"Choice: {choice}")
         choice_events = [data for data in positive_events if (data.system_name in choice)]
 
@@ -499,7 +500,7 @@ def split_dataset_on(dataset, f, fraction):
         choice_fraction = float(len(choice_events)) / num_dataset
         logger.debug(f"Choice fraction: {choice_fraction}")
 
-        if np.abs(choice_fraction-fraction) < 0.025:
+        if np.abs(choice_fraction - fraction) < 0.025:
             return choice
 
 
@@ -522,6 +523,33 @@ def partition_pandda_dataset(options, dataset):
 
     # smiles_split = get_smiles_split(dataset, 0.2)
 
+def train(options: Options, dataset: PanDDAEventDataset, annotations: PanDDAEventAnnotations):
+    # Get the dataset
+    sample_event = lambda __data: generate_ligand_sample(
+        __data,
+        get_ligand_decoy_transform,
+        sample_xmap_from_data
+    )
+
+    transform = lambda event: sample_event_density(
+            event,
+            lambda _event: get_annotation_pandda(_event, 0.5),
+            lambda _event, _annotation: get_image_pandda(
+                _event,
+                sample_event=sample_event,
+            )
+        )
+    dataset_torch = PanDDAEventDatasetTorch(
+        dataset,
+        transform=transform,
+    )
+
+    # Get the dataloader
+    train_dataloader = DataLoader(dataset_torch, batch_size=1, shuffle=True)
+
+    # Trainloop
+
+    ...
 
 
 
@@ -571,7 +599,6 @@ class CLI:
         options = Options.load(options_json_path)
         dataset = PanDDAEventDataset.load(Path(options.working_dir))
         partition_pandda_dataset(options, dataset)
-        ...
 
     def train_pandda(self, options_json_path: str = "./options.json"):
         ...
