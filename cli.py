@@ -81,6 +81,8 @@ def parse_dataset(options: Options, ):
     pdbs = {}
     sfs = {}
 
+    num_epochs = 3
+
     for sub in sfs_dir.glob("*"):
         for entry in sub.glob("*"):
             match = re.match(constants.MTZ_REGEX, entry.name)
