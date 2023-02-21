@@ -675,7 +675,7 @@ class CLI:
 
     def partition_pandda_dataset(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
-        dataset = PanDDAEventDataset.load(Path(options.working_dir))
+        dataset = PanDDAEventDataset.load(Path(options.working_dir) / constants.PANDDA_DATASET_FILE)
         partition_pandda_dataset(options, dataset)
 
     def train_pandda(self, options_json_path: str = "./options.json"):
