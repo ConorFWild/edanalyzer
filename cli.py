@@ -632,7 +632,7 @@ def train_pandda(
                                                                     running_loss / i) + "\n")
                 for model_annotation_np, annotation_np in zip(model_annotations_np, annotations_np):
 
-                    print(f"{model_annotation_np[1]} : {annotation_np[1]}")
+                    print(f"{round(model_annotation_np[1], 2)} : {round(annotation_np[1], 2)}")
                     # print("{}".format() + "\n")
                 print("#################################################" + "\n")
 
