@@ -544,7 +544,7 @@ def train_pandda(
 
     # Trainloop
     for image, annotation in train_dataloader:
-        print(image)
+        # print(image)
         print(annotation)
 
     ...

@@ -147,9 +147,12 @@ def get_sample_transform_from_event(event: PanDDAEvent,
             )
         )
     )
-    corner_0 = gemmi.Position(0.0,0.0,0.0)
-    corner_n = gemmi.Position(float(n),float(n),float(n))
-    logger.debug(f"Corners: {transform.apply(corner_0)} : {transform.apply(corner_n)}")
+    corner_0_pos = transform.apply(gemmi.Position(0.0,0.0,0.0))
+    corner_n_pos = transform.apply(gemmi.Position(float(n),float(n),float(n)))
+    corner_0 = (corner_0_pos.x, corner_0_pos.y, corner_0_pos.z)
+    corner_n = (corner_n_pos.x, corner_n_pos.y, corner_n_pos.z)
+    logger.debug(f"Centroid: ")
+    logger.debug(f"Corners: {corner_0} : {corner_n}")
 
     return transform, np.zeros((n,n,n), dtype=np.float32)
 
