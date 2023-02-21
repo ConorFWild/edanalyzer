@@ -14,7 +14,7 @@ def load_xmap_from_mtz(path):
 
 
 def sample_xmap(xmap, transform, sample_array):
-    xmap.sample_values(sample_array, transform)
+    xmap.interpolate_values(sample_array, transform)
     return sample_array
 
 
