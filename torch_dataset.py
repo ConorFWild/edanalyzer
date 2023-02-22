@@ -212,7 +212,7 @@ def get_image_event_map_and_raw_from_event(event: PanDDAEvent):
 
     except Exception as e:
         print(e)
-        return sample_array, False
+        return np.stack([sample_array, sample_array], axis=0), False
 
     return np.stack([image_event, image_raw], axis=0), True
 
