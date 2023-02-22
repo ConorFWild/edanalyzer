@@ -87,7 +87,6 @@ class StructureReflectionsDatasetTorch(Dataset):
         # reflections_path = data.pdb_path
         # structure_path = data.mtz_path
         # ligands = data.ligands
-
         image, label = self.transform(data)
 
         return image, label
@@ -201,15 +200,21 @@ def get_image_event_map_and_raw_from_event(event: PanDDAEvent):
                                                                      3.5
                                                                      )
 
-    sample_array_event = np.copy(sample_array)
-    xmap_event = get_xmap_from_event(event)
-    image_event = sample_xmap(xmap_event, sample_transform, sample_array_event)
+    try:
+        sample_array_event = np.copy(sample_array)
+        xmap_event = get_xmap_from_event(event)
+        image_event = sample_xmap(xmap_event, sample_transform, sample_array_event)
 
-    sample_array_raw = np.copy(sample_array)
-    xmap_raw = get_raw_xmap_from_event(event)
-    image_raw = sample_xmap(xmap_raw, sample_transform, sample_array_raw)
 
-    return np.stack([image_event, image_raw], axis=0)
+        sample_array_raw = np.copy(sample_array)
+        xmap_raw = get_raw_xmap_from_event(event)
+        image_raw = sample_xmap(xmap_raw, sample_transform, sample_array_raw)
+
+    except Exception as e:
+        print(e)
+        return sample_array, False
+
+    return np.stack([image_event, image_raw], axis=0), True
 
 
 def get_annotation_from_event_annotation(annotation: PanDDAEventAnnotation):
@@ -239,9 +244,12 @@ class PanDDAEventDatasetTorch(Dataset):
 
         annotation = self.annotations.annotations[idx]
 
-        image = self.transform_image(event)
+        image, loaded = self.transform_image(event)
 
-        label = self.transform_annotation(annotation)
+        if loaded:
+            label = self.transform_annotation(annotation)
 
+        else:
+            label = np.array([1.0,0.0], dtype=np.float32)
         return image, label
 
