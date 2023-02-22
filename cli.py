@@ -7,7 +7,7 @@ import subprocess
 from data import StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEvent, \
     PanDDAEventDataset, PanDDAEventAnnotations, PanDDAEventAnnotation
 import constants
-from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation
+from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation, get_image_event_map_and_raw_from_event
 
 from loguru import logger
 # from openbabel import pybel
@@ -568,7 +568,7 @@ def train_pandda(
     dataset_torch = PanDDAEventDatasetTorch(
         dataset,
         annotations,
-        transform_image=get_image_from_event,
+        transform_image=get_image_event_map_and_raw_from_event,
         transform_annotation=get_annotation_from_event_annotation
 
     )

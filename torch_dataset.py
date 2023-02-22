@@ -1,3 +1,4 @@
+import constants
 from data import StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEventDataset, \
     PanDDAEvent, PanDDAEventAnnotations, PanDDAEventAnnotation
 from numpy.random import default_rng
@@ -6,11 +7,13 @@ from scipy.spatial.transform import Rotation as R
 from loguru import logger
 import gemmi
 from torch.utils.data import Dataset
-
+from pathlib import Path
 
 
 def load_xmap_from_mtz(path):
-    ...
+    mtz = gemmi.read_mtz_file(str(path))
+    xmap = mtz.transform_f_phi_to_map()
+    return xmap
 
 
 def sample_xmap(xmap, transform, sample_array):
@@ -179,6 +182,28 @@ def get_image_from_event(event: PanDDAEvent):
     image = sample_xmap(xmap, sample_transform, sample_array)
 
     return np.expand_dims(image, axis=0)
+
+def get_raw_xmap_from_event(event: PanDDAEvent):
+    mtz_path = Path(event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=event.dtag)
+    return load_xmap_from_mtz(mtz_path)
+
+
+def get_image_event_map_and_raw_from_event(event: PanDDAEvent):
+    sample_transform, sample_array = get_sample_transform_from_event(event,
+                                                                     0.5,
+                                                                     30,
+                                                                     3.5
+                                                                     )
+
+    sample_array_event = np.copy(sample_array)
+    xmap_event = get_xmap_from_event(event)
+    image_event = sample_xmap(xmap_event, sample_transform, sample_array_event)
+
+    sample_array_raw = np.copy(sample_array)
+    xmap_raw = get_raw_xmap_from_event(event)
+    image_raw = sample_xmap(xmap_raw, sample_transform, sample_array_raw)
+
+    return np.stack([image_event, image_raw], axis=0)
 
 
 def get_annotation_from_event_annotation(annotation: PanDDAEventAnnotation):
