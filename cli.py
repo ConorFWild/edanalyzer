@@ -560,7 +560,7 @@ def train_pandda(
                  dataset: PanDDAEventDataset,
         annotations: PanDDAEventAnnotations):
 
-    num_epochs = 3
+    num_epochs = 10
     logger.info(f"Training on {len(dataset.pandda_events)} events!")
 
 
@@ -602,8 +602,11 @@ def train_pandda(
     model.to(dev)
         # Trainloop
 
+    running_loss = []
+
     for epoch in range(num_epochs):
         i = 0
+        print(f"Epoch: {epoch}")
         for image, annotation in train_dataloader:
             print(f"\tBatch: {i}")
             # print(image)
@@ -620,16 +623,19 @@ def train_pandda(
             optimizer.step()
 
             # RECORD LOSS
-            running_loss += loss.item()
+            running_loss.append(loss.item())
+
             # print statistics per epoch
             i+=1
             if i % 100 == 99:  # print every 100 mini-batches
 
                 model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]
                 annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
-                print("Loss at epoch {}, iteration {} is {}".format(epoch,
-                                                                    i,
-                                                                    running_loss / i) + "\n")
+                # print("Loss at epoch {}, iteration {} is {}".format(epoch,
+                #                                                     i,
+                #                                                     running_loss / i) + "\n")
+                print(f"Recent loss is: {sum(running_loss[-90:]) / 90}")
+
                 for model_annotation_np, annotation_np in zip(model_annotations_np, annotations_np):
 
                     print(f"{round(float(model_annotation_np[1]), 2)} : {round(float(annotation_np[1]), 2)}")
