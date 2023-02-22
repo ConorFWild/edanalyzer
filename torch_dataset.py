@@ -189,6 +189,7 @@ def get_raw_xmap_from_event(event: PanDDAEvent):
 
 
 def get_image_event_map_and_raw_from_event(event: PanDDAEvent):
+    logger.debug(f"Loading: {event.dtag}")
     sample_transform, sample_array = get_sample_transform_from_event(event,
                                                                      0.5,
                                                                      30,
