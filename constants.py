@@ -32,6 +32,7 @@ PANDDA_INSPECT_MODEL_DIR = "modelled_structures"
 PANDDA_EVENT_MAP_TEMPLATE = "{dtag}-event_{event_idx}_1-BDC_{bdc}_map.native.ccp4"
 PANDDA_MODEL_FILE = "{dtag}-pandda-model.pdb"
 PANDDA_INITIAL_MODEL_TEMPLATE = "{dtag}-pandda-input.pdb"
+PANDDA_INITIAL_MTZ_TEMPLATE = "{dtag}-pandda-input.mtz"
 
 PANDDA_INSPECT_DTAG = "dtag"
 PANDDA_INSPECT_EVENT_IDX = "event_idx"

@@ -12,8 +12,13 @@ from pathlib import Path
 
 def load_xmap_from_mtz(path):
     mtz = gemmi.read_mtz_file(str(path))
-    xmap = mtz.transform_f_phi_to_map()
-    return xmap
+    for f, phi in constants.STRUCTURE_FACTORS:
+        try:
+            xmap = mtz.transform_f_phi_to_map(f, phi, sample_rate=3)
+            return xmap
+        except Exception as e:
+            continue
+    raise Exception()
 
 
 def sample_xmap(xmap, transform, sample_array):
@@ -184,7 +189,7 @@ def get_image_from_event(event: PanDDAEvent):
     return np.expand_dims(image, axis=0)
 
 def get_raw_xmap_from_event(event: PanDDAEvent):
-    mtz_path = Path(event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=event.dtag)
+    mtz_path = Path(event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=event.dtag)
     return load_xmap_from_mtz(mtz_path)
 
 
