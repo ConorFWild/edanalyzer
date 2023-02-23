@@ -25,6 +25,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch_network import squeezenet1_1, resnet18
 import download_dataset
+import dataclasses
 
 def download_dataset(options: Options):
     data_dir = Path(options.working_dir) / constants.DATA_DIR
