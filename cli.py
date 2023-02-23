@@ -560,7 +560,7 @@ def train_pandda(
                  dataset: PanDDAEventDataset,
         annotations: PanDDAEventAnnotations):
 
-    num_epochs = 10
+    num_epochs = 100
     logger.info(f"Training on {len(dataset.pandda_events)} events!")
 
 
@@ -642,6 +642,7 @@ def train_pandda(
                     # print("{}".format() + "\n")
                 print("#################################################" + "\n")
 
+        logger.info(f"Saving state dict for model at epoch: {epoch}")
         torch.save(model.state_dict(), Path(options.working_dir) / constants.MODEL_FILE)
 
 class CLI:
