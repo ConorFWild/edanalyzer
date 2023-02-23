@@ -23,8 +23,8 @@ import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.optim as optim
-from torch_network import squeezenet1_1
-
+from torch_network import squeezenet1_1, resnet18
+import download_dataset
 
 def download_dataset(options: Options):
     data_dir = Path(options.working_dir) / constants.DATA_DIR
@@ -576,6 +576,8 @@ def train_pandda(
     train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=True, num_workers=12)
 
     model = squeezenet1_1(num_classes=2, num_input=2)
+    model = resnet18(num_classes=2, num_input=2)
+
 
     model = model.train()
 
