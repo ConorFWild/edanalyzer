@@ -7,7 +7,8 @@ import subprocess
 from data import StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEvent, \
     PanDDAEventDataset, PanDDAEventAnnotations, PanDDAEventAnnotation
 import constants
-from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation, get_image_event_map_and_raw_from_event
+from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation, \
+    get_image_event_map_and_raw_from_event
 
 from loguru import logger
 # from openbabel import pybel
@@ -81,7 +82,6 @@ def parse_dataset(options: Options, ):
 
     pdbs = {}
     sfs = {}
-
 
     for sub in sfs_dir.glob("*"):
         for entry in sub.glob("*"):
@@ -527,7 +527,6 @@ def partition_pandda_dataset(options, dataset):
     #     else:
     #         annotations.append(PanDDAEventAnnotation(annotation=False))
 
-
     train_set = PanDDAEventDataset(pandda_events=events_not_in_split)
     train_set_annotations = []
     for event in train_set.pandda_events:
@@ -538,8 +537,8 @@ def partition_pandda_dataset(options, dataset):
 
     train_set.save(Path(options.working_dir) / constants.TRAIN_SET_FILE)
 
-    PanDDAEventAnnotations(annotations=train_set_annotations).save(Path(options.working_dir) / constants.TRAIN_SET_ANNOTATION_FILE)
-
+    PanDDAEventAnnotations(annotations=train_set_annotations).save(
+        Path(options.working_dir) / constants.TRAIN_SET_ANNOTATION_FILE)
 
     test_set = PanDDAEventDataset(pandda_events=events_in_split)
     test_set_annotations = []
@@ -551,19 +550,18 @@ def partition_pandda_dataset(options, dataset):
 
     test_set.save(Path(options.working_dir) / constants.TEST_SET_FILE)
 
-    PanDDAEventAnnotations(annotations=test_set_annotations).save(Path(options.working_dir) / constants.TEST_SET_ANNOTATION_FILE)
+    PanDDAEventAnnotations(annotations=test_set_annotations).save(
+        Path(options.working_dir) / constants.TEST_SET_ANNOTATION_FILE)
 
     # smiles_split = get_smiles_split(dataset, 0.2)
 
 
 def train_pandda(
         options: Options,
-                 dataset: PanDDAEventDataset,
+        dataset: PanDDAEventDataset,
         annotations: PanDDAEventAnnotations):
-
     num_epochs = 100
     logger.info(f"Training on {len(dataset.pandda_events)} events!")
-
 
     # Get the dataset
     dataset_torch = PanDDAEventDatasetTorch(
@@ -580,7 +578,6 @@ def train_pandda(
     model = squeezenet1_1(num_classes=2, num_input=2)
 
     model = model.train()
-
 
     # Define loss function
     criterion = nn.BCELoss()
@@ -601,7 +598,7 @@ def train_pandda(
         dev = "cpu"
 
     model.to(dev)
-        # Trainloop
+    # Trainloop
 
     running_loss = []
 
@@ -627,7 +624,7 @@ def train_pandda(
             running_loss.append(loss.item())
 
             # print statistics per epoch
-            i+=1
+            i += 1
             if i % 100 == 99:  # print every 100 mini-batches
 
                 model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]
@@ -638,13 +635,282 @@ def train_pandda(
                 print(f"Recent loss is: {sum(running_loss[-90:]) / 90}")
 
                 for model_annotation_np, annotation_np in zip(model_annotations_np, annotations_np):
-
                     print(f"{round(float(model_annotation_np[1]), 2)} : {round(float(annotation_np[1]), 2)}")
                     # print("{}".format() + "\n")
                 print("#################################################" + "\n")
 
         logger.info(f"Saving state dict for model at epoch: {epoch}")
         torch.save(model.state_dict(), Path(options.working_dir) / constants.MODEL_FILE)
+
+
+def try_make_dir(path: Path):
+    if path.exists():
+        os.mkdir(path)
+
+
+def symlink(source_path: Path, target_path: Path):
+    os.symlink(source_path, target_path)
+
+
+def make_fake_processed_dataset_dir(event: PanDDAEvent, processed_datasets_dir: Path):
+    processed_dataset_dir = processed_datasets_dir / event.dtag
+    try_make_dir(processed_dataset_dir)
+
+    pandda_model_dir = processed_dataset_dir / constants.PANDDA_INSPECT_MODEL_DIR
+    try_make_dir(pandda_model_dir)
+
+    initial_pdb_path = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
+        dtag=event.dtag)
+    fake_initial_pdb_path = processed_dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=event.dtag)
+    symlink(initial_pdb_path, fake_initial_pdb_path)
+
+    inital_mtz_path = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(
+        dtag=event.dtag)
+    fake_inital_mtz_path = processed_dataset_dir / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=event.dtag)
+    symlink(inital_mtz_path, fake_inital_mtz_path)
+
+    event_map_path = Path(event.event_map)
+    fake_event_map_path = processed_dataset_dir / event_map_path.name
+    symlink(event_map_path, fake_event_map_path)
+
+    zmap_path = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_ZMAP_TEMPLATE.format(
+        dtag=event.dtag)
+    fake_zmap_path = processed_dataset_dir / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=event.dtag)
+    symlink(zmap_path, fake_zmap_path)
+
+
+@dataclasses.dataclass()
+class EventTableRecord:
+    dtag: str
+    event_idx: int
+    bdc: float
+    cluster_size: int
+    global_correlation_to_average_map: float
+    global_correlation_to_mean_map: float
+    local_correlation_to_average_map: float
+    local_correlation_to_mean_map: float
+    site_idx: int
+    x: float
+    y: float
+    z: float
+    z_mean: float
+    z_peak: float
+    applied_b_factor_scaling: float
+    high_resolution: float
+    low_resolution: float
+    r_free: float
+    r_work: float
+    analysed_resolution: float
+    map_uncertainty: float
+    analysed: bool
+    interesting: bool
+    exclude_from_z_map_analysis: bool
+    exclude_from_characterisation: bool
+
+    @staticmethod
+    def from_event(event: PanDDAEvent):
+        matches = re.findall(
+            "_1-BDC_([0-9.]+)_map\.native\.ccp4",
+            event.event_map
+        )
+        bdc = float(matches[0])
+
+        return EventTableRecord(
+            dtag=event.dtag,
+            event_idx=event.event_idx,
+            bdc=bdc,
+            cluster_size=0,
+            global_correlation_to_average_map=0,
+            global_correlation_to_mean_map=0,
+            local_correlation_to_average_map=0,
+            local_correlation_to_mean_map=0,
+            site_idx=0,
+            x=event.x,
+            y=event.y,
+            z=event.z,
+            z_mean=0.0,
+            z_peak=0.0,
+            applied_b_factor_scaling=0.0,
+            high_resolution=0.0,
+            low_resolution=0.0,
+            r_free=0.0,
+            r_work=0.0,
+            analysed_resolution=0.0,
+            map_uncertainty=0.0,
+            analysed=False,
+            interesting=False,
+            exclude_from_z_map_analysis=False,
+            exclude_from_characterisation=False,
+        )
+
+
+@dataclasses.dataclass()
+class EventTable:
+    records: list[EventTableRecord]
+
+    @staticmethod
+    def from_pandda_event_dataset(pandda_event_dataset: PanDDAEventDataset):
+        records = []
+        for event in pandda_event_dataset.pandda_events:
+            event_record = EventTableRecord.from_event(event)
+            records.append(event_record)
+
+        return EventTable(records)
+
+    def save(self, path: Path):
+        records = []
+        for record in self.records:
+            event_dict = dataclasses.asdict(record)
+            event_dict["1-BDC"] = round(1 - event_dict["bdc"], 2)
+            records.append(event_dict)
+        table = pd.DataFrame(records)
+        table.to_csv(str(path))
+
+
+def make_fake_event_table(dataset: PanDDAEventDataset, path: Path):
+    event_table = EventTable.from_pandda_event_dataset(dataset)
+    event_table.save(path)
+
+
+@dataclasses.dataclass()
+class SiteTableRecord:
+    site_idx: int
+    centroid: tuple[float, float, float]
+
+    @staticmethod
+    def from_site_id(site_id: int, centroid: tuple[float, float, float]):
+        return SiteTableRecord(
+            site_idx=site_id,
+            centroid=(centroid[0], centroid[1], centroid[2],),
+        )
+
+
+@dataclasses.dataclass()
+class SiteTable:
+    site_record_list: list[SiteTableRecord]
+
+    def __iter__(self):
+        for record in self.site_record_list:
+            yield record
+
+    @staticmethod
+    def from_pandda_event_dataset(pandda_event_dataset: PanDDAEventDataset):
+
+        records = [SiteTableRecord(0, (0.0, 0.0, 0.0))]
+
+        return SiteTable(records)
+
+    def save(self, path: Path):
+        records = []
+        for site_record in self.site_record_list:
+            site_record_dict = dataclasses.asdict(site_record)
+            records.append(site_record_dict)
+
+        table = pd.DataFrame(records)
+
+        table.to_csv(str(path))
+
+
+def make_fake_site_table(dataset: PanDDAEventDataset, path: Path):
+    site_table = SiteTable.from_pandda_event_dataset(dataset)
+    site_table.save(path)
+
+
+def make_fake_pandda(dataset: PanDDAEventDataset, path: Path):
+    fake_pandda_dir = path
+    fake_analyses_dir = fake_pandda_dir / constants.PANDDA_ANALYSIS_DIR
+    fake_event_table_path = fake_analyses_dir / constants.PANDDA_EVENT_TABLE_PATH
+    fake_site_table_path = fake_analyses_dir / constants.PANDDA_SITE_TABLE_PATH
+    fake_processed_datasets_dir = path / constants.PANDDA_PROCESSED_DATASETS_DIR
+
+    try_make_dir(fake_pandda_dir)
+    try_make_dir(fake_analyses_dir)
+    try_make_dir(fake_processed_datasets_dir)
+
+    make_fake_event_table(dataset, fake_event_table_path)
+    make_fake_site_table(dataset, fake_site_table_path)
+
+    fake_processed_dataset_dirs = {}
+    for event in dataset.pandda_events:
+        make_fake_processed_dataset_dir(event, fake_processed_datasets_dir)
+
+
+def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations: PanDDAEventAnnotations):
+    # Get the dataset
+    dataset_torch = PanDDAEventDatasetTorch(
+        dataset,
+        annotations,
+        transform_image=get_image_event_map_and_raw_from_event,
+        transform_annotation=get_annotation_from_event_annotation
+
+    )
+
+    # Get the dataloader
+    train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=False, num_workers=12)
+
+    model = squeezenet1_1(num_classes=2, num_input=2)
+    model.load_state_dict(torch.load(Path(options.working_dir) / constants.MODEL_FILE))
+    model.eval()
+
+    records = {}
+    for image, annotation, idx in train_dataloader:
+        image_c = image.to(dev)
+        annotation_c = annotation.to(dev)
+
+        # forward
+        model_annotation = model(image_c)
+
+        annotation_np = annotation.to(torch.device("cpu")).detach().numpy()
+        model_annotation_np = model_annotation.to(torch.device("cpu")).detach().numpy()
+        idx_np = idx.to(torch.device("cpu")).detach().numpy()
+
+        #
+        for _annotation, _model_annotation, _idx in zip(annotation_np, model_annotation_np, idx_np):
+            records[_idx] = {"annotation": _annotation[1], "model_annotation": _model_annotation[1]}
+
+    # Save a model annotations json
+    # pandda_event_model_annotations = PanDDAEventModelAnnotations(
+    #     annotations={
+    #         _idx: records[_idx]["model_annotation"] for _idx in records
+    #     }
+    # )
+
+    # Sort by model annotation
+    sorted_idxs = sorted(records, key=lambda x: records[x]["model_annotation"], reverse=True)
+
+    # Get highest scoring non-hits
+    high_scoring_non_hits = []
+    for sorted_idx in sorted_idxs:
+        if len(high_scoring_non_hits) > 1000:
+            continue
+        if records[sorted_idx]["annotation"] == 0.0:
+            high_scoring_non_hits.append(sorted_idx)
+
+    # Get the lowest scoring hits
+    low_scoring_hits = []
+    for sorted_idx in reversed(sorted_idxs):
+        if len(low_scoring_hits) > 1000:
+            continue
+        if records[sorted_idx]["annotation"] == 1.0:
+            low_scoring_hits.append(sorted_idx)
+
+    # Make fake PanDDA and inspect table for high scoring non hits
+    high_scoring_non_hit_dataset = PanDDAEventDataset(pandda_events=[
+        dataset[_idx] for _idx in high_scoring_non_hits
+    ])
+    make_fake_pandda(high_scoring_non_hit_dataset, Path(options.working_dir) / HIGH_SCORING_NON_HIT_DATASET_FILE)
+
+    # Make fake PanDDA and inspect table for low scoring hits
+    low_scoring_hit_dataset = PanDDAEventDataset(pandda_events=[
+        dataset[_idx] for _idx in high_scoring_non_hits
+    ])
+    make_fake_pandda(low_scoring_hit_dataset, Path(options.working_dir) / LOW_SCORING_HIT_DATASET_FILE)
+
+
+# def
 
 class CLI:
 

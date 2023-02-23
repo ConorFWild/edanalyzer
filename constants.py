@@ -35,6 +35,9 @@ PANDDA_EVENT_MAP_TEMPLATE = "{dtag}-event_{event_idx}_1-BDC_{bdc}_map.native.ccp
 PANDDA_MODEL_FILE = "{dtag}-pandda-model.pdb"
 PANDDA_INITIAL_MODEL_TEMPLATE = "{dtag}-pandda-input.pdb"
 PANDDA_INITIAL_MTZ_TEMPLATE = "{dtag}-pandda-input.mtz"
+PANDDA_EVENT_TABLE_PATH = "pandda_analyse_events.csv"
+PANDDA_SITE_TABLE_PATH = "pandda_analyse_sites.csv"
+PANDDA_ZMAP_TEMPLATE = "{dtag}-z_map.native.ccp4"
 
 PANDDA_INSPECT_DTAG = "dtag"
 PANDDA_INSPECT_EVENT_IDX = "event_idx"
