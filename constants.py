@@ -25,6 +25,8 @@ DIAMOND_ANALYSIS_DIR = "analysis"
 DIAMOND_MODEL_BUILDING_DIR_NEW = "model_building"
 DIAMOND_MODEL_BUILDING_DIR_OLD = "initial_model"
 
+MODEL_FILE = "model_state_dict.pt"
+
 PANDDA_ANALYSIS_DIR = "analyses"
 PANDDA_INSPECT_TABLE_FILE = "pandda_inspect_events.csv"
 PANDDA_PROCESSED_DATASETS_DIR = "processed_datasets"

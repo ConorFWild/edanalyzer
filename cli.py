@@ -642,6 +642,8 @@ def train_pandda(
                     # print("{}".format() + "\n")
                 print("#################################################" + "\n")
 
+        torch.save(model.state_dict(), Path(options.working_dir) / constants.MODEL_FILE)
+
 class CLI:
 
     def download_dataset(self, options_json_path: str = "./options.json"):
