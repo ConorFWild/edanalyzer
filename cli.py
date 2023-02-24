@@ -841,6 +841,7 @@ def make_fake_pandda(dataset: PanDDAEventDataset, path: Path):
 
     fake_processed_dataset_dirs = {}
     for event in dataset.pandda_events:
+        logger.debug(f"Copying event dir: {event.dtag} {event.event_idx}")
         make_fake_processed_dataset_dir(event, fake_processed_datasets_dir)
 
 
