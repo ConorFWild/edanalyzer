@@ -616,6 +616,8 @@ def train_pandda(
             image_c = image.to(dev)
             annotation_c = annotation.to(dev)
 
+            optimizer.zero_grad()
+
             # forward + backward + optimize
             model_annotation = model(image_c)
             # print(outputs.to("cpu").detach().numpy())
@@ -848,7 +850,6 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
         annotations,
         transform_image=get_image_event_map_and_raw_from_event,
         transform_annotation=get_annotation_from_event_annotation
-
     )
 
     # Get the dataloader

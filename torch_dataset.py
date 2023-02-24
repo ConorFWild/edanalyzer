@@ -337,5 +337,5 @@ class PanDDAEventDatasetTorch(Dataset):
 
         else:
             label = np.array([1.0,0.0], dtype=np.float32)
-        return image, label
+        return image, label, idx
 
