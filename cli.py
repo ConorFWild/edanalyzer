@@ -578,7 +578,7 @@ def train_pandda(
     train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=True, num_workers=12)
 
     # model = squeezenet1_1(num_classes=2, num_input=2)
-    model = resnet18(num_classes=2, num_input=2)
+    model = resnet18(num_classes=2, num_input=3)
 
 
     model = model.train()
@@ -870,7 +870,7 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
         train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=False, num_workers=12)
 
         # model = squeezenet1_1(num_classes=2, num_input=2)
-        model = resnet18(num_classes=2, num_input=2)
+        model = resnet18(num_classes=2, num_input=3)
         model.load_state_dict(torch.load(Path(options.working_dir) / constants.MODEL_FILE))
         model.eval()
 
@@ -923,7 +923,7 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
     # Get highest scoring non-hits
     high_scoring_non_hits = []
     for sorted_idx in sorted_idxs:
-        if len(high_scoring_non_hits) > 1000:
+        if len(high_scoring_non_hits) > 300:
             continue
         if records[sorted_idx]["annotation"] == 0.0:
             high_scoring_non_hits.append(sorted_idx)
@@ -932,7 +932,7 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
     # Get the lowest scoring hits
     low_scoring_hits = []
     for sorted_idx in reversed(sorted_idxs):
-        if len(low_scoring_hits) > 1000:
+        if len(low_scoring_hits) > 300:
             continue
         if records[sorted_idx]["annotation"] == 1.0:
             low_scoring_hits.append(sorted_idx)

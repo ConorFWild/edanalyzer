@@ -100,6 +100,17 @@ def get_xmap_from_event(event: PanDDAEvent):
     return m
 
 
+def get_zmap_from_event(event: PanDDAEvent):
+    zmap_path = str(Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_ZMAP_TEMPLATE.format(
+        dtag=event.dtag))
+    ccp4 = gemmi.read_ccp4_map(zmap_path)
+    ccp4.setup(float('nan'))
+    m = ccp4.grid
+
+    return m
+
+
 def get_sample_transform_from_event(event: PanDDAEvent,
                                     sample_distance: float,
                                     n: int,
@@ -126,11 +137,11 @@ def get_sample_transform_from_event(event: PanDDAEvent,
 
     # Apply random translation
     transform = event_centre_transform.combine(
-                centre_grid_transform.combine(
-                    initial_transform
-                )
-            )
-    corner_0_pos = transform.apply(gemmi.Position(0.0,0.0,0.0))
+        centre_grid_transform.combine(
+            initial_transform
+        )
+    )
+    corner_0_pos = transform.apply(gemmi.Position(0.0, 0.0, 0.0))
     corner_n_pos = transform.apply(gemmi.Position(
         float(n),
         float(n),
@@ -139,18 +150,19 @@ def get_sample_transform_from_event(event: PanDDAEvent,
     )
     corner_0 = (corner_0_pos.x, corner_0_pos.y, corner_0_pos.z)
     corner_n = (corner_n_pos.x, corner_n_pos.y, corner_n_pos.z)
-    average_pos = [c0 + (cn - c0)/2 for c0, cn in zip(corner_0, corner_n)]
+    average_pos = [c0 + (cn - c0) / 2 for c0, cn in zip(corner_0, corner_n)]
     event_centroid = (event.x, event.y, event.z)
     # logger.debug(f"Centroid: {event_centroid}")
     # logger.debug(f"Corners: {corner_0} : {corner_n} : average: {average_pos}")
     # logger.debug(f"Distance from centroid to average: {gemmi.Position(*average_pos).dist(gemmi.Position(*event_centroid))}")
 
-    return transform, np.zeros((n,n,n), dtype=np.float32)
+    return transform, np.zeros((n, n, n), dtype=np.float32)
+
 
 def get_sample_transform_from_event_augmented(event: PanDDAEvent,
-                                    sample_distance: float,
-                                    n: int,
-                                    translation: float):
+                                              sample_distance: float,
+                                              n: int,
+                                              translation: float):
     # Get basic sample grid transform
     initial_transform = gemmi.Transform()
     scale_matrix = np.eye(3) * sample_distance
@@ -204,7 +216,7 @@ def get_sample_transform_from_event_augmented(event: PanDDAEvent,
             )
         )
     )
-    corner_0_pos = transform.apply(gemmi.Position(0.0,0.0,0.0))
+    corner_0_pos = transform.apply(gemmi.Position(0.0, 0.0, 0.0))
     corner_n_pos = transform.apply(gemmi.Position(
         float(n),
         float(n),
@@ -213,13 +225,13 @@ def get_sample_transform_from_event_augmented(event: PanDDAEvent,
     )
     corner_0 = (corner_0_pos.x, corner_0_pos.y, corner_0_pos.z)
     corner_n = (corner_n_pos.x, corner_n_pos.y, corner_n_pos.z)
-    average_pos = [c0 + (cn - c0)/2 for c0, cn in zip(corner_0, corner_n)]
+    average_pos = [c0 + (cn - c0) / 2 for c0, cn in zip(corner_0, corner_n)]
     event_centroid = (event.x, event.y, event.z)
     # logger.debug(f"Centroid: {event_centroid}")
     # logger.debug(f"Corners: {corner_0} : {corner_n} : average: {average_pos}")
     # logger.debug(f"Distance from centroid to average: {gemmi.Position(*average_pos).dist(gemmi.Position(*event_centroid))}")
 
-    return transform, np.zeros((n,n,n), dtype=np.float32)
+    return transform, np.zeros((n, n, n), dtype=np.float32)
 
 
 def get_image_from_event(event: PanDDAEvent):
@@ -235,6 +247,7 @@ def get_image_from_event(event: PanDDAEvent):
 
     return np.expand_dims(image, axis=0)
 
+
 def get_image_from_event_augmented(event: PanDDAEvent):
     xmap = get_xmap_from_event(event)
 
@@ -248,8 +261,11 @@ def get_image_from_event_augmented(event: PanDDAEvent):
 
     return np.expand_dims(image, axis=0)
 
+
 def get_raw_xmap_from_event(event: PanDDAEvent):
-    mtz_path = Path(event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=event.dtag)
+    mtz_path = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(
+        dtag=event.dtag)
     return load_xmap_from_mtz(mtz_path)
 
 
@@ -266,41 +282,49 @@ def get_image_event_map_and_raw_from_event(event: PanDDAEvent):
         xmap_event = get_xmap_from_event(event)
         image_event = sample_xmap(xmap_event, sample_transform, sample_array_event)
 
-
         sample_array_raw = np.copy(sample_array)
         xmap_raw = get_raw_xmap_from_event(event)
         image_raw = sample_xmap(xmap_raw, sample_transform, sample_array_raw)
 
+        sample_array_zmap = np.copy(sample_array)
+        xmap_zmap = get_zmap_from_event(event)
+        image_zmap = sample_xmap(xmap_zmap, sample_transform, sample_array_zmap)
+
+
     except Exception as e:
         print(e)
-        return np.stack([sample_array, sample_array], axis=0), False
+        return np.stack([sample_array, sample_array, sample_array], axis=0), False
 
-    return np.stack([image_event, image_raw], axis=0), True
+    return np.stack([image_event, image_raw, image_zmap], axis=0), True
+
 
 def get_image_event_map_and_raw_from_event_augmented(event: PanDDAEvent):
     # logger.debug(f"Loading: {event.dtag}")
     sample_transform, sample_array = get_sample_transform_from_event_augmented(
         event,
-                                                                     0.5,
-                                                                     30,
-                                                                     3.5
-                                                                     )
+        0.5,
+        30,
+        3.5
+    )
 
     try:
         sample_array_event = np.copy(sample_array)
         xmap_event = get_xmap_from_event(event)
         image_event = sample_xmap(xmap_event, sample_transform, sample_array_event)
 
-
         sample_array_raw = np.copy(sample_array)
         xmap_raw = get_raw_xmap_from_event(event)
         image_raw = sample_xmap(xmap_raw, sample_transform, sample_array_raw)
 
+        sample_array_zmap = np.copy(sample_array)
+        xmap_zmap = get_zmap_from_event(event)
+        image_zmap = sample_xmap(xmap_zmap, sample_transform, sample_array_zmap)
+
     except Exception as e:
         print(e)
-        return np.stack([sample_array, sample_array], axis=0), False
+        return np.stack([sample_array, sample_array, sample_array], axis=0), False
 
-    return np.stack([image_event, image_raw], axis=0), True
+    return np.stack([image_event, image_raw, image_zmap], axis=0), True
 
 
 def get_annotation_from_event_annotation(annotation: PanDDAEventAnnotation):
@@ -336,6 +360,5 @@ class PanDDAEventDatasetTorch(Dataset):
             label = self.transform_annotation(annotation)
 
         else:
-            label = np.array([1.0,0.0], dtype=np.float32)
+            label = np.array([1.0, 0.0], dtype=np.float32)
         return image, label, idx
-
