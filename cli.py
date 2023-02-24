@@ -655,7 +655,8 @@ def try_make_dir(path: Path):
 
 
 def symlink(source_path: Path, target_path: Path):
-    os.symlink(source_path, target_path)
+    if not target_path.exists():
+        os.symlink(source_path, target_path)
 
 
 def make_fake_processed_dataset_dir(event: PanDDAEvent, processed_datasets_dir: Path):
