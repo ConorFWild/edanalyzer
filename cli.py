@@ -608,7 +608,7 @@ def train_pandda(
     for epoch in range(num_epochs):
         i = 0
         print(f"Epoch: {epoch}")
-        for image, annotation in train_dataloader:
+        for image, annotation, idx in train_dataloader:
             print(f"\tBatch: {i}")
             # print(image)
             # print(annotation)
