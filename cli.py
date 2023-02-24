@@ -645,7 +645,7 @@ def train_pandda(
                 print("#################################################" + "\n")
 
         logger.info(f"Saving state dict for model at epoch: {epoch}")
-        torch.save(model.state_dict(), Path(options.working_dir) / constants.MODEL_FILE)
+        # torch.save(model.state_dict(), Path(options.working_dir) / constants.MODEL_FILE)
 
 
 def try_make_dir(path: Path):
