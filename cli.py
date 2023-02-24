@@ -905,13 +905,13 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
     high_scoring_non_hit_dataset = PanDDAEventDataset(pandda_events=[
         dataset[_idx] for _idx in high_scoring_non_hits
     ])
-    make_fake_pandda(high_scoring_non_hit_dataset, Path(options.working_dir) / HIGH_SCORING_NON_HIT_DATASET_FILE)
+    make_fake_pandda(high_scoring_non_hit_dataset, Path(options.working_dir) / constants.HIGH_SCORING_NON_HIT_DATASET_DIR)
 
     # Make fake PanDDA and inspect table for low scoring hits
     low_scoring_hit_dataset = PanDDAEventDataset(pandda_events=[
         dataset[_idx] for _idx in high_scoring_non_hits
     ])
-    make_fake_pandda(low_scoring_hit_dataset, Path(options.working_dir) / LOW_SCORING_HIT_DATASET_FILE)
+    make_fake_pandda(low_scoring_hit_dataset, Path(options.working_dir) / constants.LOW_SCORING_HIT_DATASET_DIR)
 
 
 # def
