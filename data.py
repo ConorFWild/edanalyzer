@@ -136,6 +136,7 @@ class PanDDAUpdatedEventAnnotations(BaseModel):
     keys: list[PanDDAEventKey]
     annotations: list[PanDDAEventAnnotation]
 
+    @classmethod
     def load(cls, path):
         return load_model(path, cls)
 
