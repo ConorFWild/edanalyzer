@@ -1066,7 +1066,6 @@ class CLI:
         logger.info(f"Got {len(keys)} new high scoring non hit annotations!")
 
 
-
         low_scoring_hit_dir = output_dir / constants.LOW_SCORING_HIT_DATASET_DIR
         low_scoring_hit_inspect_table_path = low_scoring_hit_dir / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
         low_scoring_hit_inspect_table = pd.read_csv(low_scoring_hit_inspect_table_path)
