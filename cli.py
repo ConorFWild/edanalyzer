@@ -688,6 +688,14 @@ def make_fake_processed_dataset_dir(event: PanDDAEvent, processed_datasets_dir: 
     fake_zmap_path = processed_dataset_dir / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=event.dtag)
     symlink(zmap_path, fake_zmap_path)
 
+    pandda_model_file = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INSPECT_MODEL_DIR / constants.PANDDA_MODEL_FILE.format(
+        dtag=event.dtag)
+    fake_model_file = pandda_model_dir / pandda_model_file.name
+    if pandda_model_file.exists():
+        symlink(pandda_model_file, fake_model_file)
+
+
 
 @dataclasses.dataclass()
 class EventTableRecord:
@@ -955,6 +963,7 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
         else:
             pandda_events.append(event)
             dtag_event_ids.append(key)
+
     low_scoring_hit_dataset = PanDDAEventDataset(pandda_events=pandda_events)
     make_fake_pandda(low_scoring_hit_dataset,
                      Path(options.working_dir) / constants.LOW_SCORING_HIT_DATASET_DIR)
