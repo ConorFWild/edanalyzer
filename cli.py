@@ -906,7 +906,7 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
     else:
         with open(records_file, "rb") as f:
 
-            records = pickle.load(records_file)
+            records = pickle.load(f)
 
     # Sort by model annotation
     sorted_idxs = sorted(records, key=lambda x: records[x]["model_annotation"], reverse=True)
