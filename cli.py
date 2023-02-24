@@ -1,4 +1,5 @@
 import os
+import pickle
 import re
 
 import fire
@@ -859,6 +860,16 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
     model.load_state_dict(torch.load(Path(options.working_dir) / constants.MODEL_FILE))
     model.eval()
 
+    if torch.cuda.is_available():
+        logger.info(f"Using cuda!")
+        dev = "cuda:0"
+    else:
+        logger.info(f"Using cpu!")
+        dev = "cpu"
+
+    model.to(dev)
+    model.eval()
+
     records = {}
     for image, annotation, idx in train_dataloader:
         image_c = image.to(dev)
@@ -881,6 +892,9 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
     #         _idx: records[_idx]["model_annotation"] for _idx in records
     #     }
     # )
+
+    with open(Path(options.working_dir) / "train_records.pickle", "wb") as f:
+        pickle.dump(records, f)
 
     # Sort by model annotation
     sorted_idxs = sorted(records, key=lambda x: records[x]["model_annotation"], reverse=True)
