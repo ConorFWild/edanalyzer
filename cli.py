@@ -1073,6 +1073,7 @@ class CLI:
         logger.info(f"Length of low scoring hit inspect table: {len(low_scoring_hit_inspect_table)}")
 
 
+
         for idx, row in low_scoring_hit_inspect_table.iterrows():
             dtag = row[constants.PANDDA_INSPECT_DTAG]
             event_idx = int(row[constants.PANDDA_INSPECT_EVENT_IDX])
