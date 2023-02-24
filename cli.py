@@ -728,7 +728,7 @@ class EventTableRecord:
         return EventTableRecord(
             dtag=event.dtag,
             event_idx=event.event_idx,
-            bdc=bdc,
+            bdc=1-bdc,
             cluster_size=0,
             global_correlation_to_average_map=0,
             global_correlation_to_mean_map=0,
