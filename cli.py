@@ -6,7 +6,7 @@ import fire
 from pathlib import Path
 import subprocess
 from data import StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEvent, \
-    PanDDAEventDataset, PanDDAEventAnnotations, PanDDAEventAnnotation
+    PanDDAEventDataset, PanDDAEventAnnotations, PanDDAEventAnnotation, PanDDAUpdatedEventAnnotations, PanDDAEventKey
 import constants
 from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation, \
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented
@@ -561,7 +561,9 @@ def partition_pandda_dataset(options, dataset):
 def train_pandda(
         options: Options,
         dataset: PanDDAEventDataset,
-        annotations: PanDDAEventAnnotations):
+        annotations: PanDDAEventAnnotations,
+        updated_annotations: PanDDAUpdatedEventAnnotations,
+):
     num_epochs = 100
     logger.info(f"Training on {len(dataset.pandda_events)} events!")
 
@@ -569,6 +571,7 @@ def train_pandda(
     dataset_torch = PanDDAEventDatasetTorch(
         dataset,
         annotations,
+        updated_annotations,
         transform_image=get_image_event_map_and_raw_from_event_augmented,
         transform_annotation=get_annotation_from_event_annotation
 
@@ -579,8 +582,6 @@ def train_pandda(
 
     # model = squeezenet1_1(num_classes=2, num_input=2)
     model = resnet18(num_classes=2, num_input=3)
-
-
     model = model.train()
 
     # Define loss function
@@ -1022,8 +1023,8 @@ class CLI:
         options = Options.load(options_json_path)
         dataset = PanDDAEventDataset.load(Path(options.working_dir) / constants.TRAIN_SET_FILE)
         annotations = PanDDAEventAnnotations.load(Path(options.working_dir) / constants.TRAIN_SET_ANNOTATION_FILE)
-
-        train_pandda(options, dataset, annotations)
+        updated_annotations = PanDDAUpdatedEventAnnotations.load(Path(options.working_dir) / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
+        train_pandda(options, dataset, annotations, updated_annotations)
 
     def annotate_test_dataset(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
@@ -1032,6 +1033,62 @@ class CLI:
 
         annotate_test_set(options, dataset, annotations)
 
+    def parse_updated_annotations(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+        output_dir = Path(options.working_dir)
+        if (output_dir / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE).exists():
+            pandda_updated_annotations = PanDDAUpdatedEventAnnotations.load(output_dir / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
+        else:
+            pandda_updated_annotations = PanDDAUpdatedEventAnnotations(keys=[], annotations=[])
+
+        keys = []
+        annotations = []
+
+        high_scoring_non_hit_dir = output_dir / constants.HIGH_SCORING_NON_HIT_DATASET_DIR
+        high_scoring_non_hit_inspect_table_path = high_scoring_non_hit_dir / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
+        high_scoring_non_hit_inspect_table = pd.read_csv(high_scoring_non_hit_inspect_table_path)
+
+
+        for idx, row in high_scoring_non_hit_inspect_table.iterrows():
+            dtag = row[constants.PANDDA_INSPECT_DTAG]
+            event_idx = int(row[constants.PANDDA_INSPECT_EVENT_IDX])
+            key = PanDDAEventKey(dtag=dtag, event_idx=event_idx)
+            if row[constants.PANDDA_INSPECT_VIEWED] == "True":
+                if row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
+                    annotation = PanDDAEventAnnotation(annotation=True)
+                else:
+                    annotation = PanDDAEventAnnotation(annotation=False)
+                keys.append(key)
+                annotations.append(annotation)
+
+        logger.info(f"Got {len(keys)} new high scoring non hit annotations!")
+
+
+        low_scoring_hit_dir = output_dir / constants.LOW_SCORING_HIT_DATASET_DIR
+        low_scoring_hit_inspect_table_path = low_scoring_hit_dir / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
+        low_scoring_hit_inspect_table = pd.read_csv(low_scoring_hit_inspect_table_path)
+
+        for idx, row in low_scoring_hit_inspect_table.iterrows():
+            dtag = row[constants.PANDDA_INSPECT_DTAG]
+            event_idx = int(row[constants.PANDDA_INSPECT_EVENT_IDX])
+            key = PanDDAEventKey(dtag=dtag, event_idx=event_idx)
+            if row[constants.PANDDA_INSPECT_VIEWED] == "True":
+                if row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
+                    annotation = PanDDAEventAnnotation(annotation=True)
+                else:
+                    annotation = PanDDAEventAnnotation(annotation=False)
+                keys.append(key)
+                annotations.append(annotation)
+
+        logger.info(f"Got {len(keys)} total new annotations!")
+
+        for key, annotation in zip(keys, annotations):
+            if key not in pandda_updated_annotations.keys:
+                pandda_updated_annotations.keys.append(key)
+                pandda_updated_annotations.annotations.append(annotation)
+
+        pandda_updated_annotations.save(output_dir / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
+        ...
 
     def test_pandda(self, options_json_path: str = "./options.json"):
         ...

@@ -1,6 +1,6 @@
 import constants
 from data import StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEventDataset, \
-    PanDDAEvent, PanDDAEventAnnotations, PanDDAEventAnnotation
+    PanDDAEvent, PanDDAEventAnnotations, PanDDAEventAnnotation, PanDDAUpdatedEventAnnotations
 from numpy.random import default_rng
 import numpy as np
 from scipy.spatial.transform import Rotation as R
@@ -338,11 +338,17 @@ class PanDDAEventDatasetTorch(Dataset):
     def __init__(self,
                  pandda_event_dataset: PanDDAEventDataset,
                  annotations: PanDDAEventAnnotations,
+                 updated_annotations: PanDDAUpdatedEventAnnotations,
                  transform_image=lambda x: x,
                  transform_annotation=lambda x: x
                  ):
         self.pandda_event_dataset = pandda_event_dataset
         self.annotations = annotations
+        self.updated_annotations = {
+            (key.dtag, key.event_idx): annotation
+            for key, annotation
+            in zip(updated_annotations.keys, updated_annotations.annotations)
+        }
         self.transform_image = transform_image
         self.transform_annotation = transform_annotation
 
@@ -352,7 +358,12 @@ class PanDDAEventDatasetTorch(Dataset):
     def __getitem__(self, idx: int):
         event = self.pandda_event_dataset.pandda_events[idx]
 
-        annotation = self.annotations.annotations[idx]
+        key = (event.dtag, event.event_idx)
+
+        if key in self.updated_annotations:
+            annotation = self.updated_annotations[key]
+        else:
+            annotation = self.annotations.annotations[idx]
 
         image, loaded = self.transform_image(event)
 

@@ -127,3 +127,17 @@ class Options(BaseModel):
 
     def save(self, path):
         save_model(path, self)
+
+class PanDDAEventKey(BaseModel):
+    dtag: str
+    event_idx: int
+
+class PanDDAUpdatedEventAnnotations(BaseModel):
+    keys: list[PanDDAEventKey]
+    annotations: list[PanDDAEventAnnotation]
+
+    def load(cls, path):
+        return load_model(path, cls)
+
+    def save(self, path):
+        save_model(path, self)
