@@ -920,6 +920,7 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
         if records[sorted_idx]["annotation"] == 0.0:
             high_scoring_non_hits.append(sorted_idx)
 
+
     # Get the lowest scoring hits
     low_scoring_hits = []
     for sorted_idx in reversed(sorted_idxs):
@@ -929,16 +930,32 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
             low_scoring_hits.append(sorted_idx)
 
     # Make fake PanDDA and inspect table for high scoring non hits
-    high_scoring_non_hit_dataset = PanDDAEventDataset(pandda_events=[
-        dataset.pandda_events[_idx] for _idx in high_scoring_non_hits
-    ])
+    pandda_events = []
+    dtag_event_ids = []
+    for _idx in high_scoring_non_hits:
+        event = dataset.pandda_events[_idx]
+        key = (event.dtag, event.event_idx)
+        if key in dtag_event_ids:
+            continue
+        else:
+            pandda_events.append(event)
+            dtag_event_ids.append(key)
+    high_scoring_non_hit_dataset = PanDDAEventDataset(pandda_events=pandda_events)
     make_fake_pandda(high_scoring_non_hit_dataset,
                      Path(options.working_dir) / constants.HIGH_SCORING_NON_HIT_DATASET_DIR)
 
     # Make fake PanDDA and inspect table for low scoring hits
-    low_scoring_hit_dataset = PanDDAEventDataset(pandda_events=[
-        dataset.pandda_events[_idx] for _idx in high_scoring_non_hits
-    ])
+    pandda_events = []
+    dtag_event_ids = []
+    for _idx in low_scoring_hits:
+        event = dataset.pandda_events[_idx]
+        key = (event.dtag, event.event_idx)
+        if key in dtag_event_ids:
+            continue
+        else:
+            pandda_events.append(event)
+            dtag_event_ids.append(key)
+    low_scoring_hit_dataset = PanDDAEventDataset(pandda_events=pandda_events)
     make_fake_pandda(low_scoring_hit_dataset,
                      Path(options.working_dir) / constants.LOW_SCORING_HIT_DATASET_DIR)
 
