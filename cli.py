@@ -650,7 +650,7 @@ def train_pandda(
 
 
 def try_make_dir(path: Path):
-    if path.exists():
+    if not path.exists():
         os.mkdir(path)
 
 
@@ -830,7 +830,7 @@ def make_fake_pandda(dataset: PanDDAEventDataset, path: Path):
     fake_analyses_dir = fake_pandda_dir / constants.PANDDA_ANALYSIS_DIR
     fake_event_table_path = fake_analyses_dir / constants.PANDDA_EVENT_TABLE_PATH
     fake_site_table_path = fake_analyses_dir / constants.PANDDA_SITE_TABLE_PATH
-    fake_processed_datasets_dir = path / constants.PANDDA_PROCESSED_DATASETS_DIR
+    fake_processed_datasets_dir = fake_pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
 
     try_make_dir(fake_pandda_dir)
     try_make_dir(fake_analyses_dir)
@@ -845,59 +845,67 @@ def make_fake_pandda(dataset: PanDDAEventDataset, path: Path):
 
 
 def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations: PanDDAEventAnnotations):
-    # Get the dataset
-    dataset_torch = PanDDAEventDatasetTorch(
-        dataset,
-        annotations,
-        transform_image=get_image_event_map_and_raw_from_event,
-        transform_annotation=get_annotation_from_event_annotation
-    )
+    records_file = Path(options.working_dir) / "train_records.pickle"
 
-    # Get the dataloader
-    train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=False, num_workers=12)
+    if not records_file.exists():
+        # Get the dataset
+        dataset_torch = PanDDAEventDatasetTorch(
+            dataset,
+            annotations,
+            transform_image=get_image_event_map_and_raw_from_event,
+            transform_annotation=get_annotation_from_event_annotation
+        )
 
-    # model = squeezenet1_1(num_classes=2, num_input=2)
-    model = resnet18(num_classes=2, num_input=2)
-    model.load_state_dict(torch.load(Path(options.working_dir) / constants.MODEL_FILE))
-    model.eval()
+        # Get the dataloader
+        train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=False, num_workers=12)
 
-    if torch.cuda.is_available():
-        logger.info(f"Using cuda!")
-        dev = "cuda:0"
+        # model = squeezenet1_1(num_classes=2, num_input=2)
+        model = resnet18(num_classes=2, num_input=2)
+        model.load_state_dict(torch.load(Path(options.working_dir) / constants.MODEL_FILE))
+        model.eval()
+
+        if torch.cuda.is_available():
+            logger.info(f"Using cuda!")
+            dev = "cuda:0"
+        else:
+            logger.info(f"Using cpu!")
+            dev = "cpu"
+
+        model.to(dev)
+        model.eval()
+
+        records = {}
+        for image, annotation, idx in train_dataloader:
+            image_c = image.to(dev)
+            annotation_c = annotation.to(dev)
+
+            # forward
+            model_annotation = model(image_c)
+
+            annotation_np = annotation.to(torch.device("cpu")).detach().numpy()
+            model_annotation_np = model_annotation.to(torch.device("cpu")).detach().numpy()
+            idx_np = idx.to(torch.device("cpu")).detach().numpy()
+
+            #
+            for _annotation, _model_annotation, _idx in zip(annotation_np, model_annotation_np, idx_np):
+                records[_idx] = {"annotation": _annotation[1], "model_annotation": _model_annotation[1]}
+                event = dataset.pandda_events[_idx]
+                logger.debug(f"{event.dtag} {event.event_idx} {_annotation[1]} {_model_annotation[1]}")
+
+        # Save a model annotations json
+        # pandda_event_model_annotations = PanDDAEventModelAnnotations(
+        #     annotations={
+        #         _idx: records[_idx]["model_annotation"] for _idx in records
+        #     }
+        # )
+
+        with open(records_file, "wb") as f:
+            pickle.dump(records, f)
+
     else:
-        logger.info(f"Using cpu!")
-        dev = "cpu"
+        with open(records_file, "rb") as f:
 
-    model.to(dev)
-    model.eval()
-
-    records = {}
-    for image, annotation, idx in train_dataloader:
-        image_c = image.to(dev)
-        annotation_c = annotation.to(dev)
-
-        # forward
-        model_annotation = model(image_c)
-
-        annotation_np = annotation.to(torch.device("cpu")).detach().numpy()
-        model_annotation_np = model_annotation.to(torch.device("cpu")).detach().numpy()
-        idx_np = idx.to(torch.device("cpu")).detach().numpy()
-
-        #
-        for _annotation, _model_annotation, _idx in zip(annotation_np, model_annotation_np, idx_np):
-            records[_idx] = {"annotation": _annotation[1], "model_annotation": _model_annotation[1]}
-            event = dataset.pandda_events[_idx]
-            logger.debug(f"{event.dtag} {event.event_idx} {_annotation[1]} {_model_annotation[1]}")
-
-    # Save a model annotations json
-    # pandda_event_model_annotations = PanDDAEventModelAnnotations(
-    #     annotations={
-    #         _idx: records[_idx]["model_annotation"] for _idx in records
-    #     }
-    # )
-
-    with open(Path(options.working_dir) / "train_records.pickle", "wb") as f:
-        pickle.dump(records, f)
+            records = pickle.load(records_file)
 
     # Sort by model annotation
     sorted_idxs = sorted(records, key=lambda x: records[x]["model_annotation"], reverse=True)
@@ -922,13 +930,15 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
     high_scoring_non_hit_dataset = PanDDAEventDataset(pandda_events=[
         dataset.pandda_events[_idx] for _idx in high_scoring_non_hits
     ])
-    make_fake_pandda(high_scoring_non_hit_dataset, Path(options.working_dir) / constants.HIGH_SCORING_NON_HIT_DATASET_DIR)
+    make_fake_pandda(high_scoring_non_hit_dataset,
+                     Path(options.working_dir) / constants.HIGH_SCORING_NON_HIT_DATASET_DIR)
 
     # Make fake PanDDA and inspect table for low scoring hits
     low_scoring_hit_dataset = PanDDAEventDataset(pandda_events=[
         dataset.pandda_events[_idx] for _idx in high_scoring_non_hits
     ])
-    make_fake_pandda(low_scoring_hit_dataset, Path(options.working_dir) / constants.LOW_SCORING_HIT_DATASET_DIR)
+    make_fake_pandda(low_scoring_hit_dataset,
+                     Path(options.working_dir) / constants.LOW_SCORING_HIT_DATASET_DIR)
 
 
 # def
