@@ -1048,6 +1048,7 @@ class CLI:
         high_scoring_non_hit_inspect_table_path = high_scoring_non_hit_dir / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
         high_scoring_non_hit_inspect_table = pd.read_csv(high_scoring_non_hit_inspect_table_path)
 
+        logger.info(f"Length of high scoring non hit inspect table: {len(high_scoring_non_hit_inspect_table)}")
 
         for idx, row in high_scoring_non_hit_inspect_table.iterrows():
             dtag = row[constants.PANDDA_INSPECT_DTAG]
@@ -1062,6 +1063,8 @@ class CLI:
                 annotations.append(annotation)
 
         logger.info(f"Got {len(keys)} new high scoring non hit annotations!")
+
+        logger.info(f"Length of low scoring hit inspect table: {len(high_scoring_non_hit_inspect_table)}")
 
 
         low_scoring_hit_dir = output_dir / constants.LOW_SCORING_HIT_DATASET_DIR
