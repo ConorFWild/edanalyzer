@@ -1054,6 +1054,7 @@ class CLI:
             dtag = row[constants.PANDDA_INSPECT_DTAG]
             event_idx = int(row[constants.PANDDA_INSPECT_EVENT_IDX])
             key = PanDDAEventKey(dtag=dtag, event_idx=event_idx)
+            print(row[constants.PANDDA_INSPECT_VIEWED])
             if row[constants.PANDDA_INSPECT_VIEWED] == "True":
                 if row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
                     annotation = PanDDAEventAnnotation(annotation=True)
