@@ -984,6 +984,14 @@ class CLI:
 
         train_pandda(options, dataset, annotations)
 
+    def annotate_test_dataset(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+        dataset = PanDDAEventDataset.load(Path(options.working_dir) / constants.TRAIN_SET_FILE)
+        annotations = PanDDAEventAnnotations.load(Path(options.working_dir) / constants.TRAIN_SET_ANNOTATION_FILE)
+
+        annotate_test_set(options, dataset, annotations)
+
+
     def test_pandda(self, options_json_path: str = "./options.json"):
         ...
 
