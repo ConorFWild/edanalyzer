@@ -856,7 +856,8 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
     # Get the dataloader
     train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=False, num_workers=12)
 
-    model = squeezenet1_1(num_classes=2, num_input=2)
+    # model = squeezenet1_1(num_classes=2, num_input=2)
+    model = resnet18(num_classes=2, num_input=2)
     model.load_state_dict(torch.load(Path(options.working_dir) / constants.MODEL_FILE))
     model.eval()
 
