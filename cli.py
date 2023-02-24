@@ -896,7 +896,7 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
     #     }
     # )
 
-    with open(Path(options.working_dir) / "train_records.pickle", "wb") as f:
+    with open(Path(options.working_dir) / "annotate_records.pickle", "wb") as f:
         pickle.dump(records, f)
 
     # Sort by model annotation
