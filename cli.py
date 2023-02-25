@@ -855,7 +855,7 @@ def make_fake_pandda(dataset: PanDDAEventDataset, path: Path):
         make_fake_processed_dataset_dir(event, fake_processed_datasets_dir)
 
 
-def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations: PanDDAEventAnnotations):
+def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations: PanDDAEventAnnotations, updated_annotations: PanDDAUpdatedEventAnnotations):
     records_file = Path(options.working_dir) / "train_records.pickle"
 
     if not records_file.exists():
@@ -863,6 +863,7 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
         dataset_torch = PanDDAEventDatasetTorch(
             dataset,
             annotations,
+            updated_annotations=updated_annotations,
             transform_image=get_image_event_map_and_raw_from_event,
             transform_annotation=get_annotation_from_event_annotation
         )
@@ -1071,8 +1072,6 @@ class CLI:
         low_scoring_hit_inspect_table = pd.read_csv(low_scoring_hit_inspect_table_path)
 
         logger.info(f"Length of low scoring hit inspect table: {len(low_scoring_hit_inspect_table)}")
-
-
 
         for idx, row in low_scoring_hit_inspect_table.iterrows():
             dtag = row[constants.PANDDA_INSPECT_DTAG]
