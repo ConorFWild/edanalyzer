@@ -26,7 +26,9 @@ DIAMOND_MODEL_BUILDING_DIR_NEW = "model_building"
 DIAMOND_MODEL_BUILDING_DIR_OLD = "initial_model"
 PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE = "pandda_updated_event_annotations.json"
 
-MODEL_FILE = "model_state_dict_zero.pt"
+# MODEL_FILE = "model_state_dict_zero.pt"
+MODEL_FILE = "model_state_dict_zero_z.pt"
+
 
 PANDDA_ANALYSIS_DIR = "analyses"
 PANDDA_INSPECT_TABLE_FILE = "pandda_inspect_events.csv"
