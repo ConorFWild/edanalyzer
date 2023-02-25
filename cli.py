@@ -1031,8 +1031,9 @@ class CLI:
         options = Options.load(options_json_path)
         dataset = PanDDAEventDataset.load(Path(options.working_dir) / constants.TRAIN_SET_FILE)
         annotations = PanDDAEventAnnotations.load(Path(options.working_dir) / constants.TRAIN_SET_ANNOTATION_FILE)
+        updated_annotations = PanDDAUpdatedEventAnnotations.load(Path(options.working_dir) / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
 
-        annotate_test_set(options, dataset, annotations)
+        annotate_test_set(options, dataset, annotations, updated_annotations)
 
     def parse_updated_annotations(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
