@@ -1043,6 +1043,8 @@ class CLI:
         else:
             pandda_updated_annotations = PanDDAUpdatedEventAnnotations(keys=[], annotations=[])
 
+        logger.info(f"Currently {len(pandda_updated_annotations.keys)} updated annotations")
+
         keys = []
         annotations = []
 
@@ -1092,6 +1094,8 @@ class CLI:
             if key not in pandda_updated_annotations.keys:
                 pandda_updated_annotations.keys.append(key)
                 pandda_updated_annotations.annotations.append(annotation)
+
+        logger.info(f"Now {len(pandda_updated_annotations.keys)} updated annotations!")
 
         pandda_updated_annotations.save(output_dir / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
         ...
