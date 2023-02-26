@@ -361,7 +361,7 @@ class PanDDAEventDatasetTorch(Dataset):
         key = (event.dtag, event.event_idx)
 
         if key in self.updated_annotations:
-            logger.debug(f"Using updated annotation! Was {self.annotations.annotations[idx]} now {self.annotations[key]}!")
+            logger.debug(f"Using updated annotation! Was {self.annotations.annotations[idx]} now {self.updated_annotations[key]}!")
             annotation = self.updated_annotations[key]
         else:
             annotation = self.annotations.annotations[idx]
