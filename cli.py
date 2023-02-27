@@ -1,6 +1,7 @@
 import os
 import pickle
 import re
+import shutil
 
 import fire
 from pathlib import Path
@@ -1111,7 +1112,97 @@ class CLI:
     def generate_reannotate_table(self):
         ...
 
-    def reannotate(self):
+    def reannotate_pandda(self, pandda_dir, options_json_path: str = "./options.json", ):
+
+        options = Options.load(options_json_path)
+
+        records_file = Path(options.working_dir) / "annotate_pandda_records.pickle"
+
+        pandda_dir = Path(pandda_dir)
+
+        # Get the event table
+
+        # Make a copy of the event table
+        analyse_table_path = pandda_dir / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_EVENT_TABLE_PATH
+        inspect_table_path = pandda_dir / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
+
+        deprecated_analyse_table_path = pandda_dir / constants.PANDDA_ANALYSIS_DIR / "pandda_analyse_events_dep.csv"
+        deprecated_inspect_table_path = pandda_dir / constants.PANDDA_ANALYSIS_DIR / "pandda_inspect_events_dep.csv"
+
+        if not deprecated_analyse_table_path.exists():
+            shutil.copyfile(analyse_table_path, deprecated_inspect_table_path)
+
+        if not deprecated_inspect_table_path.exists():
+            shutil.copyfile(inspect_table_path, deprecated_inspect_table_path)
+
+        # Parse the event table
+        table = pd.read_csv(analyse_table_path)
+
+        if not records_file.exists():
+            logger.info(f"Performing annotation!")
+
+            # Get the device
+            if torch.cuda.is_available():
+                logger.info(f"Using cuda!")
+                dev = "cuda:0"
+            else:
+                logger.info(f"Using cpu!")
+                dev = "cpu"
+
+            # Load the model
+            model = resnet18(num_classes=2, num_input=3)
+            model.load_state_dict(torch.load(Path(options.working_dir) / constants.MODEL_FILE))
+
+            # Add model to device
+            model.to(dev)
+            model.eval()
+
+            # Iterate the event table, rescoring
+            records = {}
+            logger.info(f"Annotating {len(table)} events!")
+            for idx, row in table.iterrows():
+                # Get an event model
+                event = parse_inspect_table_row(
+                    row,
+                    pandda_dir,
+                    pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR,
+                    "",
+                )
+
+                # Load the image
+                image = get_image_event_map_and_raw_from_event(event)
+
+                # Move tensors to device
+                image_c = image.to(dev)
+                # Run model
+                model_annotation = model(image_c)
+
+                # Track score
+                model_annotation_np = model_annotation.to(torch.device("cpu")).detach().numpy()
+
+                #
+                records[idx] = {"event": event, "model_annotation": model_annotation_np[1]}
+                logger.debug(f"{event.dtag} {event.event_idx} {model_annotation[1]}")
+
+            # Cache scores
+            with open(records_file, "wb") as f:
+                pickle.dump(records, f)
+
+        # Load scores if they are there
+        else:
+            logger.info(f"Loading pre-analysed records!")
+            with open(records_file, "rb") as f:
+                records = pickle.load(f)
+
+        # Sort by score
+        table["score"] = [record["model_annotation"] for record in records.values()]
+        sorted_table = table.sort_values(by="score", ascending=False)
+        logger.info(f"Sorted events by CNN score!")
+        print(sorted_table)
+
+        # Save new table
+        sorted_table.to_csv(analyse_table_path)
+
         ...
 
     def parse_reannotations(self):
