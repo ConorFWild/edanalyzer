@@ -1173,7 +1173,7 @@ class CLI:
                 image, loaded = get_image_event_map_and_raw_from_event(event)
 
                 # Get tensor
-                image_t = torch.from_numpy(image)
+                image_t = torch.unsqueeze(torch.from_numpy(image), 0)
 
                 # Move tensors to device
                 image_c = image_t.to(dev)
