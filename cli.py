@@ -222,11 +222,12 @@ def get_structure_ligands(pdb_path):
 
                 ligand_centroid = get_ligand_centroid(ligand)
 
-                smiles = parse_ligand(
-                    structure,
-                    chain,
-                    ligand,
-                )
+                # smiles = parse_ligand(
+                #     structure,
+                #     chain,
+                #     ligand,
+                # )
+                smiles = ""
                 logger.debug(f"Ligand smiles: {smiles}")
                 logger.debug(f"Num atoms: {num_atoms}")
                 logger.debug(f"Centroid: {ligand_centroid}")
