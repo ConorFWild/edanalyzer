@@ -1172,6 +1172,9 @@ class CLI:
                 # Load the image
                 image, loaded = get_image_event_map_and_raw_from_event(event)
 
+                # Get tensor
+                image_t = torch.from_numpy(image)
+
                 # Move tensors to device
                 image_c = image.to(dev)
                 # Run model
