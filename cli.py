@@ -1170,7 +1170,7 @@ class CLI:
                 )
 
                 # Load the image
-                image = get_image_event_map_and_raw_from_event(event)
+                image, loaded = get_image_event_map_and_raw_from_event(event)
 
                 # Move tensors to device
                 image_c = image.to(dev)
