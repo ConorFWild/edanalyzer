@@ -228,9 +228,9 @@ def get_structure_ligands(pdb_path):
                 #     ligand,
                 # )
                 smiles = ""
-                logger.debug(f"Ligand smiles: {smiles}")
-                logger.debug(f"Num atoms: {num_atoms}")
-                logger.debug(f"Centroid: {ligand_centroid}")
+                # logger.debug(f"Ligand smiles: {smiles}")
+                # logger.debug(f"Num atoms: {num_atoms}")
+                # logger.debug(f"Centroid: {ligand_centroid}")
                 lig = Ligand(
                     id=id,
                     smiles=smiles,
