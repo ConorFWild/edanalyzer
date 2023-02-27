@@ -729,12 +729,18 @@ class EventTableRecord:
     exclude_from_characterisation: bool
 
     @staticmethod
-    def from_event(event: PanDDAEvent):
+    def from_event(event: PanDDAEvent, site_idx =None):
         matches = re.findall(
             "_1-BDC_([0-9.]+)_map\.native\.ccp4",
             event.event_map
         )
         bdc = float(matches[0])
+
+        if site_idx:
+            _site_idx = site_idx
+        else:
+            _site_idx = 0
+
 
         return EventTableRecord(
             dtag=event.dtag,
@@ -745,7 +751,7 @@ class EventTableRecord:
             global_correlation_to_mean_map=0,
             local_correlation_to_average_map=0,
             local_correlation_to_mean_map=0,
-            site_idx=0,
+            site_idx=_site_idx,
             x=event.x,
             y=event.y,
             z=event.z,
@@ -791,6 +797,7 @@ class EventTable:
 def make_fake_event_table(dataset: PanDDAEventDataset, path: Path):
     event_table = EventTable.from_pandda_event_dataset(dataset)
     event_table.save(path)
+    return event_table
 
 
 @dataclasses.dataclass()
@@ -815,9 +822,18 @@ class SiteTable:
             yield record
 
     @staticmethod
-    def from_pandda_event_dataset(pandda_event_dataset: PanDDAEventDataset):
+    def from_pandda_event_dataset(pandda_event_dataset: PanDDAEventDataset, event_table: EventTable):
 
-        records = [SiteTableRecord(0, (0.0, 0.0, 0.0))]
+        site_ids = []
+        for _record in event_table.records:
+            if _record.site_idx in site_ids:
+                continue
+            else:
+                site_ids.append(_record.site_idx)
+
+        records = []
+        for site_id in site_ids:
+            records.append(SiteTableRecord(site_id, (0.0, 0.0, 0.0)))
 
         return SiteTable(records)
 
@@ -832,8 +848,8 @@ class SiteTable:
         table.to_csv(str(path))
 
 
-def make_fake_site_table(dataset: PanDDAEventDataset, path: Path):
-    site_table = SiteTable.from_pandda_event_dataset(dataset)
+def make_fake_site_table(dataset: PanDDAEventDataset, path: Path, event_table):
+    site_table = SiteTable.from_pandda_event_dataset(dataset, event_table)
     site_table.save(path)
 
 
@@ -848,8 +864,8 @@ def make_fake_pandda(dataset: PanDDAEventDataset, path: Path):
     try_make_dir(fake_analyses_dir)
     try_make_dir(fake_processed_datasets_dir)
 
-    make_fake_event_table(dataset, fake_event_table_path)
-    make_fake_site_table(dataset, fake_site_table_path)
+    event_table = make_fake_event_table(dataset, fake_event_table_path)
+    make_fake_site_table(dataset, fake_site_table_path, event_table)
 
     fake_processed_dataset_dirs = {}
     for event in dataset.pandda_events:
@@ -874,7 +890,7 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
         train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=False, num_workers=12)
 
         # model = squeezenet1_1(num_classes=2, num_input=2)
-        model = resnet18(num_classes=2, num_input=3)
+        model = resnet18(num_classes=2, num_input=4)
         model.load_state_dict(torch.load(Path(options.working_dir) / constants.MODEL_FILE))
         model.eval()
 
