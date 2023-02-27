@@ -1176,7 +1176,7 @@ class CLI:
                 image_t = torch.from_numpy(image)
 
                 # Move tensors to device
-                image_c = image.to(dev)
+                image_c = image_t.to(dev)
                 # Run model
                 model_annotation = model(image_c)
 
