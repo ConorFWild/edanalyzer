@@ -1185,7 +1185,7 @@ class CLI:
 
                 #
                 records[idx] = {"event": event, "model_annotation": model_annotation_np[0][1]}
-                logger.debug(f"{event.dtag} {event.event_idx} {model_annotation[0][1]}")
+                logger.debug(f"{idx} / {len(table)} : {event.dtag} {event.event_idx} {model_annotation[0][1]}")
 
             # Cache scores
             with open(records_file, "wb") as f:
