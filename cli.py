@@ -1136,7 +1136,7 @@ class CLI:
             shutil.copyfile(inspect_table_path, deprecated_inspect_table_path)
 
         # Parse the event table
-        table = pd.read_csv(analyse_table_path)
+        table = pd.read_csv(inspect_table_path)
 
         if not records_file.exists():
             logger.info(f"Performing annotation!")
