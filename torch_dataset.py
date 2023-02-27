@@ -302,7 +302,7 @@ def get_model_map(event: PanDDAEvent, xmap_event):
     pandda_input_pdb = Path(
         event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
         dtag=event.dtag)
-    structure = gemmi.read_structure(pandda_input_pdb)
+    structure = gemmi.read_structure(str(pandda_input_pdb))
     new_xmap = gemmi.FloatGrid(xmap_event.nu, xmap_event.nv, xmap_event.nw)
     new_xmap.spacegroup = xmap_event.spacegroup
     new_xmap.set_unit_cell(xmap_event.unit_cell)
