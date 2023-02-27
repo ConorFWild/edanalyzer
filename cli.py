@@ -831,6 +831,7 @@ class SiteTable:
             else:
                 site_ids.append(_record.site_idx)
 
+
         records = []
         for site_id in site_ids:
             records.append(SiteTableRecord(site_id, (0.0, 0.0, 0.0)))
