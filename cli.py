@@ -1184,7 +1184,7 @@ class CLI:
                 model_annotation_np = model_annotation.to(torch.device("cpu")).detach().numpy()
 
                 #
-                records[idx] = {"event": event, "model_annotation": model_annotation_np[1]}
+                records[idx] = {"event": event, "model_annotation": model_annotation_np[0][1]}
                 logger.debug(f"{event.dtag} {event.event_idx} {model_annotation[1]}")
 
             # Cache scores
