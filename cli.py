@@ -583,7 +583,7 @@ def train_pandda(
     train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=True, num_workers=12)
 
     # model = squeezenet1_1(num_classes=2, num_input=2)
-    model = resnet18(num_classes=2, num_input=3)
+    model = resnet18(num_classes=2, num_input=4)
     model = model.train()
 
     # Define loss function

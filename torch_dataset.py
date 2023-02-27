@@ -298,6 +298,27 @@ def get_image_event_map_and_raw_from_event(event: PanDDAEvent):
     return np.stack([image_event, image_raw, image_zmap], axis=0), True
 
 
+def get_model_map(event: PanDDAEvent, xmap_event):
+    pandda_input_pdb = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
+        dtag=event.dtag)
+    structure = gemmi.read_structure(pandda_input_pdb)
+    new_xmap = gemmi.FloatGrid(xmap_event.nu, xmap_event.nv, xmap_event.nw)
+    new_xmap.spacegroup = xmap_event.spacegroup
+    new_xmap.set_unit_cell(xmap_event.unit_cell)
+    for model in structure:
+        for chain in model:
+            for residue in chain.get_polymer():
+                for atom in residue:
+                    new_xmap.set_points_around(
+                        atom.pos,
+                        radius=1,
+                        value=1.0,
+                    )
+
+    return new_xmap
+
+
 def get_image_event_map_and_raw_from_event_augmented(event: PanDDAEvent):
     # logger.debug(f"Loading: {event.dtag}")
     sample_transform, sample_array = get_sample_transform_from_event_augmented(
@@ -320,11 +341,15 @@ def get_image_event_map_and_raw_from_event_augmented(event: PanDDAEvent):
         xmap_zmap = get_zmap_from_event(event)
         image_zmap = sample_xmap(xmap_zmap, sample_transform, sample_array_zmap)
 
+        sample_array_model = np.copy(sample_array)
+        model_map = get_model_map(event, xmap_event)
+        image_model = sample_xmap(model_map, sample_transform, sample_array_model)
+
     except Exception as e:
         print(e)
-        return np.stack([sample_array, sample_array, sample_array], axis=0), False
+        return np.stack([sample_array, sample_array, sample_array, sample_array], axis=0), False
 
-    return np.stack([image_event, image_raw, image_zmap], axis=0), True
+    return np.stack([image_event, image_raw, image_zmap, image_model], axis=0), True
 
 
 def get_annotation_from_event_annotation(annotation: PanDDAEventAnnotation):
@@ -361,7 +386,8 @@ class PanDDAEventDatasetTorch(Dataset):
         key = (event.dtag, event.event_idx)
 
         if key in self.updated_annotations:
-            logger.debug(f"Using updated annotation! Was {self.annotations.annotations[idx]} now {self.updated_annotations[key]}!")
+            logger.debug(
+                f"Using updated annotation! Was {self.annotations.annotations[idx]} now {self.updated_annotations[key]}!")
             annotation = self.updated_annotations[key]
         else:
             annotation = self.annotations.annotations[idx]
