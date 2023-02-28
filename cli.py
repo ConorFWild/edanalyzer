@@ -944,16 +944,15 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
     # Get highest scoring non-hits
     high_scoring_non_hits = []
     for sorted_idx in sorted_idxs:
-        if len(high_scoring_non_hits) > 300:
+        if len(high_scoring_non_hits) > 1500:
             continue
         if records[sorted_idx]["annotation"] == 0.0:
             high_scoring_non_hits.append(sorted_idx)
 
-
     # Get the lowest scoring hits
     low_scoring_hits = []
     for sorted_idx in reversed(sorted_idxs):
-        if len(low_scoring_hits) > 300:
+        if len(low_scoring_hits) > 1500:
             continue
         if records[sorted_idx]["annotation"] == 1.0:
             low_scoring_hits.append(sorted_idx)
