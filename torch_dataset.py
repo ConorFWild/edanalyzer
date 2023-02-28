@@ -290,12 +290,15 @@ def get_image_event_map_and_raw_from_event(event: PanDDAEvent):
         xmap_zmap = get_zmap_from_event(event)
         image_zmap = sample_xmap(xmap_zmap, sample_transform, sample_array_zmap)
 
+        sample_array_model = np.copy(sample_array)
+        model_map = get_model_map(event, xmap_event)
+        image_model = sample_xmap(model_map, sample_transform, sample_array_model)
 
     except Exception as e:
         print(e)
-        return np.stack([sample_array, sample_array, sample_array], axis=0), False
+        return np.stack([sample_array, sample_array, sample_array, sample_array], axis=0), False
 
-    return np.stack([image_event, image_raw, image_zmap], axis=0), True
+    return np.stack([image_event, image_raw, image_zmap, image_model], axis=0), True
 
 
 def get_model_map(event: PanDDAEvent, xmap_event):
