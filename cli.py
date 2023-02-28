@@ -778,9 +778,10 @@ class EventTable:
     @staticmethod
     def from_pandda_event_dataset(pandda_event_dataset: PanDDAEventDataset):
         records = []
-        for event in pandda_event_dataset.pandda_events:
-            event_record = EventTableRecord.from_event(event)
+        for j, event in enumerate(pandda_event_dataset.pandda_events):
+            event_record = EventTableRecord.from_event(event, int(j/100))
             records.append(event_record)
+
 
         return EventTable(records)
 
