@@ -569,6 +569,7 @@ def train_pandda(
         dataset: PanDDAEventDataset,
         annotations: PanDDAEventAnnotations,
         updated_annotations: PanDDAUpdatedEventAnnotations,
+        update=False
 ):
     num_epochs = 100
     logger.info(f"Training on {len(dataset.pandda_events)} events!")
@@ -588,6 +589,8 @@ def train_pandda(
 
     # model = squeezenet1_1(num_classes=2, num_input=2)
     model = resnet18(num_classes=2, num_input=4)
+    if update:
+        model.load_state_dict(torch.load(Path(options.working_dir) / constants.MODEL_FILE))
     model = model.train()
 
     # Define loss function
@@ -1268,7 +1271,7 @@ class CLI:
     def finetune(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
         dataset = PanDDAEventDataset.load(Path(options.working_dir), name=constants.FINETUNE_TRAIN_EVENTS_FILE)
-        annotations = PanDDAEventAnnotations.load(Path(options.working_dir) / constants.TRAIN_SET_ANNOTATION_FILE)
+        annotations = PanDDAEventAnnotations.load(Path(options.working_dir) / constants.FINETUNE_TRAIN_SET_ANNOTATION_FILE)
         updated_annotations = PanDDAUpdatedEventAnnotations.load(
             Path(options.working_dir) / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
         train_pandda(options, dataset, annotations, updated_annotations, update=True)
