@@ -1244,6 +1244,8 @@ class CLI:
             events += finetune_dataset_events
             logger.info(f"Got {len(finetune_dataset_events)} events from {finetune_pandda_and_source_path.pandda}")
 
+        logger.info(f"Got {len(events)} annotated events!")
+
         pandda_dataset = PanDDAEventDataset(pandda_events=events)
         pandda_dataset.save(Path(options.working_dir), constants.FINETUNE_TRAIN_EVENTS_FILE)
 
@@ -1254,6 +1256,10 @@ class CLI:
             else:
                 pandda_dataset_annotations.append(PanDDAEventAnnotation(annotation=False))
 
+        hits = [a for a in pandda_dataset_annotations if a.annotation]
+        non_hits = [a for a in pandda_dataset_annotations if not a.annotation]
+
+        logger.info(f"Got {len(hits)} hits and {len(non_hits)} non-hits!")
 
         PanDDAEventAnnotations(annotations=pandda_dataset_annotations).save(
             Path(options.working_dir) / constants.FINETUNE_TRAIN_SET_ANNOTATION_FILE)
