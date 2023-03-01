@@ -1247,13 +1247,25 @@ class CLI:
         pandda_dataset = PanDDAEventDataset(pandda_events=events)
         pandda_dataset.save(Path(options.working_dir), constants.FINETUNE_TRAIN_EVENTS_FILE)
 
+        pandda_dataset_annotations = []
+        for event in pandda_dataset.pandda_events:
+            if event.hit:
+                pandda_dataset_annotations.append(PanDDAEventAnnotation(annotation=True))
+            else:
+                pandda_dataset_annotations.append(PanDDAEventAnnotation(annotation=False))
+
+
+        PanDDAEventAnnotations(annotations=pandda_dataset_annotations).save(
+            Path(options.working_dir) / constants.FINETUNE_TRAIN_SET_ANNOTATION_FILE)
+
+
     def finetune(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
         dataset = PanDDAEventDataset.load(Path(options.working_dir), name=constants.FINETUNE_TRAIN_EVENTS_FILE)
         annotations = PanDDAEventAnnotations.load(Path(options.working_dir) / constants.TRAIN_SET_ANNOTATION_FILE)
         updated_annotations = PanDDAUpdatedEventAnnotations.load(
             Path(options.working_dir) / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
-        train_pandda(options, dataset, annotations, updated_annotations)
+        train_pandda(options, dataset, annotations, updated_annotations, update=True)
 
     def parse_reannotations(self):
         ...
