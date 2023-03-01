@@ -77,12 +77,12 @@ class PanDDAEventModelAnnotations(BaseModel):
 class PanDDAEventDataset(BaseModel):
     pandda_events: list[PanDDAEvent]
 
-    def save(self, path, name:str="default_events.json"):
+    def save(self, path, name:str="pandda_dataset.json"):
         save_model(path / name , self)
 
     @classmethod
-    def load(cls, path):
-        return load_model(path , cls)
+    def load(cls, path, name: str = "pandda_dataset.json"):
+        return load_model(path / name, cls)
 
     def __getitem__(self, item):
         return self.pandda_events[item]
