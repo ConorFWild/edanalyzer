@@ -598,6 +598,8 @@ def train_pandda(
 
     # model = squeezenet1_1(num_classes=2, num_input=2)
     model = resnet18(num_classes=2, num_input=4)
+    model.to(dev)
+
     if update:
         model.load_state_dict(torch.load(Path(options.working_dir) / constants.MODEL_FILE, map_location=dev),
                               )
@@ -615,7 +617,6 @@ def train_pandda(
     running_loss = 0
 
 
-    model.to(dev)
     # Trainloop
 
     running_loss = []
