@@ -572,6 +572,14 @@ def train_pandda(
         updated_annotations: PanDDAUpdatedEventAnnotations,
         update=False
 ):
+
+    if torch.cuda.is_available():
+        logger.info(f"Using cuda!")
+        dev = "cuda:0"
+    else:
+        logger.info(f"Using cpu!")
+        dev = "cpu"
+
     num_epochs = 100
     logger.info(f"Training on {len(dataset.pandda_events)} events!")
 
@@ -591,7 +599,8 @@ def train_pandda(
     # model = squeezenet1_1(num_classes=2, num_input=2)
     model = resnet18(num_classes=2, num_input=4)
     if update:
-        model.load_state_dict(torch.load(Path(options.working_dir) / constants.MODEL_FILE))
+        model.load_state_dict(torch.load(Path(options.working_dir) / constants.MODEL_FILE),
+                              map_location=dev)
     model = model.train()
 
     # Define loss function
@@ -605,12 +614,6 @@ def train_pandda(
 
     running_loss = 0
 
-    if torch.cuda.is_available():
-        logger.info(f"Using cuda!")
-        dev = "cuda:0"
-    else:
-        logger.info(f"Using cpu!")
-        dev = "cpu"
 
     model.to(dev)
     # Trainloop
