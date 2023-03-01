@@ -1248,6 +1248,7 @@ class CLI:
         pandda_dataset.save(Path(options.working_dir), "finetune_train_events.json")
 
     def finetune(self):
+        ...
 
     def parse_reannotations(self):
         ...
