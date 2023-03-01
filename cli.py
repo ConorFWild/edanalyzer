@@ -28,6 +28,7 @@ import torch.optim as optim
 from torch_network import squeezenet1_1, resnet18
 import download_dataset
 import dataclasses
+import time
 
 def download_dataset(options: Options):
     data_dir = Path(options.working_dir) / constants.DATA_DIR
@@ -630,7 +631,10 @@ def train_pandda(
             optimizer.zero_grad()
 
             # forward + backward + optimize
+            begin_annotate = time.time()
             model_annotation = model(image_c)
+            finish_annotate = time.time()
+            logger.debug(f"Annotated 12 datasets in {finish_annotate-begin_annotate}")
             # print(outputs.to("cpu").detach().numpy())
             loss = criterion(model_annotation, annotation_c)
             loss.backward()
