@@ -77,8 +77,8 @@ class PanDDAEventModelAnnotations(BaseModel):
 class PanDDAEventDataset(BaseModel):
     pandda_events: list[PanDDAEvent]
 
-    def save(self, path):
-        save_model(path , self)
+    def save(self, path, name:str="default_events.json"):
+        save_model(path / name , self)
 
     @classmethod
     def load(cls, path):
@@ -118,8 +118,13 @@ class StructureReflectionsDataset(BaseModel):
         save_model(path / constants.DATASET_FILE, self)
 
 
+class FinetuneDataset(BaseModel):
+    pandda: str
+    source: str
+
 class Options(BaseModel):
     working_dir: str
+    finetune_datasets_train: list[FinetuneDataset]
 
     @classmethod
     def load(cls, path):

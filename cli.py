@@ -338,6 +338,7 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
     x = row[constants.PANDDA_INSPECT_X]
     y = row[constants.PANDDA_INSPECT_Y]
     z = row[constants.PANDDA_INSPECT_Z]
+    viewed = row[constants.PANDDA_INSPECT_VIEWED]
 
     hit_confidence = row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
     if hit_confidence == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
@@ -353,6 +354,9 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         bdc=bdc
     )
     if not event_map_path.exists():
+        return None
+
+    if not viewed:
         return None
 
     inspect_model_path = inspect_model_dir / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
@@ -1225,6 +1229,25 @@ class CLI:
         sorted_table.to_csv(analyse_table_path)
 
         ...
+
+    def parse_finetune_dataset(self, options_json_path: str = "./options.json"):
+        # Get options
+        options = Options.load(options_json_path)
+
+        # Get events for each finettune dataset path
+        events = []
+        for finetune_pandda_and_source_path in options.finetune_datasets_train:
+            finetune_dataset_events = parse_potential_pandda_dir(
+                Path(finetune_pandda_and_source_path.pandda),
+                Path(finetune_pandda_and_source_path.source)
+            )
+            events += finetune_dataset_events
+            logger.info(f"Got {len(finetune_dataset_events)} events from {finetune_pandda_and_source_path.pandda}")
+
+        pandda_dataset = PanDDAEventDataset(pandda_events=events)
+        pandda_dataset.save(Path(options.working_dir), "finetune_train_events.json")
+
+    def finetune(self):
 
     def parse_reannotations(self):
         ...
