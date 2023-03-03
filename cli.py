@@ -890,8 +890,13 @@ def make_fake_pandda(dataset: PanDDAEventDataset, path: Path):
         make_fake_processed_dataset_dir(event, fake_processed_datasets_dir)
 
 
-def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations: PanDDAEventAnnotations, updated_annotations: PanDDAUpdatedEventAnnotations):
-    records_file = Path(options.working_dir) / "train_records.pickle"
+def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations: PanDDAEventAnnotations, updated_annotations: PanDDAUpdatedEventAnnotations, test_annotation_dir: Path):
+
+    if not test_annotation_dir.exists():
+        os.mkdir(test_annotation_dir)
+
+    records_file = test_annotation_dir / "train_records.pickle"
+
 
     if not records_file.exists():
         # Get the dataset
@@ -986,7 +991,7 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
             dtag_event_ids.append(key)
     high_scoring_non_hit_dataset = PanDDAEventDataset(pandda_events=pandda_events)
     make_fake_pandda(high_scoring_non_hit_dataset,
-                     Path(options.working_dir) / constants.HIGH_SCORING_NON_HIT_DATASET_DIR)
+                     test_annotation_dir / constants.HIGH_SCORING_NON_HIT_DATASET_DIR)
 
     # Make fake PanDDA and inspect table for low scoring hits
     pandda_events = []
@@ -1002,7 +1007,7 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
 
     low_scoring_hit_dataset = PanDDAEventDataset(pandda_events=pandda_events)
     make_fake_pandda(low_scoring_hit_dataset,
-                     Path(options.working_dir) / constants.LOW_SCORING_HIT_DATASET_DIR)
+                     test_annotation_dir / constants.LOW_SCORING_HIT_DATASET_DIR)
 
 
 # def
@@ -1061,13 +1066,22 @@ class CLI:
         updated_annotations = PanDDAUpdatedEventAnnotations.load(Path(options.working_dir) / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
         train_pandda(options, dataset, annotations, updated_annotations)
 
-    def annotate_test_dataset(self, options_json_path: str = "./options.json"):
+    def annotate_train_dataset(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
         dataset = PanDDAEventDataset.load(Path(options.working_dir) / constants.TRAIN_SET_FILE)
         annotations = PanDDAEventAnnotations.load(Path(options.working_dir) / constants.TRAIN_SET_ANNOTATION_FILE)
         updated_annotations = PanDDAUpdatedEventAnnotations.load(Path(options.working_dir) / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
 
-        annotate_test_set(options, dataset, annotations, updated_annotations)
+        annotate_test_set(options, dataset, annotations, updated_annotations, )
+
+    def annotate_test_dataset(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+        dataset = PanDDAEventDataset.load(Path(options.working_dir) / constants.TEST_SET_FILE)
+        annotations = PanDDAEventAnnotations.load(Path(options.working_dir) / constants.TEST_SET_ANNOTATION_FILE)
+        updated_annotations = PanDDAUpdatedEventAnnotations.load(Path(options.working_dir) / constants.PANDDA_UPDATED_TEST_EVENT_ANNOTATIONS_FILE)
+        test_annotations_dir = Path(options.working_dir) / constants.PANDDA_TEST_ANNOTATION_DIR
+
+        annotate_test_set(options, dataset, annotations, updated_annotations, test_annotations_dir)
 
     def parse_updated_annotations(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)

@@ -26,6 +26,8 @@ def sample_xmap(xmap, transform, sample_array):
     return sample_array
 
 
+
+
 def annotate_data_randomly(data: StructureReflectionsData, p: float):
     rng = default_rng()
     val = rng.random_sample()
