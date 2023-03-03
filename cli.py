@@ -1076,9 +1076,13 @@ class CLI:
 
     def annotate_test_dataset(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
-        dataset = PanDDAEventDataset.load(Path(options.working_dir) / constants.TEST_SET_FILE)
+        dataset = PanDDAEventDataset.load(Path(options.working_dir), name=constants.TEST_SET_FILE)
         annotations = PanDDAEventAnnotations.load(Path(options.working_dir) / constants.TEST_SET_ANNOTATION_FILE)
-        updated_annotations = PanDDAUpdatedEventAnnotations.load(Path(options.working_dir) / constants.PANDDA_UPDATED_TEST_EVENT_ANNOTATIONS_FILE)
+        updated_event_annotation_path = Path(options.working_dir) / constants.PANDDA_UPDATED_TEST_EVENT_ANNOTATIONS_FILE
+        if updated_event_annotation_path.exists():
+            updated_annotations = PanDDAUpdatedEventAnnotations.load(updated_event_annotation_path)
+        else:
+            updated_annotations = PanDDAUpdatedEventAnnotations(keys=[], annotations=[])
         test_annotations_dir = Path(options.working_dir) / constants.PANDDA_TEST_ANNOTATION_DIR
 
         annotate_test_set(options, dataset, annotations, updated_annotations, test_annotations_dir)
