@@ -519,6 +519,8 @@ def populate_from_diamond(session):
             if len(experiment_datasets) == 0:
                 logger.info(f"No datasets for experiment! Skipping!")
                 continue
+            else:
+                logger.info(f"Got {len(experiment_datasets)}!")
             experiments[str(experiment_dir)] = experiment
             experiment.datasets = list(experiment_datasets.values())
 
