@@ -547,6 +547,7 @@ def populate_from_diamond(session):
                 )
                 if not pandda_events:
                     logger.info(f"No PanDDA events! Skipping!")
+                    continue
 
                 for event in pandda_events:
                     event.dataset = experiment_datasets[event.dtag]
