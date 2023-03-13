@@ -419,9 +419,11 @@ def parse_pandda_inspect_table(
         if possible_event:
             events.append(possible_event)
 
-    events_with_models = len([event for event in events if event.ligand is not None])
+    # events_with_models = len([event for event in events if event.ligand is not None])
+    high_confidence_events = len([event for event in events if event.hit_confidence not in ["Low", "low"]])
 
-    if events_with_models > 0:
+
+    if high_confidence_events > 0:
         return events
     else:
         logger.warning(f"No events with models! Skipping!")
