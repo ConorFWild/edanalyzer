@@ -95,10 +95,10 @@ class EventORM(Base):
     dataset_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_DATASET}.id"))
     pandda_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_PANDDA}.id"))
 
-    ligand: Mapped[Optional["LigandORM"]]
-    dataset: Mapped["DatasetORM"]
-    pandda: Mapped["PanDDAORM"]
-    annotations: Mapped["AnnotationORM"] = relationship(back_populates="event")
+    ligand: Mapped[Optional["LigandORM"]] = relationship(back_populates="event")
+    dataset: Mapped["DatasetORM"] = relationship(back_populates="events")
+    pandda: Mapped["PanDDAORM"] = relationship(back_populates="events")
+    annotations: Mapped["AnnotationORM"] = relationship(back_populates="events")
     partitions: Mapped["PartitionORM"] = relationship(
         secondary=event_partition_association_table,
         back_populates="events",
