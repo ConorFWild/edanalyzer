@@ -7,6 +7,7 @@ import gemmi
 import numpy as np
 import pandas as pd
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from sqlalchemy import Column
@@ -19,6 +20,7 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 
 import constants
+from data import PanDDAEventReannotations, PanDDAEventAnnotations, PanDDAEventDataset
 
 
 class Base(DeclarativeBase):
@@ -47,12 +49,11 @@ class PanDDAORM(Base):
 
     path: Mapped[str]
 
-    events: Mapped[List["EventORM"]] = relationship(back_populates="pandda")
+    events: Mapped[List[""]] = relationship(back_populates="pandda")
     datasets: Mapped[List["DatasetORM"]] = relationship(
         secondary=dataset_pandda_association_table,
         back_populates="panddas",
     )
-
 
     system_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_SYSTEM}.id"))
     experiment_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_EXPERIMENT}.id"))
@@ -278,7 +279,6 @@ def get_structure_ligands(pdb_path):
                     )
                     structure_ligands.append(lig)
 
-
     return structure_ligands
 
 
@@ -314,12 +314,14 @@ def get_event_ligand(inspect_model_path, x, y, z, cutoff=5.0):
     else:
         return None
 
+
 def try_open_structure(path):
     try:
         st = gemmi.read_structure(str(path))
         return True
     except:
         return False
+
 
 def try_open_reflections(path):
     try:
@@ -328,12 +330,14 @@ def try_open_reflections(path):
     except:
         return False
 
+
 def try_open_map(path):
     try:
         m = gemmi.read_ccp4_map(str(path))
         return True
     except:
         return False
+
 
 def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, model_building_dir):
     dtag = str(row[constants.PANDDA_INSPECT_DTAG])
@@ -444,7 +448,6 @@ def parse_pandda_inspect_table(
 
     # events_with_models = len([event for event in events if event.ligand is not None])
     high_confidence_events = len([event for event in events if event.hit_confidence not in ["Low", "low"]])
-
 
     if high_confidence_events > 0:
         return events
@@ -603,7 +606,8 @@ def populate_from_diamond(session):
                     pandda = PanDDAORM(
                         path=str(potential_pandda_dir),
                         events=pandda_events,
-                        datasets=[dataset for dataset in experiment_datasets.values() if dataset.dtag in pandda_dataset_dtags],
+                        datasets=[dataset for dataset in experiment_datasets.values() if
+                                  dataset.dtag in pandda_dataset_dtags],
                         system=system,
                         experiment=experiment
                     )
@@ -626,7 +630,6 @@ def populate_from_diamond(session):
                 if event.dtag in system.datasets:
                     event.dataset = system
 
-
     session.add_all([experiment for experiment in experiments.values()])
     session.add_all([system for system in systems.values()])
     session.add_all([pandda for pandda in panddas.values()])
@@ -634,9 +637,51 @@ def populate_from_diamond(session):
     session.commit()
 
 
-def populate_partition_from_json(json_path: Path):
-    ...
+def populate_partition_from_json(
+        session,
+        train_dataset: PanDDAEventDataset,
+                                 test_dataset: PanDDAEventDataset):
 
+    # Get the datasets
+    # datasets_stmt = select(DatasetORM)
+
+    # Get the events
+    events_stmt = select(EventORM).join(EventORM.pandda)
+
+    # Get the train dataset keys
+    train_event_keys = [(event.pandda_dir, event.dtag, event.event_idx, ) for event in train_dataset.pandda_events]
+
+    # Add partitions for train
+    train_partition = PartitionORM(name=constants.TRAIN_PARTITION)
+    for event in session.scalars(events_stmt):
+        event_key = (event.pandda.path, event.dtag, event.event_idx,)
+        if event_key in train_event_keys:
+            train_partition.events.append(event)
+
+    # Get the test dataset keys
+    test_event_keys = [(event.pandda_dir, event.dtag, event.event_idx, ) for event in test_dataset.pandda_events]
+
+    # Add partitions for test
+    test_partition = PartitionORM(name=constants.TEST_PARTITION)
+    for event in session.scalars(events_stmt):
+        event_key = (event.pandda.path, event.dtag, event.event_idx,)
+        if event_key in test_event_keys:
+            test_partition.events.append(event)
+
+    session.add_all([train_partition, test_partition])
+    session.commit()
+
+
+def populate_from_custom_panddas(session, custom_pandda_paths):
+
+    # Get the experiments
+
+    # Get the systems
+
+    # Get the datasets
+
+    for pandda_path in custom_pandda_paths:
+        ...
 
 def initialize_database(engine_path: str):
     engine = create_engine(f"sqlite:///{engine_path}")
