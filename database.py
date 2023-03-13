@@ -110,8 +110,6 @@ class EventORM(Base):
         back_populates="events",
     )
 
-    ...
-
 
 class LigandORM(Base):
     __tablename__ = constants.TABLE_LIGAND
