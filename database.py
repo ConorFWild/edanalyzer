@@ -441,7 +441,7 @@ def parse_potential_pandda_dir(potential_pandda_dir, model_building_dir):
 
 def get_experiment_datasets(experiment: ExperimentORM):
     datasets = {}
-    for directory in Path(experiment.path).glob("*"):
+    for directory in Path(experiment.model_dir).glob("*"):
         if directory.is_dir():
             structure_path = directory / constants.MODEL_BUILDING_STRUCTURE_FILE
             reflections_path = directory / constants.MODEL_BUILDING_REFLECTIONS_FILE
