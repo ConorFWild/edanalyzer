@@ -96,7 +96,7 @@ class EventORM(Base):
     event_map: Mapped[str]
     z_map: Mapped[str]
 
-    ligand_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_LIGAND}.id"))
+    # ligand_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_LIGAND}.id"))
     dataset_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_DATASET}.id"))
     pandda_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_PANDDA}.id"))
 
