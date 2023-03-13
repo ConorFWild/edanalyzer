@@ -509,7 +509,7 @@ def populate_from_diamond(session):
             if not model_building_dir.exists():
                 model_building_dir = analysis_dir / constants.DIAMOND_MODEL_BUILDING_DIR_OLD
                 if not model_building_dir.exists():
-                    logger.debug(f"No model building dir: skipping!")
+                    logger.warning(f"No model building dir: skipping!")
                     continue
 
             experiment = ExperimentORM(
@@ -521,7 +521,7 @@ def populate_from_diamond(session):
 
             experiment_datasets = get_experiment_datasets(experiment)
             if len(experiment_datasets) == 0:
-                logger.info(f"No datasets for experiment! Skipping!")
+                logger.warning(f"No datasets for experiment! Skipping!")
                 continue
             else:
                 logger.info(f"Got {len(experiment_datasets)} datasets!")
