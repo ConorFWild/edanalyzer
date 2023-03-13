@@ -446,10 +446,12 @@ def get_experiment_datasets(experiment: ExperimentORM):
             structure_path = directory / constants.MODEL_BUILDING_STRUCTURE_FILE
             reflections_path = directory / constants.MODEL_BUILDING_REFLECTIONS_FILE
             if not structure_path.exists():
-                structure_path = None
+                # structure_path = None
+                continue
 
             if not reflections_path.exists():
-                reflections_path = None
+                # reflections_path = None
+                continue
 
             dataset = DatasetORM(
                 dtag=directory.name,
