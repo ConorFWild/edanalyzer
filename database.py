@@ -52,18 +52,18 @@ class PanDDAORM(Base):
         secondary=dataset_pandda_association_table,
         back_populates="panddas",
     )
-    system = relationship(back_populates="panddas")
-    experiment = relationship(back_populates="panddas")
+    system: Mapped["SystemORM"] = relationship(back_populates="panddas")
+    experiment: Mapped["ExperimentORM"] = relationship(back_populates="panddas")
 
 
 class DatasetORM(Base):
     __tablename__ = constants.TABLE_DATASET
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    dtag: str
-    path: str
-    structure: str
-    reflections: str
+    dtag: Mapped[str]
+    path: Mapped[str]
+    structure: Mapped[str]
+    reflections: Mapped[str]
 
     system_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_SYSTEM}.id"))
     experiment_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_EXPERIMENT}.id"))
@@ -167,7 +167,7 @@ class PartitionORM(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    name: str
+    name: Mapped[str]
     events: Mapped[List["EventORM"]] = relationship(
         secondary=event_partition_association_table,
         back_populates="partitions",
