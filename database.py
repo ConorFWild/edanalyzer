@@ -420,9 +420,9 @@ def parse_pandda_inspect_table(
     events_with_models = len([event for event in events if event.ligand is not None])
 
     if events_with_models > 0:
-        logger.warning(f"No events with models! Skipping!")
         return events
     else:
+        logger.warning(f"No events with models! Skipping!")
         return None
 
 
