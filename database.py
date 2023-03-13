@@ -302,11 +302,13 @@ def get_event_ligand(inspect_model_path, x, y, z, cutoff=5.0):
         ligand_dict[lig.id] = lig
 
     if len(ligand_dict) == 0:
+        logger.warning(f"Modelled structure but no ligands!")
         return None
 
     min_dist_id = min(ligand_distances, key=lambda _id: ligand_distances[_id])
 
     if ligand_distances[min_dist_id] < cutoff:
+        # logger.warning(f"Modelled structure has ligand")
         return ligand_dict[min_dist_id]
     else:
         return None
