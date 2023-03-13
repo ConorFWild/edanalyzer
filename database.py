@@ -97,6 +97,7 @@ class EventORM(Base):
     structure: Mapped[str]
     event_map: Mapped[str]
     z_map: Mapped[str]
+    viewed: Mapped[bool]
 
     # ligand_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_LIGAND}.id"))
     dataset_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_DATASET}.id"))
@@ -353,8 +354,8 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
     if not event_map_path.exists():
         return None
 
-    if not viewed:
-        return None
+    # if not viewed:
+    #     return None
 
     inspect_model_path = inspect_model_dir / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
     # initial_model = processed_dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)
@@ -391,6 +392,7 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         event_map=event_map_path,
         z_map=z_map_path,
         ligand=ligand,
+        viewed=viewed,
     )
 
     return event
@@ -418,6 +420,7 @@ def parse_pandda_inspect_table(
     events_with_models = len([event for event in events if event.ligand is not None])
 
     if events_with_models > 0:
+        logger.warning(f"No events with models! Skipping!")
         return events
     else:
         return None
