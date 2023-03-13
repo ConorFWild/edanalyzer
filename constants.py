@@ -29,6 +29,7 @@ DIAMOND_MODEL_BUILDING_DIR_OLD = "initial_model"
 PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE = "pandda_updated_event_annotations.json"
 PANDDA_TEST_ANNOTATION_DIR = "TEST"
 PANDDA_UPDATED_TEST_EVENT_ANNOTATIONS_FILE = "pandda_updated_test_event_annotations.json"
+SQLITE_FILE = "database.db"
 
 # MODEL_FILE = "model_state_dict_zero.pt"
 MODEL_FILE = "model_state_dict_zero_z.pt"
@@ -58,3 +59,15 @@ PANDDA_INSPECT_VIEWED = "Viewed"
 
 HIGH_SCORING_NON_HIT_DATASET_DIR = "HIGH_SCORING_NON_HIT_DATASET_DIR"
 LOW_SCORING_HIT_DATASET_DIR = "LOW_SCORING_HIT_DATASET_DIR"
+
+MODEL_BUILDING_STRUCTURE_FILE = "dimple.pdb"
+MODEL_BUILDING_REFLECTIONS_FILE = "dimple.mtz"
+
+TABLE_PANDDA = "pandda"
+TABLE_EVENT = "event"
+TABLE_DATASET = "dataset"
+TABLE_LIGAND = "ligand"
+TABLE_ANNOTATION = " annotation"
+TABLE_PARTITION = "partition"
+TABLE_SYSTEM = "system"
+TABLE_EXPERIMENT = "experiment"

@@ -11,6 +11,7 @@ from data import StructureReflectionsDataset, Options, StructureReflectionsData,
 import constants
 from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation, \
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented
+from database import populate_from_diamond
 
 from loguru import logger
 # from openbabel import pybel
@@ -29,6 +30,12 @@ from torch_network import squeezenet1_1, resnet18
 import download_dataset
 import dataclasses
 import time
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+
+
+
 
 def download_dataset(options: Options):
     data_dir = Path(options.working_dir) / constants.DATA_DIR
@@ -897,7 +904,6 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
 
     records_file = test_annotation_dir / "train_records.pickle"
 
-
     if not records_file.exists():
         # Get the dataset
         dataset_torch = PanDDAEventDatasetTorch(
@@ -1305,6 +1311,13 @@ class CLI:
     def parse_reannotations(self):
         ...
 
+    def populate_database_diamond(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+
+        engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+
+        with Session(engine) as session:
+            populate_from_diamond(session)
 
 if __name__ == "__main__":
     fire.Fire(CLI)
