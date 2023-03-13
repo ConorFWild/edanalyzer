@@ -427,7 +427,9 @@ def parse_potential_pandda_dir(potential_pandda_dir, model_building_dir):
     pandda_analysis_dir = potential_pandda_dir / constants.PANDDA_ANALYSIS_DIR
     pandda_inspect_table_file = pandda_analysis_dir / constants.PANDDA_INSPECT_TABLE_FILE
     pandda_processed_datasets_dir = potential_pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
+
     if not os.access(pandda_analysis_dir, os.R_OK):
+        logger.warning(f"Could not read: {pandda_analysis_dir}! Skipping!")
         return None
     if pandda_analysis_dir.exists():
         if pandda_inspect_table_file.exists():
@@ -547,6 +549,7 @@ def populate_from_diamond(session):
                     potential_pandda_dir,
                     model_building_dir,
                 )
+
                 if not pandda_events:
                     logger.info(f"No PanDDA events! Skipping!")
                     continue
