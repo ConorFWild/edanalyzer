@@ -361,7 +361,7 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
     inspect_model_path = inspect_model_dir / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
     # initial_model = processed_dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)
 
-    if inspect_model_path.exists() & hit_confidence_class:
+    if inspect_model_path.exists():
         ligand = get_event_ligand(
             inspect_model_path,
             x,
