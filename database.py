@@ -52,6 +52,11 @@ class PanDDAORM(Base):
         secondary=dataset_pandda_association_table,
         back_populates="panddas",
     )
+
+
+    system_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_SYSTEM}.id"))
+    experiment_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_EXPERIMENT}.id"))
+
     system: Mapped["SystemORM"] = relationship(back_populates="panddas")
     experiment: Mapped["ExperimentORM"] = relationship(back_populates="panddas")
 
@@ -553,6 +558,8 @@ def populate_from_diamond(session):
 
                 else:
                     logger.debug(f"Discovered no events with models: skipping!")
+
+                logger.info(f"Discovered {len(pandda_events)} events for pandda!")
 
     # logger.info(f"Found {len(pandda_events)} events!")
     # num_events_with_ligands = len([event for event in pandda_events if event.ligand is not None])
