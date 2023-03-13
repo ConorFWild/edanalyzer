@@ -98,6 +98,7 @@ class EventORM(Base):
     event_map: Mapped[str]
     z_map: Mapped[str]
     viewed: Mapped[bool]
+    hit_confidence: Mapped[str]
 
     # ligand_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_LIGAND}.id"))
     dataset_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_DATASET}.id"))
@@ -393,6 +394,7 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         z_map=z_map_path,
         ligand=ligand,
         viewed=viewed,
+        hit_confidence=hit_confidence
     )
 
     return event
