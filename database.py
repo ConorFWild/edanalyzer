@@ -86,6 +86,7 @@ class EventORM(Base):
     __tablename__ = constants.TABLE_EVENT
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    dtag: Mapped[str]
     event_idx: Mapped[int]
     x: Mapped[float]
     y: Mapped[float]
@@ -378,6 +379,7 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
     #     system_name = dtag[:last_hypen_pos + 1]
 
     event = EventORM(
+        dtag=dtag,
         event_idx=event_idx,
         x=x,
         y=y,
