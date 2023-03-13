@@ -150,6 +150,7 @@ class SystemORM(Base):
 
     experiments: Mapped[List["ExperimentORM"]] = relationship(back_populates="system")
     panddas: Mapped[List["PanDDAORM"]] = relationship(back_populates="system")
+    datasets: Mapped[List["DatasetORM"]] = relationship(back_populates="system")
 
 
 class ExperimentORM(Base):
