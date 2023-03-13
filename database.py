@@ -250,33 +250,34 @@ def get_structure_ligands(pdb_path):
     for model in structure:
         for chain in model:
             ligands = chain.get_ligands()
-            for ligand in ligands:
+            for res in chain:
                 # structure_ligands.append(
+                if res.name == "LIG":
+                    num_atoms = get_ligand_num_atoms(res)
 
-                num_atoms = get_ligand_num_atoms(ligand)
+                    ligand_centroid = get_ligand_centroid(res)
 
-                ligand_centroid = get_ligand_centroid(ligand)
+                    # smiles = parse_ligand(
+                    #     structure,
+                    #     chain,
+                    #     ligand,
+                    # )
+                    smiles = ""
+                    # logger.debug(f"Ligand smiles: {smiles}")
+                    # logger.debug(f"Num atoms: {num_atoms}")
+                    # logger.debug(f"Centroid: {ligand_centroid}")
+                    lig = LigandORM(
+                        path=str(pdb_path),
+                        smiles=smiles,
+                        chain=chain.name,
+                        residue=res.seqid.num,
+                        num_atoms=num_atoms,
+                        x=ligand_centroid[0],
+                        y=ligand_centroid[1],
+                        z=ligand_centroid[2]
+                    )
+                    structure_ligands.append(lig)
 
-                # smiles = parse_ligand(
-                #     structure,
-                #     chain,
-                #     ligand,
-                # )
-                smiles = ""
-                # logger.debug(f"Ligand smiles: {smiles}")
-                # logger.debug(f"Num atoms: {num_atoms}")
-                # logger.debug(f"Centroid: {ligand_centroid}")
-                lig = LigandORM(
-                    path=str(pdb_path),
-                    smiles=smiles,
-                    chain=chain.name,
-                    residue=ligand.seqid.num,
-                    num_atoms=num_atoms,
-                    x=ligand_centroid[0],
-                    y=ligand_centroid[1],
-                    z=ligand_centroid[2]
-                )
-                structure_ligands.append(lig)
 
     return structure_ligands
 
