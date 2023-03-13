@@ -512,11 +512,13 @@ def populate_from_diamond(session):
                 path=str(experiment_dir),
                 model_dir=str(model_building_dir)
             )
-            experiments[str(experiment_dir)] = experiment
 
             logger.debug(f"Model building dir is: {model_building_dir}")
 
             experiment_datasets = get_experiment_datasets(experiment)
+            if len(experiment_datasets) == 0:
+                continue
+            experiments[str(experiment_dir)] = experiment
             experiment.datasets = list(experiment_datasets.values())
 
             logger.debug(f"Example experiment is: {experiment.datasets[0].dtag}")
