@@ -104,7 +104,7 @@ class EventORM(Base):
     ligand: Mapped[Optional["LigandORM"]] = relationship(back_populates="event")
     dataset: Mapped["DatasetORM"] = relationship(back_populates="events")
     pandda: Mapped["PanDDAORM"] = relationship(back_populates="events")
-    annotations: Mapped["AnnotationORM"] = relationship(back_populates="events")
+    annotations: Mapped["AnnotationORM"] = relationship(back_populates="event")
     partitions: Mapped["PartitionORM"] = relationship(
         secondary=event_partition_association_table,
         back_populates="events",
