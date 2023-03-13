@@ -517,9 +517,11 @@ def populate_from_diamond(session):
             experiment_datasets = get_experiment_datasets(experiment)
             experiment.datasets = list(experiment_datasets.values())
 
-            logger.debug(f"Example experiment is: {experiment.datasets[0]}")
+            logger.debug(f"Example experiment is: {experiment.datasets[0].dtag}")
 
             system = get_system_from_dataset(experiment.datasets[0])
+            # logger.debug(f"Example system is: {experiment.datasets[0]}")
+
             if system.name in systems:
                 system = systems[system.name]
             else:
