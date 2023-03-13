@@ -619,6 +619,14 @@ def populate_from_diamond(session):
     # num_events_with_ligands = len([event for event in pandda_events if event.ligand is not None])
     # logger.info(f"Found {num_events_with_ligands} events with ligands modelled!")
 
+    for pandda in panddas.values():
+        for event in pandda.events:
+            if event.dataset is None:
+                system = pandda.system
+                if event.dtag in system.datasets:
+                    event.dataset = system
+
+
     session.add_all([experiment for experiment in experiments.values()])
     session.add_all([system for system in systems.values()])
     session.add_all([pandda for pandda in panddas.values()])
