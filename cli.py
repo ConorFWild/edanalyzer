@@ -11,7 +11,7 @@ from data import StructureReflectionsDataset, Options, StructureReflectionsData,
 import constants
 from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation, \
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented
-from database import populate_from_diamond
+from database import populate_from_diamond, initialize_database
 
 from loguru import logger
 # from openbabel import pybel
@@ -1310,6 +1310,10 @@ class CLI:
 
     def parse_reannotations(self):
         ...
+
+    def initialize_database(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+        initialize_database(f"{options.working_dir}/{constants.SQLITE_FILE}")
 
     def populate_database_diamond(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
