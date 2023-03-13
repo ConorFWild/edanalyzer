@@ -520,7 +520,7 @@ def populate_from_diamond(session):
                 logger.info(f"No datasets for experiment! Skipping!")
                 continue
             else:
-                logger.info(f"Got {len(experiment_datasets)}!")
+                logger.info(f"Got {len(experiment_datasets)} datasets!")
             experiments[str(experiment_dir)] = experiment
             experiment.datasets = list(experiment_datasets.values())
 
@@ -545,6 +545,8 @@ def populate_from_diamond(session):
                     potential_pandda_dir,
                     model_building_dir,
                 )
+                if not pandda_events:
+                    logger.info(f"No PanDDA events! Skipping!")
 
                 for event in pandda_events:
                     event.dataset = experiment_datasets[event.dtag]
