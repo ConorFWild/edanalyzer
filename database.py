@@ -79,6 +79,7 @@ class DatasetORM(Base):
         secondary=dataset_pandda_association_table,
         back_populates="datasets",
     )
+    events: Mapped["EventORM"] = relationship(back_populates="dataset")
 
 
 class EventORM(Base):
