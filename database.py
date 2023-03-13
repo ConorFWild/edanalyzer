@@ -557,7 +557,10 @@ def populate_from_diamond(session):
                     logger.info(f"Got {len(pandda_events)} pandda events!")
 
                 for event in pandda_events:
-                    event.dataset = experiment_datasets[event.dtag]
+                    if event.dtag in experiment_datasets:
+                        event.dataset = experiment_datasets[event.dtag]
+                    else:
+                        logger.warning(f"Event with dataset {event.dtag} has no corresponding dataset in experiment!")
 
                 pandda_dataset_dtags = get_pandda_dir_dataset_dtags(potential_pandda_dir)
 
