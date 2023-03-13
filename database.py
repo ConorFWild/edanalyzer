@@ -314,6 +314,26 @@ def get_event_ligand(inspect_model_path, x, y, z, cutoff=5.0):
     else:
         return None
 
+def try_open_structure(path):
+    try:
+        st = gemmi.read_structure(str(path))
+        return True
+    except:
+        return False
+
+def try_open_reflections(path):
+    try:
+        mtz = gemmi.read_mtz_file(str(path))
+        return True
+    except:
+        return False
+
+def try_open_map(path):
+    try:
+        m = gemmi.read_ccp4_map(str(path))
+        return True
+    except:
+        return False
 
 def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, model_building_dir):
     dtag = str(row[constants.PANDDA_INSPECT_DTAG])
@@ -344,18 +364,18 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         z_map_path = str(z_map_path)
 
     initial_structure = processed_dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)
-    if not initial_structure.exists():
+    if not try_open_structure(initial_structure):
         initial_structure = None
     else:
         initial_structure = str(initial_structure)
 
     initial_reflections = processed_dataset_dir / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dtag)
-    if not initial_reflections.exists():
+    if not try_open_reflections(initial_reflections):
         initial_reflections = None
     else:
         initial_reflections = str(initial_reflections)
 
-    if not event_map_path.exists():
+    if not try_open_map(event_map_path):
         return None
 
     # if not viewed:
