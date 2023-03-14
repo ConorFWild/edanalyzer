@@ -612,7 +612,7 @@ def get_system_from_dataset(dataset: DatasetORM):
     return SystemORM(
         name=system_name
     )
-
+#
 
 def get_pandda_dir_dataset_dtags(potential_pandda_dir: Path):
     processed_dataset_dir = potential_pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
@@ -629,7 +629,7 @@ def populate_from_diamond(session):
     pandda_data_root_dir = Path(constants.PANDDA_DATA_ROOT_DIR)
     logger.info(f"Looking for PanDDAs under dir: {pandda_data_root_dir}")
 
-    with Parallel(prefer="threads", verbose=10) as parallel:
+    with Parallel(n_jobs=-1, prefer="threads", verbose=10) as parallel:
 
         experiments = {}
         systems = {}
