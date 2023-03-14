@@ -49,7 +49,7 @@ class PanDDAORM(Base):
 
     path: Mapped[str]
 
-    events: Mapped[List[""]] = relationship(back_populates="pandda")
+    events: Mapped[List["EventORM"]] = relationship(back_populates="pandda")
     datasets: Mapped[List["DatasetORM"]] = relationship(
         secondary=dataset_pandda_association_table,
         back_populates="panddas",
@@ -729,37 +729,42 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
         # Get the experiment or create a new one
         if pandda_data_source in experiments:
             experiment = experiments[pandda_data_source]
+
+            # Get the datasets
             experiment_datasets = [
                 dataset
                 for dataset
                 in datasets.values()
                 if dataset.experiment.model_dir == experiment.model_dir
             ]
+
+            # Get the system
             system = experiment.system
+
         else:
             experiment = ExperimentORM(
                 path=None,
                 model_dir=pandda_data_source,
             )
             new_experiments.append(experiment)
+
+            # Get the datasets
             experiment_datasets = get_experiment_datasets(experiment)
             system = get_system_from_dataset(list(experiment_datasets.values())[0])
+
+            # Get the system or create a new one
             if system.name in systems:
                 system = systems[system.name]
             else:
                 new_systems.append(system)
 
+            # Update the dataset system and experiment
             for dtag, dataset in experiment_datasets.items():
                 dataset.experiment = experiment
                 dataset.system = system
 
+        # Get the other system datasets
         system_datasets = {dataset.dtag: dataset for dataset in system.datasets}
-
-        # Get the datasets
-
-        # Get the system or create a new one
-
-        # Update the dataset system and experiment
 
         # Get the events
         events = parse_potential_pandda_dir(pandda_path, pandda_data_source, )
@@ -775,7 +780,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
                 else:
                     logger.warning(f"Not in system datasets either!")
 
-        # Get PanDDA dtags
+        # Get PanDDA dataset dtags
         pandda_dataset_dtags = get_pandda_dir_dataset_dtags(pandda_path)
 
         # Create a new PanDDA
@@ -790,11 +795,16 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
         new_panddas.append(pandda)
 
         # Add the events to the revelant partition
+        for event in events:
+            partition.events.append(event)
 
-        # Assign annotations to the events
+    # Add entries
+    session.add_all([experiment for experiment in new_experiments])
+    session.add_all([system for system in new_systems])
+    session.add_all([pandda for pandda in new_panddas])
 
-
-
+    # Commit
+    session.commit()
 
 
 def initialize_database(engine_path: str):
