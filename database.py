@@ -33,7 +33,7 @@ class Base(DeclarativeBase):
 
 
 event_partition_association_table = Table(
-    "event_partition_association_table",
+    constants.TABLE_EVENT_PARTITION,
     Base.metadata,
     Column("id", Integer, primary_key=True),
     Column("event_id", Integer, ForeignKey(f"{constants.TABLE_EVENT}.id"),),
@@ -41,7 +41,7 @@ event_partition_association_table = Table(
 )
 
 dataset_pandda_association_table = Table(
-    "dataset_pandda_association_table",
+    constants.TABLE_DATASET_PANDDA,
     Base.metadata,
     Column("id", Integer, primary_key=True),
     Column("dataset_id", Integer, ForeignKey(f"{constants.TABLE_DATASET}.id"),),
