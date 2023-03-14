@@ -464,8 +464,9 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         ligand=ligand,
         viewed=viewed,
         hit_confidence=hit_confidence,
-        annotations =[annotation,]
+        annotations=[annotation,]
     )
+    annotation.event = event
 
     return event
 
@@ -902,6 +903,8 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
     session.add_all([experiment for experiment in new_experiments])
     session.add_all([system for system in new_systems])
     session.add_all([pandda for pandda in new_panddas])
+
+
 
     # Commit
     session.commit()
