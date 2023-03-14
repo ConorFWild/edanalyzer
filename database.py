@@ -302,13 +302,13 @@ def get_structure_ligands(pdb_path):
                     # logger.debug(f"Centroid: {ligand_centroid}")
                     lig = LigandORM(
                         path=str(pdb_path),
-                        smiles=smiles,
-                        chain=chain.name,
-                        residue=res.seqid.num,
-                        num_atoms=num_atoms,
-                        x=ligand_centroid[0],
-                        y=ligand_centroid[1],
-                        z=ligand_centroid[2]
+                        smiles=str(smiles),
+                        chain=str(chain.name),
+                        residue=int(res.seqid.num),
+                        num_atoms=int(num_atoms),
+                        x=float(ligand_centroid[0]),
+                        y=float(ligand_centroid[1]),
+                        z=float(ligand_centroid[2])
                     )
                     structure_ligands.append(lig)
 
