@@ -629,7 +629,7 @@ def populate_from_diamond(session):
     pandda_data_root_dir = Path(constants.PANDDA_DATA_ROOT_DIR)
     logger.info(f"Looking for PanDDAs under dir: {pandda_data_root_dir}")
 
-    with Parallel(prefer="threads") as parallel:
+    with Parallel(prefer="threads", verbose=10) as parallel:
 
         experiments = {}
         systems = {}
