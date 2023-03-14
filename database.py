@@ -123,7 +123,7 @@ class EventORM(Base):
     pandda_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_PANDDA}.id"))
 
     ligand: Mapped[Optional["LigandORM"]] = relationship(back_populates="event")
-    dataset: Mapped["DatasetORM"] = relationship(back_populates="events")
+    dataset: Mapped[Optional["DatasetORM"]] = relationship(back_populates="events")
     pandda: Mapped["PanDDAORM"] = relationship(back_populates="events")
     annotations: Mapped[List["AnnotationORM"]] = relationship(back_populates="event")
     partitions: Mapped["PartitionORM"] = relationship(
@@ -903,8 +903,6 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
     session.add_all([experiment for experiment in new_experiments])
     session.add_all([system for system in new_systems])
     session.add_all([pandda for pandda in new_panddas])
-
-
 
     # Commit
     session.commit()
