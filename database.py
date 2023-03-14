@@ -726,7 +726,7 @@ def populate_from_diamond(session):
 
                     logger.info(f"Discovered {len(pandda_events)} events for pandda!")
 
-            if (time.time() - begin_time) > 60*3:
+            if (time.time() - begin_time) > 60*15:
                 break
 
         # logger.info(f"Found {len(pandda_events)} events!")
