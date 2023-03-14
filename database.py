@@ -140,7 +140,7 @@ class EventORM(Base):
     hit_confidence: Mapped[str]
 
     # ligand_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_LIGAND}.id"))
-    dataset_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_DATASET}.id"))
+    dataset_id: Mapped[Optional[int]] = mapped_column(ForeignKey(f"{constants.TABLE_DATASET}.id"))
     pandda_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_PANDDA}.id"))
 
     ligand: Mapped[Optional["LigandORM"]] = relationship(back_populates="event")
