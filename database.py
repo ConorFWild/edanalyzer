@@ -161,7 +161,7 @@ class ExperimentORM(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    path: Mapped[str]
+    path: Mapped[Optional[str]]
     model_dir: Mapped[str]
 
     system_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_SYSTEM}.id"))
@@ -407,6 +407,15 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
     #     last_hypen_pos = hyphens[-1]
     #     system_name = dtag[:last_hypen_pos + 1]
 
+    if hit_confidence not in ["Low", "low"]:
+        annotation_value = True
+    else:
+        annotation_value = False
+    annotation = AnnotationORM(
+        annotation=annotation_value,
+        source="auto"
+    )
+
     event = EventORM(
         dtag=dtag,
         event_idx=event_idx,
@@ -421,7 +430,8 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         z_map=z_map_path,
         ligand=ligand,
         viewed=viewed,
-        hit_confidence=hit_confidence
+        hit_confidence=hit_confidence,
+        annotation = annotation
     )
 
     return event
@@ -672,16 +682,120 @@ def populate_partition_from_json(
     session.commit()
 
 
-def populate_from_custom_panddas(session, custom_pandda_paths):
+def populate_from_custom_panddas(session, custom_panddas, partition_name):
 
     # Get the experiments
+    experiments_stmt = select(ExperimentORM)
+    experiments = {experiment.model_dir: experiment for experiment in session.scalars(experiments_stmt)}
 
     # Get the systems
+    systems_stmt = select(SystemORM)
+    systems = {system.name: system for system in session.scalars(systems_stmt)}
+
 
     # Get the datasets
+    datasets_stmt = select(DatasetORM).join(DatasetORM.experiment)
+    datasets = {dataset.path: dataset for dataset in session.scalars(datasets_stmt)}
 
-    for pandda_path in custom_pandda_paths:
-        ...
+    # Get the partitions
+    partitions_stmt = select(PartitionORM)
+    partitions = {partition.name: partition for partition in session.scalars(partitions_stmt)}
+
+    # Get the panddas
+    panddas_stmt = select(PanDDAORM)
+    panddas = {pandda.path: pandda for pandda in session.scalars(panddas_stmt)}
+
+
+    # Create a new partition if necessary
+    if partition_name not in partitions:
+        partition = PartitionORM(name=partition_name)
+    else:
+        partition = partitions[partition_name]
+
+    # Loop over custom PanDDAs, adding appropriate systems, experiments, annotitions,
+    # partitions and events
+    new_panddas = []
+    new_systems = []
+    new_experiments = []
+    for custom_pandda in custom_panddas:
+        # Unpack the PanDDA object
+        pandda_data_source = custom_pandda.source
+        pandda_path = custom_pandda.pandda
+
+        # Check if PanDDA already added
+        if pandda_path in panddas:
+            continue
+
+        # Get the experiment or create a new one
+        if pandda_data_source in experiments:
+            experiment = experiments[pandda_data_source]
+            experiment_datasets = [
+                dataset
+                for dataset
+                in datasets.values()
+                if dataset.experiment.model_dir == experiment.model_dir
+            ]
+            system = experiment.system
+        else:
+            experiment = ExperimentORM(
+                path=None,
+                model_dir=pandda_data_source,
+            )
+            new_experiments.append(experiment)
+            experiment_datasets = get_experiment_datasets(experiment)
+            system = get_system_from_dataset(list(experiment_datasets.values())[0])
+            if system.name in systems:
+                system = systems[system.name]
+            else:
+                new_systems.append(system)
+
+            for dtag, dataset in experiment_datasets.items():
+                dataset.experiment = experiment
+                dataset.system = system
+
+        system_datasets = {dataset.dtag: dataset for dataset in system.datasets}
+
+        # Get the datasets
+
+        # Get the system or create a new one
+
+        # Update the dataset system and experiment
+
+        # Get the events
+        events = parse_potential_pandda_dir(pandda_path, pandda_data_source, )
+
+        # Match events to datasets
+        for event in events:
+            if event.dtag in experiment_datasets:
+                event.dataset = experiment_datasets[event.dtag]
+            else:
+                logger.warning(f"Event with dataset {event.dtag} has no corresponding dataset in experiment!")
+                if event.dtag in system_datasets:
+                    event.dataset = system_datasets[event.dtag]
+                else:
+                    logger.warning(f"Not in system datasets either!")
+
+        # Get PanDDA dtags
+        pandda_dataset_dtags = get_pandda_dir_dataset_dtags(pandda_path)
+
+        # Create a new PanDDA
+        pandda = PanDDAORM(
+            path=str(pandda_path),
+            events=events,
+            datasets=[dataset for dataset in experiment_datasets.values() if
+                      dataset.dtag in pandda_dataset_dtags],
+            system=system,
+            experiment=experiment
+        )
+        new_panddas.append(pandda)
+
+        # Add the events to the revelant partition
+
+        # Assign annotations to the events
+
+
+
+
 
 def initialize_database(engine_path: str):
     engine = create_engine(f"sqlite:///{engine_path}")
