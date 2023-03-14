@@ -18,6 +18,8 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
+from sqlalchemy import UniqueConstraint
+
 
 import constants
 from data import PanDDAEventReannotations, PanDDAEventAnnotations, PanDDAEventDataset
@@ -45,6 +47,10 @@ dataset_pandda_association_table = Table(
 class PanDDAORM(Base):
     __tablename__ = constants.TABLE_PANDDA
 
+    __table_args__ = (
+        UniqueConstraint("path"),
+    )
+
     id: Mapped[int] = mapped_column(primary_key=True)
 
     path: Mapped[str]
@@ -64,6 +70,10 @@ class PanDDAORM(Base):
 
 class DatasetORM(Base):
     __tablename__ = constants.TABLE_DATASET
+
+    __table_args__ = (
+        UniqueConstraint("path"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     dtag: Mapped[str]
@@ -85,6 +95,10 @@ class DatasetORM(Base):
 
 class EventORM(Base):
     __tablename__ = constants.TABLE_EVENT
+
+    __table_args__ = (
+        UniqueConstraint("pandda_id", "dtag", "event_idx"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     dtag: Mapped[str]
@@ -136,6 +150,10 @@ class LigandORM(Base):
 class AnnotationORM(Base):
     __tablename__ = constants.TABLE_ANNOTATION
 
+    __table_args__ = (
+        UniqueConstraint("source", "event_id"),
+    )
+
     id: Mapped[int] = mapped_column(primary_key=True)
     annotation: Mapped[bool]
     source: Mapped[str]
@@ -148,6 +166,10 @@ class AnnotationORM(Base):
 class SystemORM(Base):
     __tablename__ = constants.TABLE_SYSTEM
 
+    __table_args__ = (
+        UniqueConstraint("name"),
+    )
+
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
 
@@ -158,6 +180,10 @@ class SystemORM(Base):
 
 class ExperimentORM(Base):
     __tablename__ = constants.TABLE_EXPERIMENT
+
+    __table_args__ = (
+        UniqueConstraint("path"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -173,6 +199,10 @@ class ExperimentORM(Base):
 
 class PartitionORM(Base):
     __tablename__ = constants.TABLE_PARTITION
+
+    __table_args__ = (
+        UniqueConstraint("name"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
