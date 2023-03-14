@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 from typing import List, Optional
 import os
@@ -634,6 +635,7 @@ def populate_from_diamond(session):
         experiments = {}
         systems = {}
         panddas = {}
+        begin_time = time.time()
         for experiment_superdir in pandda_data_root_dir.glob("*"):
             logger.info(f"Checking superdir: {experiment_superdir}")
             for experiment_dir in experiment_superdir.glob("*"):
@@ -722,6 +724,9 @@ def populate_from_diamond(session):
                         logger.debug(f"Discovered no events with models: skipping!")
 
                     logger.info(f"Discovered {len(pandda_events)} events for pandda!")
+
+            if (time.time() - begin_time) > 60*3:
+                break
 
         # logger.info(f"Found {len(pandda_events)} events!")
         # num_events_with_ligands = len([event for event in pandda_events if event.ligand is not None])
