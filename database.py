@@ -16,7 +16,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import Column
 from sqlalchemy import Table
 from sqlalchemy import ForeignKey
-from sqlalchemy import String
+from sqlalchemy import String, Integer
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -35,16 +35,37 @@ class Base(DeclarativeBase):
 event_partition_association_table = Table(
     "event_partition_association_table",
     Base.metadata,
-    Column("event_id", ForeignKey(f"{constants.TABLE_EVENT}.id"), primary_key=True),
-    Column("partition_id", ForeignKey(f"{constants.TABLE_PARTITION}.id"), primary_key=True),
+    Column("id", Integer, primary_key=True),
+    Column("event_id", Integer, ForeignKey(f"{constants.TABLE_EVENT}.id"),),
+    Column("partition_id", Integer, ForeignKey(f"{constants.TABLE_PARTITION}.id"),),
 )
 
 dataset_pandda_association_table = Table(
     "dataset_pandda_association_table",
     Base.metadata,
-    Column("dataset_id", ForeignKey(f"{constants.TABLE_DATASET}.id"), primary_key=True),
-    Column("pandda_id", ForeignKey(f"{constants.TABLE_PANDDA}.id"), primary_key=True),
+    Column("id", Integer, primary_key=True),
+    Column("dataset_id", Integer, ForeignKey(f"{constants.TABLE_DATASET}.id"),),
+    Column("pandda_id", Integer, ForeignKey(f"{constants.TABLE_PANDDA}.id"), ),
 )
+
+
+# class EventPartitionAssociationTable(Base):
+#     __tablename__ = constants.TABLE_EVENT_PARTITION
+#
+#     id: Mapped[int] = mapped_column(primary_key=True)
+#
+#     event_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_EVENT}.id"))
+#     partition_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_PARTITION}.id"))
+#
+#
+# class DatasetPanDDAAssociationTable(Base):
+#     __tablename__ = constants.TABLE_DATASET_PANDDA
+#
+#     id: Mapped[int] = mapped_column(primary_key=True)
+#
+#     dataset_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_DATASET}.id"))
+#     pandda_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_PANDDA}.id"))
+
 
 
 class PanDDAORM(Base):
@@ -60,7 +81,7 @@ class PanDDAORM(Base):
 
     events: Mapped[List["EventORM"]] = relationship(back_populates="pandda")
     datasets: Mapped[List["DatasetORM"]] = relationship(
-        secondary=dataset_pandda_association_table,
+        secondary=constants.TABLE_DATASET_PANDDA,
         back_populates="panddas",
     )
 
@@ -90,7 +111,7 @@ class DatasetORM(Base):
     system: Mapped["SystemORM"] = relationship(back_populates="datasets")
     experiment: Mapped["ExperimentORM"] = relationship(back_populates="datasets")
     panddas: Mapped[List["PanDDAORM"]] = relationship(
-        secondary=dataset_pandda_association_table,
+        secondary=constants.TABLE_DATASET_PANDDA,
         back_populates="datasets",
     )
     events: Mapped["EventORM"] = relationship(back_populates="dataset")
@@ -127,7 +148,7 @@ class EventORM(Base):
     pandda: Mapped["PanDDAORM"] = relationship(back_populates="events")
     annotations: Mapped[List["AnnotationORM"]] = relationship(back_populates="event")
     partitions: Mapped["PartitionORM"] = relationship(
-        secondary=event_partition_association_table,
+        secondary=constants.TABLE_EVENT_PARTITION,
         back_populates="events",
     )
 
@@ -211,7 +232,7 @@ class PartitionORM(Base):
 
     name: Mapped[str]
     events: Mapped[List["EventORM"]] = relationship(
-        secondary=event_partition_association_table,
+        secondary=constants.TABLE_EVENT_PARTITION,
         back_populates="partitions",
     )
     # events: Mapped[List["EventORM"]]

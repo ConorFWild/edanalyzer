@@ -63,6 +63,9 @@ LOW_SCORING_HIT_DATASET_DIR = "LOW_SCORING_HIT_DATASET_DIR"
 MODEL_BUILDING_STRUCTURE_FILE = "dimple.pdb"
 MODEL_BUILDING_REFLECTIONS_FILE = "dimple.mtz"
 
+
+TABLE_EVENT_PARTITION = "event_partition_association_table"
+TABLE_DATASET_PANDDA = "dataset_pandda_association_table"
 TABLE_PANDDA = "pandda"
 TABLE_EVENT = "event"
 TABLE_DATASET = "dataset"
