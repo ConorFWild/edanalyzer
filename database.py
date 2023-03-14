@@ -6,6 +6,7 @@ from loguru import logger
 import gemmi
 import numpy as np
 import pandas as pd
+from joblib import Parallel, delayed
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -495,6 +496,46 @@ def parse_pandda_inspect_table(
         logger.warning(f"No events with models! Skipping!")
         return None
 
+def parse_pandda_inspect_table_parallel(
+        pandda_inspect_table_file,
+        potential_pandda_dir,
+        pandda_processed_datasets_dir,
+        model_building_dir,
+        parallel
+):
+    try:
+        pandda_inspect_table = pd.read_csv(pandda_inspect_table_file)
+    except Exception as e:
+        logger.warning(f"Failed to read table: {pandda_inspect_table_file} : {e}")
+        return None
+
+    events = []
+    for index, row in pandda_inspect_table.iterrows():
+        possible_event = parse_inspect_table_row(
+            row, potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir)
+        if possible_event:
+            events.append(possible_event)
+
+    events = parallel(
+        delayed(parse_inspect_table_row)(
+            row,
+            potential_pandda_dir,
+            pandda_processed_datasets_dir,
+            model_building_dir,
+        )
+        for index, row
+        in pandda_inspect_table.iterrows()
+    )
+
+    # events_with_models = len([event for event in events if event.ligand is not None])
+    high_confidence_events = len([event for event in events if event.hit_confidence not in ["Low", "low"]])
+
+    if high_confidence_events > 0:
+        return events
+    else:
+        logger.warning(f"No events with models! Skipping!")
+        return None
+
 
 def parse_potential_pandda_dir(potential_pandda_dir, model_building_dir):
     pandda_analysis_dir = potential_pandda_dir / constants.PANDDA_ANALYSIS_DIR
@@ -509,6 +550,25 @@ def parse_potential_pandda_dir(potential_pandda_dir, model_building_dir):
             events = parse_pandda_inspect_table(
                 pandda_inspect_table_file,
                 potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir
+
+            )
+            return events
+
+    return None
+
+def parse_potential_pandda_dir_parallel(potential_pandda_dir, model_building_dir, parallel):
+    pandda_analysis_dir = potential_pandda_dir / constants.PANDDA_ANALYSIS_DIR
+    pandda_inspect_table_file = pandda_analysis_dir / constants.PANDDA_INSPECT_TABLE_FILE
+    pandda_processed_datasets_dir = potential_pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
+
+    if not os.access(pandda_analysis_dir, os.R_OK):
+        logger.warning(f"Could not read: {pandda_analysis_dir}! Skipping!")
+        return None
+    if pandda_analysis_dir.exists():
+        if pandda_inspect_table_file.exists():
+            events = parse_pandda_inspect_table_parallel(
+                pandda_inspect_table_file,
+                potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir, parallel
 
             )
             return events
@@ -568,100 +628,103 @@ def populate_from_diamond(session):
     pandda_data_root_dir = Path(constants.PANDDA_DATA_ROOT_DIR)
     logger.info(f"Looking for PanDDAs under dir: {pandda_data_root_dir}")
 
-    experiments = {}
-    systems = {}
-    panddas = {}
-    for experiment_superdir in pandda_data_root_dir.glob("*"):
-        logger.info(f"Checking superdir: {experiment_superdir}")
-        for experiment_dir in experiment_superdir.glob("*"):
-            logger.info(f"Checking project dir: {experiment_dir}")
+    with Parallel(prefer="threads") as parallel:
 
-            analysis_dir = experiment_dir / constants.DIAMOND_PROCESSING_DIR / constants.DIAMOND_ANALYSIS_DIR
+        experiments = {}
+        systems = {}
+        panddas = {}
+        for experiment_superdir in pandda_data_root_dir.glob("*"):
+            logger.info(f"Checking superdir: {experiment_superdir}")
+            for experiment_dir in experiment_superdir.glob("*"):
+                logger.info(f"Checking project dir: {experiment_dir}")
 
-            model_building_dir = analysis_dir / constants.DIAMOND_MODEL_BUILDING_DIR_NEW
-            if not model_building_dir.exists():
-                model_building_dir = analysis_dir / constants.DIAMOND_MODEL_BUILDING_DIR_OLD
+                analysis_dir = experiment_dir / constants.DIAMOND_PROCESSING_DIR / constants.DIAMOND_ANALYSIS_DIR
+
+                model_building_dir = analysis_dir / constants.DIAMOND_MODEL_BUILDING_DIR_NEW
                 if not model_building_dir.exists():
-                    logger.warning(f"No model building dir: skipping!")
-                    continue
+                    model_building_dir = analysis_dir / constants.DIAMOND_MODEL_BUILDING_DIR_OLD
+                    if not model_building_dir.exists():
+                        logger.warning(f"No model building dir: skipping!")
+                        continue
 
-            experiment = ExperimentORM(
-                path=str(experiment_dir),
-                model_dir=str(model_building_dir)
-            )
-
-            logger.debug(f"Model building dir is: {model_building_dir}")
-
-            experiment_datasets = get_experiment_datasets(experiment)
-            if len(experiment_datasets) == 0:
-                logger.warning(f"No datasets for experiment! Skipping!")
-                continue
-            else:
-                logger.info(f"Got {len(experiment_datasets)} datasets!")
-            experiments[str(experiment_dir)] = experiment
-            experiment.datasets = list(experiment_datasets.values())
-
-            logger.debug(f"Example experiment is: {experiment.datasets[0].dtag}")
-
-            system = get_system_from_dataset(experiment.datasets[0])
-            # logger.debug(f"Example system is: {experiment.datasets[0]}")
-
-            if system.name in systems:
-                system = systems[system.name]
-            else:
-                systems[system.name] = system
-            system.experiments.append(experiment)
-
-            for dataset in experiment_datasets.values():
-                dataset.system = system
-                dataset.experiment = experiment
-
-            for potential_pandda_dir in analysis_dir.glob("*"):
-                logger.debug(f"Checking folder {potential_pandda_dir} ")
-                pandda_events = parse_potential_pandda_dir(
-                    potential_pandda_dir,
-                    model_building_dir,
+                experiment = ExperimentORM(
+                    path=str(experiment_dir),
+                    model_dir=str(model_building_dir)
                 )
 
-                if not pandda_events:
-                    logger.info(f"No PanDDA events! Skipping!")
+                logger.debug(f"Model building dir is: {model_building_dir}")
+
+                experiment_datasets = get_experiment_datasets(experiment)
+                if len(experiment_datasets) == 0:
+                    logger.warning(f"No datasets for experiment! Skipping!")
                     continue
                 else:
-                    logger.info(f"Got {len(pandda_events)} pandda events!")
+                    logger.info(f"Got {len(experiment_datasets)} datasets!")
+                experiments[str(experiment_dir)] = experiment
+                experiment.datasets = list(experiment_datasets.values())
 
-                for event in pandda_events:
-                    if event.dtag in experiment_datasets:
-                        event.dataset = experiment_datasets[event.dtag]
-                    else:
-                        logger.warning(f"Event with dataset {event.dtag} has no corresponding dataset in experiment!")
+                logger.debug(f"Example experiment is: {experiment.datasets[0].dtag}")
 
-                pandda_dataset_dtags = get_pandda_dir_dataset_dtags(potential_pandda_dir)
+                system = get_system_from_dataset(experiment.datasets[0])
+                # logger.debug(f"Example system is: {experiment.datasets[0]}")
 
-                if pandda_events:
-                    logger.info(f"Found {len(pandda_events)} events!")
-                    num_events_with_ligands = len(
-                        [event for event in pandda_events if event.ligand is not None])
-                    logger.info(f"Events which are modelled: {num_events_with_ligands}")
-
-                    pandda = PanDDAORM(
-                        path=str(potential_pandda_dir),
-                        events=pandda_events,
-                        datasets=[dataset for dataset in experiment_datasets.values() if
-                                  dataset.dtag in pandda_dataset_dtags],
-                        system=system,
-                        experiment=experiment
-                    )
-                    panddas[str(pandda.path)] = pandda
-
-
+                if system.name in systems:
+                    system = systems[system.name]
                 else:
-                    logger.debug(f"Discovered no events with models: skipping!")
+                    systems[system.name] = system
+                system.experiments.append(experiment)
 
-                logger.info(f"Discovered {len(pandda_events)} events for pandda!")
+                for dataset in experiment_datasets.values():
+                    dataset.system = system
+                    dataset.experiment = experiment
 
-    # logger.info(f"Found {len(pandda_events)} events!")
-    # num_events_with_ligands = len([event for event in pandda_events if event.ligand is not None])
-    # logger.info(f"Found {num_events_with_ligands} events with ligands modelled!")
+                for potential_pandda_dir in analysis_dir.glob("*"):
+                    logger.debug(f"Checking folder {potential_pandda_dir} ")
+                    pandda_events = parse_potential_pandda_dir_parallel(
+                        potential_pandda_dir,
+                        model_building_dir,
+                        parallel
+                    )
+
+                    if not pandda_events:
+                        logger.info(f"No PanDDA events! Skipping!")
+                        continue
+                    else:
+                        logger.info(f"Got {len(pandda_events)} pandda events!")
+
+                    for event in pandda_events:
+                        if event.dtag in experiment_datasets:
+                            event.dataset = experiment_datasets[event.dtag]
+                        else:
+                            logger.warning(f"Event with dataset {event.dtag} has no corresponding dataset in experiment!")
+
+                    pandda_dataset_dtags = get_pandda_dir_dataset_dtags(potential_pandda_dir)
+
+                    if pandda_events:
+                        logger.info(f"Found {len(pandda_events)} events!")
+                        num_events_with_ligands = len(
+                            [event for event in pandda_events if event.ligand is not None])
+                        logger.info(f"Events which are modelled: {num_events_with_ligands}")
+
+                        pandda = PanDDAORM(
+                            path=str(potential_pandda_dir),
+                            events=pandda_events,
+                            datasets=[dataset for dataset in experiment_datasets.values() if
+                                      dataset.dtag in pandda_dataset_dtags],
+                            system=system,
+                            experiment=experiment
+                        )
+                        panddas[str(pandda.path)] = pandda
+
+
+                    else:
+                        logger.debug(f"Discovered no events with models: skipping!")
+
+                    logger.info(f"Discovered {len(pandda_events)} events for pandda!")
+
+        # logger.info(f"Found {len(pandda_events)} events!")
+        # num_events_with_ligands = len([event for event in pandda_events if event.ligand is not None])
+        # logger.info(f"Found {num_events_with_ligands} events with ligands modelled!")
 
     for pandda in panddas.values():
         for event in pandda.events:
