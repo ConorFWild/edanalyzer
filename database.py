@@ -509,14 +509,14 @@ def parse_pandda_inspect_table_parallel(
         logger.warning(f"Failed to read table: {pandda_inspect_table_file} : {e}")
         return None
 
-    events = []
-    for index, row in pandda_inspect_table.iterrows():
-        possible_event = parse_inspect_table_row(
-            row, potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir)
-        if possible_event:
-            events.append(possible_event)
+    # events = []
+    # for index, row in pandda_inspect_table.iterrows():
+    #     possible_event = parse_inspect_table_row(
+    #         row, potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir)
+    #     if possible_event:
+    #         events.append(possible_event)
 
-    events = parallel(
+    events_initial = parallel(
         delayed(parse_inspect_table_row)(
             row,
             potential_pandda_dir,
@@ -527,6 +527,7 @@ def parse_pandda_inspect_table_parallel(
         in pandda_inspect_table.iterrows()
     )
 
+    events = [event for event in events_initial if event]
     # events_with_models = len([event for event in events if event.ligand is not None])
     high_confidence_events = len([event for event in events if event.hit_confidence not in ["Low", "low"]])
 
