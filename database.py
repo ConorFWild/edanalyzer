@@ -110,9 +110,9 @@ class EventORM(Base):
     y: Mapped[float]
     z: Mapped[float]
     bdc: Mapped[float]
-    initial_structure: Mapped[str]
-    initial_reflections: Mapped[str]
-    structure: Mapped[str]
+    initial_structure: Mapped[Optional[str]]
+    initial_reflections: Mapped[Optional[str]]
+    structure: Mapped[Optional[str]]
     event_map: Mapped[str]
     z_map: Mapped[str]
     viewed: Mapped[bool]
@@ -450,12 +450,12 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
     )
 
     event = EventORM(
-        dtag=dtag,
-        event_idx=event_idx,
-        x=x,
-        y=y,
-        z=z,
-        bdc=bdc,
+        dtag=str(dtag),
+        event_idx=int(event_idx),
+        x=float(x),
+        y=float(y),
+        z=float(z),
+        bdc=float(bdc),
         initial_structure=initial_structure,
         initial_reflections=initial_reflections,
         structure=inspect_model_path,
@@ -596,8 +596,8 @@ def get_experiment_datasets(experiment: ExperimentORM):
             dataset = DatasetORM(
                 dtag=directory.name,
                 path=str(directory),
-                structure=structure_path,
-                reflections=reflections_path
+                structure=str(structure_path),
+                reflections=str(reflections_path)
             )
             datasets[dataset.dtag] = dataset
     return datasets
