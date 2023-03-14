@@ -459,7 +459,7 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         initial_structure=initial_structure,
         initial_reflections=initial_reflections,
         structure=inspect_model_path,
-        event_map=event_map_path,
+        event_map=str(event_map_path),
         z_map=z_map_path,
         ligand=ligand,
         viewed=viewed,
