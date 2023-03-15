@@ -625,17 +625,21 @@ def get_experiment_datasets(experiment: ExperimentORM):
     return datasets
 
 
-def get_system_from_dataset(dataset: DatasetORM):
-    hyphens = [pos for pos, char in enumerate(dataset.dtag) if char == "-"]
-    if len(hyphens) == 0:
-        return None
-    else:
-        last_hypen_pos = hyphens[-1]
-        system_name = dataset.dtag[:last_hypen_pos]
+def get_system_from_dataset(datasets: List[DatasetORM]):
 
-    return SystemORM(
-        name=system_name
-    )
+    for dataset in datasets:
+        hyphens = [pos for pos, char in enumerate(dataset.dtag) if char == "-"]
+        if len(hyphens) == 0:
+            continue
+        else:
+            last_hypen_pos = hyphens[-1]
+            system_name = dataset.dtag[:last_hypen_pos]
+
+            return SystemORM(
+                name=system_name
+            )
+
+    return None
 #
 
 def get_pandda_dir_dataset_dtags(potential_pandda_dir: Path):
@@ -686,13 +690,17 @@ def populate_from_diamond(session):
                     continue
                 else:
                     logger.info(f"Got {len(experiment_datasets)} datasets!")
-                experiments[str(experiment_dir)] = experiment
                 experiment.datasets = list(experiment_datasets.values())
 
                 logger.debug(f"Example experiment is: {experiment.datasets[0].dtag}")
 
                 system = get_system_from_dataset(experiment.datasets[0])
+
+                if not system:
+                    continue
                 # logger.debug(f"Example system is: {experiment.datasets[0]}")
+
+                experiments[str(experiment_dir)] = experiment
 
                 if system.name in systems:
                     system = systems[system.name]
@@ -872,7 +880,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
 
             # Get the datasets
             experiment_datasets = get_experiment_datasets(experiment)
-            system = get_system_from_dataset(list(experiment_datasets.values())[0])
+            system = get_system_from_datasets(list(experiment_datasets.values()))
 
             # Get the system or create a new one
             if system.name in systems:
