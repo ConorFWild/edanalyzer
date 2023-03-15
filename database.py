@@ -625,7 +625,7 @@ def get_experiment_datasets(experiment: ExperimentORM):
     return datasets
 
 
-def get_system_from_dataset(datasets: List[DatasetORM]):
+def get_system_from_datasets(datasets: List[DatasetORM]):
 
     for dataset in datasets:
         hyphens = [pos for pos, char in enumerate(dataset.dtag) if char == "-"]
@@ -694,7 +694,7 @@ def populate_from_diamond(session):
 
                 logger.debug(f"Example experiment is: {experiment.datasets[0].dtag}")
 
-                system = get_system_from_dataset(experiment.datasets[0])
+                system = get_system_from_datasets(experiment.datasets)
 
                 if not system:
                     continue
