@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import List, Optional
 import os
 
-
 from loguru import logger
 import gemmi
 import numpy as np
@@ -23,7 +22,6 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from sqlalchemy import UniqueConstraint
 
-
 import constants
 from data import PanDDAEventReannotations, PanDDAEventAnnotations, PanDDAEventDataset
 
@@ -36,15 +34,15 @@ event_partition_association_table = Table(
     constants.TABLE_EVENT_PARTITION,
     Base.metadata,
     Column("id", Integer, primary_key=True),
-    Column("event_id", Integer, ForeignKey(f"{constants.TABLE_EVENT}.id"),),
-    Column("partition_id", Integer, ForeignKey(f"{constants.TABLE_PARTITION}.id"),),
+    Column("event_id", Integer, ForeignKey(f"{constants.TABLE_EVENT}.id"), ),
+    Column("partition_id", Integer, ForeignKey(f"{constants.TABLE_PARTITION}.id"), ),
 )
 
 dataset_pandda_association_table = Table(
     constants.TABLE_DATASET_PANDDA,
     Base.metadata,
     Column("id", Integer, primary_key=True),
-    Column("dataset_id", Integer, ForeignKey(f"{constants.TABLE_DATASET}.id"),),
+    Column("dataset_id", Integer, ForeignKey(f"{constants.TABLE_DATASET}.id"), ),
     Column("pandda_id", Integer, ForeignKey(f"{constants.TABLE_PANDDA}.id"), ),
 )
 
@@ -65,7 +63,6 @@ dataset_pandda_association_table = Table(
 #
 #     dataset_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_DATASET}.id"))
 #     pandda_id: Mapped[int] = mapped_column(ForeignKey(f"{constants.TABLE_PANDDA}.id"))
-
 
 
 class PanDDAORM(Base):
@@ -135,7 +132,7 @@ class EventORM(Base):
     initial_reflections: Mapped[Optional[str]]
     structure: Mapped[Optional[str]]
     event_map: Mapped[str]
-    z_map: Mapped[str]
+    z_map: Mapped[Optional[str]]
     viewed: Mapped[bool]
     hit_confidence: Mapped[str]
 
@@ -485,7 +482,7 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
         ligand=ligand,
         viewed=viewed,
         hit_confidence=hit_confidence,
-        annotations=[annotation,]
+        annotations=[annotation, ]
     )
     annotation.event = event
 
@@ -519,6 +516,7 @@ def parse_pandda_inspect_table(
     else:
         logger.warning(f"No events with models! Skipping!")
         return None
+
 
 def parse_pandda_inspect_table_parallel(
         pandda_inspect_table_file,
@@ -581,6 +579,7 @@ def parse_potential_pandda_dir(potential_pandda_dir, model_building_dir):
 
     return None
 
+
 def parse_potential_pandda_dir_parallel(potential_pandda_dir, model_building_dir, parallel):
     pandda_analysis_dir = potential_pandda_dir / constants.PANDDA_ANALYSIS_DIR
     pandda_inspect_table_file = pandda_analysis_dir / constants.PANDDA_INSPECT_TABLE_FILE
@@ -626,7 +625,6 @@ def get_experiment_datasets(experiment: ExperimentORM):
 
 
 def get_system_from_datasets(datasets: List[DatasetORM]):
-
     for dataset in datasets:
         hyphens = [pos for pos, char in enumerate(dataset.dtag) if char == "-"]
         if len(hyphens) == 0:
@@ -640,6 +638,8 @@ def get_system_from_datasets(datasets: List[DatasetORM]):
             )
 
     return None
+
+
 #
 
 def get_pandda_dir_dataset_dtags(potential_pandda_dir: Path):
@@ -730,7 +730,8 @@ def populate_from_diamond(session):
                         if event.dtag in experiment_datasets:
                             event.dataset = experiment_datasets[event.dtag]
                         else:
-                            logger.warning(f"Event with dataset {event.dtag} has no corresponding dataset in experiment!")
+                            logger.warning(
+                                f"Event with dataset {event.dtag} has no corresponding dataset in experiment!")
 
                     pandda_dataset_dtags = get_pandda_dir_dataset_dtags(potential_pandda_dir)
 
@@ -780,8 +781,7 @@ def populate_from_diamond(session):
 def populate_partition_from_json(
         session,
         train_dataset: PanDDAEventDataset,
-                                 test_dataset: PanDDAEventDataset):
-
+        test_dataset: PanDDAEventDataset):
     # Get the datasets
     # datasets_stmt = select(DatasetORM)
 
@@ -789,7 +789,7 @@ def populate_partition_from_json(
     events_stmt = select(EventORM).join(EventORM.pandda)
 
     # Get the train dataset keys
-    train_event_keys = [(event.pandda_dir, event.dtag, event.event_idx, ) for event in train_dataset.pandda_events]
+    train_event_keys = [(event.pandda_dir, event.dtag, event.event_idx,) for event in train_dataset.pandda_events]
 
     # Add partitions for train
     train_partition = PartitionORM(name=constants.TRAIN_PARTITION)
@@ -799,7 +799,7 @@ def populate_partition_from_json(
             train_partition.events.append(event)
 
     # Get the test dataset keys
-    test_event_keys = [(event.pandda_dir, event.dtag, event.event_idx, ) for event in test_dataset.pandda_events]
+    test_event_keys = [(event.pandda_dir, event.dtag, event.event_idx,) for event in test_dataset.pandda_events]
 
     # Add partitions for test
     test_partition = PartitionORM(name=constants.TEST_PARTITION)
@@ -813,7 +813,6 @@ def populate_partition_from_json(
 
 
 def populate_from_custom_panddas(session, custom_panddas, partition_name):
-
     # Get the experiments
     experiments_stmt = select(ExperimentORM)
     experiments = {experiment.model_dir: experiment for experiment in session.scalars(experiments_stmt)}
@@ -821,7 +820,6 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
     # Get the systems
     systems_stmt = select(SystemORM)
     systems = {system.name: system for system in session.scalars(systems_stmt)}
-
 
     # Get the datasets
     datasets_stmt = select(DatasetORM).join(DatasetORM.experiment)
@@ -835,7 +833,6 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
     panddas_stmt = select(PanDDAORM)
     panddas = {pandda.path: pandda for pandda in session.scalars(panddas_stmt)}
 
-
     # Create a new partition if necessary
     if partition_name not in partitions:
         partition = PartitionORM(name=partition_name)
@@ -848,16 +845,19 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
     new_systems = []
     new_experiments = []
     for custom_pandda in custom_panddas:
+        logger.info(f"PanDDA Path is: {custom_pandda.path}")
         # Unpack the PanDDA object
         pandda_data_source = custom_pandda.source
         pandda_path = custom_pandda.pandda
 
         # Check if PanDDA already added
         if pandda_path in panddas:
+            logger.warning(f"Already parsed PanDDA at: {pandda_path}")
             continue
 
         # Get the experiment or create a new one
         if pandda_data_source in experiments:
+            logger.info(f"PanDDA data source {pandda_data_source} already part of an experiment")
             experiment = experiments[pandda_data_source]
 
             # Get the datasets
@@ -867,11 +867,14 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
                 in datasets.values()
                 if dataset.experiment.model_dir == experiment.model_dir
             ]
+            logger.info(f"Found {len(experiment_datasets)} datasets for experiment")
 
             # Get the system
             system = experiment.system
+            logger.info(f"System name is: {system.name}")
 
         else:
+            logger.info(f"Creating new experiment: {pandda_data_source}")
             experiment = ExperimentORM(
                 path=None,
                 model_dir=pandda_data_source,
@@ -880,13 +883,23 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
 
             # Get the datasets
             experiment_datasets = get_experiment_datasets(experiment)
+            logger.info(f"Found {len(experiment_datasets)} datasets for experiment")
+
+            # Get the system
             system = get_system_from_datasets(list(experiment_datasets.values()))
+            logger.info(f"System name is: {system.name}")
 
             # Get the system or create a new one
             if system.name in systems:
+                logger.info(f"Know system, replacing with one from table!")
                 system = systems[system.name]
+                system.experiments.append(experiment)
             else:
+                logger.info(f"New system!")
                 new_systems.append(system)
+
+            # Match the experiment to its system
+            experiment.system = system
 
             # Update the dataset system and experiment
             for dtag, dataset in experiment_datasets.items():
@@ -895,9 +908,11 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
 
         # Get the other system datasets
         system_datasets = {dataset.dtag: dataset for dataset in system.datasets}
+        logger.info(f"System has {len(system_datasets)} datasets")
 
         # Get the events
         events = parse_potential_pandda_dir(pandda_path, pandda_data_source, )
+        logger.info(f"Found {len(events)} events!")
 
         # Match events to datasets
         for event in events:
@@ -932,6 +947,87 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
     session.add_all([experiment for experiment in new_experiments])
     session.add_all([system for system in new_systems])
     session.add_all([pandda for pandda in new_panddas])
+
+    # Commit
+    session.commit()
+
+
+def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
+    # Get the events
+    events_stmt = select(EventORM)
+    events = {event.event_map: event for event in session.scalars(events_stmt)}
+    logger.info(f"Got {len(events)} events from table")
+
+    # Get the inspect table
+    inspect_table_path = annotation_update_dir / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
+    inspect_table = pd.read_csv(inspect_table_path)
+    logger.info(f"Loaded inspect table at : {inspect_table_path}")
+
+    # Parse the table
+    annotations = []
+    for idx, row in inspect_table.iterrows():
+        dtag = row[constants.PANDDA_INSPECT_DTAG]
+        event_idx = int(row[constants.PANDDA_INSPECT_EVENT_IDX])
+        bdc = row[constants.PANDDA_INSPECT_BDC]
+
+        viewed = row[constants.PANDDA_INSPECT_VIEWED]
+
+        if viewed != True:
+            logger.debug(f"Event {dtag} {event_idx} has not been viewed! Skipping!")
+            continue
+
+        # Get the resolved event map path
+        event_map_path = str(Path(constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+            dtag=dtag,
+            event_idx=event_idx,
+            bdc=bdc
+        )).resolve())
+
+        # Get the event using its event map path
+        event = events[event_map_path]
+
+        # Determine the annotation
+        if row[constants.PANDDA_INSPECT_VIEWED] == True:
+            if row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
+                annotation = AnnotationORM(annotation=True, source="manual", event=event)
+            else:
+                annotation = AnnotationORM(annotation=False, source="manual", event=event)
+
+            annotations.append(annotation)
+
+    logger.info(f"Got {len(annotations)} new annotations!")
+
+    # Update
+    session.add_all([annotation for annotation in annotations])
+
+    # Commit
+    session.commit()
+
+
+def parse_annotation_update_dir(session, annotation_update_dir: Path):
+    # Get the events
+    events_stmt = select(EventORM)
+    events = {event.id: event for event in session.scalars(events_stmt)}
+
+    # Get the inspect table
+    inspect_table_path = annotation_update_dir / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
+    inspect_table = pd.read_csv(inspect_table_path)
+
+    # Parse the table
+    annotations = []
+    for idx, row in inspect_table.iterrows():
+        dtag = row[constants.PANDDA_INSPECT_DTAG]
+        event = events[dtag]
+        if row[constants.PANDDA_INSPECT_VIEWED] == True:
+            if row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
+                annotation = AnnotationORM(annotation=True, source="manual", event=event)
+            else:
+                annotation = AnnotationORM(annotation=False, source="manual", event=event)
+
+            annotations.append(annotation)
+
+    # Update
+    session.add_all([annotation for annotation in annotations])
 
     # Commit
     session.commit()
