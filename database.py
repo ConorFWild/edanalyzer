@@ -983,7 +983,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
     session.add_all([pandda for pandda in new_panddas])
 
     # Commit
-    # session.commit()
+    session.commit()
 
 
 def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
