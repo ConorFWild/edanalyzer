@@ -1381,20 +1381,22 @@ class CLI:
             )
             events = session.scalars(events_stmt).unique().all()
             logger.info(f"Loaded {len(events)} events!")
+
+            # Load train partition events
             train_partition_events = [
                 event
                 for event
                 in events
-                if constants.INITIAL_TRAIN_PARTITION == event.partitions
+                if constants.INITIAL_TRAIN_PARTITION == event.partitions.name
             ]
             logger.info(f"Got {len(events)} finetune events!")
 
-
+            # Load finetune train partition events
             finetune_train_partition_events = [
                 event
                 for event
                 in events
-                if constants.FINETUNE_TRAIN_PARTITION == event.partitions
+                if constants.FINETUNE_TRAIN_PARTITION == event.partitions.name
             ]
             logger.info(f"Got {len(finetune_train_partition_events)} finetune events!")
 
