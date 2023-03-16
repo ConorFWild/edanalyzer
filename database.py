@@ -967,7 +967,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
 def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
     # Get the events
     events_stmt = select(EventORM).join(EventORM.annotations)
-    events = {event.event_map: event for event in session.scalars(events_stmt)}
+    events = {event.event_map: event for event in session.scalars(events_stmt).all()}
     logger.info(f"Got {len(events)} events from table")
 
     # Get the inspect table
@@ -1008,6 +1008,7 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
             continue
         # event = events[event_map_path]
 
+        print(len(event.annotations))
         for annotation in event.annotations:
             if annotation.source == "manual":
                 logger.debug(f"Already manually annotated event: {event.event_map}")
