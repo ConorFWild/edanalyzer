@@ -33,7 +33,7 @@ import dataclasses
 import time
 
 from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session, joinedload, subqueryload
+from sqlalchemy.orm import Session, joinedload, subqueryload, selectinload
 
 
 def download_dataset(options: Options):
@@ -1372,11 +1372,9 @@ class CLI:
         with Session(engine) as session:
             logger.info(f"Loading events")
             events_stmt = select(EventORM).options(
-                joinedload(EventORM.annotations),
-                joinedload(EventORM.partitions),
-                joinedload(EventORM.pandda),
-                subqueryload(PanDDAORM.system),
-                subqueryload(PanDDAORM.experiment),
+                selectinload(EventORM.annotations),
+                selectinload(EventORM.partitions),
+                selectinload(EventORM.pandda).selectinload([PanDDAORM.system, PanDDAORM.experiment]),
             )
             events = session.scalars(events_stmt).unique().all()
             logger.info(f"Loaded {len(events)} events!")
@@ -1455,7 +1453,7 @@ class CLI:
             non_hits = [annotation for annotation in annotations if not annotation.annotation]
             logger.info(f"Got {len(non_hits)} events annotated as hits")
 
-
+            # Make a blank updated annotations
             updated_annotations = PanDDAUpdatedEventAnnotations(
                 keys=[],
                 annotations=[]
