@@ -1001,11 +1001,11 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
         )).readlink())
 
         # Get the event using its event map path
-        # if event_map_path in events:
-        #     event = events[event_map_path]
-        # else:
-        #     continue
-        event = events[event_map_path]
+        if event_map_path in events:
+            event = events[event_map_path]
+        else:
+            continue
+        # event = events[event_map_path]
 
         # Determine the annotation
         if row[constants.PANDDA_INSPECT_VIEWED] == True:
