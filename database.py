@@ -975,6 +975,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
 
         # Add the events to the revelant partition
         for event in events:
+            event.partition = partition
             partition.events.append(event)
 
     # Add entries
