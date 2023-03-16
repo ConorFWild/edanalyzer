@@ -831,28 +831,35 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
     # Get the experiments
     experiments_stmt = select(ExperimentORM)
     experiments = {experiment.model_dir: experiment for experiment in session.scalars(experiments_stmt)}
+    logger.info(f"Found {len(experiments)} experiments in database!")
 
     # Get the systems
     systems_stmt = select(SystemORM)
     systems = {system.name: system for system in session.scalars(systems_stmt)}
+    logger.info(f"Found {len(systems)} systems in database!")
 
     # Get the datasets
     datasets_stmt = select(DatasetORM).join(DatasetORM.experiment)
     datasets = {dataset.path: dataset for dataset in session.scalars(datasets_stmt)}
+    logger.info(f"Found {len(datasets)} datasets in database!")
 
     # Get the partitions
     partitions_stmt = select(PartitionORM)
     partitions = {partition.name: partition for partition in session.scalars(partitions_stmt)}
+    logger.info(f"Found {len(partitions)} partitions in database!")
 
     # Get the panddas
     panddas_stmt = select(PanDDAORM)
     panddas = {pandda.path: pandda for pandda in session.scalars(panddas_stmt)}
+    logger.info(f"Found {len(panddas)} panddas in database!")
 
     # Create a new partition if necessary
     if partition_name not in partitions:
         partition = PartitionORM(name=partition_name)
+        logger.info(f"Using partitions: {partition_name}")
     else:
         partition = partitions[partition_name]
+        logger.info(f'Created new partition: {partition_name}')
 
     # Loop over custom PanDDAs, adding appropriate systems, experiments, annotitions,
     # partitions and events
@@ -908,6 +915,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
             if system.name in systems:
                 logger.info(f"Know system, replacing with one from table!")
                 system = systems[system.name]
+
                 system.experiments.append(experiment)
             else:
                 logger.info(f"New system!")
@@ -964,7 +972,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
     session.add_all([pandda for pandda in new_panddas])
 
     # Commit
-    session.commit()
+    # session.commit()
 
 
 def parse_old_annotation_update_dir(session, annotation_update_dir: Path):

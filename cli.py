@@ -12,7 +12,7 @@ import constants
 from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation, \
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented
 from database import populate_from_diamond, initialize_database, populate_partition_from_json, \
-    parse_old_annotation_update_dir
+    parse_old_annotation_update_dir, populate_from_custom_panddas
 
 from loguru import logger
 # from openbabel import pybel
@@ -1350,6 +1350,21 @@ class CLI:
                     Path(old_annotation_update_dir),
                 )
 
+    def populate_from_custom_panddas_finetune_train(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+
+        engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+
+        partition_name = constants.FINETUNE_TRAIN_PARTITION
+
+        funetune_train_datasets = options.finetune_datasets_train
+        with Session(engine) as session:
+
+            populate_from_custom_panddas(
+                session,
+                funetune_train_datasets,
+                partition_name
+            )
 
 if __name__ == "__main__":
     fire.Fire(CLI)
