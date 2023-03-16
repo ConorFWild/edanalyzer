@@ -497,7 +497,7 @@ def parse_pandda_inspect_table(
         potential_pandda_dir,
         pandda_processed_datasets_dir,
         model_building_dir,
-annotation_type
+        annotation_type
 ):
     try:
         pandda_inspect_table = pd.read_csv(pandda_inspect_table_file)
@@ -508,7 +508,12 @@ annotation_type
     events = []
     for index, row in pandda_inspect_table.iterrows():
         possible_event = parse_inspect_table_row(
-            row, potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir, annotation_type)
+            row,
+            potential_pandda_dir,
+            pandda_processed_datasets_dir,
+            model_building_dir,
+            annotation_type,
+        )
         if possible_event:
             events.append(possible_event)
 
@@ -576,8 +581,10 @@ def parse_potential_pandda_dir(potential_pandda_dir, model_building_dir, annotat
         if pandda_inspect_table_file.exists():
             events = parse_pandda_inspect_table(
                 pandda_inspect_table_file,
-                potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir, annotation_type
-
+                potential_pandda_dir,
+                pandda_processed_datasets_dir,
+                model_building_dir,
+                annotation_type
             )
             return events
 
@@ -1006,7 +1013,6 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
         dtag = row[constants.PANDDA_INSPECT_DTAG]
         event_idx = int(row[constants.PANDDA_INSPECT_EVENT_IDX])
         bdc = row[constants.PANDDA_INSPECT_BDC]
-
         viewed = row[constants.PANDDA_INSPECT_VIEWED]
 
         if viewed != True:
@@ -1018,9 +1024,9 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
             (
                 annotation_update_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag /
                 constants.PANDDA_EVENT_MAP_TEMPLATE.format(
-            dtag=dtag,
-            event_idx=event_idx,
-            bdc=bdc
+                    dtag=dtag,
+                    event_idx=event_idx,
+                    bdc=bdc
         )).readlink())
 
         # Get the event using its event map path
@@ -1035,7 +1041,7 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
         for annotation in event.annotations:
             if annotation.source == "manual":
                 logger.debug(f"Already manually annotated event: {event.event_map}")
-                annotated=True
+                annotated = True
 
         if annotated:
             continue
@@ -1052,7 +1058,13 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
     logger.info(f"Got {len(annotations)} new annotations!")
 
     # Update
-    session.add_all([annotation for annotation in annotations])
+    session.add_all(
+        [
+            annotation
+            for annotation
+            in annotations
+        ]
+    )
 
     # Commit
     session.commit()
