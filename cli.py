@@ -1385,11 +1385,7 @@ class CLI:
                 event
                 for event
                 in events
-                if constants.INITIAL_TRAIN_PARTITION in [
-                    partition.name
-                    for partition
-                    in event.partitions
-                ]
+                if constants.INITIAL_TRAIN_PARTITION == event.partitions
             ]
             logger.info(f"Got {len(events)} finetune events!")
 
@@ -1398,11 +1394,7 @@ class CLI:
                 event
                 for event
                 in events
-                if constants.FINETUNE_TRAIN_PARTITION in [
-                    partition.name
-                    for partition
-                    in event.partitions
-                ]
+                if constants.FINETUNE_TRAIN_PARTITION == event.partitions
             ]
             logger.info(f"Got {len(finetune_train_partition_events)} finetune events!")
 
