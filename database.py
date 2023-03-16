@@ -114,7 +114,7 @@ class DatasetORM(Base):
         secondary=constants.TABLE_DATASET_PANDDA,
         back_populates="datasets",
     )
-    events: Mapped["EventORM"] = relationship(back_populates="dataset")
+    events: Mapped[List["EventORM"]] = relationship(back_populates="dataset")
 
 
 class EventORM(Base):
