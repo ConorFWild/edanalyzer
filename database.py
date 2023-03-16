@@ -781,7 +781,8 @@ def populate_from_diamond(session):
 def populate_partition_from_json(
         session,
         train_dataset: PanDDAEventDataset,
-        test_dataset: PanDDAEventDataset):
+        test_dataset: PanDDAEventDataset,
+):
     # Get the datasets
     # datasets_stmt = select(DatasetORM)
 
@@ -792,22 +793,27 @@ def populate_partition_from_json(
     train_event_keys = [(event.pandda_dir, event.dtag, event.event_idx,) for event in train_dataset.pandda_events]
 
     # Add partitions for train
-    train_partition = PartitionORM(name=constants.TRAIN_PARTITION)
+    train_partition = PartitionORM(name=constants.TRAIN_PARTITION, events = [])
     for event in session.scalars(events_stmt):
         event_key = (event.pandda.path, event.dtag, event.event_idx,)
         if event_key in train_event_keys:
             train_partition.events.append(event)
 
+    logger.info(f"Added {len(train_partition.events)} events to train partition")
+
     # Get the test dataset keys
     test_event_keys = [(event.pandda_dir, event.dtag, event.event_idx,) for event in test_dataset.pandda_events]
 
     # Add partitions for test
-    test_partition = PartitionORM(name=constants.TEST_PARTITION)
+    test_partition = PartitionORM(name=constants.TEST_PARTITION, events = [])
     for event in session.scalars(events_stmt):
         event_key = (event.pandda.path, event.dtag, event.event_idx,)
         if event_key in test_event_keys:
             test_partition.events.append(event)
 
+    logger.info(f"Added {len(test_partition.events)} events to train partition")
+
+    # Add partitions and commit
     session.add_all([train_partition, test_partition])
     session.commit()
 

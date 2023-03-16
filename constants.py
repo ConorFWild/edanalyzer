@@ -74,3 +74,6 @@ TABLE_ANNOTATION = "annotation"
 TABLE_PARTITION = "partition"
 TABLE_SYSTEM = "system"
 TABLE_EXPERIMENT = "experiment"
+
+TRAIN_PARTITION = "train"
+TEST_PARTITION = "test"
