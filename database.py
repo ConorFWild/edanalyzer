@@ -995,7 +995,7 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
             dtag=dtag,
             event_idx=event_idx,
             bdc=bdc
-        )).resolve())
+        )).readlink())
 
         # Get the event using its event map path
         if event_map_path in events:
