@@ -790,12 +790,13 @@ def populate_partition_from_json(
     events_stmt = select(EventORM).join(EventORM.pandda)
 
     # Get the train dataset keys
-    train_event_keys = [(event.pandda_dir, event.dtag, event.event_idx,) for event in train_dataset.pandda_events]
+    train_event_keys = [(str(event.pandda_dir), str(event.dtag), int(event.event_idx),) for event in
+                        train_dataset.pandda_events]
 
     # Add partitions for train
-    train_partition = PartitionORM(name=constants.TRAIN_PARTITION, events = [])
+    train_partition = PartitionORM(name=constants.TRAIN_PARTITION, events=[])
     for event in session.scalars(events_stmt):
-        event_key = (event.pandda.path, event.dtag, event.event_idx,)
+        event_key = (str(event.pandda.path), str(event.dtag), int(event.event_idx),)
         if event_key in train_event_keys:
             train_partition.events.append(event)
 
@@ -805,9 +806,9 @@ def populate_partition_from_json(
     test_event_keys = [(event.pandda_dir, event.dtag, event.event_idx,) for event in test_dataset.pandda_events]
 
     # Add partitions for test
-    test_partition = PartitionORM(name=constants.TEST_PARTITION, events = [])
+    test_partition = PartitionORM(name=constants.TEST_PARTITION, events=[])
     for event in session.scalars(events_stmt):
-        event_key = (event.pandda.path, event.dtag, event.event_idx,)
+        event_key = (str(event.pandda.path), str(event.dtag), int(event.event_idx),)
         if event_key in test_event_keys:
             test_partition.events.append(event)
 
