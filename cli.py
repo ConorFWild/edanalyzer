@@ -11,7 +11,7 @@ from data import StructureReflectionsDataset, Options, StructureReflectionsData,
 import constants
 from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation, \
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented
-from database import populate_from_diamond, initialize_database
+from database import populate_from_diamond, initialize_database, populate_partition_from_json
 
 from loguru import logger
 # from openbabel import pybel
@@ -33,8 +33,6 @@ import time
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-
-
 
 
 def download_dataset(options: Options):
@@ -579,7 +577,6 @@ def train_pandda(
         updated_annotations: PanDDAUpdatedEventAnnotations,
         update=False
 ):
-
     if torch.cuda.is_available():
         logger.info(f"Using cuda!")
         dev = "cuda:0"
@@ -623,7 +620,6 @@ def train_pandda(
 
     running_loss = 0
 
-
     # Trainloop
 
     running_loss = []
@@ -645,7 +641,7 @@ def train_pandda(
             begin_annotate = time.time()
             model_annotation = model(image_c)
             finish_annotate = time.time()
-            logger.debug(f"Annotated 12 datasets in {finish_annotate-begin_annotate}")
+            logger.debug(f"Annotated 12 datasets in {finish_annotate - begin_annotate}")
             # print(outputs.to("cpu").detach().numpy())
             loss = criterion(model_annotation, annotation_c)
             loss.backward()
@@ -721,7 +717,6 @@ def make_fake_processed_dataset_dir(event: PanDDAEvent, processed_datasets_dir: 
         symlink(pandda_model_file, fake_model_file)
 
 
-
 @dataclasses.dataclass()
 class EventTableRecord:
     dtag: str
@@ -751,7 +746,7 @@ class EventTableRecord:
     exclude_from_characterisation: bool
 
     @staticmethod
-    def from_event(event: PanDDAEvent, site_idx =None):
+    def from_event(event: PanDDAEvent, site_idx=None):
         matches = re.findall(
             "_1-BDC_([0-9.]+)_map\.native\.ccp4",
             event.event_map
@@ -763,11 +758,10 @@ class EventTableRecord:
         else:
             _site_idx = 0
 
-
         return EventTableRecord(
             dtag=event.dtag,
             event_idx=event.event_idx,
-            bdc=1-bdc,
+            bdc=1 - bdc,
             cluster_size=0,
             global_correlation_to_average_map=0,
             global_correlation_to_mean_map=0,
@@ -801,9 +795,8 @@ class EventTable:
     def from_pandda_event_dataset(pandda_event_dataset: PanDDAEventDataset):
         records = []
         for j, event in enumerate(pandda_event_dataset.pandda_events):
-            event_record = EventTableRecord.from_event(event, int(j/100))
+            event_record = EventTableRecord.from_event(event, int(j / 100))
             records.append(event_record)
-
 
         return EventTable(records)
 
@@ -854,7 +847,6 @@ class SiteTable:
             else:
                 site_ids.append(_record.site_idx)
 
-
         records = []
         for site_id in site_ids:
             records.append(SiteTableRecord(site_id, (0.0, 0.0, 0.0)))
@@ -897,8 +889,8 @@ def make_fake_pandda(dataset: PanDDAEventDataset, path: Path):
         make_fake_processed_dataset_dir(event, fake_processed_datasets_dir)
 
 
-def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations: PanDDAEventAnnotations, updated_annotations: PanDDAUpdatedEventAnnotations, test_annotation_dir: Path):
-
+def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations: PanDDAEventAnnotations,
+                      updated_annotations: PanDDAUpdatedEventAnnotations, test_annotation_dir: Path):
     if not test_annotation_dir.exists():
         os.mkdir(test_annotation_dir)
 
@@ -1069,14 +1061,16 @@ class CLI:
         options = Options.load(options_json_path)
         dataset = PanDDAEventDataset.load(Path(options.working_dir) / constants.TRAIN_SET_FILE)
         annotations = PanDDAEventAnnotations.load(Path(options.working_dir) / constants.TRAIN_SET_ANNOTATION_FILE)
-        updated_annotations = PanDDAUpdatedEventAnnotations.load(Path(options.working_dir) / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
+        updated_annotations = PanDDAUpdatedEventAnnotations.load(
+            Path(options.working_dir) / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
         train_pandda(options, dataset, annotations, updated_annotations)
 
     def annotate_train_dataset(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
         dataset = PanDDAEventDataset.load(Path(options.working_dir) / constants.TRAIN_SET_FILE)
         annotations = PanDDAEventAnnotations.load(Path(options.working_dir) / constants.TRAIN_SET_ANNOTATION_FILE)
-        updated_annotations = PanDDAUpdatedEventAnnotations.load(Path(options.working_dir) / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
+        updated_annotations = PanDDAUpdatedEventAnnotations.load(
+            Path(options.working_dir) / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
 
         annotate_test_set(options, dataset, annotations, updated_annotations, )
 
@@ -1097,7 +1091,8 @@ class CLI:
         options = Options.load(options_json_path)
         output_dir = Path(options.working_dir)
         if (output_dir / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE).exists():
-            pandda_updated_annotations = PanDDAUpdatedEventAnnotations.load(output_dir / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
+            pandda_updated_annotations = PanDDAUpdatedEventAnnotations.load(
+                output_dir / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
         else:
             pandda_updated_annotations = PanDDAUpdatedEventAnnotations(keys=[], annotations=[])
 
@@ -1299,11 +1294,11 @@ class CLI:
         PanDDAEventAnnotations(annotations=pandda_dataset_annotations).save(
             Path(options.working_dir) / constants.FINETUNE_TRAIN_SET_ANNOTATION_FILE)
 
-
     def finetune(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
         dataset = PanDDAEventDataset.load(Path(options.working_dir), name=constants.FINETUNE_TRAIN_EVENTS_FILE)
-        annotations = PanDDAEventAnnotations.load(Path(options.working_dir) / constants.FINETUNE_TRAIN_SET_ANNOTATION_FILE)
+        annotations = PanDDAEventAnnotations.load(
+            Path(options.working_dir) / constants.FINETUNE_TRAIN_SET_ANNOTATION_FILE)
         updated_annotations = PanDDAUpdatedEventAnnotations.load(
             Path(options.working_dir) / constants.PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE)
         train_pandda(options, dataset, annotations, updated_annotations, update=True)
@@ -1322,6 +1317,22 @@ class CLI:
 
         with Session(engine) as session:
             populate_from_diamond(session)
+
+    def populate_partitions(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+
+        engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+
+        train_dataset = PanDDAEventDataset.load(Path(options.working_dir), name=constants.TRAIN_SET_FILE)
+
+        test_dataset = PanDDAEventDataset.load(Path(options.working_dir), name=constants.TEST_SET_FILE)
+        with Session(engine) as session:
+            populate_partition_from_json(
+                session,
+                train_dataset,
+                test_dataset,
+            )
+
 
 if __name__ == "__main__":
     fire.Fire(CLI)
