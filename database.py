@@ -991,7 +991,10 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
             continue
 
         # Get the resolved event map path
-        event_map_path = str(Path(constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+        event_map_path = str(
+            (
+                annotation_update_dir / constants.PANDDA_PROCESSED_DATASETS_DIR /
+                constants.PANDDA_EVENT_MAP_TEMPLATE.format(
             dtag=dtag,
             event_idx=event_idx,
             bdc=bdc
