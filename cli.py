@@ -1388,6 +1388,8 @@ class CLI:
                     in event.partitions
                 ]
             ]
+            logger.info(f"Got {len(events)} finetune events!")
+
 
             finetune_train_partition_events = [
                 event
@@ -1399,6 +1401,7 @@ class CLI:
                     in event.partitions
                 ]
             ]
+            logger.info(f"Got {len(finetune_train_partition_events)} finetune events!")
 
             pandda_events = []
             annotations = []
