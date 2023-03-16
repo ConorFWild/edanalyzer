@@ -989,7 +989,6 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
 
         viewed = row[constants.PANDDA_INSPECT_VIEWED]
 
-
         if viewed != True:
             logger.debug(f"Event {dtag} {event_idx} has not been viewed! Skipping!")
             continue
@@ -1012,10 +1011,14 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
         # event = events[event_map_path]
 
         # print(len(event.annotations))
+        annotated = False
         for annotation in event.annotations:
             if annotation.source == "manual":
                 logger.debug(f"Already manually annotated event: {event.event_map}")
-                continue
+                annotated=True
+
+        if annotated:
+            continue
 
         # Determine the annotation
         if row[constants.PANDDA_INSPECT_VIEWED] == True:
