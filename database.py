@@ -628,7 +628,6 @@ def get_experiment_datasets(experiment: ExperimentORM, ):
                 # reflections_path = None
                 reflections_path = directory / constants.OLD_MODEL_BUILDING_REFLECTIONS_FILE_TEMPLATE.format(dtag=directory.name)
                 if not reflections_path.exists():
-
                     continue
 
             dataset = DatasetORM(
@@ -897,12 +896,12 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
             experiment = experiments[pandda_data_source]
 
             # Get the datasets
-            experiment_datasets = [
-                dataset
+            experiment_datasets = {
+                dataset.dtag: dataset
                 for dataset
                 in datasets.values()
                 if dataset.experiment.model_dir == experiment.model_dir
-            ]
+            }
             logger.info(f"Found {len(experiment_datasets)} datasets for experiment")
 
             # Get the system
