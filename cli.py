@@ -1371,7 +1371,8 @@ class CLI:
 
         with Session(engine) as session:
 
-            events_stmt = select(EventORM).options(joinedload(EventORM.annotations)).options(
+            events_stmt = select(EventORM).options(
+                joinedload(EventORM.annotations)).options(
                 joinedload(EventORM.partitions)).options(
                 joinedload(EventORM.pandda)).options(
                 joinedload(EventORM.experiment)).options(
