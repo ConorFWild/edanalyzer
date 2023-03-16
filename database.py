@@ -393,7 +393,7 @@ def try_open_map(path):
         return False
 
 
-def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, model_building_dir):
+def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, model_building_dir, annotation_type):
     dtag = str(row[constants.PANDDA_INSPECT_DTAG])
     event_idx = row[constants.PANDDA_INSPECT_EVENT_IDX]
     bdc = row[constants.PANDDA_INSPECT_BDC]
@@ -497,6 +497,7 @@ def parse_pandda_inspect_table(
         potential_pandda_dir,
         pandda_processed_datasets_dir,
         model_building_dir,
+annotation_type
 ):
     try:
         pandda_inspect_table = pd.read_csv(pandda_inspect_table_file)
@@ -507,7 +508,7 @@ def parse_pandda_inspect_table(
     events = []
     for index, row in pandda_inspect_table.iterrows():
         possible_event = parse_inspect_table_row(
-            row, potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir)
+            row, potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir, annotation_type)
         if possible_event:
             events.append(possible_event)
 
@@ -563,7 +564,7 @@ def parse_pandda_inspect_table_parallel(
         return None
 
 
-def parse_potential_pandda_dir(potential_pandda_dir, model_building_dir):
+def parse_potential_pandda_dir(potential_pandda_dir, model_building_dir, annotation_type):
     pandda_analysis_dir = potential_pandda_dir / constants.PANDDA_ANALYSIS_DIR
     pandda_inspect_table_file = pandda_analysis_dir / constants.PANDDA_INSPECT_TABLE_FILE
     pandda_processed_datasets_dir = potential_pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
@@ -575,7 +576,7 @@ def parse_potential_pandda_dir(potential_pandda_dir, model_building_dir):
         if pandda_inspect_table_file.exists():
             events = parse_pandda_inspect_table(
                 pandda_inspect_table_file,
-                potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir
+                potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir, annotation_type
 
             )
             return events
@@ -934,7 +935,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
         logger.info(f"System has {len(system_datasets)} datasets")
 
         # Get the events
-        events = parse_potential_pandda_dir(pandda_path, pandda_data_source, )
+        events = parse_potential_pandda_dir(pandda_path, pandda_data_source, annotation_type="manual")
         logger.info(f"Found {len(events)} events!")
 
         # Match events to datasets
