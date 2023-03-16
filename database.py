@@ -604,19 +604,25 @@ def parse_potential_pandda_dir_parallel(potential_pandda_dir, model_building_dir
     return None
 
 
-def get_experiment_datasets(experiment: ExperimentORM):
+def get_experiment_datasets(experiment: ExperimentORM, ):
     datasets = {}
     for directory in Path(experiment.model_dir).glob("*"):
         if directory.is_dir():
             structure_path = directory / constants.MODEL_BUILDING_STRUCTURE_FILE
             reflections_path = directory / constants.MODEL_BUILDING_REFLECTIONS_FILE
+
             if not structure_path.exists():
                 # structure_path = None
-                continue
+                structure_path = directory / constants.OLD_MODEL_BUILDING_STRUCTURE_FILE_TEMPLATE.format(dtag=directory.name)
+                if not structure_path.exists():
+                    continue
 
             if not reflections_path.exists():
                 # reflections_path = None
-                continue
+                reflections_path = directory / constants.OLD_MODEL_BUILDING_REFLECTIONS_FILE_TEMPLATE.format(dtag=directory.name)
+                if not reflections_path.exists():
+
+                    continue
 
             dataset = DatasetORM(
                 dtag=directory.name,
