@@ -1366,5 +1366,19 @@ class CLI:
                 partition_name
             )
 
+    def train_default_and_finetune(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+
+        engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+        #
+        # with Session(engine) as session:
+        #
+        #
+        #     train_partition_events =
+        #
+        #     finetune_train_partition_events =
+
+
+
 if __name__ == "__main__":
     fire.Fire(CLI)

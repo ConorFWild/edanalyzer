@@ -944,7 +944,8 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
         events = parse_potential_pandda_dir(
             Path(pandda_path),
             Path(pandda_data_source),
-            annotation_type="manual")
+            annotation_type="manual",
+        )
         logger.info(f"Found {len(events)} events!")
 
         # Match events to datasets
@@ -959,7 +960,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
                     logger.warning(f"Not in system datasets either!")
 
         # Get PanDDA dataset dtags
-        pandda_dataset_dtags = get_pandda_dir_dataset_dtags(pandda_path)
+        pandda_dataset_dtags = get_pandda_dir_dataset_dtags(Path(pandda_path))
 
         # Create a new PanDDA
         pandda = PanDDAORM(
