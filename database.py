@@ -847,12 +847,14 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
     logger.info(f"Found {len(experiments)} experiments in database!")
 
     # Get the systems
-    systems_stmt = select(SystemORM)
+    systems_stmt = select(SystemORM).options(joinedload((SystemORM.datasets)))
     systems = {system.name: system for system in session.scalars(systems_stmt)}
     logger.info(f"Found {len(systems)} systems in database!")
 
     # Get the datasets
-    datasets_stmt = select(DatasetORM).join(DatasetORM.experiment)
+    datasets_stmt = select(DatasetORM).options(joinedload(DatasetORM.experiment),
+                                              joinedload(DatasetORM.events),
+                                              )
     datasets = {dataset.path: dataset for dataset in session.scalars(datasets_stmt)}
     logger.info(f"Found {len(datasets)} datasets in database!")
 
