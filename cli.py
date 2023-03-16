@@ -1374,9 +1374,11 @@ class CLI:
             events_stmt = select(EventORM).options(
                 joinedload(EventORM.annotations)).options(
                 joinedload(EventORM.partitions)).options(
-                joinedload(EventORM.pandda)).options(
-                joinedload(EventORM.pandda.experiment)).options(
-                joinedload(EventORM.pandda.system))
+                joinedload(EventORM.pandda).subqueryload(
+                    PanDDAORM.system
+                ).subqueryload(
+                    PanDDAORM.experiment
+                ))
             events = session.scalars(events_stmt).unique().all()
             logger.info(f"Loaded {len(events)} events!")
             train_partition_events = [
