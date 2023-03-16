@@ -125,6 +125,7 @@ class FinetuneDataset(BaseModel):
 class Options(BaseModel):
     working_dir: str
     finetune_datasets_train: list[FinetuneDataset]
+    old_updated_annotation_dirs: list[str]
 
     @classmethod
     def load(cls, path):

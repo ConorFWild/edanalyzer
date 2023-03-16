@@ -974,6 +974,8 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
     inspect_table_path = annotation_update_dir / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
     inspect_table = pd.read_csv(inspect_table_path)
     logger.info(f"Loaded inspect table at : {inspect_table_path}")
+    num_viewed = inspect_table[inspect_table[constants.PANDDA_INSPECT_VIEWED] == True]
+    logger.info(f"Inspect table has {len(inspect_table)} events of which {len(num_viewed)} are viewed")
 
     # Parse the table
     annotations = []
@@ -1013,7 +1015,7 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
     session.add_all([annotation for annotation in annotations])
 
     # Commit
-    session.commit()
+    # session.commit()
 
 
 def parse_annotation_update_dir(session, annotation_update_dir: Path):

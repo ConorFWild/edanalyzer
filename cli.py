@@ -11,7 +11,8 @@ from data import StructureReflectionsDataset, Options, StructureReflectionsData,
 import constants
 from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation, \
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented
-from database import populate_from_diamond, initialize_database, populate_partition_from_json
+from database import populate_from_diamond, initialize_database, populate_partition_from_json, \
+    parse_old_annotation_update_dir
 
 from loguru import logger
 # from openbabel import pybel
@@ -1332,6 +1333,21 @@ class CLI:
                 train_dataset,
                 test_dataset,
             )
+
+    def parse_old_annotation_update_dir(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+
+        old_annotation_update_dirs = options.old_updated_annotation_dirs
+
+        engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+
+        with Session(engine) as session:
+            for old_annotation_update_dir in old_annotation_update_dirs:
+                logger.info(f"Parsing old update dir: {old_annotation_update_dir}")
+                parse_old_annotation_update_dir(
+                    session,
+                    Path(old_annotation_update_dir),
+                )
 
 
 if __name__ == "__main__":
