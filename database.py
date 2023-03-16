@@ -21,6 +21,9 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from sqlalchemy import UniqueConstraint
+from sqlalchemy.orm import lazyload
+from sqlalchemy.orm import joinedload
+
 
 import constants
 from data import PanDDAEventReannotations, PanDDAEventAnnotations, PanDDAEventDataset
@@ -966,7 +969,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
 
 def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
     # Get the events
-    events_stmt = select(EventORM).join(EventORM.annotations)
+    events_stmt = select(EventORM).options(joinedload(EventORM.annotations))
     events = {event.event_map: event for event in session.scalars(events_stmt).all()}
     logger.info(f"Got {len(events)} events from table")
 
