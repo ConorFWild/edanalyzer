@@ -1372,7 +1372,10 @@ class CLI:
         with Session(engine) as session:
 
             events_stmt = select(EventORM).options(joinedload(EventORM.annotations)).options(
-                joinedload(EventORM.partitions))
+                joinedload(EventORM.partitions)).options(
+                joinedload(EventORM.pandda)).options(
+                joinedload(EventORM.experiment)).options(
+                joinedload(EventORM.system))
             events = session.scalars(events_stmt).unique().all()
             train_partition_events = [
                 event
