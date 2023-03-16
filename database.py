@@ -799,25 +799,25 @@ def populate_partition_from_json(
     logger.info(f'Got {len(events)} events!')
 
     # Add partitions for train
-    train_partition = PartitionORM(name=constants.TRAIN_PARTITION, events=[])
+    train_partition = PartitionORM(name=constants.INITIAL_TRAIN_PARTITION, events=[])
     logger.info(f"Iterating {len(train_event_keys)} train events")
     for event_key in train_event_keys:
         if event_key in events:
             train_partition.events.append(events[event_key])
 
-    logger.info(f"Added {len(train_partition.events)} events to train partition")
+    logger.info(f"Added {len(train_partition.events)} events to intial train partition")
 
     # Get the test dataset keys
     test_event_keys = [str(event.event_map) for event in test_dataset.pandda_events]
 
     # Add partitions for test
-    test_partition = PartitionORM(name=constants.TEST_PARTITION, events=[])
+    test_partition = PartitionORM(name=constants.INITIAL_TEST_PARTITION, events=[])
     logger.info(f"Iterating {len(test_event_keys)} test events")
     for event_key in test_event_keys:
         if event_key in events:
             test_partition.events.append(events[event_key])
 
-    logger.info(f"Added {len(test_partition.events)} events to train partition")
+    logger.info(f"Added {len(test_partition.events)} events to intial test partition")
 
     # Add partitions and commit
     # session.add_all([train_partition, test_partition])

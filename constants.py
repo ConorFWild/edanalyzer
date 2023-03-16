@@ -75,5 +75,5 @@ TABLE_PARTITION = "partition"
 TABLE_SYSTEM = "system"
 TABLE_EXPERIMENT = "experiment"
 
-TRAIN_PARTITION = "train"
-TEST_PARTITION = "test"
+INITIAL_TRAIN_PARTITION = "train"
+INITIAL_TEST_PARTITION = "test"
