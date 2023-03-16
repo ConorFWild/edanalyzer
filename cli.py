@@ -12,7 +12,7 @@ import constants
 from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation, \
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented
 from database import populate_from_diamond, initialize_database, populate_partition_from_json, \
-    parse_old_annotation_update_dir, populate_from_custom_panddas
+    parse_old_annotation_update_dir, populate_from_custom_panddas, EventORM,
 
 from loguru import logger
 # from openbabel import pybel
@@ -32,8 +32,8 @@ import download_dataset
 import dataclasses
 import time
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session, joinedload
 
 
 def download_dataset(options: Options):
@@ -1343,7 +1343,6 @@ class CLI:
 
         for old_annotation_update_dir in old_annotation_update_dirs:
             with Session(engine) as session:
-
                 logger.info(f"Parsing old update dir: {old_annotation_update_dir}")
                 parse_old_annotation_update_dir(
                     session,
@@ -1359,7 +1358,6 @@ class CLI:
 
         funetune_train_datasets = options.finetune_datasets_train
         with Session(engine) as session:
-
             populate_from_custom_panddas(
                 session,
                 funetune_train_datasets,
@@ -1370,14 +1368,97 @@ class CLI:
         options = Options.load(options_json_path)
 
         engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
-        #
-        # with Session(engine) as session:
-        #
-        #
-        #     train_partition_events =
-        #
-        #     finetune_train_partition_events =
 
+        with Session(engine) as session:
+
+            events_stmt = select(EventORM).options(joinedload(EventORM.annotations)).options(
+                joinedload(EventORM.partitions))
+            events = session.scalars(events_stmt).unique().all()
+            train_partition_events = [
+                event
+                for event
+                in events
+                if constants.INITIAL_TRAIN_PARTITION in [
+                    partition.name
+                    for partition
+                    in event.partitions
+                ]
+            ]
+
+            finetune_train_partition_events = [
+                event
+                for event
+                in events
+                if constants.FINETUNE_TRAIN_PARTITION in [
+                    partition.name
+                    for partition
+                    in event.partitions
+                ]
+            ]
+
+            pandda_events = []
+            annotations = []
+            for event in train_partition_events + finetune_train_partition_events:
+                if event.hit_confidence not in ["Low", "low"]:
+                    hit = True
+                else:
+                    hit = False
+
+                pandda_event = PanDDAEvent(
+                    id=event.id,
+                    pandda_dir=event.pandda.path,
+                    model_building_dir=event.experiment.model_dir,
+                    system_name=event.system.name,
+                    dtag=event.dtag,
+                    event_idx=event.event_idx,
+                    event_map=event.event_map,
+                    x=event.x,
+                    y=event.y,
+                    z=event.z,
+                    hit=hit,
+                    ligand=None
+                )
+                pandda_events.append(event)
+
+
+                event_annotations = {annotation.source: annotation for annotation in pandda_event.annotations}
+                if "manual" in event_annotations:
+                    annotation = event_annotation["manual"]
+                else:
+                    annotation = event_annotations["auto"]
+
+                event_annotation = PanDDAEventAnnotation(
+                    annotation=annotation.annotation
+                )
+                annotations.append(event_annotation)
+
+            # Make the dataset
+            dataset = PanDDAEventDataset(
+                pandda_events=pandda_events
+            )
+            logger.info(f"Got {len(pandda_events)} events")
+
+            # Make the annotations
+            pandda_event_annotations = PanDDAEventAnnotations(annotations=annotations)
+            logger.info(f"Got {len(annotations)} annotations")
+            hits = [annotation for annotation in annotations if annotation.annotation]
+            logger.info(f"Got {len(hits)} events annotated as hits")
+            non_hits = [annotation for annotation in annotations if not annotation.annotation]
+            logger.info(f"Got {len(non_hits)} events annotated as hits")
+
+
+            updated_annotations = PanDDAUpdatedEventAnnotations(
+                keys=[],
+                annotations=[]
+
+            )
+
+            train_pandda(
+                options,
+                dataset,
+                pandda_event_annotations,
+                updated_annotations
+            )
 
 
 if __name__ == "__main__":
