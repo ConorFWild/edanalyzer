@@ -959,8 +959,6 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
             continue
         logger.info(f"Found {len(events)} events!")
 
-
-
         # Match events to datasets
         for event in events:
             if event.dtag in experiment_datasets:
