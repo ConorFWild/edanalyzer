@@ -966,7 +966,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
 
 def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
     # Get the events
-    events_stmt = select(EventORM)
+    events_stmt = select(EventORM).join(EventORM.annotations)
     events = {event.event_map: event for event in session.scalars(events_stmt)}
     logger.info(f"Got {len(events)} events from table")
 
@@ -985,6 +985,7 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
         bdc = row[constants.PANDDA_INSPECT_BDC]
 
         viewed = row[constants.PANDDA_INSPECT_VIEWED]
+
 
         if viewed != True:
             logger.debug(f"Event {dtag} {event_idx} has not been viewed! Skipping!")
@@ -1006,6 +1007,11 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
         else:
             continue
         # event = events[event_map_path]
+
+        for annotation in event.annotations:
+            if annotation.source == "manual":
+                logger.debug(f"Already manually annotated event: {event.event_map}")
+                continue
 
         # Determine the annotation
         if row[constants.PANDDA_INSPECT_VIEWED] == True:
