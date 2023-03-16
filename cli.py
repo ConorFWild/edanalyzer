@@ -1374,7 +1374,10 @@ class CLI:
             events_stmt = select(EventORM).options(
                 selectinload(EventORM.annotations),
                 selectinload(EventORM.partitions),
-                selectinload(EventORM.pandda).selectinload([PanDDAORM.system, PanDDAORM.experiment]),
+                selectinload(EventORM.pandda).options(
+                    selectinload(PanDDAORM.system),
+                    selectinload(PanDDAORM.experiment),
+                ),
             )
             events = session.scalars(events_stmt).unique().all()
             logger.info(f"Loaded {len(events)} events!")
