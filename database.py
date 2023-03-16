@@ -941,7 +941,10 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
         logger.info(f"System has {len(system_datasets)} datasets")
 
         # Get the events
-        events = parse_potential_pandda_dir(pandda_path, pandda_data_source, annotation_type="manual")
+        events = parse_potential_pandda_dir(
+            Path(pandda_path),
+            Path(pandda_data_source),
+            annotation_type="manual")
         logger.info(f"Found {len(events)} events!")
 
         # Match events to datasets
