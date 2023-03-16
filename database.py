@@ -843,29 +843,29 @@ def populate_partition_from_json(
 def populate_from_custom_panddas(session, custom_panddas, partition_name):
     # Get the experiments
     experiments_stmt = select(ExperimentORM)
-    experiments = {experiment.model_dir: experiment for experiment in session.scalars(experiments_stmt)}
+    experiments = {experiment.model_dir: experiment for experiment in session.scalars(experiments_stmt).unique().all()}
     logger.info(f"Found {len(experiments)} experiments in database!")
 
     # Get the systems
     systems_stmt = select(SystemORM).options(joinedload((SystemORM.datasets)))
-    systems = {system.name: system for system in session.scalars(systems_stmt)}
+    systems = {system.name: system for system in session.scalars(systems_stmt).unique().all()}
     logger.info(f"Found {len(systems)} systems in database!")
 
     # Get the datasets
     datasets_stmt = select(DatasetORM).options(joinedload(DatasetORM.experiment),
                                               joinedload(DatasetORM.events),
                                               )
-    datasets = {dataset.path: dataset for dataset in session.scalars(datasets_stmt)}
+    datasets = {dataset.path: dataset for dataset in session.scalars(datasets_stmt).unique().all()}
     logger.info(f"Found {len(datasets)} datasets in database!")
 
     # Get the partitions
     partitions_stmt = select(PartitionORM)
-    partitions = {partition.name: partition for partition in session.scalars(partitions_stmt)}
+    partitions = {partition.name: partition for partition in session.scalars(partitions_stmt).unique().all()}
     logger.info(f"Found {len(partitions)} partitions in database!")
 
     # Get the panddas
     panddas_stmt = select(PanDDAORM)
-    panddas = {pandda.path: pandda for pandda in session.scalars(panddas_stmt)}
+    panddas = {pandda.path: pandda for pandda in session.scalars(panddas_stmt).unique().all()}
     logger.info(f"Found {len(panddas)} panddas in database!")
 
     # Create a new partition if necessary
