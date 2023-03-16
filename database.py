@@ -970,7 +970,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
 def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
     # Get the events
     events_stmt = select(EventORM).options(joinedload(EventORM.annotations))
-    events = {event.event_map: event for event in session.scalars(events_stmt).unqiue().all()}
+    events = {event.event_map: event for event in session.scalars(events_stmt).unique().all()}
     logger.info(f"Got {len(events)} events from table")
 
     # Get the inspect table
