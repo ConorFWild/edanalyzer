@@ -793,12 +793,17 @@ def populate_partition_from_json(
     train_event_keys = [str(event.event_map) for event in
                         train_dataset.pandda_events]
 
+    # Get the events
+    logger.info(f"Getting events")
+    events = {event.event_map: event for event in session.scalars(events_stmt)}
+    logger.info(f'Got {len(events)} events!')
+
     # Add partitions for train
     train_partition = PartitionORM(name=constants.TRAIN_PARTITION, events=[])
-    for event in session.scalars(events_stmt):
-        event_key = event.event_map
-        if event_key in train_event_keys:
-            train_partition.events.append(event)
+    logger.info(f"Iterating {len(train_event_keys)} train events")
+    for event_key in train_event_keys:
+        if event_key in events:
+            train_partition.events.append(events[event_key])
 
     logger.info(f"Added {len(train_partition.events)} events to train partition")
 
@@ -807,10 +812,10 @@ def populate_partition_from_json(
 
     # Add partitions for test
     test_partition = PartitionORM(name=constants.TEST_PARTITION, events=[])
-    for event in session.scalars(events_stmt):
-        event_key = event.event_map
-        if event_key in test_event_keys:
-            test_partition.events.append(event)
+    logger.info(f"Iterating {len(test_event_keys)} test events")
+    for event_key in test_event_keys:
+        if event_key in events:
+            test_partition.events.append(events[event_key])
 
     logger.info(f"Added {len(test_partition.events)} events to train partition")
 
