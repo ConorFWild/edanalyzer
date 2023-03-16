@@ -820,8 +820,8 @@ def populate_partition_from_json(
     logger.info(f"Added {len(test_partition.events)} events to intial test partition")
 
     # Add partitions and commit
-    # session.add_all([train_partition, test_partition])
-    # session.commit()
+    session.add_all([train_partition, test_partition])
+    session.commit()
 
 
 def populate_from_custom_panddas(session, custom_panddas, partition_name):
