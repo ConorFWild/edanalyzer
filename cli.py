@@ -33,7 +33,7 @@ import dataclasses
 import time
 
 from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, subqueryload
 
 
 def download_dataset(options: Options):
@@ -1372,12 +1372,12 @@ class CLI:
         with Session(engine) as session:
             logger.info(f"Loading events")
             events_stmt = select(EventORM).options(
-                joinedload(EventORM.annotations)).options(
-                joinedload(EventORM.partitions)).options(
-                joinedload(EventORM.pandda).subqueryload(
-                    PanDDAORM.system,
-                    PanDDAORM.experiment
-                ))
+                joinedload(EventORM.annotations),
+                joinedload(EventORM.partitions),
+                joinedload(EventORM.pandda),
+                subqueryload(PanDDAORM.system),
+                subqueryload(PanDDAORM.experiment),
+            )
             events = session.scalars(events_stmt).unique().all()
             logger.info(f"Loaded {len(events)} events!")
             train_partition_events = [
