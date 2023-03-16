@@ -954,10 +954,12 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
             Path(pandda_data_source),
             annotation_type="manual",
         )
+        if not events:
+            logger.warning(f"Did not find any events! Skipping!")
+            continue
         logger.info(f"Found {len(events)} events!")
 
-        if not events:
-            continue
+
 
         # Match events to datasets
         for event in events:
