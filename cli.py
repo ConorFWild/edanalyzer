@@ -1370,7 +1370,7 @@ class CLI:
         engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
 
         with Session(engine) as session:
-
+            logger.info(f"Loading events")
             events_stmt = select(EventORM).options(
                 joinedload(EventORM.annotations)).options(
                 joinedload(EventORM.partitions)).options(
@@ -1378,6 +1378,7 @@ class CLI:
                 joinedload(EventORM.experiment)).options(
                 joinedload(EventORM.system))
             events = session.scalars(events_stmt).unique().all()
+            logger.info(f"Loaded {len(events)} events!")
             train_partition_events = [
                 event
                 for event
