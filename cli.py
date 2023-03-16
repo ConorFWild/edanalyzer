@@ -1341,8 +1341,9 @@ class CLI:
 
         engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
 
-        with Session(engine) as session:
-            for old_annotation_update_dir in old_annotation_update_dirs:
+        for old_annotation_update_dir in old_annotation_update_dirs:
+            with Session(engine) as session:
+
                 logger.info(f"Parsing old update dir: {old_annotation_update_dir}")
                 parse_old_annotation_update_dir(
                     session,
