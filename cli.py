@@ -12,7 +12,7 @@ import constants
 from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation, \
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented
 from database import populate_from_diamond, initialize_database, populate_partition_from_json, \
-    parse_old_annotation_update_dir, populate_from_custom_panddas, EventORM
+    parse_old_annotation_update_dir, populate_from_custom_panddas, EventORM, PanDDAORM
 
 from loguru import logger
 # from openbabel import pybel
@@ -1375,8 +1375,8 @@ class CLI:
                 joinedload(EventORM.annotations)).options(
                 joinedload(EventORM.partitions)).options(
                 joinedload(EventORM.pandda)).options(
-                joinedload(EventORM.experiment)).options(
-                joinedload(EventORM.system))
+                joinedload(PanDDAORM.experiment)).options(
+                joinedload(PanDDAORM.system))
             events = session.scalars(events_stmt).unique().all()
             logger.info(f"Loaded {len(events)} events!")
             train_partition_events = [
