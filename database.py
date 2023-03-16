@@ -1011,12 +1011,12 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
             continue
         # event = events[event_map_path]
 
-        print(len(event.annotations))
+        # print(len(event.annotations))
         for annotation in event.annotations:
             if annotation.source == "manual":
                 logger.debug(f"Already manually annotated event: {event.event_map}")
                 continue
-
+π
         # Determine the annotation
         if row[constants.PANDDA_INSPECT_VIEWED] == True:
             if row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
