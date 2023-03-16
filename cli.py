@@ -1375,8 +1375,7 @@ class CLI:
                 joinedload(EventORM.annotations)).options(
                 joinedload(EventORM.partitions)).options(
                 joinedload(EventORM.pandda).subqueryload(
-                    PanDDAORM.system
-                ).subqueryload(
+                    PanDDAORM.system,
                     PanDDAORM.experiment
                 ))
             events = session.scalars(events_stmt).unique().all()
