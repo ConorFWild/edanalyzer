@@ -1028,7 +1028,7 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
     session.add_all([annotation for annotation in annotations])
 
     # Commit
-    # session.commit()
+    session.commit()
 
 
 def parse_annotation_update_dir(session, annotation_update_dir: Path):
