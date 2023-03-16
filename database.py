@@ -1016,7 +1016,7 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
             if annotation.source == "manual":
                 logger.debug(f"Already manually annotated event: {event.event_map}")
                 continue
-π
+
         # Determine the annotation
         if row[constants.PANDDA_INSPECT_VIEWED] == True:
             if row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
