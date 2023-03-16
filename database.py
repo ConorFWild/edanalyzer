@@ -868,7 +868,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
     new_systems = []
     new_experiments = []
     for custom_pandda in custom_panddas:
-        logger.info(f"PanDDA Path is: {custom_pandda.path}")
+        logger.info(f"PanDDA Path is: {custom_pandda.pandda}")
         # Unpack the PanDDA object
         pandda_data_source = custom_pandda.source
         pandda_path = custom_pandda.pandda
