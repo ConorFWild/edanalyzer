@@ -1027,19 +1027,19 @@ def annotate_test_set(
 
     for cutoff in np.linspace(0.0,1.0, 100):
         fp = [
-            _idx for _idx, _record in records
+            _idx for _idx, _record in records.items()
             if ((_record["annotation"] == False) & (_record["model_annotation"] > cutoff))
         ]
         tp = [
-            _idx for _idx, _record in records
+            _idx for _idx, _record in records.items()
             if ((_record["annotation"] == True) & (_record["model_annotation"] > cutoff))
         ]
         fn = [
-            _idx for _idx, _record in records
+            _idx for _idx, _record in records.items()
             if ((_record["annotation"] == True) & (_record["model_annotation"] < cutoff))
         ]
         tn = [
-            _idx for _idx, _record in records
+            _idx for _idx, _record in records.items()
             if ((_record["annotation"] == False) & (_record["model_annotation"] < cutoff))
         ]
         precission = len(tp) / len(tp+fp)
