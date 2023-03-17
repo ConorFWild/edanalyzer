@@ -28,6 +28,8 @@ DIAMOND_MODEL_BUILDING_DIR_NEW = "model_building"
 DIAMOND_MODEL_BUILDING_DIR_OLD = "initial_model"
 PANDDA_UPDATED_EVENT_ANNOTATIONS_FILE = "pandda_updated_event_annotations.json"
 PANDDA_TEST_ANNOTATION_DIR = "TEST"
+PANDDA_TRAIN_ANNOTATION_DIR = "TRAIN"
+
 PANDDA_UPDATED_TEST_EVENT_ANNOTATIONS_FILE = "pandda_updated_test_event_annotations.json"
 SQLITE_FILE = "database.db"
 

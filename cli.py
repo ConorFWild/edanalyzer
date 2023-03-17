@@ -890,14 +890,22 @@ def make_fake_pandda(dataset: PanDDAEventDataset, path: Path):
         make_fake_processed_dataset_dir(event, fake_processed_datasets_dir)
 
 
-def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations: PanDDAEventAnnotations,
-                      updated_annotations: PanDDAUpdatedEventAnnotations, test_annotation_dir: Path):
+def annotate_test_set(
+        options: Options,
+        dataset: PanDDAEventDataset,
+        annotations: PanDDAEventAnnotations,
+        updated_annotations: PanDDAUpdatedEventAnnotations,
+        test_annotation_dir: Path,
+):
+    logger.info(f"Output directory is: {test_annotation_dir}")
     if not test_annotation_dir.exists():
         os.mkdir(test_annotation_dir)
 
     records_file = test_annotation_dir / "train_records.pickle"
+    logger.info(f"Record file is: {records_file}")
 
     if not records_file.exists():
+        logger.info(f"No record file to parse: Annotating dataset!")
         # Get the dataset
         dataset_torch = PanDDAEventDatasetTorch(
             dataset,
@@ -954,6 +962,7 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
             pickle.dump(records, f)
 
     else:
+        logger.info(f"Records file for CNN annotations exists: loading!")
         with open(records_file, "rb") as f:
 
             records = pickle.load(f)
@@ -964,18 +973,20 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
     # Get highest scoring non-hits
     high_scoring_non_hits = []
     for sorted_idx in sorted_idxs:
-        if len(high_scoring_non_hits) > 1500:
-            continue
+        # if len(high_scoring_non_hits) > 1500:
+        #     continue
         if records[sorted_idx]["annotation"] == 0.0:
             high_scoring_non_hits.append(sorted_idx)
+    logger.info(f"Got {len(high_scoring_non_hits)} high scoring non-hits!")
 
     # Get the lowest scoring hits
     low_scoring_hits = []
     for sorted_idx in reversed(sorted_idxs):
-        if len(low_scoring_hits) > 1500:
-            continue
+        # if len(low_scoring_hits) > 1500:
+        #     continue
         if records[sorted_idx]["annotation"] == 1.0:
             low_scoring_hits.append(sorted_idx)
+    logger.info(f"Got {len(low_scoring_hits)} low scoring hits!")
 
     # Make fake PanDDA and inspect table for high scoring non hits
     pandda_events = []
@@ -989,8 +1000,10 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
             pandda_events.append(event)
             dtag_event_ids.append(key)
     high_scoring_non_hit_dataset = PanDDAEventDataset(pandda_events=pandda_events)
-    make_fake_pandda(high_scoring_non_hit_dataset,
-                     test_annotation_dir / constants.HIGH_SCORING_NON_HIT_DATASET_DIR)
+    make_fake_pandda(
+        high_scoring_non_hit_dataset,
+        test_annotation_dir / constants.HIGH_SCORING_NON_HIT_DATASET_DIR,
+    )
 
     # Make fake PanDDA and inspect table for low scoring hits
     pandda_events = []
@@ -1005,11 +1018,112 @@ def annotate_test_set(options: Options, dataset: PanDDAEventDataset, annotations
             dtag_event_ids.append(key)
 
     low_scoring_hit_dataset = PanDDAEventDataset(pandda_events=pandda_events)
-    make_fake_pandda(low_scoring_hit_dataset,
-                     test_annotation_dir / constants.LOW_SCORING_HIT_DATASET_DIR)
+    make_fake_pandda(
+        low_scoring_hit_dataset,
+        test_annotation_dir / constants.LOW_SCORING_HIT_DATASET_DIR,
+    )
 
 
-# def
+def dataset_and_annotations_from_database(options):
+    engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+
+    with Session(engine) as session:
+        logger.info(f"Loading events")
+        events_stmt = select(EventORM).options(
+            selectinload(EventORM.annotations),
+            selectinload(EventORM.partitions),
+            selectinload(EventORM.pandda).options(
+                selectinload(PanDDAORM.system),
+                selectinload(PanDDAORM.experiment),
+            ),
+        )
+        events = session.scalars(events_stmt).unique().all()
+        logger.info(f"Loaded {len(events)} events!")
+
+        logger.info(f"Num events with partitions: {len([event for event in events if event.partitions])}")
+        logger.info(f"Num events without partitions: {len([event for event in events if not event.partitions])}")
+
+        events_with_partitions = [event for event in events if event.partitions]
+
+        # Load train partition events
+        train_partition_events = [
+            event
+            for event
+            in events_with_partitions
+            if constants.INITIAL_TRAIN_PARTITION == event.partitions.name
+        ]
+        logger.info(f"Got {len(train_partition_events)} finetune events!")
+
+        # Load finetune train partition events
+        finetune_train_partition_events = [
+            event
+            for event
+            in events_with_partitions
+            if constants.FINETUNE_TRAIN_PARTITION == event.partitions.name
+        ]
+        logger.info(f"Got {len(finetune_train_partition_events)} finetune events!")
+
+        events_pyd = []
+        annotations_pyd = []
+        for event_orm in train_partition_events + finetune_train_partition_events:
+            if event_orm.hit_confidence not in ["Low", "low"]:
+                hit = True
+            else:
+                hit = False
+
+            event_pyd = PanDDAEvent(
+                id=event_orm.id,
+                pandda_dir=event_orm.pandda.path,
+                model_building_dir=event_orm.pandda.experiment.model_dir,
+                system_name=event_orm.pandda.system.name,
+                dtag=event_orm.dtag,
+                event_idx=event_orm.event_idx,
+                event_map=event_orm.event_map,
+                x=event_orm.x,
+                y=event_orm.y,
+                z=event_orm.z,
+                hit=hit,
+                ligand=None
+            )
+            events_pyd.append(event_pyd)
+
+            event_annotations = {
+                annotation.source: annotation
+                for annotation
+                in event_orm.annotations
+            }
+            if "manual" in event_annotations:
+                annotation_orm = event_annotations["manual"]
+            else:
+                annotation_orm = event_annotations["auto"]
+
+            annotation_pyd = PanDDAEventAnnotation(
+                annotation=annotation_orm.annotation
+            )
+            annotations_pyd.append(annotation_pyd)
+
+        # Make the dataset
+        dataset = PanDDAEventDataset(
+            pandda_events=events_pyd
+        )
+        logger.info(f"Got {len(events_pyd)} events")
+
+        # Make the annotations
+        annotation_dataset = PanDDAEventAnnotations(annotations=annotations_pyd)
+        logger.info(f"Got {len(annotations_pyd)} annotations")
+        hits = [annotation_pyd for annotation_pyd in annotations_pyd if annotation_pyd.annotation]
+        logger.info(f"Got {len(hits)} events annotated as hits")
+        non_hits = [annotation_pyd for annotation_pyd in annotations_pyd if not annotation_pyd.annotation]
+        logger.info(f"Got {len(non_hits)} events annotated as hits")
+
+        # Make a blank updated annotations
+        updated_annotations = PanDDAUpdatedEventAnnotations(
+            keys=[],
+            annotations=[]
+
+        )
+
+    return dataset, annotation_dataset, updated_annotations
 
 class CLI:
 
@@ -1471,6 +1585,21 @@ class CLI:
                 annotation_dataset,
                 updated_annotations
             )
+
+    def annotate_train_dataset_all(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+        dataset, annotations, updated_annotations = dataset_and_annotations_from_database(options)
+
+
+        train_annotations_dir = Path(options.working_dir) / constants.PANDDA_TRAIN_ANNOTATION_DIR
+
+        annotate_test_set(
+            options,
+            dataset,
+            annotations,
+            updated_annotations,
+            train_annotations_dir,
+        )
 
 
 if __name__ == "__main__":
