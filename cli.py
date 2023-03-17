@@ -1405,57 +1405,57 @@ class CLI:
             ]
             logger.info(f"Got {len(finetune_train_partition_events)} finetune events!")
 
-            pandda_events = []
-            annotations = []
-            for event in train_partition_events + finetune_train_partition_events:
-                if event.hit_confidence not in ["Low", "low"]:
+            events_pyd = []
+            annotations_pyd = []
+            for event_orm in train_partition_events + finetune_train_partition_events:
+                if event_orm.hit_confidence not in ["Low", "low"]:
                     hit = True
                 else:
                     hit = False
 
-                pandda_event = PanDDAEvent(
-                    id=event.id,
-                    pandda_dir=event.pandda.path,
-                    model_building_dir=event.pandda.experiment.model_dir,
-                    system_name=event.pandda.system.name,
-                    dtag=event.dtag,
-                    event_idx=event.event_idx,
-                    event_map=event.event_map,
-                    x=event.x,
-                    y=event.y,
-                    z=event.z,
+                event_pyd = PanDDAEvent(
+                    id=event_orm.id,
+                    pandda_dir=event_orm.pandda.path,
+                    model_building_dir=event_orm.pandda.experiment.model_dir,
+                    system_name=event_orm.pandda.system.name,
+                    dtag=event_orm.dtag,
+                    event_idx=event_orm.event_idx,
+                    event_map=event_orm.event_map,
+                    x=event_orm.x,
+                    y=event_orm.y,
+                    z=event_orm.z,
                     hit=hit,
                     ligand=None
                 )
-                pandda_events.append(event)
+                events_pyd.append(event_pyd)
 
                 event_annotations = {
                     annotation.source: annotation
                     for annotation
-                    in event.annotations
+                    in event_orm.annotations
                 }
                 if "manual" in event_annotations:
-                    annotation = event_annotation["manual"]
+                    annotation_orm = event_annotations["manual"]
                 else:
-                    annotation = event_annotations["auto"]
+                    annotation_orm = event_annotations["auto"]
 
-                event_annotation = PanDDAEventAnnotation(
-                    annotation=annotation.annotation
+                annotation_pyd = PanDDAEventAnnotation(
+                    annotation=annotation_orm.annotation
                 )
-                annotations.append(event_annotation)
+                annotations_pyd.append(annotation_pyd)
 
             # Make the dataset
             dataset = PanDDAEventDataset(
-                pandda_events=pandda_events
+                pandda_events=events_pyd
             )
-            logger.info(f"Got {len(pandda_events)} events")
+            logger.info(f"Got {len(events_pyd)} events")
 
             # Make the annotations
-            pandda_event_annotations = PanDDAEventAnnotations(annotations=annotations)
-            logger.info(f"Got {len(annotations)} annotations")
-            hits = [annotation for annotation in annotations if annotation.annotation]
+            annotation_dataset = PanDDAEventAnnotations(annotations=annotations_pyd)
+            logger.info(f"Got {len(annotations_pyd)} annotations")
+            hits = [annotation_pyd for annotation_pyd in annotations_pyd if annotation_pyd.annotation]
             logger.info(f"Got {len(hits)} events annotated as hits")
-            non_hits = [annotation for annotation in annotations if not annotation.annotation]
+            non_hits = [annotation_pyd for annotation_pyd in annotations_pyd if not annotation_pyd.annotation]
             logger.info(f"Got {len(non_hits)} events annotated as hits")
 
             # Make a blank updated annotations
@@ -1468,7 +1468,7 @@ class CLI:
             train_pandda(
                 options,
                 dataset,
-                pandda_event_annotations,
+                annotation_dataset,
                 updated_annotations
             )
 
