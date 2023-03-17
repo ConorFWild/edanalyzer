@@ -1327,6 +1327,7 @@ class CLI:
         train_dataset = PanDDAEventDataset.load(Path(options.working_dir), name=constants.TRAIN_SET_FILE)
 
         test_dataset = PanDDAEventDataset.load(Path(options.working_dir), name=constants.TEST_SET_FILE)
+
         with Session(engine) as session:
             populate_partition_from_json(
                 session,
@@ -1384,21 +1385,22 @@ class CLI:
             logger.info(f"Num events with partitions: {len([event for event in events if event.partitions])}")
             logger.info(f"Num events without partitions: {len([event for event in events if not event.partitions])}")
 
+            events_with_partitions = [event for event in events if event.partitions]
 
             # Load train partition events
             train_partition_events = [
                 event
                 for event
-                in events
+                in events_with_partitions
                 if constants.INITIAL_TRAIN_PARTITION == event.partitions.name
             ]
-            logger.info(f"Got {len(events)} finetune events!")
+            logger.info(f"Got {len(train_partition_events)} finetune events!")
 
             # Load finetune train partition events
             finetune_train_partition_events = [
                 event
                 for event
-                in events
+                in events_with_partitions
                 if constants.FINETUNE_TRAIN_PARTITION == event.partitions.name
             ]
             logger.info(f"Got {len(finetune_train_partition_events)} finetune events!")
