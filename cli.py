@@ -1357,12 +1357,11 @@ class CLI:
         partition_name = constants.FINETUNE_TRAIN_PARTITION
 
         funetune_train_datasets = options.finetune_datasets_train
-        with Session(engine) as session:
-            populate_from_custom_panddas(
-                session,
-                funetune_train_datasets,
-                partition_name
-            )
+        populate_from_custom_panddas(
+            engine,
+            funetune_train_datasets,
+            partition_name
+        )
 
     def train_default_and_finetune(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
