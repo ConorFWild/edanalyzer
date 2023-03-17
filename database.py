@@ -402,6 +402,9 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
     z = row[constants.PANDDA_INSPECT_Z]
     viewed = row[constants.PANDDA_INSPECT_VIEWED]
 
+    if viewed != True:
+        return None
+
     hit_confidence = row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
     if hit_confidence == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
         hit_confidence_class = True
