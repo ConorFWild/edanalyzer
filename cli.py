@@ -681,51 +681,6 @@ def symlink(source_path: Path, target_path: Path):
         os.symlink(source_path, target_path)
 
 
-def make_fake_processed_dataset_dir(event: PanDDAEvent, processed_datasets_dir: Path):
-    processed_dataset_dir = processed_datasets_dir / event.dtag
-    try_make_dir(processed_dataset_dir)
-
-    pandda_model_dir = processed_dataset_dir / constants.PANDDA_INSPECT_MODEL_DIR
-    try_make_dir(pandda_model_dir)
-
-    initial_pdb_path = Path(
-        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
-        dtag=event.dtag)
-    fake_initial_pdb_path = processed_dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=event.id)
-    symlink(initial_pdb_path, fake_initial_pdb_path)
-
-    inital_mtz_path = Path(
-        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(
-        dtag=event.dtag)
-    fake_inital_mtz_path = processed_dataset_dir / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=event.id)
-    symlink(inital_mtz_path, fake_inital_mtz_path)
-
-    event_map_path = Path(event.event_map)
-    # fake_event_map_path = processed_dataset_dir / event_map_path.name
-    fake_event_map_path = processed_dataset_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
-        dtag=event.id,
-        event_idx=1,
-        bdc=event.bdc
-    )
-
-    symlink(event_map_path, fake_event_map_path)
-
-    zmap_path = Path(
-        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_ZMAP_TEMPLATE.format(
-        dtag=event.dtag)
-    fake_zmap_path = processed_dataset_dir / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=event.id)
-    symlink(zmap_path, fake_zmap_path)
-
-    pandda_model_file = Path(
-        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INSPECT_MODEL_DIR / constants.PANDDA_MODEL_FILE.format(
-        dtag=event.dtag)
-    # fake_model_file = pandda_model_dir / pandda_model_file.name
-    fake_model_file = pandda_model_dir / constants.PANDDA_MODEL_FILE.format(dtag=event.id)
-
-    if pandda_model_file.exists():
-        symlink(pandda_model_file, fake_model_file)
-
-
 @dataclasses.dataclass()
 class EventTableRecord:
     dtag: str
@@ -875,6 +830,53 @@ def make_fake_event_table(dataset: PanDDAEventDataset, path: Path):
     return event_table
 
 
+def make_fake_processed_dataset_dir(event:PanDDAEvent, event_table_record: EventTableRecord, processed_datasets_dir: Path):
+    processed_dataset_dir = processed_datasets_dir / event.dtag
+    try_make_dir(processed_dataset_dir)
+
+    pandda_model_dir = processed_dataset_dir / constants.PANDDA_INSPECT_MODEL_DIR
+    try_make_dir(pandda_model_dir)
+
+    initial_pdb_path = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
+        dtag=event.dtag)
+    fake_initial_pdb_path = processed_dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=event.id)
+    symlink(initial_pdb_path, fake_initial_pdb_path)
+
+    inital_mtz_path = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(
+        dtag=event.dtag)
+    fake_inital_mtz_path = processed_dataset_dir / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=event.id)
+    symlink(inital_mtz_path, fake_inital_mtz_path)
+
+    event_map_path = Path(event.event_map)
+    # fake_event_map_path = processed_dataset_dir / event_map_path.name
+    fake_event_map_path = processed_dataset_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+        dtag=event.id,
+        event_idx=1,
+        bdc=event_table_record.bdc
+    )
+
+    symlink(event_map_path, fake_event_map_path)
+
+    zmap_path = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_ZMAP_TEMPLATE.format(
+        dtag=event.dtag)
+    fake_zmap_path = processed_dataset_dir / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=event.id)
+    symlink(zmap_path, fake_zmap_path)
+
+    pandda_model_file = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INSPECT_MODEL_DIR / constants.PANDDA_MODEL_FILE.format(
+        dtag=event.dtag)
+    # fake_model_file = pandda_model_dir / pandda_model_file.name
+    fake_model_file = pandda_model_dir / constants.PANDDA_MODEL_FILE.format(dtag=event.id)
+
+    if pandda_model_file.exists():
+        symlink(pandda_model_file, fake_model_file)
+
+
+
+
 @dataclasses.dataclass()
 class SiteTableRecord:
     site_idx: int
@@ -943,9 +945,13 @@ def make_fake_pandda(dataset: PanDDAEventDataset, path: Path):
     make_fake_site_table(dataset, fake_site_table_path, event_table)
 
     fake_processed_dataset_dirs = {}
-    for event in dataset.pandda_events:
+    for event, event_table_record in zip(dataset.pandda_events, event_table.records):
         logger.debug(f"Copying event dir: {event.dtag} {event.event_idx}")
-        make_fake_processed_dataset_dir(event, fake_processed_datasets_dir)
+        make_fake_processed_dataset_dir(
+            event,
+            event_table_record,
+            fake_processed_datasets_dir,
+        )
 
 
 def annotate_test_set(
