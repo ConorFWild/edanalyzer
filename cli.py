@@ -1050,7 +1050,7 @@ def annotate_test_set(
             recall = len(tp) / len(tp+fn)
         else:
             recall =0.0
-        logger.info(f"Cutoff: {0.0}: Precission: {precission} : Recall: {recall}")
+        logger.info(f"Cutoff: {cutoff}: Precission: {precission} : Recall: {recall}")
 
     # Sort by model annotation
     sorted_idxs = sorted(records, key=lambda x: records[x]["model_annotation"], reverse=True)
