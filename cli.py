@@ -1048,7 +1048,8 @@ def annotate_test_set(
             precission = 0.0
         if len(tp+fn):
             recall = len(tp) / len(tp+fn)
-        recall =0.0
+        else:
+            recall =0.0
         logger.info(f"Cutoff: {0.0}: Precission: {precission} : Recall: {recall}")
 
     # Sort by model annotation
