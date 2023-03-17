@@ -691,29 +691,37 @@ def make_fake_processed_dataset_dir(event: PanDDAEvent, processed_datasets_dir: 
     initial_pdb_path = Path(
         event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
         dtag=event.dtag)
-    fake_initial_pdb_path = processed_dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=event.dtag)
+    fake_initial_pdb_path = processed_dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=event.id)
     symlink(initial_pdb_path, fake_initial_pdb_path)
 
     inital_mtz_path = Path(
         event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(
         dtag=event.dtag)
-    fake_inital_mtz_path = processed_dataset_dir / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=event.dtag)
+    fake_inital_mtz_path = processed_dataset_dir / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=event.id)
     symlink(inital_mtz_path, fake_inital_mtz_path)
 
     event_map_path = Path(event.event_map)
-    fake_event_map_path = processed_dataset_dir / event_map_path.name
+    # fake_event_map_path = processed_dataset_dir / event_map_path.name
+    fake_event_map_path = processed_dataset_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+        dtag=event.id,
+        event_idx=1,
+        bdc=event.bdc
+    )
+
     symlink(event_map_path, fake_event_map_path)
 
     zmap_path = Path(
         event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_ZMAP_TEMPLATE.format(
         dtag=event.dtag)
-    fake_zmap_path = processed_dataset_dir / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=event.dtag)
+    fake_zmap_path = processed_dataset_dir / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=event.id)
     symlink(zmap_path, fake_zmap_path)
 
     pandda_model_file = Path(
         event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INSPECT_MODEL_DIR / constants.PANDDA_MODEL_FILE.format(
         dtag=event.dtag)
-    fake_model_file = pandda_model_dir / pandda_model_file.name
+    # fake_model_file = pandda_model_dir / pandda_model_file.name
+    fake_model_file = pandda_model_dir / constants.PANDDA_MODEL_FILE.format(dtag=event.id)
+
     if pandda_model_file.exists():
         symlink(pandda_model_file, fake_model_file)
 
@@ -787,6 +795,47 @@ class EventTableRecord:
             exclude_from_characterisation=False,
         )
 
+    @staticmethod
+    def from_event_database(event: PanDDAEvent, site_idx=None):
+        matches = re.findall(
+            "_1-BDC_([0-9.]+)_map\.native\.ccp4",
+            event.event_map
+        )
+        bdc = float(matches[0])
+
+        if site_idx:
+            _site_idx = site_idx
+        else:
+            _site_idx = 0
+
+        return EventTableRecord(
+            dtag=str(event.id),
+            event_idx=1,
+            bdc=1 - bdc,
+            cluster_size=0,
+            global_correlation_to_average_map=0,
+            global_correlation_to_mean_map=0,
+            local_correlation_to_average_map=0,
+            local_correlation_to_mean_map=0,
+            site_idx=_site_idx,
+            x=event.x,
+            y=event.y,
+            z=event.z,
+            z_mean=0.0,
+            z_peak=0.0,
+            applied_b_factor_scaling=0.0,
+            high_resolution=0.0,
+            low_resolution=0.0,
+            r_free=0.0,
+            r_work=0.0,
+            analysed_resolution=0.0,
+            map_uncertainty=0.0,
+            analysed=False,
+            interesting=False,
+            exclude_from_z_map_analysis=False,
+            exclude_from_characterisation=False,
+        )
+
 
 @dataclasses.dataclass()
 class EventTable:
@@ -797,6 +846,15 @@ class EventTable:
         records = []
         for j, event in enumerate(pandda_event_dataset.pandda_events):
             event_record = EventTableRecord.from_event(event, int(j / 100))
+            records.append(event_record)
+
+        return EventTable(records)
+
+    @staticmethod
+    def from_pandda_event_dataset_database(pandda_event_dataset: PanDDAEventDataset):
+        records = []
+        for j, event in enumerate(pandda_event_dataset.pandda_events):
+            event_record = EventTableRecord.from_event_database(event, int(j / 100))
             records.append(event_record)
 
         return EventTable(records)
@@ -812,7 +870,7 @@ class EventTable:
 
 
 def make_fake_event_table(dataset: PanDDAEventDataset, path: Path):
-    event_table = EventTable.from_pandda_event_dataset(dataset)
+    event_table = EventTable.from_pandda_event_dataset_database(dataset)
     event_table.save(path)
     return event_table
 
@@ -973,8 +1031,8 @@ def annotate_test_set(
     # Get highest scoring non-hits
     high_scoring_non_hits = []
     for sorted_idx in sorted_idxs:
-        # if len(high_scoring_non_hits) > 1500:
-        #     continue
+        if len(high_scoring_non_hits) > 5000:
+            continue
         if records[sorted_idx]["annotation"] == 0.0:
             high_scoring_non_hits.append(sorted_idx)
     logger.info(f"Got {len(high_scoring_non_hits)} high scoring non-hits!")
@@ -982,8 +1040,8 @@ def annotate_test_set(
     # Get the lowest scoring hits
     low_scoring_hits = []
     for sorted_idx in reversed(sorted_idxs):
-        # if len(low_scoring_hits) > 1500:
-        #     continue
+        if len(low_scoring_hits) > 5000:
+            continue
         if records[sorted_idx]["annotation"] == 1.0:
             low_scoring_hits.append(sorted_idx)
     logger.info(f"Got {len(low_scoring_hits)} low scoring hits!")
@@ -993,12 +1051,12 @@ def annotate_test_set(
     dtag_event_ids = []
     for _idx in high_scoring_non_hits:
         event = dataset.pandda_events[_idx]
-        key = (event.dtag, event.event_idx)
-        if key in dtag_event_ids:
-            continue
-        else:
-            pandda_events.append(event)
-            dtag_event_ids.append(key)
+        # key = (event.dtag, event.event_idx)
+        # if key in dtag_event_ids:
+        #     continue
+        # else:
+        pandda_events.append(event)
+            # dtag_event_ids.append(key)
     high_scoring_non_hit_dataset = PanDDAEventDataset(pandda_events=pandda_events)
     make_fake_pandda(
         high_scoring_non_hit_dataset,
@@ -1010,12 +1068,12 @@ def annotate_test_set(
     dtag_event_ids = []
     for _idx in low_scoring_hits:
         event = dataset.pandda_events[_idx]
-        key = (event.dtag, event.event_idx)
-        if key in dtag_event_ids:
-            continue
-        else:
-            pandda_events.append(event)
-            dtag_event_ids.append(key)
+        # key = (event.dtag, event.event_idx)
+        # if key in dtag_event_ids:
+        #     continue
+        # else:
+        pandda_events.append(event)
+            # dtag_event_ids.append(key)
 
     low_scoring_hit_dataset = PanDDAEventDataset(pandda_events=pandda_events)
     make_fake_pandda(
@@ -1589,7 +1647,6 @@ class CLI:
     def annotate_train_dataset_all(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
         dataset, annotations, updated_annotations = dataset_and_annotations_from_database(options)
-
 
         train_annotations_dir = Path(options.working_dir) / constants.PANDDA_TRAIN_ANNOTATION_DIR
 
