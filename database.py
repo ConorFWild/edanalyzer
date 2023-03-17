@@ -738,7 +738,8 @@ def populate_from_diamond(session):
                     pandda_events = parse_potential_pandda_dir_parallel(
                         potential_pandda_dir,
                         model_building_dir,
-                        parallel
+                        parallel,
+                        "auto"
                     )
 
                     if not pandda_events:
