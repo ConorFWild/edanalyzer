@@ -1429,8 +1429,11 @@ class CLI:
                 )
                 pandda_events.append(event)
 
-
-                event_annotations = {annotation.source: annotation for annotation in pandda_event.annotations}
+                event_annotations = {
+                    annotation.source: annotation
+                    for annotation
+                    in event.annotations
+                }
                 if "manual" in event_annotations:
                     annotation = event_annotation["manual"]
                 else:
