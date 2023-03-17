@@ -1416,8 +1416,8 @@ class CLI:
                 pandda_event = PanDDAEvent(
                     id=event.id,
                     pandda_dir=event.pandda.path,
-                    model_building_dir=event.experiment.model_dir,
-                    system_name=event.system.name,
+                    model_building_dir=event.pandda.experiment.model_dir,
+                    system_name=event.pandda.system.name,
                     dtag=event.dtag,
                     event_idx=event.event_idx,
                     event_map=event.event_map,
