@@ -883,7 +883,7 @@ def populate_from_custom_panddas(session, custom_panddas, partition_name):
     new_panddas = []
     new_systems = []
     new_experiments = []
-    with Parallel(n_cpus=-2) as parallel:
+    with Parallel(n_jobs=-2, prefer="threads", verbose=10) as parallel:
         for custom_pandda in custom_panddas:
             logger.info(f"PanDDA Path is: {custom_pandda.pandda}")
             # Unpack the PanDDA object
