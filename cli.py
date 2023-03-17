@@ -1042,9 +1042,14 @@ def annotate_test_set(
             _idx for _idx, _record in records.items()
             if ((_record["annotation"] == False) & (_record["model_annotation"] < cutoff))
         ]
-        precission = len(tp) / len(tp+fp)
-        recall = len(tp) / len(tp+fn)
-        logger.info(f"Precission: {precission} : Recall: {recall}")
+        if len(tp+fp) != 0:
+            precission = len(tp) / len(tp+fp)
+        else:
+            precission = 0.0
+        if len(tp+fn):
+            recall = len(tp) / len(tp+fn)
+        recall =0.0
+        logger.info(f"Cutoff: {0.0}: Precission: {precission} : Recall: {recall}")
 
     # Sort by model annotation
     sorted_idxs = sorted(records, key=lambda x: records[x]["model_annotation"], reverse=True)
