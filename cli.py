@@ -1381,6 +1381,10 @@ class CLI:
             events = session.scalars(events_stmt).unique().all()
             logger.info(f"Loaded {len(events)} events!")
 
+            logger.info(f"Num events with partitions: {len([event for event in events if event.partitions])}")
+            logger.info(f"Num events without partitions: {len([event for event in events if not event.partitions])}")
+
+
             # Load train partition events
             train_partition_events = [
                 event
