@@ -1025,6 +1025,27 @@ def annotate_test_set(
 
             records = pickle.load(f)
 
+    for cutoff in np.linspace(0.0,1.0, 100):
+        fp = [
+            _idx for _idx, _record in records
+            if ((_record["annotation"] == False) & (_record["model_annotation"] > cutoff))
+        ]
+        tp = [
+            _idx for _idx, _record in records
+            if ((_record["annotation"] == True) & (_record["model_annotation"] > cutoff))
+        ]
+        fn = [
+            _idx for _idx, _record in records
+            if ((_record["annotation"] == True) & (_record["model_annotation"] < cutoff))
+        ]
+        tn = [
+            _idx for _idx, _record in records
+            if ((_record["annotation"] == False) & (_record["model_annotation"] < cutoff))
+        ]
+        precission = len(tp) / len(tp+fp)
+        recall = len(tp) / len(tp+fn)
+        logger.info(f"Precission: {precission} : Recall: {recall}")
+
     # Sort by model annotation
     sorted_idxs = sorted(records, key=lambda x: records[x]["model_annotation"], reverse=True)
 
