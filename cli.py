@@ -766,7 +766,7 @@ class EventTableRecord:
         return EventTableRecord(
             dtag=str(event.id),
             event_idx=1,
-            bdc=1 - bdc,
+            bdc=bdc,
             cluster_size=0,
             global_correlation_to_average_map=0,
             global_correlation_to_mean_map=0,
