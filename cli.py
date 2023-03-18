@@ -830,8 +830,9 @@ def make_fake_event_table(dataset: PanDDAEventDataset, path: Path):
     return event_table
 
 
-def make_fake_processed_dataset_dir(event:PanDDAEvent, event_table_record: EventTableRecord, processed_datasets_dir: Path):
-    processed_dataset_dir = processed_datasets_dir / event.dtag
+def make_fake_processed_dataset_dir(event: PanDDAEvent, event_table_record: EventTableRecord, processed_datasets_dir: Path):
+    # processed_dataset_dir = processed_datasets_dir / event.dtag
+    processed_dataset_dir = processed_datasets_dir / str(event.id)
     try_make_dir(processed_dataset_dir)
 
     pandda_model_dir = processed_dataset_dir / constants.PANDDA_INSPECT_MODEL_DIR
