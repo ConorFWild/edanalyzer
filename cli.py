@@ -855,7 +855,7 @@ def make_fake_processed_dataset_dir(event: PanDDAEvent, event_table_record: Even
     fake_event_map_path = processed_dataset_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
         dtag=event.id,
         event_idx=1,
-        bdc=event_table_record.bdc
+        bdc=round(1-event_table_record.bdc, 2)
     )
 
     symlink(event_map_path, fake_event_map_path)
