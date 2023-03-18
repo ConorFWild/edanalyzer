@@ -961,6 +961,7 @@ def annotate_test_set(
         annotations: PanDDAEventAnnotations,
         updated_annotations: PanDDAUpdatedEventAnnotations,
         test_annotation_dir: Path,
+events: dict[int, EventORM]
 ):
     logger.info(f"Output directory is: {test_annotation_dir}")
     if not test_annotation_dir.exists():
@@ -1065,6 +1066,13 @@ def annotate_test_set(
     # Get highest scoring non-hits
     high_scoring_non_hits = []
     for sorted_idx in sorted_idxs:
+        event = dataset.pandda_events[sorted_idx]
+        event_orm = events[event.id]
+        for annotation in event_orm.annotations:
+            if annotation.source == "manual":
+                logger.debug(f"Already have manual annotation!")
+                continue
+
         if len(high_scoring_non_hits) > 5000:
             continue
         if records[sorted_idx]["annotation"] == 0.0:
@@ -1074,6 +1082,15 @@ def annotate_test_set(
     # Get the lowest scoring hits
     low_scoring_hits = []
     for sorted_idx in reversed(sorted_idxs):
+
+        # Skip if already manually annotated
+        event = dataset.pandda_events[sorted_idx]
+        event_orm = events[event.id]
+        for annotation in event_orm.annotations:
+            if annotation.source == "manual":
+                logger.debug(f"Already have manual annotation!")
+                continue
+
         if len(low_scoring_hits) > 5000:
             continue
         if records[sorted_idx]["annotation"] == 1.0:
@@ -1215,7 +1232,7 @@ def dataset_and_annotations_from_database(options):
 
         )
 
-    return dataset, annotation_dataset, updated_annotations
+    return dataset, annotation_dataset, updated_annotations, {event.id: event for event in train_partition_events + finetune_train_partition_events}
 
 class CLI:
 
@@ -1680,7 +1697,7 @@ class CLI:
 
     def annotate_train_dataset_all(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
-        dataset, annotations, updated_annotations = dataset_and_annotations_from_database(options)
+        dataset, annotations, updated_annotations, events = dataset_and_annotations_from_database(options)
 
         train_annotations_dir = Path(options.working_dir) / constants.PANDDA_TRAIN_ANNOTATION_DIR
 
@@ -1690,6 +1707,7 @@ class CLI:
             annotations,
             updated_annotations,
             train_annotations_dir,
+            events
         )
 
 
