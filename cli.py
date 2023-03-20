@@ -1760,6 +1760,7 @@ def update_from_annotations_v2_get_annotations(
 
     # Load the table
     table = pd.read_csv(table_path)
+    logger.info(f"Event table has {len(table)} rows")
 
     # Iterate the table making new annotations
     annotations = []
@@ -1784,8 +1785,8 @@ def update_from_annotations_v2_get_annotations(
             event_idx=str(1),
             bdc=str(round(bdc)),
         )
-        assert observed_event_map_path.exists()
-        assert str(observed_event_map_path.readlink()) == event.event_map
+        assert observed_event_map_path.exists(), f"{observed_event_map_path} vs {event.event_map}"
+        assert str(observed_event_map_path.readlink()) == event.event_map, f"{observed_event_map_path} vs {event.event_map}"
 
         # Check does not already have a manual annotation
         assert "manual" not in [annotation.source for annotation in event.annotations]
