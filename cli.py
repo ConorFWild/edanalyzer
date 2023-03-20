@@ -12,7 +12,7 @@ import constants
 from torch_dataset import PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation, \
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented
 from database import populate_from_diamond, initialize_database, populate_partition_from_json, \
-    parse_old_annotation_update_dir, populate_from_custom_panddas, EventORM, PanDDAORM
+    parse_old_annotation_update_dir, populate_from_custom_panddas, EventORM, PanDDAORM, AnnotationORM
 
 from loguru import logger
 # from openbabel import pybel
@@ -1709,6 +1709,102 @@ class CLI:
             train_annotations_dir,
             events
         )
+
+    def update_from_annotations_v2(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+        engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+
+        with Session(engine) as session:
+
+            # Get the events
+            events_stmt = select(EventORM).options(
+                selectinload(EventORM.annotations)
+            )
+            logger.info(f"Loading events...")
+            events = {event.id: event for event in session.scalars(events_stmt).unique().all()}
+            logger.info(f"Loaded {len(events)} events")
+
+            # Update the high scoring non-hit annotations
+            high_scoring_non_hit_pandda_path = Path(
+                options.working_dir) / constants.PANDDA_TRAIN_ANNOTATION_DIR / constants.HIGH_SCORING_NON_HIT_DATASET_DIR
+            high_scoring_non_hit_annotations = update_from_annotations_v2_get_annotations(
+                events,
+                high_scoring_non_hit_pandda_path
+            )
+            logger.info(f"Got {len(high_scoring_non_hit_annotations)} new high scoring non-hit annotations")
+
+            # Update the low scoring hit annotations
+            low_scoring_hit_pandda_path = Path(
+                options.working_dir) / constants.PANDDA_TRAIN_ANNOTATION_DIR / constants.HIGH_SCORING_NON_HIT_DATASET_DIR
+            low_scoring_hit_annotations = update_from_annotations_v2_get_annotations(
+                events,
+                low_scoring_hit_pandda_path
+            )
+            logger.info(f"Got {len(low_scoring_hit_annotations)} new low scoring hit annotations")
+
+
+def update_from_annotations_v2_get_annotations(
+    events: dict[int, EventORM],
+    pandda_path: Path,
+):
+
+    # Get the table path
+    table_path = pandda_path / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
+
+    # Load the table
+    table = pd.read_csv(table_path)
+
+    # Iterate the table making new annotations
+    annotations = []
+    for idx, row in table.iterrows():
+        # Unpack the row
+        dtag = row[constants.PANDDA_INSPECT_DTAG]
+        confidence = row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
+        viewed = row[constants.PANDDA_INSPECT_VIEWED]
+        bdc = row[constants.PANDDA_INSPECT_BDC]
+
+        # Get the event
+        event = events[int(dtag)]
+
+        # Skip if not viewed
+        if not viewed == True:
+            # logger.debug(f"Event {dtag} not viewed, skipping!")
+            continue
+
+        # Check event map path matches
+        observed_event_map_path = pandda_path / constants.PANDDA_PROCESSED_DATASETS_DIR / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+            dtag=str(dtag),
+            event_idx=str(1),
+            bdc=str(round(bdc)),
+        )
+        assert observed_event_map_path.exists()
+        assert str(observed_event_map_path.readlink()) == event.event_map
+
+        # Check does not already have a manual annotation
+        assert "manual" not in [annotation.source for annotation in event.annotations]
+
+        # Get the newly assigned annotation
+        if confidence == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
+            annotation = AnnotationORM(
+                annotation=False,
+                source="manual",
+                event=event,
+            )
+
+        elif confidence == constants.PANDDA_INSPECT_TABLE_LOW_CONFIDENCE:
+            annotation = AnnotationORM(
+                annotation=False,
+                source="manual",
+                event=event,
+            )
+
+        else:
+            raise Exception(f"Failed to parse annotation label in table! Confidence was: {confidence}")
+
+        # Append
+        annotations.append(annotation)
+
+    return annotations
 
 
 if __name__ == "__main__":
