@@ -1783,7 +1783,7 @@ def update_from_annotations_v2_get_annotations(
         observed_event_map_path = pandda_path / constants.PANDDA_PROCESSED_DATASETS_DIR / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
             dtag=str(dtag),
             event_idx=str(1),
-            bdc=str(1-round(bdc)),
+            bdc=str(1-round(bdc, 2)),
         )
         assert observed_event_map_path.exists(), f"{observed_event_map_path} vs {event.event_map}"
         assert str(observed_event_map_path.readlink()) == event.event_map, f"{observed_event_map_path} vs {event.event_map}"
