@@ -1075,10 +1075,9 @@ events: dict[int, EventORM]
     for sorted_idx in sorted_idxs:
         event = dataset.pandda_events[sorted_idx]
         event_orm = events[event.id]
-        for annotation in event_orm.annotations:
-            if annotation.source == "manual":
-                logger.debug(f"Already have manual annotation!")
-                continue
+        if "manual" in [annotation.source for annotation in event_orm.annotations]:
+            logger.debug(f"Already have manual annotation!")
+            continue
 
         if len(high_scoring_non_hits) > 5000:
             continue
@@ -1093,10 +1092,9 @@ events: dict[int, EventORM]
         # Skip if already manually annotated
         event = dataset.pandda_events[sorted_idx]
         event_orm = events[event.id]
-        for annotation in event_orm.annotations:
-            if annotation.source == "manual":
-                logger.debug(f"Already have manual annotation!")
-                continue
+        if "manual" in [annotation.source for annotation in event_orm.annotations]:
+            logger.debug(f"Already have manual annotation!")
+            continue
 
         if len(low_scoring_hits) > 5000:
             continue
