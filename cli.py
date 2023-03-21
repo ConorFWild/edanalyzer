@@ -1747,6 +1747,9 @@ class CLI:
             )
             logger.info(f"Got {len(low_scoring_hit_annotations)} new low scoring hit annotations")
 
+            session.add_all(high_scoring_non_hit_annotations)
+            session.add_all(low_scoring_hit_annotations)
+            session.commit()
 
 def update_from_annotations_v2_get_annotations(
     events: dict[int, EventORM],
