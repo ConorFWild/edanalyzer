@@ -1789,7 +1789,9 @@ def update_from_annotations_v2_get_annotations(
         assert str(observed_event_map_path.readlink()) == event.event_map, f"{observed_event_map_path} vs {event.event_map}"
 
         # Check does not already have a manual annotation
-        assert "manual" not in [annotation.source for annotation in event.annotations]
+        if "manual" in [annotation.source for annotation in event.annotations]:
+            logger.warning(f"Already has manual annotation!")
+            continue
 
         # Get the newly assigned annotation
         if confidence == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
