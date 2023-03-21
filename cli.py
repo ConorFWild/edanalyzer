@@ -1790,7 +1790,7 @@ def update_from_annotations_v2_get_annotations(
 
         # Check does not already have a manual annotation
         if "manual" in [annotation.source for annotation in event.annotations]:
-            logger.warning(f"Event {dtag} already has manual annotation! Skipping!")
+            logger.warning(f"Event {dtag} already has manual in its {len(event.annotations)} annotations! Skipping!")
             continue
 
         # Get the newly assigned annotation
