@@ -34,7 +34,7 @@ import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.optim as optim
-from src.edanalyzer.torch_network import resnet18
+from edanalyzer.torch_network import resnet18
 import download_dataset
 import dataclasses
 import time
