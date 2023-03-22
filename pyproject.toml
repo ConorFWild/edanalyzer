@@ -27,7 +27,6 @@ dependencies = [
     "joblib",
     "torch",
     "torchvision",
-    "torchaudio"
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
