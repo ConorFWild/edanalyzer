@@ -24,7 +24,7 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import joinedload
 
 
-import edanalyzer.constants
+from  edanalyzer import constants
 from edanalyzer.data import PanDDAEventDataset
 
 

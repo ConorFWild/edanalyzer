@@ -11,7 +11,7 @@ from edanalyzer.data import (
     PanDDAEventDataset, PanDDAEventAnnotations, PanDDAEventAnnotation, PanDDAUpdatedEventAnnotations,
     PanDDAEventKey,
 )
-import edanalyzer.constants
+from edanalyzer import constants
 from edanalyzer.torch_dataset import (
     PanDDAEventDatasetTorch, get_annotation_from_event_annotation,
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented,
