@@ -1,4 +1,4 @@
-from src.edanalyzer.data import StructureReflectionsDataset, StructureReflectionsData, PanDDAEventDataset, \
+from edanalyzer.data import StructureReflectionsDataset, StructureReflectionsData, PanDDAEventDataset, \
     PanDDAEvent, PanDDAEventAnnotations, PanDDAEventAnnotation, PanDDAUpdatedEventAnnotations
 from numpy.random import default_rng
 import numpy as np
