@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from edanalyzer import constants
+from src.edanalyzer import constants
 
 
 def load_model(path, model):

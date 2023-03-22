@@ -6,17 +6,17 @@ import shutil
 import fire
 from pathlib import Path
 import subprocess
-from edanalyzer.data import (
+from src.edanalyzer.data import (
     StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEvent,
     PanDDAEventDataset, PanDDAEventAnnotations, PanDDAEventAnnotation, PanDDAUpdatedEventAnnotations,
     PanDDAEventKey,
 )
-from edanalyzer import constants
-from edanalyzer.torch_dataset import (
+from src.edanalyzer import constants
+from src.edanalyzer.torch_dataset import (
     PanDDAEventDatasetTorch, get_annotation_from_event_annotation,
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented,
 )
-from edanalyzer.database import (
+from src.edanalyzer.database import (
     populate_from_diamond, initialize_database, populate_partition_from_json,
     parse_old_annotation_update_dir, populate_from_custom_panddas, EventORM, PanDDAORM, AnnotationORM,
 )
@@ -34,7 +34,7 @@ import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.optim as optim
-from edanalyzer.torch_network import resnet18
+from src.edanalyzer.torch_network import resnet18
 import download_dataset
 import dataclasses
 import time
