@@ -7,7 +7,7 @@ from loguru import logger
 import gemmi
 from torch.utils.data import Dataset
 from pathlib import Path
-
+from edanalyzer import constants
 
 def load_xmap_from_mtz(path):
     mtz = gemmi.read_mtz_file(str(path))
