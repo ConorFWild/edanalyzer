@@ -15,18 +15,17 @@ from sqlalchemy import create_engine
 from sqlalchemy import Column
 from sqlalchemy import Table
 from sqlalchemy import ForeignKey
-from sqlalchemy import String, Integer
+from sqlalchemy import Integer
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from sqlalchemy import UniqueConstraint
-from sqlalchemy.orm import lazyload
 from sqlalchemy.orm import joinedload
 
 
-import constants
-from data import PanDDAEventReannotations, PanDDAEventAnnotations, PanDDAEventDataset
+import edanalyzer.constants
+from edanalyzer.data import PanDDAEventDataset
 
 
 class Base(DeclarativeBase):
@@ -1047,8 +1046,8 @@ def parse_old_annotation_update_dir(session, annotation_update_dir: Path):
         # Get the resolved event map path
         event_map_path = str(
             (
-                annotation_update_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag /
-                constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+                    annotation_update_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag /
+                    constants.PANDDA_EVENT_MAP_TEMPLATE.format(
                     dtag=dtag,
                     event_idx=event_idx,
                     bdc=bdc

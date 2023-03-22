@@ -1,7 +1,6 @@
 from pydantic import BaseModel
-from torch.utils.data import Dataset
 
-import constants
+import edanalyzer.constants
 
 
 def load_model(path, model):

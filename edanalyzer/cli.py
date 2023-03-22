@@ -6,17 +6,17 @@ import shutil
 import fire
 from pathlib import Path
 import subprocess
-from data import (
+from edanalyzer.data import (
     StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEvent,
     PanDDAEventDataset, PanDDAEventAnnotations, PanDDAEventAnnotation, PanDDAUpdatedEventAnnotations,
     PanDDAEventKey,
 )
-import constants
-from torch_dataset import (
-    PanDDAEventDatasetTorch, get_image_from_event, get_annotation_from_event_annotation,
+import edanalyzer.constants
+from edanalyzer.torch_dataset import (
+    PanDDAEventDatasetTorch, get_annotation_from_event_annotation,
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented,
 )
-from database import (
+from edanalyzer.database import (
     populate_from_diamond, initialize_database, populate_partition_from_json,
     parse_old_annotation_update_dir, populate_from_custom_panddas, EventORM, PanDDAORM, AnnotationORM,
 )
@@ -34,13 +34,13 @@ import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.optim as optim
-from torch_network import squeezenet1_1, resnet18
+from edanalyzer.torch_network import resnet18
 import download_dataset
 import dataclasses
 import time
 
 from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session, joinedload, subqueryload, selectinload
+from sqlalchemy.orm import Session, selectinload
 
 
 def download_dataset(options: Options):

@@ -1,5 +1,5 @@
-import constants
-from data import StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEventDataset, \
+import edanalyzer.constants
+from edanalyzer.data import StructureReflectionsDataset, StructureReflectionsData, PanDDAEventDataset, \
     PanDDAEvent, PanDDAEventAnnotations, PanDDAEventAnnotation, PanDDAUpdatedEventAnnotations
 from numpy.random import default_rng
 import numpy as np
