@@ -1740,7 +1740,7 @@ class CLI:
 
             # Update the low scoring hit annotations
             low_scoring_hit_pandda_path = Path(
-                options.working_dir) / constants.PANDDA_TRAIN_ANNOTATION_DIR / constants.HIGH_SCORING_NON_HIT_DATASET_DIR
+                options.working_dir) / constants.PANDDA_TRAIN_ANNOTATION_DIR / constants.LOW_SCORING_HIT_DATASET_DIR
             low_scoring_hit_annotations = update_from_annotations_v2_get_annotations(
                 events,
                 low_scoring_hit_pandda_path
