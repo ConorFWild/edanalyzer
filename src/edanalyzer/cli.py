@@ -1867,6 +1867,42 @@ class CLI:
             session.add_all(low_scoring_hit_annotations)
             session.commit()
 
+    def update_test_from_annotations_v2(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+        engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+
+        with Session(engine) as session:
+
+            # Get the events
+            events_stmt = select(EventORM).options(
+                selectinload(EventORM.annotations)
+            )
+            logger.info(f"Loading events...")
+            events = {event.id: event for event in session.scalars(events_stmt).unique().all()}
+            logger.info(f"Loaded {len(events)} events")
+
+            # Update the high scoring non-hit annotations
+            high_scoring_non_hit_pandda_path = Path(
+                options.working_dir) / constants.PANDDA_TEST_ANNOTATION_DIR / constants.HIGH_SCORING_NON_HIT_DATASET_DIR
+            high_scoring_non_hit_annotations = update_from_annotations_v2_get_annotations(
+                events,
+                high_scoring_non_hit_pandda_path
+            )
+            logger.info(f"Got {len(high_scoring_non_hit_annotations)} new high scoring non-hit annotations")
+
+            # Update the low scoring hit annotations
+            low_scoring_hit_pandda_path = Path(
+                options.working_dir) / constants.PANDDA_TEST_ANNOTATION_DIR / constants.LOW_SCORING_HIT_DATASET_DIR
+            low_scoring_hit_annotations = update_from_annotations_v2_get_annotations(
+                events,
+                low_scoring_hit_pandda_path
+            )
+            logger.info(f"Got {len(low_scoring_hit_annotations)} new low scoring hit annotations")
+
+            session.add_all(high_scoring_non_hit_annotations)
+            session.add_all(low_scoring_hit_annotations)
+            session.commit()
+
 def update_from_annotations_v2_get_annotations(
     events: dict[int, EventORM],
     pandda_path: Path,
