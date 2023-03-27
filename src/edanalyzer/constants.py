@@ -35,6 +35,7 @@ SQLITE_FILE = "database.db"
 
 # MODEL_FILE = "model_state_dict_zero.pt"
 MODEL_FILE = "model_state_dict_zero_z.pt"
+MODEL_FILE_EPOCH = "model_state_dict_{epoch}.pt"
 
 
 PANDDA_ANALYSIS_DIR = "analyses"
