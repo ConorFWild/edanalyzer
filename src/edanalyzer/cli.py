@@ -669,15 +669,16 @@ def train_pandda(
 
                 model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]
                 annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
+                idxs = [x.to(torch.device("cpu")).detach() for x in annotation]
                 # print("Loss at epoch {}, iteration {} is {}".format(epoch,
                 #                                                     i,
                 #                                                     running_loss / i) + "\n")
                 print(f"Recent loss is: {sum(running_loss[-90:]) / 90}")
 
-                for model_annotation_np, annotation_np in zip(model_annotations_np, annotations_np):
+                for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
                     mod_an = round(float(model_annotation_np[1]), 2)
                     an = round(float(annotation_np[1]), 2)
-                    event = dataset[idx]
+                    event = dataset[_idx]
                     event_path = event.event_map
 
                     print(
