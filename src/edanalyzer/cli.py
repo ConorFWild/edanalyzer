@@ -675,7 +675,14 @@ def train_pandda(
                 print(f"Recent loss is: {sum(running_loss[-90:]) / 90}")
 
                 for model_annotation_np, annotation_np in zip(model_annotations_np, annotations_np):
-                    print(f"{round(float(model_annotation_np[1]), 2)} : {round(float(annotation_np[1]), 2)}")
+                    mod_an = round(float(model_annotation_np[1]), 2)
+                    an = round(float(annotation_np[1]), 2)
+                    event = dataset[idx]
+                    event_path = event.event_map
+
+                    print(
+                        f"{mod_an} : {an} : {event_path}"
+                    )
                     # print("{}".format() + "\n")
                 print("#################################################" + "\n")
 
