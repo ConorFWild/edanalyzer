@@ -1188,7 +1188,7 @@ def annotate_dataset(
         for _annotation, _model_annotation, _idx in zip(annotation_np, model_annotation_np, idx_np):
             records[_idx] = {"annotation": _annotation[1], "model_annotation": _model_annotation[1]}
             event = dataset.pandda_events[_idx]
-            logger.debug(f"{event.dtag} {event.event_idx} {_annotation[1]} {_model_annotation[1]}")
+            # logger.debug(f"{event.dtag} {event.event_idx} {_annotation[1]} {_model_annotation[1]}")
 
     # Save a model annotations json
     # pandda_event_model_annotations = PanDDAEventModelAnnotations(
