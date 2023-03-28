@@ -1225,7 +1225,7 @@ def precission_recall(records):
             recall = len(tp) / len(tp+fn)
         else:
             recall =0.0
-        logger.info(f"Cutoff: {cutoff}: Precission: {precission} : Recall: {recall}")
+        logger.info(f"Cutoff: {round(cutoff, 3)}: Precission: {round(precission, 3)} : Recall: {round(recall, 3)}")
 
 
 def dataset_and_annotations_from_database(options):
