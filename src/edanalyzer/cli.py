@@ -583,6 +583,8 @@ def train_pandda(
         dataset: PanDDAEventDataset,
         annotations: PanDDAEventAnnotations,
         updated_annotations: PanDDAUpdatedEventAnnotations,
+        model_file,
+        num_workers=36,
         update=False
 ):
     if torch.cuda.is_available():
@@ -606,14 +608,14 @@ def train_pandda(
     )
 
     # Get the dataloader
-    train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=True, num_workers=12)
+    train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=True, num_workers=num_workers)
 
     # model = squeezenet1_1(num_classes=2, num_input=2)
     model = resnet18(num_classes=2, num_input=4)
     model.to(dev)
 
-    if update:
-        model.load_state_dict(torch.load(Path(options.working_dir) / constants.MODEL_FILE, map_location=dev),
+    if model_file:
+        model.load_state_dict(torch.load(model_file, map_location=dev),
                               )
     model = model.train()
 
@@ -1884,16 +1886,33 @@ class CLI:
 
             )
 
+            model_files = {}
+            for model_file in Path(options.working_dir).glob("*"):
+                file_name = model_file.name
+                match = re.match(constants.MODEL_FILE_REGEX, file_name)
+                if match:
+                    epoch = int(match[1])
+                    model_files[epoch] - model_file
+
+            if len(model_files) > 0:
+                model_file = model_files[max(model_files)]
+
+            else:
+                model_file = None
+
             train_pandda(
                 options,
                 dataset,
                 annotation_dataset,
-                updated_annotations
+                updated_annotations,
+                model_file
             )
 
     def annotate_train_dataset_all(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
         dataset, annotations, updated_annotations, events = dataset_and_annotations_from_database(options)
+
+
 
         train_annotations_dir = Path(options.working_dir) / constants.PANDDA_TRAIN_ANNOTATION_DIR
 
@@ -1903,7 +1922,7 @@ class CLI:
             annotations,
             updated_annotations,
             train_annotations_dir,
-            events
+            events,
         )
 
     def annotate_test_dataset_all(self, options_json_path: str = "./options.json"):
