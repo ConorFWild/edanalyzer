@@ -1895,7 +1895,7 @@ class CLI:
                 match = re.match(constants.MODEL_FILE_REGEX, file_name)
                 if match:
                     epoch = int(match[1])
-                    model_files[epoch] - model_file
+                    model_files[epoch] = model_file
 
             if len(model_files) > 0:
                 model_file = model_files[max(model_files)]
