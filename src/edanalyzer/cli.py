@@ -583,6 +583,7 @@ def train_pandda(
         dataset: PanDDAEventDataset,
         annotations: PanDDAEventAnnotations,
         updated_annotations: PanDDAUpdatedEventAnnotations,
+        begin_epoch,
         model_file,
         num_workers=36,
         update=False
@@ -634,7 +635,9 @@ def train_pandda(
 
     running_loss = []
 
-    for epoch in range(num_epochs):
+
+
+    for epoch in range(begin_epoch+1, begin_epoch+num_epochs):
         i = 0
         print(f"Epoch: {epoch}")
         for image, annotation, idx in train_dataloader:
@@ -1896,16 +1899,20 @@ class CLI:
 
             if len(model_files) > 0:
                 model_file = model_files[max(model_files)]
-
+                epoch = max(model_files)
             else:
                 model_file = None
+                epoch = 0
+
+            logger.info(f"Beggining from epoch: {epoch}")
 
             train_pandda(
                 options,
                 dataset,
                 annotation_dataset,
                 updated_annotations,
-                model_file
+                epoch,
+            model_file,
             )
 
     def annotate_train_dataset_all(self, options_json_path: str = "./options.json"):
