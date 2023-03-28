@@ -2003,7 +2003,8 @@ class CLI:
             if match:
                 epoch = match[1]
                 logger.info(f"######## Testing model for epoch: {epoch} ########")
-                annotate_dataset(options, dataset, annotations,updated_annotations, model_file)
+                records = annotate_dataset(options, dataset, annotations,updated_annotations, model_file)
+                precission_recall(records)
 
 
 def update_from_annotations_v2_get_annotations(
