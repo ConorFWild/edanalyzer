@@ -36,7 +36,7 @@ SQLITE_FILE = "database.db"
 # MODEL_FILE = "model_state_dict_zero.pt"
 MODEL_FILE = "model_state_dict_zero_z.pt"
 MODEL_FILE_EPOCH = "model_state_dict_{epoch}.pt"
-
+MODEL_FILE_REGEX = "model_state_dict_([0-9]+).pt"
 
 PANDDA_ANALYSIS_DIR = "analyses"
 PANDDA_INSPECT_TABLE_FILE = "pandda_inspect_events.csv"

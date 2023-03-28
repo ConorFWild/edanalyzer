@@ -1136,6 +1136,97 @@ events: dict[int, EventORM]
         test_annotation_dir / constants.LOW_SCORING_HIT_DATASET_DIR,
     )
 
+def annotate_dataset(
+        options: Options,
+        dataset: PanDDAEventDataset,
+        annotations: PanDDAEventAnnotations,
+        updated_annotations: PanDDAUpdatedEventAnnotations,
+        model_file: Path
+):
+
+    logger.info(f"No record file to parse: Annotating dataset!")
+    # Get the dataset
+    dataset_torch = PanDDAEventDatasetTorch(
+        dataset,
+        annotations,
+        updated_annotations=updated_annotations,
+        transform_image=get_image_event_map_and_raw_from_event,
+        transform_annotation=get_annotation_from_event_annotation
+    )
+
+    # Get the dataloader
+    train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=False, num_workers=12)
+
+    # model = squeezenet1_1(num_classes=2, num_input=2)
+    model = resnet18(num_classes=2, num_input=4)
+    model.load_state_dict(torch.load(model_file))
+    model.eval()
+
+    if torch.cuda.is_available():
+        logger.info(f"Using cuda!")
+        dev = "cuda:0"
+    else:
+        logger.info(f"Using cpu!")
+        dev = "cpu"
+
+    model.to(dev)
+    model.eval()
+
+    records = {}
+    for image, annotation, idx in train_dataloader:
+        image_c = image.to(dev)
+        annotation_c = annotation.to(dev)
+
+        # forward
+        model_annotation = model(image_c)
+
+        annotation_np = annotation.to(torch.device("cpu")).detach().numpy()
+        model_annotation_np = model_annotation.to(torch.device("cpu")).detach().numpy()
+        idx_np = idx.to(torch.device("cpu")).detach().numpy()
+
+        #
+        for _annotation, _model_annotation, _idx in zip(annotation_np, model_annotation_np, idx_np):
+            records[_idx] = {"annotation": _annotation[1], "model_annotation": _model_annotation[1]}
+            event = dataset.pandda_events[_idx]
+            logger.debug(f"{event.dtag} {event.event_idx} {_annotation[1]} {_model_annotation[1]}")
+
+    # Save a model annotations json
+    # pandda_event_model_annotations = PanDDAEventModelAnnotations(
+    #     annotations={
+    #         _idx: records[_idx]["model_annotation"] for _idx in records
+    #     }
+    # )
+
+    return records
+
+def precission_recall(records):
+    for cutoff in np.linspace(0.0,1.0, 100):
+        fp = [
+            _idx for _idx, _record in records.items()
+            if ((_record["annotation"] == False) & (_record["model_annotation"] > cutoff))
+        ]
+        tp = [
+            _idx for _idx, _record in records.items()
+            if ((_record["annotation"] == True) & (_record["model_annotation"] > cutoff))
+        ]
+        fn = [
+            _idx for _idx, _record in records.items()
+            if ((_record["annotation"] == True) & (_record["model_annotation"] < cutoff))
+        ]
+        tn = [
+            _idx for _idx, _record in records.items()
+            if ((_record["annotation"] == False) & (_record["model_annotation"] < cutoff))
+        ]
+        if len(tp+fp) != 0:
+            precission = len(tp) / len(tp+fp)
+        else:
+            precission = 0.0
+        if len(tp+fn):
+            recall = len(tp) / len(tp+fn)
+        else:
+            recall =0.0
+        logger.info(f"Cutoff: {cutoff}: Precission: {precission} : Recall: {recall}")
+
 
 def dataset_and_annotations_from_database(options):
     engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
@@ -1901,6 +1992,19 @@ class CLI:
             session.add_all(high_scoring_non_hit_annotations)
             session.add_all(low_scoring_hit_annotations)
             session.commit()
+
+    def score_models_on_test_set(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+        dataset, annotations, updated_annotations, events = test_dataset_and_annotations_from_database(options)
+
+        for model_file in Path(options.working_dir).glob("*"):
+            file_name = model_file.name
+            match = re.match(constants.MODEL_FILE_REGEX, file_name)
+            if match:
+                epoch = match[1]
+                logger.info(f"######## Testing model for epoch: {epoch} ########")
+                annotate_dataset(options, dataset, annotations,updated_annotations, model_file)
+
 
 def update_from_annotations_v2_get_annotations(
     events: dict[int, EventORM],
