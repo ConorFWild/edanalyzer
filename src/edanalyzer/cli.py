@@ -1343,6 +1343,90 @@ def dataset_and_annotations_from_database(options):
 
     return dataset, annotation_dataset, updated_annotations, {event.id: event for event in train_partition_events + finetune_train_partition_events}
 
+def get_events(options):
+    engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+
+    with Session(engine) as session:
+        logger.info(f"Loading events")
+        events_stmt = select(EventORM).options(
+            selectinload(EventORM.annotations),
+            selectinload(EventORM.partitions),
+            selectinload(EventORM.pandda).options(
+                selectinload(PanDDAORM.system),
+                selectinload(PanDDAORM.experiment),
+            ),
+        )
+        events = session.scalars(events_stmt).unique().all()
+        logger.info(f"Loaded {len(events)} events!")
+
+        logger.info(f"Num events with partitions: {len([event for event in events if event.partitions])}")
+        logger.info(f"Num events without partitions: {len([event for event in events if not event.partitions])}")
+
+    return events
+
+def get_dataset_annotations_from_events(events):
+    events_pyd = []
+    annotations_pyd = []
+    for event_id, event_orm in events.items():
+        if event_orm.hit_confidence not in ["Low", "low"]:
+            hit = True
+        else:
+            hit = False
+
+        event_pyd = PanDDAEvent(
+            id=event_orm.id,
+            pandda_dir=event_orm.pandda.path,
+            model_building_dir=event_orm.pandda.experiment.model_dir,
+            system_name=event_orm.pandda.system.name,
+            dtag=event_orm.dtag,
+            event_idx=event_orm.event_idx,
+            event_map=event_orm.event_map,
+            x=event_orm.x,
+            y=event_orm.y,
+            z=event_orm.z,
+            hit=hit,
+            ligand=None
+        )
+        events_pyd.append(event_pyd)
+
+        event_annotations = {
+            annotation.source: annotation
+            for annotation
+            in event_orm.annotations
+        }
+        if "manual" in event_annotations:
+            annotation_orm = event_annotations["manual"]
+        else:
+            annotation_orm = event_annotations["auto"]
+
+        annotation_pyd = PanDDAEventAnnotation(
+            annotation=annotation_orm.annotation
+        )
+        annotations_pyd.append(annotation_pyd)
+
+    # Make the dataset
+    dataset = PanDDAEventDataset(
+        pandda_events=events_pyd
+    )
+    logger.info(f"Got {len(events_pyd)} events")
+
+    # Make the annotations
+    annotation_dataset = PanDDAEventAnnotations(annotations=annotations_pyd)
+    logger.info(f"Got {len(annotations_pyd)} annotations")
+    hits = [annotation_pyd for annotation_pyd in annotations_pyd if annotation_pyd.annotation]
+    logger.info(f"Got {len(hits)} events annotated as hits")
+    non_hits = [annotation_pyd for annotation_pyd in annotations_pyd if not annotation_pyd.annotation]
+    logger.info(f"Got {len(non_hits)} events annotated as hits")
+
+    # Make a blank updated annotations
+    updated_annotations = PanDDAUpdatedEventAnnotations(
+        keys=[],
+        annotations=[],
+    )
+
+
+    return dataset, annotation_dataset, updated_annotations
+
 def test_dataset_and_annotations_from_database(options):
     engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
 
@@ -2041,6 +2125,61 @@ class CLI:
                 logger.info(f"######## Testing model for epoch: {epoch} ########")
                 records = annotate_dataset(options, dataset, annotations,updated_annotations, model_file)
                 precission_recall(records)
+
+    def score_models_on_finetune_sets(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+        events = get_events(options)
+
+        def filter_finetune_test(_event: EventORM):
+            if _event.partitions:
+                if _event.partitions.name == constants.FINETUNE_TEST_PARTITION:
+                    return True
+
+            return False
+
+        def filter_finetune_train(_event: EventORM):
+            if _event.partitions:
+                if _event.partitions.name == constants.FINETUNE_TRAIN_PARTITION:
+                    return True
+
+            return False
+
+        events_finetune_test = {
+            event.event_id: event
+            for event
+            in filter(
+                filter_finetune_test,
+                events,
+            )
+        }
+        logger.info(f"Got {len(events_finetune_test)} finetune test events")
+        dataset_ftte, annotations_ftte, updated_annotations_ftte = get_dataset_annotations_from_events(events_finetune_test)
+
+        events_finetune_train = {
+            event.event_id: event
+            for event
+            in filter(
+                filter_finetune_train,
+                events,
+            )
+        }
+        logger.info(f"Got {len(events_finetune_train)} finetune train events")
+        dataset_fttr, annotations_fttr, updated_annotations_fttr = get_dataset_annotations_from_events(events_finetune_train)
+
+
+        # dataset, annotations, updated_annotations, events = test_dataset_and_annotations_from_database(options)
+
+        for model_file in Path(options.working_dir).glob("*"):
+            file_name = model_file.name
+            match = re.match(constants.MODEL_FILE_REGEX, file_name)
+            if match:
+                epoch = match[1]
+                logger.info(f"######## Testing model for epoch: {epoch} ########")
+
+                records = annotate_dataset(options, dataset_ftte, annotations_ftte, updated_annotations_ftte, model_file)
+                precission_recall(records)
+
+
 
 
 def update_from_annotations_v2_get_annotations(
