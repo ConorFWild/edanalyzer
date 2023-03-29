@@ -669,7 +669,7 @@ def train_pandda(
 
                 model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]
                 annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
-                idxs = [x.to(torch.device("cpu")).detach() for x in annotation]
+                idxs = [int(x) for x in annotation]
                 # print("Loss at epoch {}, iteration {} is {}".format(epoch,
                 #                                                     i,
                 #                                                     running_loss / i) + "\n")
