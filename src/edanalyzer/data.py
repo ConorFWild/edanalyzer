@@ -124,6 +124,7 @@ class FinetuneDataset(BaseModel):
 class Options(BaseModel):
     working_dir: str
     finetune_datasets_train: list[FinetuneDataset]
+    finetune_datasets_test: list[FinetuneDataset]
     old_updated_annotation_dirs: list[str]
 
     @classmethod
