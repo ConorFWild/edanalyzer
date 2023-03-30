@@ -1881,6 +1881,20 @@ class CLI:
             partition_name
         )
 
+    def populate_from_custom_panddas_finetune_test(self, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+
+        engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+
+        partition_name = constants.FINETUNE_TEST_PARTITION
+
+        funetune_test_datasets = options.finetune_datasets_test
+        populate_from_custom_panddas(
+            engine,
+            funetune_test_datasets,
+            partition_name
+        )
+
     def train_default_and_finetune(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
 
