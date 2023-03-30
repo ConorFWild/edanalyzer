@@ -1214,6 +1214,7 @@ def annotate_dataset(
     return records
 
 def precission_recall(records):
+    precission_recalls = {}
     for cutoff in np.linspace(0.0,1.0, 100):
         fp = [
             _idx for _idx, _record in records.items()
@@ -1239,7 +1240,10 @@ def precission_recall(records):
             recall = len(tp) / len(tp+fn)
         else:
             recall =0.0
-        logger.info(f"Cutoff: {round(cutoff, 3)}: Precission: {round(precission, 3)} : Recall: {round(recall, 3)}")
+        precission_recalls[round(cutoff, 3)] = (round(precission, 3), round(recall, 3))
+
+    return precission_recalls
+        # logger.info(f"Cutoff: {round(cutoff, 3)}: Precission: {round(precission, 3)} : Recall: {round(recall, 3)}")
 
 
 def dataset_and_annotations_from_database(options):
@@ -2183,6 +2187,7 @@ class CLI:
 
         # dataset, annotations, updated_annotations, events = test_dataset_and_annotations_from_database(options)
 
+        model_pr = {}
         for model_file in Path(options.working_dir).glob("*"):
             file_name = model_file.name
             match = re.match(constants.MODEL_FILE_REGEX, file_name)
@@ -2191,7 +2196,25 @@ class CLI:
                 logger.info(f"######## Testing model for epoch: {epoch} ########")
 
                 records = annotate_dataset(options, dataset_ftte, annotations_ftte, updated_annotations_ftte, model_file)
-                precission_recall(records)
+
+                for cutoff, (precission, recall) in precission_recall(records).items():
+
+                    model_pr[(epoch, cutoff)] = (precission, recall)
+
+        # Filter by precission > 0.4
+        def filter_precission(_key):
+            if model_pr[_key][0] > 0.4:
+                return True
+            else:
+                return False
+        filtered_model_pr = {_key: model_pr[_key] for _key in filter(filter_precission, model_pr)}
+
+        # Rank by highest recall at precission > 0.4
+        for epoch, cutoff in sorted(model_pr, key=lambda _key: model_pr[_key][1]):
+            precission, recall = filtered_model_pr[(epoch, cutoff)]
+            logger.info(
+                f"Epoch: {epoch} : Cutoff: {cutoff} : Precission : {precission} : Recall : {recall}"
+            )
 
 
 
