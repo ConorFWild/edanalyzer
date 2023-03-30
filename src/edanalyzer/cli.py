@@ -2210,7 +2210,7 @@ class CLI:
         filtered_model_pr = {_key: model_pr[_key] for _key in filter(filter_precission, model_pr)}
 
         # Rank by highest recall at precission > 0.4
-        for epoch, cutoff in sorted(model_pr, key=lambda _key: model_pr[_key][1]):
+        for epoch, cutoff in sorted(filtered_model_pr, key=lambda _key: filtered_model_pr[_key][1]):
             precission, recall = filtered_model_pr[(epoch, cutoff)]
             logger.info(
                 f"Epoch: {epoch} : Cutoff: {cutoff} : Precission : {precission} : Recall : {recall}"
