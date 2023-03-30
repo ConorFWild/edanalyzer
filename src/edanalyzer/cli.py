@@ -2159,7 +2159,7 @@ class CLI:
             return False
 
         events_finetune_test = {
-            event.event_id: event
+            event.id: event
             for event
             in filter(
                 filter_finetune_test,
@@ -2170,7 +2170,7 @@ class CLI:
         dataset_ftte, annotations_ftte, updated_annotations_ftte = get_dataset_annotations_from_events(events_finetune_test)
 
         events_finetune_train = {
-            event.event_id: event
+            event.id: event
             for event
             in filter(
                 filter_finetune_train,
