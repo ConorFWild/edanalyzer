@@ -455,18 +455,12 @@ def get_image_xmap_mean_map_augmented(event: PanDDAEvent):
 class PanDDADatasetTorchXmapGroundState(Dataset):
     def __init__(self,
                  pandda_event_dataset: PanDDAEventDataset,
-                 annotations: PanDDAEventAnnotations,
-                 updated_annotations: PanDDAUpdatedEventAnnotations,
+
                  transform_image=lambda x: x,
                  transform_annotation=lambda x: x
                  ):
         self.pandda_event_dataset = pandda_event_dataset
-        self.annotations = annotations
-        self.updated_annotations = {
-            (key.dtag, key.event_idx): annotation
-            for key, annotation
-            in zip(updated_annotations.keys, updated_annotations.annotations)
-        }
+
         self.transform_image = transform_image
         self.transform_annotation = transform_annotation
 
