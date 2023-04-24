@@ -38,6 +38,9 @@ MODEL_FILE = "model_state_dict_zero_z.pt"
 MODEL_FILE_EPOCH = "model_state_dict_{epoch}.pt"
 MODEL_FILE_REGEX = "model_state_dict_([0-9]+).pt"
 
+MODEL_FILE_EPOCH_XMAP_MEAN = "model_state_dict_xmap_mean_{epoch}.pt"
+MODEL_FILE_REGEX_XMAP_MEAN = "model_state_dict_xmap_mean_([0-9]+).pt"
+
 PANDDA_ANALYSIS_DIR = "analyses"
 PANDDA_INSPECT_TABLE_FILE = "pandda_inspect_events.csv"
 PANDDA_PROCESSED_DATASETS_DIR = "processed_datasets"
