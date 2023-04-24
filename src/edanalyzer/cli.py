@@ -2145,7 +2145,7 @@ class CLI:
         model_files = {}
         for model_file in Path(options.working_dir).glob("*"):
             file_name = model_file.name
-            match = re.match(constants.MODEL_FILE_REGEX, file_name)
+            match = re.match(constants.MODEL_FILE_EPOCH_XMAP_MEAN, file_name)
             if match:
                 epoch = int(match[1])
                 model_files[epoch] = model_file
