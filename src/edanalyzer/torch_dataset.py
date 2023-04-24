@@ -110,6 +110,16 @@ def get_zmap_from_event(event: PanDDAEvent):
 
     return m
 
+def get_mean_map_from_event(event: PanDDAEvent):
+    zmap_path = str(Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_GROUND_STATE_MAP_TEMPLATE.format(
+        dtag=event.dtag))
+    ccp4 = gemmi.read_ccp4_map(zmap_path)
+    ccp4.setup(float('nan'))
+    m = ccp4.grid
+
+    return m
+
 
 def get_sample_transform_from_event(event: PanDDAEvent,
                                     sample_distance: float,
@@ -423,11 +433,13 @@ def get_image_xmap_mean_map_augmented(event: PanDDAEvent):
     try:
         sample_array_xmap = np.copy(sample_array)
         xmap_dmap = get_raw_xmap_from_event(event)
-        image_xmap = sample_xmap(xmap_dmap, sample_transform, sample_array_xmap)
+        image_xmap_initial = sample_xmap(xmap_dmap, sample_transform, sample_array_xmap)
+        image_xmap = (image_xmap_initial - np.mean(image_xmap_initial)) / np.std(image_xmap_initial)
 
         sample_array_mean = np.copy(sample_array)
-        mean_dmap = get_zmap_from_event(event)
-        image_mean = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
+        mean_dmap = get_mean_map_from_event(event)
+        image_mean_initial = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
+        image_mean = (image_mean_initial - np.mean(image_mean_initial)) / np.std(image_mean_initial)
 
         sample_array_model = np.copy(sample_array)
         model_map = get_model_map(event, xmap_dmap)

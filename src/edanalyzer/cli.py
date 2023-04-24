@@ -15,6 +15,7 @@ from edanalyzer import constants
 from edanalyzer.torch_dataset import (
     PanDDAEventDatasetTorch, PanDDADatasetTorchXmapGroundState, get_annotation_from_event_annotation,
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented,
+get_annotation_from_event_hit, get_image_xmap_mean_map_augmented
 )
 from edanalyzer.database import (
     populate_from_diamond, initialize_database, populate_partition_from_json,
@@ -713,8 +714,8 @@ def train_pandda_from_dataset(
     # Get the dataset
     dataset_torch = PanDDADatasetTorchXmapGroundState(
         dataset,
-        transform_image=get_image_event_map_and_raw_from_event_augmented,
-        transform_annotation=get_annotation_from_event_annotation
+        transform_image=get_image_xmap_mean_map_augmented,
+        transform_annotation=get_annotation_from_event_hit
 
     )
 

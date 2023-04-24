@@ -52,6 +52,7 @@ PANDDA_INITIAL_MTZ_TEMPLATE = "{dtag}-pandda-input.mtz"
 PANDDA_EVENT_TABLE_PATH = "pandda_analyse_events.csv"
 PANDDA_SITE_TABLE_PATH = "pandda_analyse_sites.csv"
 PANDDA_ZMAP_TEMPLATE = "{dtag}-z_map.native.ccp4"
+PANDDA_GROUND_STATE_MAP_TEMPLATE = "{dtag}-ground-state-average-map.native.ccp4"
 
 PANDDA_INSPECT_DTAG = "dtag"
 PANDDA_INSPECT_EVENT_IDX = "event_idx"
