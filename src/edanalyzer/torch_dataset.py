@@ -9,6 +9,7 @@ from torch.utils.data import Dataset
 from pathlib import Path
 from edanalyzer import constants
 
+
 def load_xmap_from_mtz(path):
     mtz = gemmi.read_mtz_file(str(path))
     for f, phi in constants.STRUCTURE_FACTORS:
@@ -23,8 +24,6 @@ def load_xmap_from_mtz(path):
 def sample_xmap(xmap, transform, sample_array):
     xmap.interpolate_values(sample_array, transform)
     return sample_array
-
-
 
 
 def annotate_data_randomly(data: StructureReflectionsData, p: float):
@@ -395,6 +394,77 @@ class PanDDAEventDatasetTorch(Dataset):
             annotation = self.updated_annotations[key]
         else:
             annotation = self.annotations.annotations[idx]
+
+        image, loaded = self.transform_image(event)
+
+        if loaded:
+            label = self.transform_annotation(annotation)
+
+        else:
+            label = np.array([1.0, 0.0], dtype=np.float32)
+        return image, label, idx
+
+
+def get_annotation_from_event_hit(annotation: bool):
+    if annotation:
+        return np.array([0.0, 1.0], dtype=np.float32)
+    else:
+        return np.array([1.0, 0.0], dtype=np.float32)
+
+def get_image_xmap_mean_map_augmented(event: PanDDAEvent):
+    # logger.debug(f"Loading: {event.dtag}")
+    sample_transform, sample_array = get_sample_transform_from_event_augmented(
+        event,
+        0.5,
+        30,
+        3.5
+    )
+
+    try:
+        sample_array_xmap = np.copy(sample_array)
+        xmap_dmap = get_raw_xmap_from_event(event)
+        image_xmap = sample_xmap(xmap_dmap, sample_transform, sample_array_xmap)
+
+        sample_array_mean = np.copy(sample_array)
+        mean_dmap = get_zmap_from_event(event)
+        image_mean = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
+
+        sample_array_model = np.copy(sample_array)
+        model_map = get_model_map(event, xmap_dmap)
+        image_model = sample_xmap(model_map, sample_transform, sample_array_model)
+
+    except Exception as e:
+        # print(e)
+        return np.stack([sample_array, sample_array, sample_array], axis=0), False
+
+    return np.stack([image_xmap, image_mean, image_model], axis=0), True
+
+
+class PanDDADatasetTorchXmapGroundState(Dataset):
+    def __init__(self,
+                 pandda_event_dataset: PanDDAEventDataset,
+                 annotations: PanDDAEventAnnotations,
+                 updated_annotations: PanDDAUpdatedEventAnnotations,
+                 transform_image=lambda x: x,
+                 transform_annotation=lambda x: x
+                 ):
+        self.pandda_event_dataset = pandda_event_dataset
+        self.annotations = annotations
+        self.updated_annotations = {
+            (key.dtag, key.event_idx): annotation
+            for key, annotation
+            in zip(updated_annotations.keys, updated_annotations.annotations)
+        }
+        self.transform_image = transform_image
+        self.transform_annotation = transform_annotation
+
+    def __len__(self):
+        return len(self.pandda_event_dataset.pandda_events)
+
+    def __getitem__(self, idx: int):
+        event = self.pandda_event_dataset.pandda_events[idx]
+
+        annotation = event.hit
 
         image, loaded = self.transform_image(event)
 
