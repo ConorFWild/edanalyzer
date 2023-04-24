@@ -9,7 +9,7 @@ import subprocess
 from edanalyzer.data import (
     StructureReflectionsDataset, Options, StructureReflectionsData, Ligand, PanDDAEvent,
     PanDDAEventDataset, PanDDAEventAnnotations, PanDDAEventAnnotation, PanDDAUpdatedEventAnnotations,
-    PanDDAEventKey,
+    PanDDAEventKey,load_model
 )
 from edanalyzer import constants
 from edanalyzer.torch_dataset import (
@@ -2140,7 +2140,8 @@ class CLI:
         options = Options.load(options_json_path)
 
         # Make the dataset
-        dataset = PanDDAEventDataset.load(dataset_path)
+        # dataset = PanDDAEventDataset.load(dataset_path)
+        dataset = load_model(dataset_path, PanDDAEventDataset)
 
         # Get the output model file
         model_files = {}
