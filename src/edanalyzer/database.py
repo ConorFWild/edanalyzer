@@ -1013,6 +1013,133 @@ def populate_from_custom_pandda(session, custom_pandda, partition_name):
         # Commit
         session.commit()
 
+def populate_from_custom_pandda_path_and_experiment(session, pandda_path, experiment, partition_name):
+    # Get the experiments
+    experiments_stmt = select(ExperimentORM)
+    experiments = {experiment.model_dir: experiment for experiment in session.scalars(experiments_stmt).unique().all()}
+    logger.info(f"Found {len(experiments)} experiments in database!")
+
+    # Get the systems
+    systems_stmt = select(SystemORM).options(joinedload((SystemORM.datasets)))
+    systems = {system.name: system for system in session.scalars(systems_stmt).unique().all()}
+    logger.info(f"Found {len(systems)} systems in database!")
+
+    # Get the datasets
+    datasets_stmt = select(DatasetORM).options(joinedload(DatasetORM.experiment),
+                                               joinedload(DatasetORM.events),
+                                               )
+    datasets = {dataset.path: dataset for dataset in session.scalars(datasets_stmt).unique().all()}
+    logger.info(f"Found {len(datasets)} datasets in database!")
+
+    # Get the partitions
+    partitions_stmt = select(PartitionORM)
+    partitions = {partition.name: partition for partition in session.scalars(partitions_stmt).unique().all()}
+    logger.info(f"Found {len(partitions)} partitions in database!")
+
+    # Get the panddas
+    panddas_stmt = select(PanDDAORM)
+    panddas = {pandda.path: pandda for pandda in session.scalars(panddas_stmt).unique().all()}
+    logger.info(f"Found {len(panddas)} panddas in database!")
+
+    # Create a new partition if necessary
+    if partition_name not in partitions:
+        partition = PartitionORM(name=partition_name)
+        logger.info(f"Using partitions: {partition_name}")
+    else:
+        partition = partitions[partition_name]
+        logger.info(f'Created new partition: {partition_name}')
+
+    # Loop over custom PanDDAs, adding appropriate systems, experiments, annotitions,
+    # partitions and events
+    new_panddas = []
+    new_systems = []
+    new_experiments = []
+    with Parallel(n_jobs=-2, prefer="threads", verbose=10) as parallel:
+
+        new_experiment = False
+        new_system = False
+
+        logger.info(f"PanDDA Path is: {pandda_path}")
+        # Unpack the PanDDA object
+
+        # Check if PanDDA already added
+        if pandda_path in panddas:
+            logger.warning(f"Already parsed PanDDA at: {pandda_path}")
+            return
+
+        # Get the experiment or create a new one
+
+        # Get the datasets
+        experiment_datasets = {
+            dataset.dtag: dataset
+            for dataset
+            in datasets.values()
+            if dataset.experiment.model_dir == experiment.model_dir
+        }
+        logger.info(f"Found {len(experiment_datasets)} datasets for experiment")
+
+        # Get the system
+        system = experiment.system
+        logger.info(f"System name is: {system.name}")
+
+
+        # Get the other system datasets
+        system_datasets = {dataset.dtag: dataset for dataset in system.datasets}
+        logger.info(f"System has {len(system_datasets)} datasets")
+
+        # Get the events
+        events = parse_potential_pandda_dir_parallel(
+            Path(pandda_path),
+            Path(experiment.model_dir),
+            annotation_type="manual",
+            parallel=parallel
+        )
+        if not events:
+            logger.warning(f"Did not find any events! Skipping!")
+            return
+        logger.info(f"Found {len(events)} events!")
+
+        # Match events to datasets
+        for event in events:
+            if event.dtag in experiment_datasets:
+                event.dataset = experiment_datasets[event.dtag]
+            else:
+                logger.warning(f"Event with dataset {event.dtag} has no corresponding dataset in experiment!")
+                if event.dtag in system_datasets:
+                    event.dataset = system_datasets[event.dtag]
+                else:
+                    logger.warning(f"Not in system datasets either!")
+
+        # Get PanDDA dataset dtags
+        pandda_dataset_dtags = get_pandda_dir_dataset_dtags(Path(pandda_path))
+
+        # Create a new PanDDA
+        pandda = PanDDAORM(
+            path=str(pandda_path),
+            events=events,
+            datasets=[dataset for dataset in experiment_datasets.values() if
+                      dataset.dtag in pandda_dataset_dtags],
+            system=system,
+            experiment=experiment
+        )
+        # new_panddas.append(pandda)
+
+        # Add the events to the revelant partition
+        for event in events:
+            event.partition = partition
+            partition.events.append(event)
+
+        # Add entries
+        if new_experiment:
+            session.add_all([experiment, ])
+        if new_system:
+            session.add_all([system, ])
+
+        session.add_all([pandda, ])
+
+        # Commit
+        session.commit()
+
 def populate_from_custom_panddas(engine, custom_panddas, partition_name):
     for custom_pandda in custom_panddas:
         with Session(engine) as session:
