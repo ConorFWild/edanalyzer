@@ -2445,7 +2445,7 @@ class CLI:
                     results_this_epoch,
                     key=lambda _key: float(np.abs(results_this_epoch[_key][1]-0.95)),
                 )
-                print(f"Precission at recall: {results_this_epoch[selected_key[1]]} is: {results_this_epoch[selected_key[0]]} at cutoff: {selected_key}")
+                print(f"Precission at recall: {results_this_epoch[selected_key][1]} is: {results_this_epoch[selected_key][0]} at cutoff: {selected_key}")
 
 
         # Filter by precission > 0.4
