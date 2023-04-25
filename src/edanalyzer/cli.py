@@ -2440,6 +2440,13 @@ class CLI:
 
                     model_pr[(epoch, cutoff)] = (precission, recall)
 
+                results_this_epoch = {_key[1]: model_pr[_key] for _key in model_pr if _key[0] == epoch}
+                selected_key = min(
+                    results_this_epoch,
+                    key=lambda _key: float(np.abs(results_this_epoch[_key][1]-0.95)),
+                )
+                print(f"Precission at 95% recall: {results_this_epoch[selected_key[0]]} at cutoff: {selected_key}")
+
         # Filter by precission > 0.4
         def filter_precission(_key):
             if model_pr[_key][0] > 0.4:
