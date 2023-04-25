@@ -2427,6 +2427,8 @@ class CLI:
     def score_models_on_dataset(self, test_dataset_path, epoch=15, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
 
+        epoch = int(epoch)
+
         test_dataset = load_model(test_dataset_path, PanDDAEventDataset)
         print(f"Got dataset with: {len(test_dataset.pandda_events)} events!")
 
