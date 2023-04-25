@@ -2424,7 +2424,7 @@ class CLI:
                 f"Epoch: {epoch} : Cutoff: {cutoff} : Precission : {precission} : Recall : {recall}"
             )
 
-    def score_models_on_dataset(self, test_dataset_path, epoch=1, options_json_path: str = "./options.json"):
+    def score_models_on_dataset(self, test_dataset_path, epoch=15, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
 
         test_dataset = load_model(test_dataset_path, PanDDAEventDataset)
