@@ -2447,6 +2447,7 @@ class CLI:
                 )
                 print(f"Precission at 95% recall: {results_this_epoch[selected_key[0]]} at cutoff: {selected_key}")
 
+
         # Filter by precission > 0.4
         def filter_precission(_key):
             if model_pr[_key][0] > 0.4:
