@@ -512,3 +512,124 @@ class PanDDADatasetTorchXmapGroundState(Dataset):
         else:
             label = np.array([1.0, 0.0], dtype=np.float32)
         return image, label, idx
+
+
+def parse_pdb_file_for_ligand_array(path):
+    structure = gemmi.read_structure(str(path))
+    poss = []
+    for model in structure:
+        for chain in model:
+            for res in chain:
+                for atom in res:
+                    pos = atom.pos
+                    poss.append([pos.x, pos.y, pos.z])
+
+    return np.array(poss).T
+
+
+def get_ligand_map(
+        event,
+        n=30,
+        step=0.5,
+        translation=2.5,
+):
+    # Get the path to the ligand cif
+    dataset_dir = Path(event.model_building_dir) / event.dtag / "compound"
+    pdb_paths = [x for x in dataset_dir.glob("*.pdb") if x.exists()]
+    path = pdb_paths[0]
+
+    # Get the ligand array
+    ligand_array = parse_pdb_file_for_ligand_array(path)
+    rotation_matrix = R.random().as_matrix()
+    rng = default_rng()
+    random_translation = ((rng.random(3) - 0.5) * 2 * translation).reshape((3, 1))
+    ligand_mean_pos = np.mean(ligand_array, axis=1).reshape((3, 1))
+    centre_translation = np.array([step * n, step * n, step * n]).reshape((3, 1)) / 2
+    zero_centred_array = ligand_array - ligand_mean_pos
+    rotated_array = np.matmul(rotation_matrix, zero_centred_array)
+    grid_centred_array = rotated_array + centre_translation
+    augmented_array = (grid_centred_array + random_translation).T
+
+
+    # Get a dummy grid to place density on
+    dummy_grid = gemmi.FloatGrid(n, n, n)
+    unit_cell = gemmi.UnitCell(step * n, step * n, step * n, 90.0, 90.0, 90.0)
+    dummy_grid.set_unit_cell(unit_cell)
+
+    for pos_array in augmented_array:
+        assert pos_array.size == 3
+        if np.all(pos_array > 0):
+            if np.all(pos_array < (n * step)):
+
+                dummy_grid.set_points_around(
+                    gemmi.Position(*pos_array),
+                    radius=1.0,
+                    value=1.0,
+                )
+
+    return dummy_grid
+
+
+def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
+    # logger.debug(f"Loading: {event.dtag}")
+    sample_transform, sample_array = get_sample_transform_from_event_augmented(
+        event,
+        0.5,
+        30,
+        3.5
+    )
+
+    try:
+        sample_array_xmap = np.copy(sample_array)
+        xmap_dmap = get_raw_xmap_from_event(event)
+        image_xmap_initial = sample_xmap(xmap_dmap, sample_transform, sample_array_xmap)
+        image_xmap = (image_xmap_initial - np.mean(image_xmap_initial)) / np.std(image_xmap_initial)
+
+        sample_array_mean = np.copy(sample_array)
+        mean_dmap = get_mean_map_from_event(event)
+        image_mean_initial = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
+        image_mean = (image_mean_initial - np.mean(image_mean_initial)) / np.std(image_mean_initial)
+
+        sample_array_model = np.copy(sample_array)
+        model_map = get_model_map(event, xmap_dmap)
+        image_model = sample_xmap(model_map, sample_transform, sample_array_model)
+
+        # ligand_map_array = np.copy(sample_array)
+        ligand_map = get_ligand_map(event)
+        image_ligand = np.array(ligand_map)
+
+    except Exception as e:
+        # print(e)
+        return np.stack([sample_array, sample_array, sample_array, sample_array], axis=0), False
+
+    return np.stack([image_xmap, image_mean, image_model, image_ligand, image_ligand], axis=0), True
+
+
+class PanDDADatasetTorchLigand(Dataset):
+    def __init__(self,
+                 pandda_event_dataset: PanDDAEventDataset,
+
+                 transform_image=lambda x: x,
+                 transform_annotation=lambda x: x
+                 ):
+        self.pandda_event_dataset = pandda_event_dataset
+
+        self.transform_image = transform_image
+        self.transform_annotation = transform_annotation
+
+    def __len__(self):
+        return len(self.pandda_event_dataset.pandda_events)
+
+    def __getitem__(self, idx: int):
+        event = self.pandda_event_dataset.pandda_events[idx]
+
+        annotation = event.hit
+
+        image, loaded = self.transform_image(event)
+
+        if loaded:
+            label = self.transform_annotation(annotation)
+
+        else:
+            label = np.array([1.0, 0.0], dtype=np.float32)
+        return image, label, idx
