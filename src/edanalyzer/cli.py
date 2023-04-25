@@ -1331,8 +1331,8 @@ def get_annotations_from_dataset(
     # Get the dataset
     dataset_torch = PanDDADatasetTorchXmapGroundState(
         dataset,
-        transform_image=get_image_event_map_and_raw_from_event,
-        transform_annotation=get_annotation_from_event_annotation
+        transform_image=get_image_xmap_mean_map_augmented,
+        transform_annotation=get_annotation_from_event_hit
     )
 
     # Get the dataloader
