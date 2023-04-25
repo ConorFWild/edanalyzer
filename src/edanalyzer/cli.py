@@ -784,7 +784,7 @@ def train_pandda_from_dataset(
                 # print("Loss at epoch {}, iteration {} is {}".format(epoch,
                 #                                                     i,
                 #                                                     running_loss / i) + "\n")
-                print(f"Recent loss is: {sum(running_loss[-90:]) / 90}")
+                print(f"Recent loss is: {sum(running_loss[-998:]) / 998}")
 
                 for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
                     mod_an = round(float(model_annotation_np[1]), 2)
