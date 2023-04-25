@@ -736,7 +736,8 @@ def train_pandda_from_dataset(
 
     # Define optimizer
     optimizer = optim.Adam(model.parameters(),
-                           lr=0.00001)
+                           # lr=0.001,
+                           )
 
     optimizer.zero_grad()
 
@@ -774,7 +775,7 @@ def train_pandda_from_dataset(
 
             # print statistics per epoch
             i += 1
-            if i % 100 == 99:  # print every 100 mini-batches
+            if i % 1000 == 999:  # print every 100 mini-batches
 
                 model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]
                 annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
