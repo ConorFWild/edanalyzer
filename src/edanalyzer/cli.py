@@ -2428,6 +2428,7 @@ class CLI:
         options = Options.load(options_json_path)
 
         test_dataset = load_model(test_dataset_path, PanDDAEventDataset)
+        print(f"Got dataset with: {len(test_dataset.pandda_events)} events!")
 
         model_files = {}
         for model_file in Path(options.working_dir).glob("*"):
