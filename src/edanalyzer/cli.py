@@ -2438,7 +2438,7 @@ class CLI:
         #         epoch = int(match[1])
         #         model_files[epoch] = model_file
 
-        model_file = Path(options.working_dir) /constants.MODEL_FILE_EPOCH_XMAP_MEAN.format(epoch=epoch)
+        model_file = Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_MEAN.format(epoch=epoch)
         model_pr = {}
         while model_file.exists():
 
