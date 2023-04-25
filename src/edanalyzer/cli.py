@@ -2427,9 +2427,19 @@ class CLI:
 
         test_dataset = load_model(test_dataset_path, PanDDAEventDataset)
 
+        model_files = {}
+        for model_file in Path(options.working_dir).glob("*"):
+            file_name = model_file.name
+            match = re.match(constants.MODEL_FILE_REGEX, file_name)
+            if match:
+                epoch = int(match[1])
+                model_files[epoch] = model_file
+
 
         model_pr = {}
-        for model_file in Path(options.working_dir).glob("*"):
+        for epoch in sorted(model_files):
+            model_file = model_files[epoch]
+
             file_name = model_file.name
             match = re.match(constants.MODEL_FILE_REGEX_XMAP_MEAN, file_name)
             if match:
@@ -2450,7 +2460,7 @@ class CLI:
                     results_this_epoch,
                     key=lambda _key: float(np.abs(results_this_epoch[_key][1]-0.95)),
                 )
-                print(f"Precission at recall: {results_this_epoch[selected_key][1]} is: {results_this_epoch[selected_key][0]} at cutoff: {selected_key}")
+                print(f"Epoch {epoch}: Precission at recall: {results_this_epoch[selected_key][1]} is: {results_this_epoch[selected_key][0]} at cutoff: {selected_key}")
 
 
         # Filter by precission > 0.4
