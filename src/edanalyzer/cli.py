@@ -2336,14 +2336,19 @@ class CLI:
         options = Options.load(options_json_path)
         dataset, annotations, updated_annotations, events = test_dataset_and_annotations_from_database(options)
 
+        model_files = {}
         for model_file in Path(options.working_dir).glob("*"):
             file_name = model_file.name
             match = re.match(constants.MODEL_FILE_REGEX, file_name)
             if match:
-                epoch = match[1]
-                logger.info(f"######## Testing model for epoch: {epoch} ########")
-                records = annotate_dataset(options, dataset, annotations,updated_annotations, model_file)
-                precission_recall(records)
+                epoch = int(match[1])
+                model_files[epoch] = model_file
+
+        for epoch in sorted(model_files):
+            model_file = model_files[epoch]
+            logger.info(f"######## Testing model for epoch: {epoch} ########")
+            records = annotate_dataset(options, dataset, annotations,updated_annotations, model_file)
+            precission_recall(records)
 
     def score_models_on_finetune_sets(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
