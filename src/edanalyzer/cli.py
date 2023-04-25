@@ -2424,24 +2424,25 @@ class CLI:
                 f"Epoch: {epoch} : Cutoff: {cutoff} : Precission : {precission} : Recall : {recall}"
             )
 
-    def score_models_on_dataset(self, test_dataset_path, options_json_path: str = "./options.json"):
+    def score_models_on_dataset(self, test_dataset_path, epoch=1, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
 
         test_dataset = load_model(test_dataset_path, PanDDAEventDataset)
         print(f"Got dataset with: {len(test_dataset.pandda_events)} events!")
 
-        model_files = {}
-        for model_file in Path(options.working_dir).glob("*"):
-            file_name = model_file.name
-            match = re.match(constants.MODEL_FILE_REGEX_XMAP_MEAN, file_name)
-            if match:
-                epoch = int(match[1])
-                model_files[epoch] = model_file
+        # model_files = {}
+        # for model_file in Path(options.working_dir).glob("*"):
+        #     file_name = model_file.name
+        #     match = re.match(constants.MODEL_FILE_REGEX_XMAP_MEAN, file_name)
+        #     if match:
+        #         epoch = int(match[1])
+        #         model_files[epoch] = model_file
 
-
+        model_file = Path(options.working_dir) /constants.MODEL_FILE_EPOCH_XMAP_MEAN.format(epoch=epoch)
         model_pr = {}
-        for epoch in sorted(model_files):
-            model_file = model_files[epoch]
+        while model_file.exists():
+
+            # model_file = model_files[epoch]
 
             # file_name = model_file.name
             # match = re.match(constants.MODEL_FILE_REGEX_XMAP_MEAN, file_name)
@@ -2465,6 +2466,8 @@ class CLI:
             )
             print(f"Epoch {epoch}: Precission at recall: {results_this_epoch[selected_key][1]} is: {results_this_epoch[selected_key][0]} at cutoff: {selected_key}")
 
+            epoch += 1
+            model_file = Path(options.working_dir) /constants.MODEL_FILE_EPOCH_XMAP_MEAN.format(epoch=epoch)
 
         # Filter by precission > 0.4
         def filter_precission(_key):
