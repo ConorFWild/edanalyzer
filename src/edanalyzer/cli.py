@@ -2426,7 +2426,7 @@ class CLI:
         model_pr = {}
         for model_file in Path(options.working_dir).glob("*"):
             file_name = model_file.name
-            match = re.match(constants.MODEL_FILE_REGEX, file_name)
+            match = re.match(constants.MODEL_FILE_REGEX_XMAP_MEAN, file_name)
             if match:
                 epoch = match[1]
                 logger.info(f"######## Testing model for epoch: {epoch} ########")
