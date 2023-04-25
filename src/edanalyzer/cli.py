@@ -2431,7 +2431,7 @@ class CLI:
         model_files = {}
         for model_file in Path(options.working_dir).glob("*"):
             file_name = model_file.name
-            match = re.match(constants.MODEL_FILE_REGEX, file_name)
+            match = re.match(constants.MODEL_FILE_REGEX_XMAP_MEAN, file_name)
             if match:
                 epoch = int(match[1])
                 model_files[epoch] = model_file
@@ -2441,27 +2441,27 @@ class CLI:
         for epoch in sorted(model_files):
             model_file = model_files[epoch]
 
-            file_name = model_file.name
-            match = re.match(constants.MODEL_FILE_REGEX_XMAP_MEAN, file_name)
-            if match:
-                epoch = match[1]
-                logger.info(f"######## Testing model for epoch: {epoch} ########")
+            # file_name = model_file.name
+            # match = re.match(constants.MODEL_FILE_REGEX_XMAP_MEAN, file_name)
+            # if match:
+            #     epoch = match[1]
+            logger.info(f"######## Testing model for epoch: {epoch} ########")
 
-                records = get_annotations_from_dataset(
-                    test_dataset,
-                    model_file,
-                )
+            records = get_annotations_from_dataset(
+                test_dataset,
+                model_file,
+            )
 
-                for cutoff, (precission, recall) in precission_recall(records).items():
+            for cutoff, (precission, recall) in precission_recall(records).items():
 
-                    model_pr[(epoch, cutoff)] = (precission, recall)
+                model_pr[(epoch, cutoff)] = (precission, recall)
 
-                results_this_epoch = {_key[1]: model_pr[_key] for _key in model_pr if _key[0] == epoch}
-                selected_key = min(
-                    results_this_epoch,
-                    key=lambda _key: float(np.abs(results_this_epoch[_key][1]-0.95)),
-                )
-                print(f"Epoch {epoch}: Precission at recall: {results_this_epoch[selected_key][1]} is: {results_this_epoch[selected_key][0]} at cutoff: {selected_key}")
+            results_this_epoch = {_key[1]: model_pr[_key] for _key in model_pr if _key[0] == epoch}
+            selected_key = min(
+                results_this_epoch,
+                key=lambda _key: float(np.abs(results_this_epoch[_key][1]-0.95)),
+            )
+            print(f"Epoch {epoch}: Precission at recall: {results_this_epoch[selected_key][1]} is: {results_this_epoch[selected_key][0]} at cutoff: {selected_key}")
 
 
         # Filter by precission > 0.4
