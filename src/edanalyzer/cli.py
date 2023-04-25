@@ -798,7 +798,7 @@ def train_pandda_from_dataset(
                 print("#################################################" + "\n")
 
         logger.info(f"Saving state dict for model at epoch: {epoch}")
-        torch.save(model.state_dict(), Path(options.working_dir) / constants.MODEL_FILE_EPOCH.format(epoch=epoch))
+        torch.save(model.state_dict(), Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_MEAN.format(epoch=epoch))
 
 def try_make_dir(path: Path):
     if not path.exists():
