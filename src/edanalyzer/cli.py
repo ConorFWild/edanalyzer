@@ -16,7 +16,7 @@ from edanalyzer.torch_dataset import (
     PanDDAEventDatasetTorch, PanDDADatasetTorchXmapGroundState, get_annotation_from_event_annotation,
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented,
 get_annotation_from_event_hit, get_image_xmap_mean_map_augmented, get_image_xmap_mean_map,
-get_image_xmap_ligand_augmented, PanDDADatasetTorchLigand
+get_image_xmap_ligand_augmented, PanDDADatasetTorchLigand, get_image_xmap_ligand
 )
 from edanalyzer.database import (
     populate_from_diamond, initialize_database, populate_partition_from_json,
@@ -1490,6 +1490,64 @@ def get_annotations_from_dataset(
 
     return records
 
+def get_annotations_from_dataset_ligand(
+        dataset: PanDDAEventDataset,
+        model_file: Path
+):
+
+    logger.info(f"No record file to parse: Annotating dataset!")
+    # Get the dataset
+    dataset_torch = PanDDADatasetTorchLigand(
+        dataset,
+        transform_image=get_image_xmap_ligand,
+        transform_annotation=get_annotation_from_event_hit
+    )
+
+    # Get the dataloader
+    train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=False, num_workers=12)
+
+    # model = squeezenet1_1(num_classes=2, num_input=2)
+    model = resnet18(num_classes=2, num_input=4)
+    model.load_state_dict(torch.load(model_file))
+    model.eval()
+
+    if torch.cuda.is_available():
+        logger.info(f"Using cuda!")
+        dev = "cuda:0"
+    else:
+        logger.info(f"Using cpu!")
+        dev = "cpu"
+
+    model.to(dev)
+    model.eval()
+
+    records = {}
+    for image, annotation, idx in train_dataloader:
+        image_c = image.to(dev)
+        annotation_c = annotation.to(dev)
+
+        # forward
+        model_annotation = model(image_c)
+
+        annotation_np = annotation.to(torch.device("cpu")).detach().numpy()
+        model_annotation_np = model_annotation.to(torch.device("cpu")).detach().numpy()
+        idx_np = idx.to(torch.device("cpu")).detach().numpy()
+
+        #
+        for _annotation, _model_annotation, _idx in zip(annotation_np, model_annotation_np, idx_np):
+            records[_idx] = {"annotation": _annotation[1], "model_annotation": _model_annotation[1]}
+            event = dataset.pandda_events[_idx]
+            # logger.debug(f"{event.dtag} {event.event_idx} {_annotation[1]} {_model_annotation[1]}")
+
+    # Save a model annotations json
+    # pandda_event_model_annotations = PanDDAEventModelAnnotations(
+    #     annotations={
+    #         _idx: records[_idx]["model_annotation"] for _idx in records
+    #     }
+    # )
+
+    return records
+
 
 def precission_recall(records):
     precission_recalls = {}
@@ -2584,6 +2642,70 @@ class CLI:
         #         model_files[epoch] = model_file
 
         model_file = (Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_MEAN.format(epoch=epoch)).resolve()
+        print(f"Initial model path is: {model_file}")
+        model_pr = {}
+        while model_file.exists():
+
+            # model_file = model_files[epoch]
+
+            # file_name = model_file.name
+            # match = re.match(constants.MODEL_FILE_REGEX_XMAP_MEAN, file_name)
+            # if match:
+            #     epoch = match[1]
+            logger.info(f"######## Testing model for epoch: {epoch} ########")
+
+            records = get_annotations_from_dataset(
+                test_dataset,
+                model_file,
+            )
+
+            for cutoff, (precission, recall) in precission_recall(records).items():
+
+                model_pr[(epoch, cutoff)] = (precission, recall)
+
+            results_this_epoch = {_key[1]: model_pr[_key] for _key in model_pr if _key[0] == epoch}
+            selected_key = min(
+                results_this_epoch,
+                key=lambda _key: float(np.abs(results_this_epoch[_key][1]-0.95)),
+            )
+            print(f"Epoch {epoch}: Precission at recall: {results_this_epoch[selected_key][1]} is: {results_this_epoch[selected_key][0]} at cutoff: {selected_key}")
+
+            epoch += 1
+            model_file = Path(options.working_dir) /constants.MODEL_FILE_EPOCH_XMAP_MEAN.format(epoch=epoch)
+
+        # Filter by precission > 0.4
+        def filter_precission(_key):
+            if model_pr[_key][0] > 0.4:
+                return True
+            else:
+                return False
+        filtered_model_pr = {_key: model_pr[_key] for _key in filter(filter_precission, model_pr)}
+
+        # Rank by highest recall at precission > 0.4
+        for epoch, cutoff in sorted(filtered_model_pr, key=lambda _key: filtered_model_pr[_key][1]):
+            precission, recall = filtered_model_pr[(epoch, cutoff)]
+            logger.info(
+                f"Epoch: {epoch} : Cutoff: {cutoff} : Precission : {precission} : Recall : {recall}"
+            )
+
+
+    def score_models_on_dataset_ligand(self, test_dataset_path, epoch=15, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+
+        epoch = int(epoch)
+
+        test_dataset = load_model(test_dataset_path, PanDDAEventDataset)
+        print(f"Got dataset with: {len(test_dataset.pandda_events)} events!")
+
+        # model_files = {}
+        # for model_file in Path(options.working_dir).glob("*"):
+        #     file_name = model_file.name
+        #     match = re.match(constants.MODEL_FILE_REGEX_XMAP_MEAN, file_name)
+        #     if match:
+        #         epoch = int(match[1])
+        #         model_files[epoch] = model_file
+
+        model_file = (Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch)).resolve()
         print(f"Initial model path is: {model_file}")
         model_pr = {}
         while model_file.exists():

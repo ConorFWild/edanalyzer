@@ -570,6 +570,42 @@ def get_ligand_map(
     return dummy_grid
 
 
+def get_image_xmap_ligand(event: PanDDAEvent, ):
+    # logger.debug(f"Loading: {event.dtag}")
+    sample_transform, sample_array = get_sample_transform_from_event(
+        event,
+        0.5,
+        30,
+        3.5
+    )
+
+    try:
+        sample_array_xmap = np.copy(sample_array)
+        xmap_dmap = get_raw_xmap_from_event(event)
+        image_xmap_initial = sample_xmap(xmap_dmap, sample_transform, sample_array_xmap)
+        image_xmap = (image_xmap_initial - np.mean(image_xmap_initial)) / np.std(image_xmap_initial)
+
+        sample_array_mean = np.copy(sample_array)
+        mean_dmap = get_mean_map_from_event(event)
+        image_mean_initial = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
+        image_mean = (image_mean_initial - np.mean(image_mean_initial)) / np.std(image_mean_initial)
+
+        sample_array_model = np.copy(sample_array)
+        model_map = get_model_map(event, xmap_dmap)
+        image_model = sample_xmap(model_map, sample_transform, sample_array_model)
+
+        # ligand_map_array = np.copy(sample_array)
+        ligand_map = get_ligand_map(event)
+        image_ligand = np.array(ligand_map)
+
+    except Exception as e:
+        print(e)
+        return np.stack([sample_array, sample_array, sample_array, sample_array], axis=0), False
+
+    return np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=0), True
+
+
+
 def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
     # logger.debug(f"Loading: {event.dtag}")
     sample_transform, sample_array = get_sample_transform_from_event_augmented(
