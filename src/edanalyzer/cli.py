@@ -709,7 +709,7 @@ def train_pandda_from_dataset(
         logger.info(f"Using cpu!")
         dev = "cpu"
 
-    num_epochs = 200
+    num_epochs = 500
     logger.info(f"Training on {len(dataset.pandda_events)} events!")
 
     # Get the dataset
@@ -817,7 +817,7 @@ def train_pandda_from_dataset_ligand(
         logger.info(f"Using cpu!")
         dev = "cpu"
 
-    num_epochs = 300
+    num_epochs = 500
     logger.info(f"Training on {len(dataset.pandda_events)} events!")
 
     # Get the dataset
@@ -2572,8 +2572,6 @@ class CLI:
     def annotate_train_dataset_all(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
         dataset, annotations, updated_annotations, events = dataset_and_annotations_from_database(options)
-
-
 
         train_annotations_dir = Path(options.working_dir) / constants.PANDDA_TRAIN_ANNOTATION_DIR
 
