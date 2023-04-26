@@ -2735,7 +2735,7 @@ class CLI:
             print(f"Epoch {epoch}: Precission at recall: {results_this_epoch[selected_key][1]} is: {results_this_epoch[selected_key][0]} at cutoff: {selected_key}")
 
             epoch += 1
-            model_file = Path(options.working_dir) /constants.MODEL_FILE_EPOCH_XMAP_MEAN.format(epoch=epoch)
+            model_file = Path(options.working_dir) /constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch)
 
         # Filter by precission > 0.4
         def filter_precission(_key):
