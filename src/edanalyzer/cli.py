@@ -1369,6 +1369,144 @@ events: dict[int, EventORM]
         test_annotation_dir / constants.LOW_SCORING_HIT_DATASET_DIR,
     )
 
+def annotate_dataset_ligand(
+        dataset: PanDDAEventDataset,
+        test_annotation_dir: Path,
+        model_file,
+        events: dict[int, EventORM]
+):
+    logger.info(f"Output directory is: {test_annotation_dir}")
+    if not test_annotation_dir.exists():
+        os.mkdir(test_annotation_dir)
+
+    records_file = test_annotation_dir / "train_records.pickle"
+    logger.info(f"Record file is: {records_file}")
+
+    if not records_file.exists():
+        logger.info(f"No record file to parse: Annotating dataset!")
+        # Get the dataset
+        dataset_torch = PanDDADatasetTorchLigand(
+            dataset,
+            transform_image=get_image_xmap_ligand,
+            transform_annotation=get_annotation_from_event_hit
+        )
+
+        # Get the dataloader
+        train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=False, num_workers=12)
+
+        # model = squeezenet1_1(num_classes=2, num_input=2)
+        model = resnet18(num_classes=2, num_input=4)
+        model.load_state_dict(torch.load(model_file))
+        model.eval()
+
+        if torch.cuda.is_available():
+            logger.info(f"Using cuda!")
+            dev = "cuda:0"
+        else:
+            logger.info(f"Using cpu!")
+            dev = "cpu"
+
+        model.to(dev)
+        model.eval()
+
+        records = {}
+        for image, annotation, idx in train_dataloader:
+            image_c = image.to(dev)
+            annotation_c = annotation.to(dev)
+
+            # forward
+            model_annotation = model(image_c)
+
+            annotation_np = annotation.to(torch.device("cpu")).detach().numpy()
+            model_annotation_np = model_annotation.to(torch.device("cpu")).detach().numpy()
+            idx_np = idx.to(torch.device("cpu")).detach().numpy()
+
+            #
+            for _annotation, _model_annotation, _idx in zip(annotation_np, model_annotation_np, idx_np):
+                records[_idx] = {"annotation": _annotation[1], "model_annotation": _model_annotation[1]}
+                event = dataset.pandda_events[_idx]
+                logger.debug(f"{event.dtag} {event.event_idx} {_annotation[1]} {_model_annotation[1]}")
+
+        # Save a model annotations json
+        # pandda_event_model_annotations = PanDDAEventModelAnnotations(
+        #     annotations={
+        #         _idx: records[_idx]["model_annotation"] for _idx in records
+        #     }
+        # )
+
+        with open(records_file, "wb") as f:
+            pickle.dump(records, f)
+
+    else:
+        logger.info(f"Records file for CNN annotations exists: loading!")
+        with open(records_file, "rb") as f:
+
+            records = pickle.load(f)
+
+    # Sort by model annotation
+    sorted_idxs = sorted(records, key=lambda x: records[x]["model_annotation"], reverse=True)
+
+    # Get highest scoring non-hits
+    high_scoring_non_hits = []
+    for sorted_idx in sorted_idxs:
+        event = dataset.pandda_events[sorted_idx]
+        event_orm = events[event.id]
+        if "manual" in [annotation.source for annotation in event_orm.annotations]:
+            logger.debug(f"Already have manual annotation!")
+            continue
+
+        if len(high_scoring_non_hits) > 5000:
+            continue
+        if records[sorted_idx]["annotation"] == 0.0:
+            high_scoring_non_hits.append(sorted_idx)
+    logger.info(f"Got {len(high_scoring_non_hits)} high scoring non-hits!")
+
+    # Get the lowest scoring hits
+    low_scoring_hits = []
+    for sorted_idx in reversed(sorted_idxs):
+
+        # Skip if already manually annotated
+        event = dataset.pandda_events[sorted_idx]
+        event_orm = events[event.id]
+        if "manual" in [annotation.source for annotation in event_orm.annotations]:
+            logger.debug(f"Already have manual annotation!")
+            continue
+
+        if len(low_scoring_hits) > 5000:
+            continue
+        if records[sorted_idx]["annotation"] == 1.0:
+            low_scoring_hits.append(sorted_idx)
+    logger.info(f"Got {len(low_scoring_hits)} low scoring hits!")
+
+    # Make fake PanDDA and inspect table for high scoring non hits
+    pandda_events = []
+    dtag_event_ids = []
+    for _idx in high_scoring_non_hits:
+        event = dataset.pandda_events[_idx]
+        # key = (event.dtag, event.event_idx)
+        # if key in dtag_event_ids:
+        #     continue
+        # else:
+        pandda_events.append(event)
+            # dtag_event_ids.append(key)
+    high_scoring_non_hit_dataset = PanDDAEventDataset(pandda_events=pandda_events)
+    make_fake_pandda(
+        high_scoring_non_hit_dataset,
+        test_annotation_dir / constants.HIGH_SCORING_NON_HIT_DATASET_DIR,
+    )
+
+    # Make fake PanDDA and inspect table for low scoring hits
+    pandda_events = []
+    for _idx in low_scoring_hits:
+        event = dataset.pandda_events[_idx]
+        pandda_events.append(event)
+
+    low_scoring_hit_dataset = PanDDAEventDataset(pandda_events=pandda_events)
+    make_fake_pandda(
+        low_scoring_hit_dataset,
+        test_annotation_dir / constants.LOW_SCORING_HIT_DATASET_DIR,
+    )
+
 def annotate_dataset(
         options: Options,
         dataset: PanDDAEventDataset,
@@ -2461,6 +2599,33 @@ class CLI:
             updated_annotations,
             test_annotations_dir,
             events
+        )
+
+    def annotate_dataset_ligand(self, dataset_path, model_file, options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+
+        engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+
+        with Session(engine) as session:
+            logger.info(f"Loading events")
+            events_stmt = select(EventORM).options(
+                selectinload(EventORM.annotations),
+                selectinload(EventORM.partitions),
+                selectinload(EventORM.pandda).options(
+                    selectinload(PanDDAORM.system),
+                    selectinload(PanDDAORM.experiment),
+                ),
+            )
+            events = session.scalars(events_stmt).unique().all()
+
+        dataset = load_model(dataset_path, PanDDAEventDataset)
+        test_annotations_dir = Path(options.working_dir) / f"annotations_{Path(dataset_path).stem}"
+
+        annotate_dataset_ligand(
+            dataset,
+            test_annotations_dir,
+            model_file,
+            events,
         )
 
     def update_from_annotations_v2(self, options_json_path: str = "./options.json"):
