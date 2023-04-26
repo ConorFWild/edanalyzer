@@ -2718,7 +2718,7 @@ class CLI:
             #     epoch = match[1]
             logger.info(f"######## Testing model for epoch: {epoch} ########")
 
-            records = get_annotations_from_dataset(
+            records = get_annotations_from_dataset_ligand(
                 test_dataset,
                 model_file,
             )
