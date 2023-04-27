@@ -2614,7 +2614,8 @@ class CLI:
                     selectinload(PanDDAORM.experiment),
                 ),
             )
-            events = session.scalars(events_stmt).unique().all()
+            events_list = session.scalars(events_stmt).unique().all()
+            events = {event.id: event for event in events_list}
 
         dataset = load_model(dataset_path, PanDDAEventDataset)
         test_annotations_dir = Path(options.working_dir) / f"annotations_{Path(dataset_path).stem}"
@@ -2626,41 +2627,41 @@ class CLI:
             events,
         )
 
-    def update_from_annotations_v2(self, options_json_path: str = "./options.json"):
-        options = Options.load(options_json_path)
-        engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
-
-        with Session(engine) as session:
-
-            # Get the events
-            events_stmt = select(EventORM).options(
-                selectinload(EventORM.annotations)
-            )
-            logger.info(f"Loading events...")
-            events = {event.id: event for event in session.scalars(events_stmt).unique().all()}
-            logger.info(f"Loaded {len(events)} events")
-
-            # Update the high scoring non-hit annotations
-            high_scoring_non_hit_pandda_path = Path(
-                options.working_dir) / constants.PANDDA_TRAIN_ANNOTATION_DIR / constants.HIGH_SCORING_NON_HIT_DATASET_DIR
-            high_scoring_non_hit_annotations = update_from_annotations_v2_get_annotations(
-                events,
-                high_scoring_non_hit_pandda_path
-            )
-            logger.info(f"Got {len(high_scoring_non_hit_annotations)} new high scoring non-hit annotations")
-
-            # Update the low scoring hit annotations
-            low_scoring_hit_pandda_path = Path(
-                options.working_dir) / constants.PANDDA_TRAIN_ANNOTATION_DIR / constants.LOW_SCORING_HIT_DATASET_DIR
-            low_scoring_hit_annotations = update_from_annotations_v2_get_annotations(
-                events,
-                low_scoring_hit_pandda_path
-            )
-            logger.info(f"Got {len(low_scoring_hit_annotations)} new low scoring hit annotations")
-
-            # session.add_all(high_scoring_non_hit_annotations)
-            # session.add_all(low_scoring_hit_annotations)
-            session.commit()
+    # def update_from_annotations_v2(self, options_json_path: str = "./options.json"):
+    #     options = Options.load(options_json_path)
+    #     engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+    #
+    #     with Session(engine) as session:
+    #
+    #         # Get the events
+    #         events_stmt = select(EventORM).options(
+    #             selectinload(EventORM.annotations)
+    #         )
+    #         logger.info(f"Loading events...")
+    #         events = {event.id: event for event in session.scalars(events_stmt).unique().all()}
+    #         logger.info(f"Loaded {len(events)} events")
+    #
+    #         # Update the high scoring non-hit annotations
+    #         high_scoring_non_hit_pandda_path = Path(
+    #             options.working_dir) / constants.PANDDA_TRAIN_ANNOTATION_DIR / constants.HIGH_SCORING_NON_HIT_DATASET_DIR
+    #         high_scoring_non_hit_annotations = update_from_annotations_v2_get_annotations(
+    #             events,
+    #             high_scoring_non_hit_pandda_path
+    #         )
+    #         logger.info(f"Got {len(high_scoring_non_hit_annotations)} new high scoring non-hit annotations")
+    #
+    #         # Update the low scoring hit annotations
+    #         low_scoring_hit_pandda_path = Path(
+    #             options.working_dir) / constants.PANDDA_TRAIN_ANNOTATION_DIR / constants.LOW_SCORING_HIT_DATASET_DIR
+    #         low_scoring_hit_annotations = update_from_annotations_v2_get_annotations(
+    #             events,
+    #             low_scoring_hit_pandda_path
+    #         )
+    #         logger.info(f"Got {len(low_scoring_hit_annotations)} new low scoring hit annotations")
+    #
+    #         # session.add_all(high_scoring_non_hit_annotations)
+    #         # session.add_all(low_scoring_hit_annotations)
+    #         session.commit()
 
     def update_test_from_annotations_v2(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
@@ -2694,8 +2695,8 @@ class CLI:
             )
             logger.info(f"Got {len(low_scoring_hit_annotations)} new low scoring hit annotations")
 
-            session.add_all(high_scoring_non_hit_annotations)
-            session.add_all(low_scoring_hit_annotations)
+            # session.add_all(high_scoring_non_hit_annotations)
+            # session.add_all(low_scoring_hit_annotations)
             session.commit()
 
     def update_from_annotations_dir(self, annotation_dir, options_json_path: str = "./options.json"):
@@ -2728,8 +2729,8 @@ class CLI:
             )
             logger.info(f"Got {len(low_scoring_hit_annotations)} new low scoring hit annotations")
 
-            session.add_all(high_scoring_non_hit_annotations)
-            session.add_all(low_scoring_hit_annotations)
+            # session.add_all(high_scoring_non_hit_annotations)
+            # session.add_all(low_scoring_hit_annotations)
             session.commit()
 
     def score_models_on_test_set(self, options_json_path: str = "./options.json"):
@@ -2994,29 +2995,31 @@ def update_from_annotations_v2_get_annotations(
         annotations = {annotation.source: annotation for annotation in event.annotations}
         if "manual" in [annotation.source for annotation in event.annotations]:
             logger.warning(f"Event {dtag} already has manual in its {len(event.annotations)} annotations! Skipping!")
-            # continue
+            continue
 
         annotation = annotations["manual"]
-        annotation.source = "deprecated"
+        # annotation.source = "deprecated"
 
         # Get the newly assigned annotation
-        # if confidence == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
-        #     annotation = AnnotationORM(
-        #         annotation=True,
-        #         source="manual",
-        #         event=event,
-        #     )
-        #     annotation.annotation = True
-        #
-        # elif confidence == constants.PANDDA_INSPECT_TABLE_LOW_CONFIDENCE:
-        #     annotation = AnnotationORM(
-        #         annotation=False,
-        #         source="manual",
-        #         event=event,
-        #     )
-        #
-        # else:
-        #     raise Exception(f"Failed to parse annotation label in table! Confidence was: {confidence}")
+        if confidence == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
+            # annotation = AnnotationORM(
+            #     annotation=True,
+            #     source="manual",
+            #     event=event,
+            # )
+            annotation.annotation = True
+
+        elif confidence == constants.PANDDA_INSPECT_TABLE_LOW_CONFIDENCE:
+            # annotation = AnnotationORM(
+            #     annotation=False,
+            #     source="manual",
+            #     event=event,
+            # )
+            annotation.annotation = False
+
+
+        else:
+            raise Exception(f"Failed to parse annotation label in table! Confidence was: {confidence}")
 
         # Append
         # annotations.append(annotation)
