@@ -3007,6 +3007,7 @@ def update_from_annotations_v2_get_annotations(
             #     source="manual",
             #     event=event,
             # )
+            print(f"Setting annotation to True!")
             annotation.annotation = True
 
         elif confidence == constants.PANDDA_INSPECT_TABLE_LOW_CONFIDENCE:
