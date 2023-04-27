@@ -2991,24 +2991,29 @@ def update_from_annotations_v2_get_annotations(
         assert str(observed_event_map_path.readlink()) == event.event_map, f"{observed_event_map_path} vs {event.event_map}"
 
         # Check does not already have a manual annotation
+        annotations = {annotation.source: annotation for annotation in event.annotations}
         if "manual" in [annotation.source for annotation in event.annotations]:
             logger.warning(f"Event {dtag} already has manual in its {len(event.annotations)} annotations! Skipping!")
             continue
 
+        annotation = annotations["manual"]
+
         # Get the newly assigned annotation
         if confidence == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
-            annotation = AnnotationORM(
-                annotation=False,
-                source="manual",
-                event=event,
-            )
+            # annotation = AnnotationORM(
+            #     annotation=True,
+            #     source="manual",
+            #     event=event,
+            # )
+            annotation.annotation = True
 
         elif confidence == constants.PANDDA_INSPECT_TABLE_LOW_CONFIDENCE:
-            annotation = AnnotationORM(
-                annotation=False,
-                source="manual",
-                event=event,
-            )
+            # annotation = AnnotationORM(
+            #     annotation=False,
+            #     source="manual",
+            #     event=event,
+            # )
+            annotation.annotation = False
 
         else:
             raise Exception(f"Failed to parse annotation label in table! Confidence was: {confidence}")
