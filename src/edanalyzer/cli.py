@@ -2658,8 +2658,8 @@ class CLI:
             )
             logger.info(f"Got {len(low_scoring_hit_annotations)} new low scoring hit annotations")
 
-            session.add_all(high_scoring_non_hit_annotations)
-            session.add_all(low_scoring_hit_annotations)
+            # session.add_all(high_scoring_non_hit_annotations)
+            # session.add_all(low_scoring_hit_annotations)
             session.commit()
 
     def update_test_from_annotations_v2(self, options_json_path: str = "./options.json"):
@@ -2997,29 +2997,29 @@ def update_from_annotations_v2_get_annotations(
             # continue
 
         annotation = annotations["manual"]
+        annotation.source = "deprecated"
 
         # Get the newly assigned annotation
         if confidence == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
-            # annotation = AnnotationORM(
-            #     annotation=True,
-            #     source="manual",
-            #     event=event,
-            # )
+            annotation = AnnotationORM(
+                annotation=True,
+                source="manual",
+                event=event,
+            )
             annotation.annotation = True
 
         elif confidence == constants.PANDDA_INSPECT_TABLE_LOW_CONFIDENCE:
-            # annotation = AnnotationORM(
-            #     annotation=False,
-            #     source="manual",
-            #     event=event,
-            # )
-            annotation.annotation = False
+            annotation = AnnotationORM(
+                annotation=False,
+                source="manual",
+                event=event,
+            )
 
         else:
             raise Exception(f"Failed to parse annotation label in table! Confidence was: {confidence}")
 
         # Append
-        annotations.append(annotation)
+        # annotations.append(annotation)
 
     return annotations
 
