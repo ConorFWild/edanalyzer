@@ -3000,23 +3000,23 @@ def update_from_annotations_v2_get_annotations(
         annotation.source = "deprecated"
 
         # Get the newly assigned annotation
-        if confidence == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
-            annotation = AnnotationORM(
-                annotation=True,
-                source="manual",
-                event=event,
-            )
-            annotation.annotation = True
-
-        elif confidence == constants.PANDDA_INSPECT_TABLE_LOW_CONFIDENCE:
-            annotation = AnnotationORM(
-                annotation=False,
-                source="manual",
-                event=event,
-            )
-
-        else:
-            raise Exception(f"Failed to parse annotation label in table! Confidence was: {confidence}")
+        # if confidence == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
+        #     annotation = AnnotationORM(
+        #         annotation=True,
+        #         source="manual",
+        #         event=event,
+        #     )
+        #     annotation.annotation = True
+        #
+        # elif confidence == constants.PANDDA_INSPECT_TABLE_LOW_CONFIDENCE:
+        #     annotation = AnnotationORM(
+        #         annotation=False,
+        #         source="manual",
+        #         event=event,
+        #     )
+        #
+        # else:
+        #     raise Exception(f"Failed to parse annotation label in table! Confidence was: {confidence}")
 
         # Append
         # annotations.append(annotation)
