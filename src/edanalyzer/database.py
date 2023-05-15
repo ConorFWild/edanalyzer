@@ -1342,6 +1342,7 @@ def populate_from_custom_pandda_path_and_experiment_fake_pandda(
     # Create a new partition if necessary
     if partition_name not in partitions:
         partition = PartitionORM(name=partition_name)
+        session.add_all([partition, ])
         logger.info(f"Using partitions: {partition_name}")
     else:
         partition = partitions[partition_name]
