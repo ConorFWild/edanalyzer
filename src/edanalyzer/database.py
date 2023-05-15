@@ -493,20 +493,15 @@ def parse_inspect_table_row(row, pandda_dir, pandda_processed_datasets_dir, mode
 
     return event
 
-def parse_inspect_table_row_fake_pandda(row, pandda_dir, pandda_processed_datasets_dir, model_building_dir, annotation_type):
+def parse_inspect_table_row_fake_pandda(row, pandda_dir, pandda_processed_datasets_dir, model_building_dir, annotation_type, fake_pandda_results):
+
     dtag = str(row[constants.PANDDA_INSPECT_DTAG])
     event_idx = row[constants.PANDDA_INSPECT_EVENT_IDX]
     bdc = row[constants.PANDDA_INSPECT_BDC]
     x = row[constants.PANDDA_INSPECT_X]
     y = row[constants.PANDDA_INSPECT_Y]
     z = row[constants.PANDDA_INSPECT_Z]
-    viewed = row[constants.PANDDA_INSPECT_VIEWED]
 
-    hit_confidence = row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
-    if hit_confidence == constants.PANDDA_INSPECT_TABLE_HIGH_CONFIDENCE:
-        hit_confidence_class = True
-    else:
-        hit_confidence_class = False
 
     processed_dataset_dir = pandda_processed_datasets_dir / dtag
     inspect_model_dir = processed_dataset_dir / constants.PANDDA_INSPECT_MODEL_DIR
@@ -515,6 +510,16 @@ def parse_inspect_table_row_fake_pandda(row, pandda_dir, pandda_processed_datase
         event_idx=event_idx,
         bdc=bdc
     )
+
+    if str(event_map_path) not in fake_pandda_results:
+        return
+
+    fake_pandda_row = fake_pandda_results[str(event_map_path)]
+    viewed = fake_pandda_row[constants.PANDDA_INSPECT_VIEWED]
+
+    hit_confidence = fake_pandda_row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
+
+
     z_map_path = processed_dataset_dir / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=dtag)
     if not z_map_path.exists():
         z_map_path = None
@@ -567,7 +572,7 @@ def parse_inspect_table_row_fake_pandda(row, pandda_dir, pandda_processed_datase
         annotation_value = False
     annotation = AnnotationORM(
         annotation=annotation_value,
-        source="auto"
+        source="manual"
     )
 
     event = EventORM(
@@ -677,6 +682,7 @@ def parse_pandda_inspect_table_fake_pandda_parallel(
         model_building_dir,
         parallel,
 annotation_type,
+fake_pandda_results,
 ):
     try:
         pandda_inspect_table = pd.read_csv(pandda_inspect_table_file)
@@ -697,7 +703,8 @@ annotation_type,
             potential_pandda_dir,
             pandda_processed_datasets_dir,
             model_building_dir,
-            annotation_type
+            annotation_type,
+            fake_pandda_results
         )
         for index, row
         in pandda_inspect_table.iterrows()
@@ -757,7 +764,7 @@ def parse_potential_pandda_dir_parallel(potential_pandda_dir, model_building_dir
 
     return None
 
-def parse_potential_pandda_dir_fake_pandda_parallel(potential_pandda_dir, model_building_dir, parallel, annotation_type):
+def parse_potential_pandda_dir_fake_pandda_parallel(potential_pandda_dir, model_building_dir, fake_pandda_results, parallel, annotation_type):
     pandda_analysis_dir = potential_pandda_dir / constants.PANDDA_ANALYSIS_DIR
     pandda_inspect_table_file = pandda_analysis_dir / constants.PANDDA_INSPECT_TABLE_FILE
     pandda_processed_datasets_dir = potential_pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
@@ -769,7 +776,8 @@ def parse_potential_pandda_dir_fake_pandda_parallel(potential_pandda_dir, model_
         if pandda_inspect_table_file.exists():
             events = parse_pandda_inspect_table_fake_pandda_parallel(
                 pandda_inspect_table_file,
-                potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir, parallel, annotation_type
+                potential_pandda_dir, pandda_processed_datasets_dir, model_building_dir, parallel, annotation_type,
+                fake_pandda_results
 
             )
             return events
@@ -1380,6 +1388,7 @@ def populate_from_custom_pandda_path_and_experiment_fake_pandda(session, pandda_
         events = parse_potential_pandda_dir_fake_pandda_parallel(
             Path(pandda_path),
             Path(experiment.model_dir),
+            fake_pandda_results,
             annotation_type="manual",
             parallel=parallel
         )
