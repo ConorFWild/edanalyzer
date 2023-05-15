@@ -1395,7 +1395,9 @@ def populate_from_custom_pandda_path_and_experiment_fake_pandda(session, pandda_
         if not events:
             logger.warning(f"Did not find any events! Skipping!")
             return
-        logger.info(f"Found {len(events)} events!")
+
+        hits = [event for event in events if event.annotations[0].annotation]
+        logger.info(f"Found {len(events)} events of which {len(hits)} are hits!")
 
         # Filter events to those that are annotated in the fake pandda and update their annotations
         # filtered_annotated_events = []
