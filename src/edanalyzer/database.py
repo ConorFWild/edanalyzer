@@ -766,7 +766,7 @@ def parse_potential_pandda_dir_parallel(potential_pandda_dir, model_building_dir
 
 def parse_potential_pandda_dir_fake_pandda_parallel(potential_pandda_dir, model_building_dir, fake_pandda_results, parallel, annotation_type):
     pandda_analysis_dir = potential_pandda_dir / constants.PANDDA_ANALYSIS_DIR
-    pandda_inspect_table_file = pandda_analysis_dir / constants.PANDDA_INSPECT_TABLE_FILE
+    pandda_inspect_table_file = pandda_analysis_dir / constants.PANDDA_EVENT_TABLE_PATH
     pandda_processed_datasets_dir = potential_pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
 
     if not os.access(pandda_analysis_dir, os.R_OK):
@@ -1310,7 +1310,8 @@ def populate_from_custom_pandda_path_and_experiment(session, pandda_path, experi
         # Commit
         session.commit()
 
-def populate_from_custom_pandda_path_and_experiment_fake_pandda(session, pandda_path, experiment, fake_pandda_results, partition_name):
+def populate_from_custom_pandda_path_and_experiment_fake_pandda(
+        session, pandda_path, experiment, fake_pandda_results, partition_name):
     # Get the experiments
     experiments_stmt = select(ExperimentORM)
     experiments = {experiment.model_dir: experiment for experiment in session.scalars(experiments_stmt).unique().all()}
