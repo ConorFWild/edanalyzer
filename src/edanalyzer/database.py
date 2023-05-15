@@ -1398,37 +1398,35 @@ def populate_from_custom_pandda_path_and_experiment_fake_pandda(session, pandda_
         logger.info(f"Found {len(events)} events!")
 
         # Filter events to those that are annotated in the fake pandda and update their annotations
-        filtered_annotated_events = []
-        for event in events:
-            # Filter out unannotated events
-            if event.event_map not in fake_pandda_results:
-                continue
+        # filtered_annotated_events = []
+        # for event in events:
+        #     # Filter out unannotated events
+        #     if event.event_map not in fake_pandda_results:
+        #         continue
+        #
+        #     # Update annotation
+        #     fake_pandda_row = fake_pandda_results[event.event_map]
+        #
+        #     event.viewed = fake_pandda_row[constants.PANDDA_INSPECT_VIEWED]
+        #
+        #     hit_confidence = fake_pandda_row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
+        #     event.hit_confidence = hit_confidence
+        #
+        #     if hit_confidence not in ["Low", "low"]:
+        #         annotation_value = True
+        #     else:
+        #         annotation_value = False
+        #     annotation = AnnotationORM(
+        #         annotation=annotation_value,
+        #         source="auto"
+        #     )
+        #     event.annotations = [annotation, ]
+        #     filtered_annotated_events.append(event)
 
-            # Update annotation
-            fake_pandda_row = fake_pandda_results[event.event_map].viewed
-
-            event.viewed = fake_pandda_row[constants.PANDDA_INSPECT_VIEWED]
-
-            hit_confidence = fake_pandda_row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
-            event.hit_confidence = hit_confidence
-
-            if hit_confidence not in ["Low", "low"]:
-                annotation_value = True
-            else:
-                annotation_value = False
-            annotation = AnnotationORM(
-                annotation=annotation_value,
-                source="auto"
-            )
-            event.annotations = [annotation, ]
-            filtered_annotated_events.append(event)
-
-        print(f"Original number of events is: {len(events)} and number of events annotated in fake pandda is: {len(filtered_annotated_events)}")
-
-        return
+        # print(f"Original number of events is: {len(events)} and number of events annotated in fake pandda is: {len(filtered_annotated_events)}")
 
         # Match events to datasets
-        for event in filtered_annotated_events:
+        for event in events:
             if event.dtag in experiment_datasets:
                 event.dataset = experiment_datasets[event.dtag]
             else:
@@ -1444,7 +1442,7 @@ def populate_from_custom_pandda_path_and_experiment_fake_pandda(session, pandda_
         # Create a new PanDDA
         pandda = PanDDAORM(
             path=str(pandda_path),
-            events=filtered_annotated_events,
+            events=events,
             datasets=[dataset for dataset in experiment_datasets.values() if
                       dataset.dtag in pandda_dataset_dtags],
             system=system,
@@ -1453,7 +1451,7 @@ def populate_from_custom_pandda_path_and_experiment_fake_pandda(session, pandda_
         # new_panddas.append(pandda)
 
         # Add the events to the revelant partition
-        for event in filtered_annotated_events:
+        for event in events:
             event.partition = partition
             partition.events.append(event)
 
