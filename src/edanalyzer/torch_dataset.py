@@ -550,8 +550,9 @@ def get_ligand_map(
 ):
     # Get the path to the ligand cif
     dataset_dir = Path(event.model_building_dir) / event.dtag / "compound"
-    pdb_paths = [x for x in dataset_dir.glob("*.pdb") if (x.exists()) and (x.stem not in LIGAND_IGNORE_REGEXES)]
-    assert len(pdb_paths) > 0, f"No pdb paths that are not to be ignored"
+    paths = [x for x in dataset_dir.glob("*.pdb")]
+    pdb_paths = [x for x in paths if (x.exists()) and (x.stem not in LIGAND_IGNORE_REGEXES)]
+    assert len(pdb_paths) > 0, f"No pdb paths that are not to be ignored: {[x.stem for x in paths]}"
     path = pdb_paths[0]
 
     # Get the ligand array
