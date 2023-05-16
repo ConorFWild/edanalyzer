@@ -2567,7 +2567,7 @@ class CLI:
             dataset,
             epoch,
             model_file,
-            num_workers=12
+            num_workers=24
         )
 
     def annotate_train_dataset_all(self, options_json_path: str = "./options.json"):
