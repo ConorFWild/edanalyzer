@@ -528,6 +528,19 @@ def parse_pdb_file_for_ligand_array(path):
 
     return np.array(poss).T
 
+LIGAND_IGNORE_REGEXES = [
+    "merged",
+    "LIG-[a-zA-Z]+-",
+    "dimple",
+    "refine",
+    "init",
+    "pipedream",
+    "phenix",
+    "None",
+    "blank",
+    "control",
+    "DMSO",
+]
 
 def get_ligand_map(
         event,
@@ -537,7 +550,8 @@ def get_ligand_map(
 ):
     # Get the path to the ligand cif
     dataset_dir = Path(event.model_building_dir) / event.dtag / "compound"
-    pdb_paths = [x for x in dataset_dir.glob("*.pdb") if x.exists()]
+    pdb_paths = [x for x in dataset_dir.glob("*.pdb") if (x.exists()) and (x.stem not in LIGAND_IGNORE_REGEXES)]
+    assert len(pdb_paths) > 0, f"No pdb paths that are not to be ignored"
     path = pdb_paths[0]
 
     # Get the ligand array
