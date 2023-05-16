@@ -817,7 +817,7 @@ def train_pandda_from_dataset_ligand(
         logger.info(f"Using cpu!")
         dev = "cpu"
 
-    num_epochs = 500
+    num_epochs = 1000
     logger.info(f"Training on {len(dataset.pandda_events)} events!")
 
     # Get the dataset
