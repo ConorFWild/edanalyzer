@@ -827,6 +827,7 @@ def train_pandda_from_dataset_ligand(
         transform_annotation=get_annotation_from_event_hit
     )
 
+
     # Get the dataloader
     train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=True, num_workers=num_workers)
 
