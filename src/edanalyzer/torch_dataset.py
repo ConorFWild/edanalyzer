@@ -542,6 +542,7 @@ def get_ligand_map(
 
     # Get the ligand array
     ligand_array = parse_pdb_file_for_ligand_array(path)
+    assert ligand_array.size > 0
     rotation_matrix = R.random().as_matrix()
     rng = default_rng()
     random_translation = ((rng.random(3) - 0.5) * 2 * translation).reshape((3, 1))
