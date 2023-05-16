@@ -9,6 +9,8 @@ from torch.utils.data import Dataset
 from pathlib import Path
 from edanalyzer import constants
 
+import traceback
+
 
 def load_xmap_from_mtz(path):
     mtz = gemmi.read_mtz_file(str(path))
@@ -624,7 +626,11 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
         sample_array_mean = np.copy(sample_array)
         mean_dmap = get_mean_map_from_event(event)
         image_mean_initial = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
-        image_mean = (image_mean_initial - np.mean(image_mean_initial)) / np.std(image_mean_initial)
+        std = np.std(image_mean_initial)
+        if np.abs(std) < 0.0000001:
+            image_mean = np.copy(sample_array)
+        else:
+            image_mean = (image_mean_initial - np.mean(image_mean_initial)) / std
 
         sample_array_model = np.copy(sample_array)
         model_map = get_model_map(event, xmap_dmap)
@@ -635,7 +641,8 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
         image_ligand = np.array(ligand_map)
 
     except Exception as e:
-        print(e)
+        print(f"Exception in loading data: {traceback.format_exc()}")
+
         return np.stack([sample_array, sample_array, sample_array, sample_array], axis=0), False
 
     return np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=0), True
