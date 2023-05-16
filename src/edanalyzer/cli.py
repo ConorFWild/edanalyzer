@@ -860,7 +860,7 @@ def train_pandda_from_dataset_ligand(
         i = 0
         print(f"Epoch: {epoch}")
         for image, annotation, idx in train_dataloader:
-            print(f"\tBatch: {i}")
+            # print(f"\tBatch: {i}")
             # print(image)
             # print(annotation)
             # print(image.shape)
@@ -873,7 +873,7 @@ def train_pandda_from_dataset_ligand(
             begin_annotate = time.time()
             model_annotation = model(image_c)
             finish_annotate = time.time()
-            logger.debug(f"Annotated 12 datasets in {finish_annotate - begin_annotate}")
+            # logger.debug(f"Annotated 12 datasets in {finish_annotate - begin_annotate}")
             # print(outputs.to("cpu").detach().numpy())
             loss = criterion(model_annotation, annotation_c)
             loss.backward()
@@ -894,6 +894,7 @@ def train_pandda_from_dataset_ligand(
                 #                                                     i,
                 #                                                     running_loss / i) + "\n")
                 print(f"Recent loss is: {sum(running_loss[-998:]) / 998}")
+                logger.debug(f"Recent loss is: {sum(running_loss[-998:]) / 998}")
 
                 for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
                     mod_an = round(float(model_annotation_np[1]), 2)
