@@ -1,3 +1,5 @@
+import time
+
 from edanalyzer.data import StructureReflectionsDataset, StructureReflectionsData, PanDDAEventDataset, \
     PanDDAEvent, PanDDAEventAnnotations, PanDDAEventAnnotation, PanDDAUpdatedEventAnnotations
 from numpy.random import default_rng
@@ -320,6 +322,7 @@ def get_model_map(event: PanDDAEvent, xmap_event):
         dtag=event.dtag)
     structure = gemmi.read_structure(str(pandda_input_pdb))
 
+    time_begin_ns = time.time()
     ns = gemmi.NeighborSearch(structure[0], structure.cell, 18).populate(include_h=False)
 
     new_xmap = gemmi.FloatGrid(xmap_event.nu, xmap_event.nv, xmap_event.nw)
@@ -361,7 +364,9 @@ def get_model_map(event: PanDDAEvent, xmap_event):
             )
             num_sym +=1
 
-    print(f"Num: {num} : num sym: {num_sym}")
+    time_finish_ns = time.time()
+    print(f"Num: {num} : num sym: {num_sym} in {round(time_finish_ns-time_begin_ns, 2)}")
+
 
     return new_xmap
 
