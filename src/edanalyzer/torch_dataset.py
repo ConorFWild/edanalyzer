@@ -335,6 +335,7 @@ def get_model_map(event: PanDDAEvent, xmap_event):
     #                     value=1.0,
     #                 )
 
+
     num_sym = 0
     num = 0
     for mark in ns.find_atoms(gemmi.Position(event.x, event.y, event.z), '\0', radius=17):
