@@ -412,7 +412,7 @@ def get_model_map(event: PanDDAEvent, xmap_event):
                         sym_pos_frac = np.array(op.apply_to_xyz([fractional_pos.x, fractional_pos.y, fractional_pos.z]))
 
                         for x,y,z in itertools.product([-1,0,1], [-1,0,1], [-1,0,1]):
-                            if (x == y == z == 0) and (triplet == "x,y,z"):
+                            if (x == 0) and (y == 0) and (z == 0) and (triplet == "x,y,z"):
                                 # print(f"\tSkipping identity!")
                                 continue
 
