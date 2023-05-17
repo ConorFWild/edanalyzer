@@ -320,7 +320,7 @@ def get_model_map(event: PanDDAEvent, xmap_event):
         dtag=event.dtag)
     structure = gemmi.read_structure(str(pandda_input_pdb))
 
-    ns = gemmi.NeighborSearch(structure[0], structure.cell, 12).populate(include_h=False)
+    ns = gemmi.NeighborSearch(structure[0], structure.cell, 18).populate(include_h=False)
 
     new_xmap = gemmi.FloatGrid(xmap_event.nu, xmap_event.nv, xmap_event.nw)
     new_xmap.spacegroup = xmap_event.spacegroup
@@ -335,7 +335,7 @@ def get_model_map(event: PanDDAEvent, xmap_event):
     #                     value=1.0,
     #                 )
 
-    for mark in ns.find_atoms(gemmi.Position(event.x, event.y, event.z), '\0', radius=10):
+    for mark in ns.find_atoms(gemmi.Position(event.x, event.y, event.z), '\0', radius=17):
         cra = mark.to_cra(structure[0])
         if mark.pos.dist(cra.atom.pos) < 0.1:
             new_xmap.set_points_around(
