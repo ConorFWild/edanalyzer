@@ -355,7 +355,7 @@ def get_model_map(event: PanDDAEvent, xmap_event):
             num += 1
         else:
             new_xmap.set_points_around(
-                _mark.pos,
+                mark_pos,
                 radius=1,
                 value=-1.0,
             )
