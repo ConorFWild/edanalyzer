@@ -345,9 +345,10 @@ def get_model_map(event: PanDDAEvent, xmap_event):
         print(_mark)
         print(dir(_mark))
         _cra = _mark.to_cra(structure[0])
-        if _mark.pos.dist(_cra.atom.pos) < 0.1:
+        mark_pos = gemmi.Position(_mark.x, _mark.y, _mark.z)
+        if mark_pos.dist(_cra.atom.pos) < 0.1:
             new_xmap.set_points_around(
-                                _mark.pos,
+                                mark_pos,
                                 radius=1,
                                 value=1.0,
                             )
