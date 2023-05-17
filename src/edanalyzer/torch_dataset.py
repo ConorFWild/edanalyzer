@@ -398,13 +398,13 @@ def get_model_map(event: PanDDAEvent, xmap_event):
                     # if event_pos.dist(atom.pos)
                     atom_pos = atom.pos
                     atom_pos_array = np.array([atom_pos.x, atom_pos.y, atom_pos.z])
-                    if np.all(atom_pos_array > lb) and np.all(atom_pos_array < ub):
-                        new_xmap.set_points_around(
-                            atom.pos,
-                            radius=1,
-                            value=1.0,
-                        )
-                        num += 1
+                    # if np.all(atom_pos_array > lb) and np.all(atom_pos_array < ub):
+                    new_xmap.set_points_around(
+                        atom.pos,
+                        radius=1,
+                        value=1.0,
+                    )
+                    num += 1
 
                     fractional_pos = structure.cell.fractionalize(atom_pos)
                     for op in symops:
@@ -413,24 +413,58 @@ def get_model_map(event: PanDDAEvent, xmap_event):
 
                         for x,y,z in itertools.product([-1,0,1], [-1,0,1], [-1,0,1]):
                             if (x == y == z == 0) and (triplet == "x,y,z"):
-                                print(f"\tSkipping identity!")
+                                # print(f"\tSkipping identity!")
                                 continue
 
                             pbc_sym_frac = sym_pos_frac + np.array([x,y,z])
                             pbc_sym_pos = structure.cell.orthogonalize(gemmi.Fractional(*pbc_sym_frac))
-                            pbc_sym_array = np.array([pbc_sym_pos.x, pbc_sym_pos.y, pbc_sym_pos.z])
-                            if np.all(pbc_sym_array > lb) and np.all(pbc_sym_array < ub):
-                                new_xmap.set_points_around(
-                                    atom.pos,
-                                    radius=1,
-                                    value=-1.0,
-                                )
-                                num_sym += 1
+                            # pbc_sym_array = np.array([pbc_sym_pos.x, pbc_sym_pos.y, pbc_sym_pos.z])
+                            new_xmap.set_points_around(
+                                pbc_sym_pos,
+                                radius=1,
+                                value=-1.0,
+                            )
+                            num_sym += 1
+    # for model in structure:
+    #     for chain in model:
+    #         for residue in chain.get_polymer():
+    #             for atom in residue:
+    #                 # if event_pos.dist(atom.pos)
+    #                 atom_pos = atom.pos
+    #                 atom_pos_array = np.array([atom_pos.x, atom_pos.y, atom_pos.z])
+    #                 if np.all(atom_pos_array > lb) and np.all(atom_pos_array < ub):
+    #                     new_xmap.set_points_around(
+    #                         atom.pos,
+    #                         radius=1,
+    #                         value=1.0,
+    #                     )
+    #                     num += 1
+    #
+    #                 fractional_pos = structure.cell.fractionalize(atom_pos)
+    #                 for op in symops:
+    #                     triplet = op.triplet()
+    #                     sym_pos_frac = np.array(op.apply_to_xyz([fractional_pos.x, fractional_pos.y, fractional_pos.z]))
+    #
+    #                     for x,y,z in itertools.product([-1,0,1], [-1,0,1], [-1,0,1]):
+    #                         if (x == y == z == 0) and (triplet == "x,y,z"):
+    #                             print(f"\tSkipping identity!")
+    #                             continue
+    #
+    #                         pbc_sym_frac = sym_pos_frac + np.array([x,y,z])
+    #                         pbc_sym_pos = structure.cell.orthogonalize(gemmi.Fractional(*pbc_sym_frac))
+    #                         pbc_sym_array = np.array([pbc_sym_pos.x, pbc_sym_pos.y, pbc_sym_pos.z])
+    #                         if np.all(pbc_sym_array > lb) and np.all(pbc_sym_array < ub):
+    #                             new_xmap.set_points_around(
+    #                                 atom.pos,
+    #                                 radius=1,
+    #                                 value=-1.0,
+    #                             )
+    #                             num_sym += 1
 
 
     time_finish_ns = time.time()
     print(
-        f"Num: {num} : num sym: {num_sym} in {round(time_finish_ns-time_begin_ns, 2)} : {round(event.x, 2)} : {round(event.y, 2)} : {round(event.z, 2)} : {pandda_input_pdb}"
+        f"Num: {num} : num sym: {num_sym} in {round(time_finish_ns-time_begin_ns, 2)} : {round(event.x, 2)}, {round(event.y, 2)}, {round(event.z, 2)} : {pandda_input_pdb}"
     )
     return new_xmap
 
