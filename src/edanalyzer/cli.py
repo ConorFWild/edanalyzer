@@ -2935,8 +2935,10 @@ class CLI:
                 key=lambda _key: float(np.abs(results_this_epoch[_key][1]-0.95)),
             )
             print(f"Epoch {epoch}: Precission at recall: {results_this_epoch[selected_key][1]} is: {results_this_epoch[selected_key][0]} at cutoff: {selected_key}")
-            epoch -= 10
+            # epoch -= 10
             # epoch += 1
+            epoch += 3
+
             model_file = Path(options.working_dir) /constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch)
 
         # Filter by precission > 0.4
