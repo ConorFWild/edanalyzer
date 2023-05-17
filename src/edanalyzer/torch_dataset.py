@@ -469,6 +469,7 @@ def get_model_map(event: PanDDAEvent, xmap_event):
     return new_xmap
 
 
+
 def get_image_event_map_and_raw_from_event_augmented(event: PanDDAEvent):
     # logger.debug(f"Loading: {event.dtag}")
     sample_transform, sample_array = get_sample_transform_from_event_augmented(
