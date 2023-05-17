@@ -427,6 +427,7 @@ def get_model_map(event: PanDDAEvent, xmap_event):
                                 )
                                 num_sym += 1
 
+
     time_finish_ns = time.time()
     print(
         f"Num: {num} : num sym: {num_sym} in {round(time_finish_ns-time_begin_ns, 2)} : {round(event.x, 2)} : {round(event.y, 2)} : {round(event.z, 2)} : {pandda_input_pdb}"
