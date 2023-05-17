@@ -313,7 +313,7 @@ def get_image_event_map_and_raw_from_event(event: PanDDAEvent):
     return np.stack([image_event, image_raw, image_zmap, image_model], axis=0), True
 
 
-def get_model_map(event: PanDDAEvent, xmap_event, event):
+def get_model_map(event: PanDDAEvent, xmap_event):
 
     pandda_input_pdb = Path(
         event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
@@ -668,7 +668,7 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
             image_mean = (image_mean_initial - np.mean(image_mean_initial)) / std
 
         sample_array_model = np.copy(sample_array)
-        model_map = get_model_map(event, xmap_dmap, event)
+        model_map = get_model_map(event, xmap_dmap, )
         image_model = sample_xmap(model_map, sample_transform, sample_array_model)
 
         # ligand_map_array = np.copy(sample_array)
