@@ -314,22 +314,41 @@ def get_image_event_map_and_raw_from_event(event: PanDDAEvent):
 
 
 def get_model_map(event: PanDDAEvent, xmap_event):
+
     pandda_input_pdb = Path(
         event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
         dtag=event.dtag)
     structure = gemmi.read_structure(str(pandda_input_pdb))
+
+    ns = gemmi.NeighborSearch(structure[0], structure.cell, 12).populate(include_h=False)
+
     new_xmap = gemmi.FloatGrid(xmap_event.nu, xmap_event.nv, xmap_event.nw)
     new_xmap.spacegroup = xmap_event.spacegroup
     new_xmap.set_unit_cell(xmap_event.unit_cell)
-    for model in structure:
-        for chain in model:
-            for residue in chain.get_polymer():
-                for atom in residue:
-                    new_xmap.set_points_around(
-                        atom.pos,
-                        radius=1,
-                        value=1.0,
-                    )
+    # for model in structure:
+    #     for chain in model:
+    #         for residue in chain.get_polymer():
+    #             for atom in residue:
+    #                 new_xmap.set_points_around(
+    #                     atom.pos,
+    #                     radius=1,
+    #                     value=1.0,
+    #                 )
+
+    for mark in ns.find_atoms(gemmi.Position(event.x, event.y, event.z), '\0', radius=10):
+        cra = mark.to_cra(structure[0])
+        if mark.pos.dist(cra.atom.pos) < 0.1:
+            new_xmap.set_points_around(
+                                mark.pos,
+                                radius=1,
+                                value=1.0,
+                            )
+        else:
+            new_xmap.set_points_around(
+                mark.pos,
+                radius=1,
+                value=-1.0,
+            )
 
     return new_xmap
 
@@ -649,7 +668,7 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
             image_mean = (image_mean_initial - np.mean(image_mean_initial)) / std
 
         sample_array_model = np.copy(sample_array)
-        model_map = get_model_map(event, xmap_dmap)
+        model_map = get_model_map(event, xmap_dmap, event)
         image_model = sample_xmap(model_map, sample_transform, sample_array_model)
 
         # ligand_map_array = np.copy(sample_array)
