@@ -339,11 +339,11 @@ def get_model_map(event: PanDDAEvent, xmap_event):
     num_sym = 0
     num = 0
     marks = ns.find_atoms(gemmi.Position(event.x, event.y, event.z), '\0', radius=17)
-    print(marks)
+    # print(marks)
     print(len(marks))
     for _mark in marks:
-        print(_mark)
-        print(dir(_mark))
+        # print(_mark)
+        # print(dir(_mark))
         _cra = _mark.to_cra(structure[0])
         mark_pos = gemmi.Position(_mark.x, _mark.y, _mark.z)
         if mark_pos.dist(_cra.atom.pos) < 0.1:
