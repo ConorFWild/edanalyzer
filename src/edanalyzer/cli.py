@@ -2934,7 +2934,13 @@ class CLI:
                 results_this_epoch,
                 key=lambda _key: float(np.abs(results_this_epoch[_key][1]-0.95)),
             )
+            selected_key_high_prec = min(
+                results_this_epoch,
+                key=lambda _key: float(np.abs(results_this_epoch[_key][0]-0.90)),
+            )
             print(f"Epoch {epoch}: Precission at recall: {results_this_epoch[selected_key][1]} is: {results_this_epoch[selected_key][0]} at cutoff: {selected_key}")
+            print(
+                f"\tEpoch {epoch}: Recall at precission: {results_this_epoch[selected_key_high_prec][0]} is: {results_this_epoch[selected_key_high_prec][1]} at cutoff: {selected_key_high_prec}")
             # epoch -= 10
             # epoch += 1
             epoch += 2
