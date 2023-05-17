@@ -1,3 +1,4 @@
+import itertools
 import time
 
 from edanalyzer.data import StructureReflectionsDataset, StructureReflectionsData, PanDDAEventDataset, \
@@ -322,8 +323,6 @@ def get_model_map(event: PanDDAEvent, xmap_event):
         dtag=event.dtag)
     structure = gemmi.read_structure(str(pandda_input_pdb))
 
-    time_begin_ns = time.time()
-    ns = gemmi.NeighborSearch(structure[0], structure.cell, 18).populate(include_h=False)
 
     new_xmap = gemmi.FloatGrid(xmap_event.nu, xmap_event.nv, xmap_event.nw)
     new_xmap.spacegroup = xmap_event.spacegroup
@@ -338,50 +337,100 @@ def get_model_map(event: PanDDAEvent, xmap_event):
     #                     value=1.0,
     #                 )
 
+    # time_begin_ns = time.time()
+    # ns = gemmi.NeighborSearch(structure[0], structure.cell, 18).populate(include_h=False)
+    #
+    # num_sym = 0
+    # num = 0
+    # event_pos = gemmi.Position(event.x, event.y, event.z)
+    # marks = ns.find_atoms(event_pos, '\0', radius=17)
+    # # print(marks)
+    # # print(len(marks))
+    # mark_dists_event = []
+    # mark_dists_cra = []
+    # for _mark in marks:
+    #     # print(_mark)
+    #     # print(dir(_mark))
+    #     _cra = _mark.to_cra(structure[0])
+    #     mark_pos = gemmi.Position(_mark.x, _mark.y, _mark.z)
+    #
+    #     mark_dists_event.append(event_pos.dist(mark_pos))
+    #
+    #     mark_dist_cra = mark_pos.dist(_cra.atom.pos)
+    #     mark_dists_cra.append(mark_dist_cra)
+    #
+    #
+    #     if mark_dist_cra < 0.1:
+    #         new_xmap.set_points_around(
+    #                             mark_pos,
+    #                             radius=1,
+    #                             value=1.0,
+    #                         )
+    #         num += 1
+    #     else:
+    #         new_xmap.set_points_around(
+    #             mark_pos,
+    #             radius=1,
+    #             value=-1.0,
+    #         )
+    #         num_sym +=1
+    #
+    # time_finish_ns = time.time()
+    # print(
+    #     f"Num: {num} : num sym: {num_sym} in {round(time_finish_ns-time_begin_ns, 2)} : {round(event.x, 2)} : {round(event.y, 2)} : {round(event.z, 2)} : {pandda_input_pdb}"
+    # )
+    # print(mark_dists_event[:10])
+    # print(mark_dists_cra[:10])
 
+    # For each atom, if it or a symmetry image (cryst and/or pbc +/- 1) of it are within 10A
+    # event_pos = gemmi.Position(event.x, event.y, event.z)
+    time_begin_ns = time.time()
+
+    lb = np.array([event.x, event.y, event.z]) - 10
+    ub = np.array([event.x, event.y, event.z]) + 10
+    symops = gemmi.find_spacegroup_by_name(structure.spacegroup_hm).operations()
     num_sym = 0
     num = 0
-    event_pos = gemmi.Position(event.x, event.y, event.z)
-    marks = ns.find_atoms(event_pos, '\0', radius=17)
-    # print(marks)
-    # print(len(marks))
-    mark_dists_event = []
-    mark_dists_cra = []
-    for _mark in marks:
-        # print(_mark)
-        # print(dir(_mark))
-        _cra = _mark.to_cra(structure[0])
-        mark_pos = gemmi.Position(_mark.x, _mark.y, _mark.z)
+    for model in structure:
+        for chain in model:
+            for residue in chain.get_polymer():
+                for atom in residue:
+                    # if event_pos.dist(atom.pos)
+                    atom_pos = atom.pos
+                    atom_pos_array = np.array([atom_pos.x, atom_pos.y, atom_pos.z])
+                    if np.all(atom_pos_array > lb) and np.all(atom_pos_array < ub):
+                        new_xmap.set_points_around(
+                            atom.pos,
+                            radius=1,
+                            value=1.0,
+                        )
+                        num += 1
 
-        mark_dists_event.append(event_pos.dist(mark_pos))
+                    fractional_pos = structure.cell.fractionalize(atom_pos)
+                    for op in symops:
+                        triplet = op.triplet()
+                        sym_pos_frac = np.array(op.apply_to_xyz([fractional_pos.x, fractional_pos.y, fractional_pos.z]))
 
-        mark_dist_cra = mark_pos.dist(_cra.atom.pos)
-        mark_dists_cra.append(mark_dist_cra)
+                        for x,y,z in itertools.product([-1,0,1], [-1,0,1], [-1,0,1]):
+                            if (x == y == z == 0) and (triplet == "x,y,z"):
+                                print(f"\tSkipping identity!")
+                                continue
 
-
-        if mark_dist_cra < 0.1:
-            new_xmap.set_points_around(
-                                mark_pos,
-                                radius=1,
-                                value=1.0,
-                            )
-            num += 1
-        else:
-            new_xmap.set_points_around(
-                mark_pos,
-                radius=1,
-                value=-1.0,
-            )
-            num_sym +=1
+                            pbc_sym_frac = sym_pos_frac + np.array([x,y,z])
+                            pbc_sym_pos = structure.cell.orthogonalize(gemmi.Fractional(*pbc_sym_frac))
+                            pbc_sym_array = np.array([pbc_sym_pos.x, pbc_sym_pos.y, pbc_sym_pos.z])
+                            if np.all(pbc_sym_array > lb) and np.all(pbc_sym_array < ub):
+                                new_xmap.set_points_around(
+                                    atom.pos,
+                                    radius=1,
+                                    value=-1.0,
+                                )
+                                num_sym += 1
 
     time_finish_ns = time.time()
     print(
         f"Num: {num} : num sym: {num_sym} in {round(time_finish_ns-time_begin_ns, 2)} : {round(event.x, 2)} : {round(event.y, 2)} : {round(event.z, 2)} : {pandda_input_pdb}"
     )
-    print(mark_dists_event[:10])
-    print(mark_dists_cra[:10])
-
-
     return new_xmap
 
 
