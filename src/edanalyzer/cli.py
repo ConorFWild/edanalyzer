@@ -2937,7 +2937,7 @@ class CLI:
             print(f"Epoch {epoch}: Precission at recall: {results_this_epoch[selected_key][1]} is: {results_this_epoch[selected_key][0]} at cutoff: {selected_key}")
             # epoch -= 10
             # epoch += 1
-            epoch += 3
+            epoch += 2
 
             model_file = Path(options.working_dir) /constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch)
 
