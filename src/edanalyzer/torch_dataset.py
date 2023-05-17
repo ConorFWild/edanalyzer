@@ -333,7 +333,7 @@ def get_model_map(event: PanDDAEvent, xmap_event):
                 for atom in residue:
                     new_xmap.set_points_around(
                         atom.pos,
-                        radius=1,
+                        radius=1.0,
                         value=1.0,
                     )
 
