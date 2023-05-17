@@ -313,7 +313,7 @@ def get_image_event_map_and_raw_from_event(event: PanDDAEvent):
     return np.stack([image_event, image_raw, image_zmap, image_model], axis=0), True
 
 
-def get_model_map(event: PanDDAEvent, xmap_event):
+def get_model_map(event: PanDDAEvent, xmap_event, event):
 
     pandda_input_pdb = Path(
         event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
