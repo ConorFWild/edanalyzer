@@ -340,6 +340,7 @@ def get_model_map(event: PanDDAEvent, xmap_event):
     num = 0
     marks = ns.find_atoms(gemmi.Position(event.x, event.y, event.z), '\0', radius=17)
     print(marks)
+    print(len(marks))
     for _mark in marks:
         print(_mark)
         _cra = _mark.to_cra(structure[0])
