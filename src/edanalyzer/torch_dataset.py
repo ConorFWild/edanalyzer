@@ -343,6 +343,7 @@ def get_model_map(event: PanDDAEvent, xmap_event):
     print(len(marks))
     for _mark in marks:
         print(_mark)
+        print(dir(_mark))
         _cra = _mark.to_cra(structure[0])
         if _mark.pos.dist(_cra.atom.pos) < 0.1:
             new_xmap.set_points_around(
