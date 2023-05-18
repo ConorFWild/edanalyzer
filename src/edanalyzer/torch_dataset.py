@@ -780,7 +780,7 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
         image_xmap_initial = sample_xmap(xmap_dmap, sample_transform, sample_array_xmap)
         image_xmap = (image_xmap_initial - np.mean(image_xmap_initial)) / np.std(image_xmap_initial)
         time_finish_get_xmap = time.time()
-        time_get_xmap = round(time_finish_get_xmap-time_begin_get_xmap)
+        time_get_xmap = round(time_finish_get_xmap-time_begin_get_xmap, 2)
 
         time_begin_get_mean = time.time()
         sample_array_mean = np.copy(sample_array)
