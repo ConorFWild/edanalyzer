@@ -816,6 +816,7 @@ class PanDDADatasetTorchLigand(Dataset):
         return len(self.pandda_event_dataset.pandda_events)
 
     def __getitem__(self, idx: int):
+        time_begin_load_item = time.time()
         event = self.pandda_event_dataset.pandda_events[idx]
 
         annotation = event.hit
@@ -827,4 +828,7 @@ class PanDDADatasetTorchLigand(Dataset):
 
         else:
             label = np.array([1.0, 0.0], dtype=np.float32)
+
+        time_finish_load_item = time.time()
+        print(f"Loaded item in: {round(time_finish_load_item-time_begin_load_item, 2)}")
         return image, label, idx
