@@ -762,19 +762,26 @@ def get_image_xmap_ligand(event: PanDDAEvent, ):
 
 def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
     # logger.debug(f"Loading: {event.dtag}")
+    time_begin_get_transform = time.time()
     sample_transform, sample_array = get_sample_transform_from_event_augmented(
         event,
         0.5,
         30,
         3.5
     )
+    time_finish_get_transform = time.time()
 
     try:
         sample_array_xmap = np.copy(sample_array)
+
+        time_begin_get_xmap = time.time()
         xmap_dmap = get_raw_xmap_from_event(event)
         image_xmap_initial = sample_xmap(xmap_dmap, sample_transform, sample_array_xmap)
         image_xmap = (image_xmap_initial - np.mean(image_xmap_initial)) / np.std(image_xmap_initial)
+        time_finish_get_xmap = time.time()
+        time_get_xmap = round(time_finish_get_xmap-time_begin_get_xmap)
 
+        time_begin_get_mean = time.time()
         sample_array_mean = np.copy(sample_array)
         mean_dmap = get_mean_map_from_event(event)
         image_mean_initial = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
@@ -783,19 +790,30 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
             image_mean = np.copy(sample_array)
         else:
             image_mean = (image_mean_initial - np.mean(image_mean_initial)) / std
+        time_finish_get_mean = time.time()
+        time_get_mean = round(time_finish_get_mean-time_begin_get_mean, 2)
 
+        time_begin_get_model = time.time()
         sample_array_model = np.copy(sample_array)
         model_map = get_model_map(event, xmap_dmap, )
         image_model = sample_xmap(model_map, sample_transform, sample_array_model)
+        time_finish_get_model = time.time()
+        time_get_model = round(time_finish_get_model-time_begin_get_model, 2)
 
         # ligand_map_array = np.copy(sample_array)
+        time_begin_get_ligand = time.time()
         ligand_map = get_ligand_map(event)
         image_ligand = np.array(ligand_map)
+        time_finish_get_ligand = time.time()
+        time_get_ligand = round(time_finish_get_ligand-time_begin_get_ligand, 2)
 
     except Exception as e:
         print(f"Exception in loading data: {traceback.format_exc()}")
 
         return np.stack([sample_array, sample_array, sample_array, sample_array], axis=0), False
+
+    print(f"Loaded item in: xmap {time_get_xmap}: mean {time_get_mean}: model {time_get_model}: ligand {time_get_ligand}")
+
 
     return np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=0), True
 
@@ -830,5 +848,5 @@ class PanDDADatasetTorchLigand(Dataset):
             label = np.array([1.0, 0.0], dtype=np.float32)
 
         time_finish_load_item = time.time()
-        print(f"Loaded item in: {round(time_finish_load_item-time_begin_load_item, 2)}")
+        # print(f"Loaded item in: {round(time_finish_load_item-time_begin_load_item, 2)}")
         return image, label, idx
