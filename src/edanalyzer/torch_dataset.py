@@ -770,6 +770,7 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
         3.5
     )
     time_finish_get_transform = time.time()
+    time_get_transform = round(time_finish_get_transform-time_begin_get_transform, 2)
 
     try:
         sample_array_xmap = np.copy(sample_array)
@@ -812,7 +813,7 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
 
         return np.stack([sample_array, sample_array, sample_array, sample_array], axis=0), False
 
-    print(f"Loaded item in: xmap {time_get_xmap}: mean {time_get_mean}: model {time_get_model}: ligand {time_get_ligand}")
+    print(f"Loaded item in: transform {time_get_transform}: xmap {time_get_xmap}: mean {time_get_mean}: model {time_get_model}: ligand {time_get_ligand}")
 
 
     return np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=0), True
