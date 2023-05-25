@@ -873,6 +873,7 @@ def train_pandda_from_dataset_ligand(
             # forward + backward + optimize
             begin_annotate = time.time()
             model_annotation = model(image_c)
+            print(model_annotation)
             finish_annotate = time.time()
             # logger.debug(f"Annotated 12 datasets in {finish_annotate - begin_annotate}")
             # print(outputs.to("cpu").detach().numpy())
