@@ -39,7 +39,7 @@ import torch.nn as nn
 import torch.optim as optim
 from edanalyzer.torch_network import resnet18
 from edanalyzer.torch_network_squeezenet import squeezenet1_1
-from edanalyzer.torch_network_mobilenet import mobilenet_v3_large
+from edanalyzer.torch_network_mobilenet import mobilenet_v3_large_3d
 import download_dataset
 import dataclasses
 import time
@@ -2754,7 +2754,7 @@ class CLI:
                 model.load_state_dict(torch.load(model_file, map_location=dev),
                                       )
         elif model_type== "mobilenet+ligand":
-            model = mobilenet_v3_large(num_classes=2, num_input=4)
+            model = mobilenet_v3_large_3d(num_classes=2, num_input=4)
             model.to(dev)
 
             if model_file:
