@@ -2670,7 +2670,7 @@ class CLI:
 
     def train(self,
               dataset_path,
-              model_path,
+              model_path=None,
               data_type="ligand",
               model_type="squeeze+ligand",
               model_key="squeeze_ligand_",
