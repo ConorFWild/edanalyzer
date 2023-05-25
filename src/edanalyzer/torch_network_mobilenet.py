@@ -147,6 +147,7 @@ class InvertedResidual(nn.Module):
         self.out_channels = cnf.out_channels
         self._is_cn = cnf.stride > 1
 
+
     def forward(self, input: Tensor) -> Tensor:
         result = self.block(input)
         if self.use_res_connect:
@@ -247,6 +248,9 @@ class MobileNetV3(nn.Module):
                 nn.init.normal_(m.weight, 0, 0.01)
                 nn.init.zeros_(m.bias)
 
+        self.act = nn.Softmax()
+
+
     def _forward_impl(self, x: Tensor) -> Tensor:
         x = self.features(x)
 
@@ -255,7 +259,7 @@ class MobileNetV3(nn.Module):
 
         x = self.classifier(x)
 
-        return x
+        return self.act(x)
 
     def forward(self, x: Tensor) -> Tensor:
         return self._forward_impl(x)
