@@ -2672,8 +2672,10 @@ class CLI:
               dataset_path,
               model_path=None,
               data_type="ligand",
-              model_type="squeeze+ligand",
-              model_key="squeeze_ligand_",
+              # model_type="squeeze+ligand",
+              model_type="resnet+ligand",
+              # model_key="squeeze_ligand_",
+              model_key="resnet_ligand_",
               options_json_path: str = "./options.json"):
         logger.info(f"Options path is: {options_json_path}")
         logger.info(f"Dataset path is: {dataset_path}")
