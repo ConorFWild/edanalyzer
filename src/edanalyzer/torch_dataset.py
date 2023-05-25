@@ -809,7 +809,8 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
         time_get_ligand = round(time_finish_get_ligand-time_begin_get_ligand, 2)
 
     except Exception as e:
-        print(f"Exception in loading data: {traceback.format_exc()}")
+        # print(f"Exception in loading data: {traceback.format_exc()}")
+        print(f"Exception in loading data: {e}")
 
         return np.stack([sample_array, sample_array, sample_array, sample_array], axis=0), False
 
