@@ -803,115 +803,115 @@ def train_pandda_from_dataset(
         logger.info(f"Saving state dict for model at epoch: {epoch}")
         torch.save(model.state_dict(), Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_MEAN.format(epoch=epoch))
 
-# def train_pandda_from_dataset_ligand(
-#         options: Options,
-#         dataset: PanDDAEventDataset,
-#         begin_epoch,
-#         model_file,
-#         num_workers=36,
-#         update=False
-# ):
-#     if torch.cuda.is_available():
-#         logger.info(f"Using cuda!")
-#         dev = "cuda:0"
-#     else:
-#         logger.info(f"Using cpu!")
-#         dev = "cpu"
-#
-#     num_epochs = 1000
-#     logger.info(f"Training on {len(dataset.pandda_events)} events!")
-#
-#     # Get the dataset
-#     dataset_torch = PanDDADatasetTorchLigand(
-#         dataset,
-#         transform_image=get_image_xmap_ligand_augmented,
-#         transform_annotation=get_annotation_from_event_hit
-#     )
-#
-#
-#     # Get the dataloader
-#     train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=True, num_workers=num_workers)
-#
-#     # model = squeezenet1_1(num_classes=2, num_input=2)
-#     model = resnet18(num_classes=2, num_input=4)
-#     model.to(dev)
-#
-#     if model_file:
-#         model.load_state_dict(torch.load(model_file, map_location=dev),
-#                               )
-#     model = model.train()
-#
-#     # Define loss function
-#     criterion = categorical_loss
-#
-#     # Define optimizer
-#     optimizer = optim.Adam(model.parameters(),
-#                            # lr=0.001,
-#                            )
-#
-#     optimizer.zero_grad()
-#
-#     running_loss = 0
-#
-#     # Trainloop
-#
-#     running_loss = []
-#
-#     for epoch in range(begin_epoch + 1, begin_epoch + num_epochs):
-#         i = 0
-#         print(f"Epoch: {epoch}")
-#         for image, annotation, idx in train_dataloader:
-#             # print(f"\tBatch: {i}")
-#             # print(image)
-#             # print(annotation)
-#             # print(image.shape)
-#             image_c = image.to(dev)
-#             annotation_c = annotation.to(dev)
-#
-#             optimizer.zero_grad()
-#
-#             # forward + backward + optimize
-#             begin_annotate = time.time()
-#             model_annotation = model(image_c)
-#             finish_annotate = time.time()
-#             # logger.debug(f"Annotated 12 datasets in {finish_annotate - begin_annotate}")
-#             # print(outputs.to("cpu").detach().numpy())
-#             loss = criterion(model_annotation, annotation_c)
-#             loss.backward()
-#             optimizer.step()
-#
-#             # RECORD LOSS
-#             running_loss.append(loss.item())
-#
-#             # print statistics per epoch
-#             i += 1
-#             if i % 1000 == 999:  # print every 100 mini-batches
-#
-#                 model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]
-#                 annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
-#                 print([(x, type(x)) for x in annotation])
-#                 idxs = [int(x) for x in idx]
-#                 # print("Loss at epoch {}, iteration {} is {}".format(epoch,
-#                 #                                                     i,
-#                 #                                                     running_loss / i) + "\n")
-#                 print(f"Recent loss is: {sum(running_loss[-998:]) / 998}")
-#                 logger.debug(f"Recent loss is: {sum(running_loss[-998:]) / 998}")
-#
-#                 for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
-#                     mod_an = round(float(model_annotation_np[1]), 2)
-#                     an = round(float(annotation_np[1]), 2)
-#                     event = dataset[_idx]
-#                     event_path = event.event_map
-#
-#                     print(
-#                         f"{mod_an} : {an} : {event_path}"
-#                     )
-#                     # print("{}".format() + "\n")
-#                 print("#################################################" + "\n")
-#
-#         logger.info(f"Saving state dict for model at epoch: {epoch}")
-#         torch.save(model.state_dict(),
-#                    Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch))
+def train_pandda_from_dataset_ligand(
+        options: Options,
+        dataset: PanDDAEventDataset,
+        begin_epoch,
+        model_file,
+        num_workers=36,
+        update=False
+):
+    if torch.cuda.is_available():
+        logger.info(f"Using cuda!")
+        dev = "cuda:0"
+    else:
+        logger.info(f"Using cpu!")
+        dev = "cpu"
+
+    num_epochs = 1000
+    logger.info(f"Training on {len(dataset.pandda_events)} events!")
+
+    # Get the dataset
+    dataset_torch = PanDDADatasetTorchLigand(
+        dataset,
+        transform_image=get_image_xmap_ligand_augmented,
+        transform_annotation=get_annotation_from_event_hit
+    )
+
+
+    # Get the dataloader
+    train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=True, num_workers=num_workers)
+
+    # model = squeezenet1_1(num_classes=2, num_input=2)
+    model = resnet18(num_classes=2, num_input=4)
+    model.to(dev)
+
+    if model_file:
+        model.load_state_dict(torch.load(model_file, map_location=dev),
+                              )
+    model = model.train()
+
+    # Define loss function
+    criterion = categorical_loss
+
+    # Define optimizer
+    optimizer = optim.Adam(model.parameters(),
+                           # lr=0.001,
+                           )
+
+    optimizer.zero_grad()
+
+    running_loss = 0
+
+    # Trainloop
+
+    running_loss = []
+
+    for epoch in range(begin_epoch + 1, begin_epoch + num_epochs):
+        i = 0
+        print(f"Epoch: {epoch}")
+        for image, annotation, idx in train_dataloader:
+            # print(f"\tBatch: {i}")
+            # print(image)
+            # print(annotation)
+            # print(image.shape)
+            image_c = image.to(dev)
+            annotation_c = annotation.to(dev)
+
+            optimizer.zero_grad()
+
+            # forward + backward + optimize
+            begin_annotate = time.time()
+            model_annotation = model(image_c)
+            finish_annotate = time.time()
+            # logger.debug(f"Annotated 12 datasets in {finish_annotate - begin_annotate}")
+            # print(outputs.to("cpu").detach().numpy())
+            loss = criterion(model_annotation, annotation_c)
+            loss.backward()
+            optimizer.step()
+
+            # RECORD LOSS
+            running_loss.append(loss.item())
+
+            # print statistics per epoch
+            i += 1
+            if i % 1000 == 999:  # print every 100 mini-batches
+
+                model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]
+                annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
+                print([(x, type(x)) for x in annotation])
+                idxs = [int(x) for x in idx]
+                # print("Loss at epoch {}, iteration {} is {}".format(epoch,
+                #                                                     i,
+                #                                                     running_loss / i) + "\n")
+                print(f"Recent loss is: {sum(running_loss[-998:]) / 998}")
+                logger.debug(f"Recent loss is: {sum(running_loss[-998:]) / 998}")
+
+                for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
+                    mod_an = round(float(model_annotation_np[1]), 2)
+                    an = round(float(annotation_np[1]), 2)
+                    event = dataset[_idx]
+                    event_path = event.event_map
+
+                    print(
+                        f"{mod_an} : {an} : {event_path}"
+                    )
+                    # print("{}".format() + "\n")
+                print("#################################################" + "\n")
+
+        logger.info(f"Saving state dict for model at epoch: {epoch}")
+        torch.save(model.state_dict(),
+                   Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch))
 
 def train(
         options,
@@ -2738,9 +2738,16 @@ class CLI:
             if model_file:
                 model.load_state_dict(torch.load(model_file, map_location=dev),
                                       )
-            model = model.train()
+        elif model_type== "resnet+ligand":
+            model = resnet18(num_classes=2, num_input=4)
+            model.to(dev)
+
+            if model_file:
+                model.load_state_dict(torch.load(model_file, map_location=dev),
+                                      )
         else:
             raise Exception
+        model = model.train()
 
 
         train(
