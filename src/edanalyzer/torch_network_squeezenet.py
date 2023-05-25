@@ -182,10 +182,12 @@ class SqueezeNet(nn.Module):
                 if m.bias is not None:
                     init.constant_(m.bias, 0)
 
+        self.act = nn.Softmax()
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.features(x)
         x = self.classifier(x)
-        return torch.flatten(x, 1)
+        return self.act(torch.flatten(x, 1))
 
 
 def _squeezenet(version, pretrained, progress, **kwargs):
