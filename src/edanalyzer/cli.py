@@ -2675,6 +2675,9 @@ class CLI:
               model_type="squeeze+ligand",
               model_key="squeeze_ligand_",
               options_json_path: str = "./options.json"):
+        logger.info(f"Options path is: {options_json_path}")
+        logger.info(f"Dataset path is: {dataset_path}")
+
         options = Options.load(options_json_path)
 
         # Make the dataset
@@ -2729,7 +2732,7 @@ class CLI:
 
         # Load the model
         if model_type == "squeeze+ligand":
-            model = squeezenet1_1(num_classes=2, num_input=4)
+            model = squeezenet1_1(num_classes=2, num_features=4)
             model.to(dev)
 
             if model_file:
