@@ -38,6 +38,7 @@ from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.optim as optim
 from edanalyzer.torch_network import resnet18
+from edanalyzer.torch_network_squeezenet import squeezenet1_1
 import download_dataset
 import dataclasses
 import time
@@ -290,37 +291,37 @@ def partition_dataset(options: Options, dataset: StructureReflectionsDataset, pr
     dataset.save(options.working_dir)
 
 
-def train(options: Options, dataset: StructureReflectionsDataset):
-    # Get the dataset
-    dataset_torch = StructureReflectionsDatasetTorch(
-        dataset,
-        transform=lambda data: sample_ligand_density(
-            data,
-            lambda _data: annotate_data_randomly(_data, 0.5),
-            lambda _data, _annotation: generate_xmap_ligand_sample_or_decoy(
-                _data,
-                _annotation,
-                sample_ligand=lambda __data: generate_ligand_sample(
-                    __data,
-                    get_ligand_decoy_transform,
-                    sample_xmap_from_data
-                ),
-                sample_ligand_decoy=lambda __data: generate_ligand_sample(
-                    __data,
-                    get_ligand_transform,
-                    sample_xmap_from_data,
-
-                )
-            )
-        )
-    )
-
-    # Get the dataloader
-    train_dataloader = DataLoader(dataset_torch, batch_size=1, shuffle=True)
-
-    # Trainloop
-
-    ...
+# def train(options: Options, dataset: StructureReflectionsDataset):
+#     # Get the dataset
+#     dataset_torch = StructureReflectionsDatasetTorch(
+#         dataset,
+#         transform=lambda data: sample_ligand_density(
+#             data,
+#             lambda _data: annotate_data_randomly(_data, 0.5),
+#             lambda _data, _annotation: generate_xmap_ligand_sample_or_decoy(
+#                 _data,
+#                 _annotation,
+#                 sample_ligand=lambda __data: generate_ligand_sample(
+#                     __data,
+#                     get_ligand_decoy_transform,
+#                     sample_xmap_from_data
+#                 ),
+#                 sample_ligand_decoy=lambda __data: generate_ligand_sample(
+#                     __data,
+#                     get_ligand_transform,
+#                     sample_xmap_from_data,
+#
+#                 )
+#             )
+#         )
+#     )
+#
+#     # Get the dataloader
+#     train_dataloader = DataLoader(dataset_torch, batch_size=1, shuffle=True)
+#
+#     # Trainloop
+#
+#     ...
 
 
 def test(options: Options, dataset: StructureReflectionsDataset):
@@ -802,43 +803,135 @@ def train_pandda_from_dataset(
         logger.info(f"Saving state dict for model at epoch: {epoch}")
         torch.save(model.state_dict(), Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_MEAN.format(epoch=epoch))
 
-def train_pandda_from_dataset_ligand(
-        options: Options,
-        dataset: PanDDAEventDataset,
-        begin_epoch,
-        model_file,
-        num_workers=36,
-        update=False
+# def train_pandda_from_dataset_ligand(
+#         options: Options,
+#         dataset: PanDDAEventDataset,
+#         begin_epoch,
+#         model_file,
+#         num_workers=36,
+#         update=False
+# ):
+#     if torch.cuda.is_available():
+#         logger.info(f"Using cuda!")
+#         dev = "cuda:0"
+#     else:
+#         logger.info(f"Using cpu!")
+#         dev = "cpu"
+#
+#     num_epochs = 1000
+#     logger.info(f"Training on {len(dataset.pandda_events)} events!")
+#
+#     # Get the dataset
+#     dataset_torch = PanDDADatasetTorchLigand(
+#         dataset,
+#         transform_image=get_image_xmap_ligand_augmented,
+#         transform_annotation=get_annotation_from_event_hit
+#     )
+#
+#
+#     # Get the dataloader
+#     train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=True, num_workers=num_workers)
+#
+#     # model = squeezenet1_1(num_classes=2, num_input=2)
+#     model = resnet18(num_classes=2, num_input=4)
+#     model.to(dev)
+#
+#     if model_file:
+#         model.load_state_dict(torch.load(model_file, map_location=dev),
+#                               )
+#     model = model.train()
+#
+#     # Define loss function
+#     criterion = categorical_loss
+#
+#     # Define optimizer
+#     optimizer = optim.Adam(model.parameters(),
+#                            # lr=0.001,
+#                            )
+#
+#     optimizer.zero_grad()
+#
+#     running_loss = 0
+#
+#     # Trainloop
+#
+#     running_loss = []
+#
+#     for epoch in range(begin_epoch + 1, begin_epoch + num_epochs):
+#         i = 0
+#         print(f"Epoch: {epoch}")
+#         for image, annotation, idx in train_dataloader:
+#             # print(f"\tBatch: {i}")
+#             # print(image)
+#             # print(annotation)
+#             # print(image.shape)
+#             image_c = image.to(dev)
+#             annotation_c = annotation.to(dev)
+#
+#             optimizer.zero_grad()
+#
+#             # forward + backward + optimize
+#             begin_annotate = time.time()
+#             model_annotation = model(image_c)
+#             finish_annotate = time.time()
+#             # logger.debug(f"Annotated 12 datasets in {finish_annotate - begin_annotate}")
+#             # print(outputs.to("cpu").detach().numpy())
+#             loss = criterion(model_annotation, annotation_c)
+#             loss.backward()
+#             optimizer.step()
+#
+#             # RECORD LOSS
+#             running_loss.append(loss.item())
+#
+#             # print statistics per epoch
+#             i += 1
+#             if i % 1000 == 999:  # print every 100 mini-batches
+#
+#                 model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]
+#                 annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
+#                 print([(x, type(x)) for x in annotation])
+#                 idxs = [int(x) for x in idx]
+#                 # print("Loss at epoch {}, iteration {} is {}".format(epoch,
+#                 #                                                     i,
+#                 #                                                     running_loss / i) + "\n")
+#                 print(f"Recent loss is: {sum(running_loss[-998:]) / 998}")
+#                 logger.debug(f"Recent loss is: {sum(running_loss[-998:]) / 998}")
+#
+#                 for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
+#                     mod_an = round(float(model_annotation_np[1]), 2)
+#                     an = round(float(annotation_np[1]), 2)
+#                     event = dataset[_idx]
+#                     event_path = event.event_map
+#
+#                     print(
+#                         f"{mod_an} : {an} : {event_path}"
+#                     )
+#                     # print("{}".format() + "\n")
+#                 print("#################################################" + "\n")
+#
+#         logger.info(f"Saving state dict for model at epoch: {epoch}")
+#         torch.save(model.state_dict(),
+#                    Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch))
+
+def train(
+        options,
+        dataset_torch,
+        model,
+        initial_epoch,
+        model_key,
+        dev,
+        batch_size=12,
+        num_workers=20,
+        num_epochs=1000,
 ):
-    if torch.cuda.is_available():
-        logger.info(f"Using cuda!")
-        dev = "cuda:0"
-    else:
-        logger.info(f"Using cpu!")
-        dev = "cpu"
-
-    num_epochs = 1000
-    logger.info(f"Training on {len(dataset.pandda_events)} events!")
-
-    # Get the dataset
-    dataset_torch = PanDDADatasetTorchLigand(
-        dataset,
-        transform_image=get_image_xmap_ligand_augmented,
-        transform_annotation=get_annotation_from_event_hit
-    )
-
 
     # Get the dataloader
-    train_dataloader = DataLoader(dataset_torch, batch_size=12, shuffle=True, num_workers=num_workers)
-
-    # model = squeezenet1_1(num_classes=2, num_input=2)
-    model = resnet18(num_classes=2, num_input=4)
-    model.to(dev)
-
-    if model_file:
-        model.load_state_dict(torch.load(model_file, map_location=dev),
-                              )
-    model = model.train()
+    train_dataloader = DataLoader(
+        dataset_torch,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+    )
 
     # Define loss function
     criterion = categorical_loss
@@ -856,7 +949,7 @@ def train_pandda_from_dataset_ligand(
 
     running_loss = []
 
-    for epoch in range(begin_epoch + 1, begin_epoch + num_epochs):
+    for epoch in range(initial_epoch + 1, initial_epoch + num_epochs):
         i = 0
         print(f"Epoch: {epoch}")
         for image, annotation, idx in train_dataloader:
@@ -899,18 +992,22 @@ def train_pandda_from_dataset_ligand(
                 for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
                     mod_an = round(float(model_annotation_np[1]), 2)
                     an = round(float(annotation_np[1]), 2)
-                    event = dataset[_idx]
-                    event_path = event.event_map
-
+                    # event = dataset[_idx]
+                    # event_path = event.event_map
                     print(
-                        f"{mod_an} : {an} : {event_path}"
+                        f"{mod_an} : {an} "
                     )
+                    # print(
+                    #     f"{mod_an} : {an} : {event_path}"
+                    # )
                     # print("{}".format() + "\n")
                 print("#################################################" + "\n")
 
         logger.info(f"Saving state dict for model at epoch: {epoch}")
-        torch.save(model.state_dict(),
-                   Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch))
+        torch.save(
+            model.state_dict(),
+            Path(options.working_dir) / f"{model_key}{epoch}.pt",
+        )
 
 def try_make_dir(path: Path):
     if not path.exists():
@@ -2038,9 +2135,9 @@ class CLI:
         options = Options.load(options_json_path)
         dataset = StructureReflectionsDataset.load(options.working_dir)
 
-    def train(self, options_json_path: str = "./options.json"):
-        options = Options.load(options_json_path)
-        dataset = StructureReflectionsDataset.load(options.working_dir)
+    # def train(self, options_json_path: str = "./options.json"):
+    #     options = Options.load(options_json_path)
+    #     dataset = StructureReflectionsDataset.load(options.working_dir)
 
     def test(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
@@ -2570,6 +2667,95 @@ class CLI:
             model_file,
             num_workers=20
         )
+
+    def train(self,
+              dataset_path,
+              model_path,
+              data_type="ligand",
+              model_type="squeeze+ligand",
+              model_key="squeeze_ligand_",
+              options_json_path: str = "./options.json"):
+        options = Options.load(options_json_path)
+
+        # Make the dataset
+        # dataset = PanDDAEventDataset.load(dataset_path)
+        dataset = load_model(
+            dataset_path,
+            PanDDAEventDataset,
+        )
+        logger.info(f"Training on {len(dataset.pandda_events)} events!")
+
+        if data_type == "ligand":
+            dataset_torch = PanDDADatasetTorchLigand(
+                dataset,
+                transform_image=get_image_xmap_ligand_augmented,
+                transform_annotation=get_annotation_from_event_hit
+            )
+
+        else:
+            raise Exception
+
+        # Get the output model file
+        if model_path:
+            model_path = Path(model_path)
+            file_name = model_path.name
+            match = re.match(
+                model_key,
+                file_name,
+            )
+            if match:
+                re.match(
+                    ".*([0-9]).pt",
+                    file_name
+                )
+                epoch = int(match[1])
+                model_file = model_path
+            else:
+                epoch = 0
+                model_file = None
+        else:
+            epoch = 0
+            model_file = None
+
+        logger.info(f"Beggining from epoch: {epoch}")
+
+        # Get the device
+        if torch.cuda.is_available():
+            logger.info(f"Using cuda!")
+            dev = "cuda:0"
+        else:
+            logger.info(f"Using cpu!")
+            dev = "cpu"
+
+        # Load the model
+        if model_type == "squeeze+ligand":
+            model = squeezenet1_1(num_classes=2, num_input=4)
+            model.to(dev)
+
+            if model_file:
+                model.load_state_dict(torch.load(model_file, map_location=dev),
+                                      )
+            model = model.train()
+        else:
+            raise Exception
+
+        train(
+            options,
+            dataset_torch,
+            model,
+            epoch,
+            model_key,
+            dev,
+            num_workers=20,
+        )
+
+        # train_pandda_from_dataset_ligand(
+        #     options,
+        #     dataset,
+        #     epoch,
+        #     model_file,
+        #     num_workers=20
+        # )
 
     def annotate_train_dataset_all(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
