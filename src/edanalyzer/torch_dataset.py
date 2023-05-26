@@ -761,12 +761,15 @@ def get_image_xmap_ligand(event: PanDDAEvent, ):
 
 
 def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
+
+    n = 64
+    step =0.25
     # logger.debug(f"Loading: {event.dtag}")
     time_begin_get_transform = time.time()
     sample_transform, sample_array = get_sample_transform_from_event_augmented(
         event,
-        0.25,
-        68,
+        step,
+        n,
         3.5
     )
     time_finish_get_transform = time.time()
@@ -803,7 +806,7 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
 
         # ligand_map_array = np.copy(sample_array)
         time_begin_get_ligand = time.time()
-        ligand_map = get_ligand_map(event)
+        ligand_map = get_ligand_map(event, n=n, step=step)
         image_ligand = np.array(ligand_map)
         time_finish_get_ligand = time.time()
         time_get_ligand = round(time_finish_get_ligand-time_begin_get_ligand, 2)
