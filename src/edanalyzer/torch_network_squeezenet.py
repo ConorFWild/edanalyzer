@@ -187,7 +187,11 @@ class SqueezeNet(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.features(x)
         x = self.classifier(x)
-        return self.act(torch.flatten(x, 1))
+        x = torch.flatten(x, 1)
+        print(f"Before softmax: {x.shape}")
+        x = self.act()
+        print(f"After softmax: {x.shape}")
+        return
 
 
 def _squeezenet(version, pretrained, progress, **kwargs):
