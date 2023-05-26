@@ -2741,7 +2741,7 @@ class CLI:
 
         # Load the model
         if model_type == "squeeze+ligand":
-            model = squeezenet1_1(num_classes=2, num_features=4)
+            model = squeezenet1_0(num_classes=2, num_features=4)
             model.to(dev)
 
             if model_file:
