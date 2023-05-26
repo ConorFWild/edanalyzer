@@ -762,8 +762,8 @@ def get_image_xmap_ligand(event: PanDDAEvent, ):
 
 def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
 
-    n = 64
-    step =0.25
+    n = 30
+    step =0.5
     # logger.debug(f"Loading: {event.dtag}")
     time_begin_get_transform = time.time()
     sample_transform, sample_array = get_sample_transform_from_event_augmented(
