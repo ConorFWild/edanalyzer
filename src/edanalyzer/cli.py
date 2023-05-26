@@ -2676,11 +2676,11 @@ class CLI:
               dataset_path,
               model_path=None,
               data_type="ligand",
-              model_type="squeeze+ligand",
-              # model_type="resnet+ligand",
+              # model_type="squeeze+ligand",
+              model_type="resnet+ligand",
               # model_type="mobilenet+ligand",
-              model_key="squeeze_ligand_",
-              # model_key="resnet_ligand_",
+              # model_key="squeeze_ligand_",
+              model_key="resnet_ligand_",
               # model_key="mobilenet_ligand_",
 
               options_json_path: str = "./options.json"):
