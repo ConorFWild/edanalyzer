@@ -765,8 +765,8 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
     time_begin_get_transform = time.time()
     sample_transform, sample_array = get_sample_transform_from_event_augmented(
         event,
-        0.5,
-        30,
+        0.25,
+        68,
         3.5
     )
     time_finish_get_transform = time.time()
