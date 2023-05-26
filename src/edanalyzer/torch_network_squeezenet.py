@@ -186,7 +186,7 @@ class SqueezeNet(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.features(x)
-        # print(f"Feature shape: {x.shape}")
+        print(f"Features shape: {x[:10]}")
         x = self.classifier(x)
         # print(f"Classified shape: {x.shape}")
         x = torch.flatten(x, 1)
