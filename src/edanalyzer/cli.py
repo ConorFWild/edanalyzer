@@ -37,7 +37,8 @@ import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.optim as optim
-from edanalyzer.torch_network import resnet18
+# from edanalyzer.torch_network import resnet18
+from edanalyzer.torch_network_resnet import resnet18
 from edanalyzer.torch_network_squeezenet import squeezenet1_1
 from edanalyzer.torch_network_mobilenet import mobilenet_v3_large_3d
 import download_dataset
@@ -2676,11 +2677,11 @@ class CLI:
               model_path=None,
               data_type="ligand",
               # model_type="squeeze+ligand",
-              # model_type="resnet+ligand",
-              model_type="mobilenet+ligand",
+              model_type="resnet+ligand",
+              # model_type="mobilenet+ligand",
               # model_key="squeeze_ligand_",
-              # model_key="resnet_ligand_",
-              model_key="mobilenet_ligand_",
+              model_key="resnet_ligand_",
+              # model_key="mobilenet_ligand_",
 
               options_json_path: str = "./options.json"):
         logger.info(f"Options path is: {options_json_path}")
