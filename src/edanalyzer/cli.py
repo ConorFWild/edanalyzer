@@ -981,7 +981,7 @@ def train(
 
             # print statistics per epoch
             i += 1
-            if i % 1000 == 999:  # print every 100 mini-batches
+            if i % 100 == 99:  # print every 100 mini-batches
 
                 model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]
                 annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
@@ -990,8 +990,8 @@ def train(
                 # print("Loss at epoch {}, iteration {} is {}".format(epoch,
                 #                                                     i,
                 #                                                     running_loss / i) + "\n")
-                print(f"Recent loss is: {sum(running_loss[-998:]) / 998}")
-                logger.debug(f"Recent loss is: {sum(running_loss[-998:]) / 998}")
+                print(f"Recent loss is: {sum(running_loss[-98:]) / 98}")
+                logger.debug(f"Recent loss is: {sum(running_loss[-98:]) / 98}")
 
                 for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
                     mod_an = round(float(model_annotation_np[1]), 2)
