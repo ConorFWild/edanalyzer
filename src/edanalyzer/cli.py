@@ -1017,6 +1017,19 @@ def train(
             Path(options.working_dir) / f"{model_key}{epoch}.pt",
         )
 
+def save_example_ligandmap(ligandmap, output_path):
+    grid = gemmi.FloatGrid(30,30,30)
+
+    grid_array = np.array(grid, copy=False)
+    grid.set_unit_cell(gemmi.UnitCell(15, 15, 15, 90.0, 90.0, 90.0))
+    grid.spacegroup = gemmi.find_spacegroup_by_name("P1")
+    m = gemmi.Ccp4Map()
+    m.update_ccp4_header()
+    # m.set_extent(...)
+    m.write_ccp4_map(output_path)
+
+
+
 def train_ligandmap(
         options,
         dataset_torch,
@@ -1101,6 +1114,8 @@ def train_ligandmap(
 
                 model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation_classification]
                 annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
+                ligandmaps_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation_ligandmap]
+
                 print([(x, type(x)) for x in annotation])
                 idxs = [int(x) for x in idx]
                 # print("Loss at epoch {}, iteration {} is {}".format(epoch,
@@ -1110,6 +1125,8 @@ def train_ligandmap(
                 logger.debug(f"Recent loss is: {sum(running_loss_classification[-98:]) / 98}")
                 print(f"Recent ligandmap loss is: {sum(running_loss_ligandmap[-98:]) / 98}")
                 logger.debug(f"Recent ligandmap loss is: {sum(running_loss_ligandmap[-98:]) / 98}")
+
+                save_example_ligandmap(ligandmaps_np[0, :,:,:], "./example.ccp4")
 
                 for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
                     mod_an = round(float(model_annotation_np[1]), 2)
