@@ -21,8 +21,10 @@ get_image_xmap_ligand_augmented, PanDDADatasetTorchLigand, get_image_xmap_ligand
 from edanalyzer.database import (
     populate_from_diamond, initialize_database, populate_partition_from_json,
     parse_old_annotation_update_dir, populate_from_custom_panddas, EventORM, PanDDAORM, AnnotationORM,
+    get_image_ligandmap_augmented
 )
 from edanalyzer.losses import categorical_loss
+
 
 from loguru import logger
 # from openbabel import pybel
@@ -39,6 +41,7 @@ import torch.nn as nn
 import torch.optim as optim
 # from edanalyzer.torch_network import resnet18
 from edanalyzer.torch_network_resnet import resnet18
+from edanalyzer.torch_network_resnet_ligandmap import resnet18_ligandmap
 from edanalyzer.torch_network_squeezenet import squeezenet1_1, squeezenet1_0
 from edanalyzer.torch_network_mobilenet import mobilenet_v3_large_3d
 import download_dataset
@@ -1006,6 +1009,138 @@ def train(
                     # )
                     # print("{}".format() + "\n")
                 print("#################################################" + "\n")
+
+        logger.info(f"Saving state dict for model at epoch: {epoch}")
+        torch.save(
+            model.state_dict(),
+            Path(options.working_dir) / f"{model_key}{epoch}.pt",
+        )
+
+def train_ligandmap(
+        options,
+        dataset_torch,
+        model,
+        initial_epoch,
+        model_key,
+        dev,
+        batch_size=12,
+        num_workers=20,
+        num_epochs=1000,
+):
+
+    # Get the dataloader
+    train_dataloader = DataLoader(
+        dataset_torch,
+        # batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+    )
+
+    # Define loss function
+    criterion1 = categorical_loss
+    criterion2 = torch.nn.MSELoss()
+
+    # Define optimizer
+    optimizer = optim.Adam(model.parameters(),
+                           # lr=0.001,
+                           )
+
+    optimizer.zero_grad()
+
+    running_loss = 0
+
+    # Trainloop
+
+    running_loss_classification = []
+    running_loss_ligandmap = []
+
+    for epoch in range(initial_epoch + 1, initial_epoch + num_epochs):
+        i = 0
+        print(f"Epoch: {epoch}")
+        for image, annotation, ligandmap, loaded_classification, loaded_ligandmap, idx in train_dataloader:
+            # print(f"\tBatch: {i}")
+            # print(image)
+            # print(annotation)
+            # print(image.shape)
+            if not loaded_classification or loaded_ligandmap:
+                continue
+            image_c = image.to(dev)
+            annotation_c = annotation.to(dev)
+
+            optimizer.zero_grad()
+
+            # forward + backward + optimize
+            begin_annotate = time.time()
+            model_annotation_classification, model_annotation_ligandmap = model(image_c)
+            # print(model_annotation)
+
+            finish_annotate = time.time()
+            # logger.debug(f"Annotated 12 datasets in {finish_annotate - begin_annotate}")
+            # print(outputs.to("cpu").detach().numpy())
+            if loaded_classification:
+                loss = criterion1(model_annotation_classification, annotation_c)
+                loss.backward()
+                running_loss_classification.append(loss.item())
+
+            if loaded_ligandmap:
+                loss = criterion2(model_annotation_ligandmap, annotation_c)
+                loss.backward()
+                running_loss_ligandmap.append(loss.item())
+
+            optimizer.step()
+
+            # RECORD LOSS
+
+            # print statistics per epoch
+            i += 1
+            if i % 100 == 99:  # print every 100 mini-batches
+
+                # model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation_classification]
+                # annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
+                # print([(x, type(x)) for x in annotation])
+                # idxs = [int(x) for x in idx]
+                # # print("Loss at epoch {}, iteration {} is {}".format(epoch,
+                # #                                                     i,
+                # #                                                     running_loss / i) + "\n")
+                # print(f"Recent loss is: {sum(running_loss[-98:]) / 98}")
+                # logger.debug(f"Recent loss is: {sum(running_loss[-98:]) / 98}")
+                #
+                # for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
+                #     mod_an = round(float(model_annotation_np[1]), 2)
+                #     an = round(float(annotation_np[1]), 2)
+                #     # event = dataset[_idx]
+                #     # event_path = event.event_map
+                #     print(
+                #         f"{mod_an} : {an} "
+                #     )
+                #     # print(
+                #     #     f"{mod_an} : {an} : {event_path}"
+                #     # )
+                #     # print("{}".format() + "\n")
+                # print("#################################################" + "\n")
+                model_annotation_np = model_annotation_classification.to(torch.device("cpu")).detach().numpy()
+                annotation_np = annotation.to(torch.device("cpu")).detach().numpy()
+                # print([(x, type(x)) for x in annotation])
+                _idx = int(idx)
+                # print("Loss at epoch {}, iteration {} is {}".format(epoch,
+                #                                                     i,
+                #                                                     running_loss / i) + "\n")
+                print(f"Recent loss is: {sum(running_loss[-98:]) / 98}")
+                logger.debug(f"Recent loss is: {sum(running_loss[-98:]) / 98}")
+
+                # for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
+                mod_an = round(float(model_annotation_np[1]), 2)
+                an = round(float(annotation_np[1]), 2)
+                # event = dataset[_idx]
+                # event_path = event.event_map
+                print(
+                    f"{mod_an} : {an} "
+                )
+                # print(
+                #     f"{mod_an} : {an} : {event_path}"
+                # )
+                # print("{}".format() + "\n")
+            print("#################################################" + "\n")
 
         logger.info(f"Saving state dict for model at epoch: {epoch}")
         torch.save(
@@ -2675,12 +2810,15 @@ class CLI:
     def train(self,
               dataset_path,
               model_path=None,
-              data_type="ligand",
+              # data_type="ligand",
+              data_type="ligandmap",
               # model_type="squeeze+ligand",
-              model_type="resnet+ligand",
+              # model_type="resnet+ligand",
+              model_type="resnet+ligandmap",
               # model_type="mobilenet+ligand",
               # model_key="squeeze_ligand_",
-              model_key="resnet_ligand_",
+              # model_key="resnet_ligand_",
+              model_key="resnet_ligandmap_",
               # model_key="mobilenet_ligand_",
 
               options_json_path: str = "./options.json"):
@@ -2704,6 +2842,13 @@ class CLI:
                 dataset,
                 transform_image=get_image_xmap_ligand_augmented,
                 transform_annotation=get_annotation_from_event_hit
+            )
+        elif data_type == "ligandmap":
+            dataset_torch = PanDDADatasetTorchLigand(
+                dataset,
+                transform_image=get_image_xmap_ligand_augmented,
+                transform_annotation=get_annotation_from_event_hit,
+                transform_ligandmap=get_image_ligandmap_augmented,
             )
 
         else:
@@ -2758,6 +2903,13 @@ class CLI:
             if model_file:
                 model.load_state_dict(torch.load(model_file, map_location=dev),
                                       )
+        elif model_type== "resnet+ligandmap":
+            model = resnet18_ligandmap(num_classes=2, num_input=4)
+            model.to(dev)
+
+            if model_file:
+                model.load_state_dict(torch.load(model_file, map_location=dev),
+                                      )
         elif model_type== "mobilenet+ligand":
             model = mobilenet_v3_large_3d(num_classes=2, num_input=4)
             model.to(dev)
@@ -2770,8 +2922,8 @@ class CLI:
             raise Exception
         model = model.train()
 
-
-        train(
+        if data_type == "ligand":
+            train(
             options,
             dataset_torch,
             model,
@@ -2780,6 +2932,16 @@ class CLI:
             dev,
             num_workers=20,
         )
+        elif data_type == "ligandmap":
+            train_ligandmap(
+                options,
+                dataset_torch,
+                model,
+                epoch,
+                model_key,
+                dev,
+                num_workers=20,
+            )
 
         # train_pandda_from_dataset_ligand(
         #     options,

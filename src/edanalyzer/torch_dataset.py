@@ -115,6 +115,7 @@ def get_zmap_from_event(event: PanDDAEvent):
 
     return m
 
+
 def get_mean_map_from_event(event: PanDDAEvent):
     zmap_path = str(Path(
         event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_GROUND_STATE_MAP_TEMPLATE.format(
@@ -317,12 +318,10 @@ def get_image_event_map_and_raw_from_event(event: PanDDAEvent):
 
 
 def get_model_map(event: PanDDAEvent, xmap_event):
-
     pandda_input_pdb = Path(
         event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
         dtag=event.dtag)
     structure = gemmi.read_structure(str(pandda_input_pdb))
-
 
     new_xmap = gemmi.FloatGrid(xmap_event.nu, xmap_event.nv, xmap_event.nw)
     new_xmap.spacegroup = xmap_event.spacegroup
@@ -461,13 +460,11 @@ def get_model_map(event: PanDDAEvent, xmap_event):
     #                             )
     #                             num_sym += 1
 
-
     # time_finish_ns = time.time()
     # print(
     #     f"Num: {num} : num sym: {num_sym} in {round(time_finish_ns-time_begin_ns, 2)} : {round(event.x, 2)}, {round(event.y, 2)}, {round(event.z, 2)} : {pandda_input_pdb}"
     # )
     return new_xmap
-
 
 
 def get_image_event_map_and_raw_from_event_augmented(event: PanDDAEvent):
@@ -559,6 +556,14 @@ def get_annotation_from_event_hit(annotation: bool):
     else:
         return np.array([1.0, 0.0], dtype=np.float32)
 
+
+def get_annotation_from_event_hit_ligandmap(annotation: bool):
+    if annotation:
+        return np.array([0.0, 1.0], dtype=np.float32)
+    else:
+        return np.array([1.0, 0.0], dtype=np.float32)
+
+
 def get_image_xmap_mean_map(event: PanDDAEvent, ):
     # logger.debug(f"Loading: {event.dtag}")
 
@@ -589,6 +594,7 @@ def get_image_xmap_mean_map(event: PanDDAEvent, ):
 
     return np.stack([image_xmap, image_mean, image_model], axis=0), True
 
+
 def get_image_xmap_mean_map_augmented(event: PanDDAEvent, ):
     # logger.debug(f"Loading: {event.dtag}")
     sample_transform, sample_array = get_sample_transform_from_event_augmented(
@@ -597,8 +603,6 @@ def get_image_xmap_mean_map_augmented(event: PanDDAEvent, ):
         30,
         3.5
     )
-
-
 
     try:
         sample_array_xmap = np.copy(sample_array)
@@ -664,6 +668,7 @@ def parse_pdb_file_for_ligand_array(path):
 
     return np.array(poss).T
 
+
 LIGAND_IGNORE_REGEXES = [
     "merged",
     "LIG-[a-zA-Z]+-",
@@ -677,6 +682,7 @@ LIGAND_IGNORE_REGEXES = [
     "control",
     "DMSO",
 ]
+
 
 def get_ligand_map(
         event,
@@ -704,7 +710,6 @@ def get_ligand_map(
     grid_centred_array = rotated_array + centre_translation
     augmented_array = (grid_centred_array + random_translation).T
 
-
     # Get a dummy grid to place density on
     dummy_grid = gemmi.FloatGrid(n, n, n)
     unit_cell = gemmi.UnitCell(step * n, step * n, step * n, 90.0, 90.0, 90.0)
@@ -714,7 +719,6 @@ def get_ligand_map(
         assert pos_array.size == 3
         if np.all(pos_array > 0):
             if np.all(pos_array < (n * step)):
-
                 dummy_grid.set_points_around(
                     gemmi.Position(*pos_array),
                     radius=1.0,
@@ -759,11 +763,9 @@ def get_image_xmap_ligand(event: PanDDAEvent, ):
     return np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=0), True
 
 
-
 def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
-
     n = 30
-    step =0.5
+    step = 0.5
     # logger.debug(f"Loading: {event.dtag}")
     time_begin_get_transform = time.time()
     sample_transform, sample_array = get_sample_transform_from_event_augmented(
@@ -773,7 +775,7 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
         3.5
     )
     time_finish_get_transform = time.time()
-    time_get_transform = round(time_finish_get_transform-time_begin_get_transform, 2)
+    time_get_transform = round(time_finish_get_transform - time_begin_get_transform, 2)
 
     try:
         sample_array_xmap = np.copy(sample_array)
@@ -783,7 +785,7 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
         image_xmap_initial = sample_xmap(xmap_dmap, sample_transform, sample_array_xmap)
         image_xmap = (image_xmap_initial - np.mean(image_xmap_initial)) / np.std(image_xmap_initial)
         time_finish_get_xmap = time.time()
-        time_get_xmap = round(time_finish_get_xmap-time_begin_get_xmap, 2)
+        time_get_xmap = round(time_finish_get_xmap - time_begin_get_xmap, 2)
 
         time_begin_get_mean = time.time()
         sample_array_mean = np.copy(sample_array)
@@ -795,32 +797,31 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
         else:
             image_mean = (image_mean_initial - np.mean(image_mean_initial)) / std
         time_finish_get_mean = time.time()
-        time_get_mean = round(time_finish_get_mean-time_begin_get_mean, 2)
+        time_get_mean = round(time_finish_get_mean - time_begin_get_mean, 2)
 
         time_begin_get_model = time.time()
         sample_array_model = np.copy(sample_array)
         model_map = get_model_map(event, xmap_dmap, )
         image_model = sample_xmap(model_map, sample_transform, sample_array_model)
         time_finish_get_model = time.time()
-        time_get_model = round(time_finish_get_model-time_begin_get_model, 2)
+        time_get_model = round(time_finish_get_model - time_begin_get_model, 2)
 
         # ligand_map_array = np.copy(sample_array)
         time_begin_get_ligand = time.time()
         ligand_map = get_ligand_map(event, n=n, step=step)
         image_ligand = np.array(ligand_map)
         time_finish_get_ligand = time.time()
-        time_get_ligand = round(time_finish_get_ligand-time_begin_get_ligand, 2)
+        time_get_ligand = round(time_finish_get_ligand - time_begin_get_ligand, 2)
 
     except Exception as e:
         # print(f"Exception in loading data: {traceback.format_exc()}")
         print(f"Exception in loading data: {e}")
 
-        return np.stack([sample_array, sample_array, sample_array, sample_array], axis=0), False
+        return np.stack([sample_array, sample_array, sample_array, sample_array], axis=0), False, None, None
 
     # print(f"Loaded item in: transform {time_get_transform}: xmap {time_get_xmap}: mean {time_get_mean}: model {time_get_model}: ligand {time_get_ligand}")
 
-
-    return np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=0), True
+    return np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=0), True, sample_transform, xmap_dmap
 
 
 class PanDDADatasetTorchLigand(Dataset):
@@ -844,7 +845,7 @@ class PanDDADatasetTorchLigand(Dataset):
 
         annotation = event.hit
 
-        image, loaded = self.transform_image(event)
+        image, loaded, transform = self.transform_image(event)
 
         if loaded:
             label = self.transform_annotation(annotation)
@@ -855,3 +856,63 @@ class PanDDADatasetTorchLigand(Dataset):
         time_finish_load_item = time.time()
         # print(f"Loaded item in: {round(time_finish_load_item-time_begin_load_item, 2)}")
         return image, label, idx
+
+
+def get_image_ligandmap_augmented(event, xmap_event, transform, n=30):
+    sample_array = np.zeros((n, n, n), dtype=np.float32)
+    model_path = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INSPECT_MODEL_DIR / constants.PANDDA_MODEL_FILE.format(
+        dtag=event.dtag)
+    if model_path.exists() and transform:
+        st = gemmi.read_structure(str(model_path))
+
+        new_xmap = gemmi.FloatGrid(xmap_event.nu, xmap_event.nv, xmap_event.nw)
+        new_xmap.spacegroup = xmap_event.spacegroup
+        new_xmap.set_unit_cell(xmap_event.unit_cell)
+        for model in st:
+            for chain in model:
+                for residue in chain:
+                    if residue.name == "LIG":
+                        for atom in residue:
+                            new_xmap.set_points_around(
+                                atom.pos,
+                                radius=1.5,
+                                value=1.0,
+                            )
+        image_ligandmap = sample_xmap(new_xmap, transform, sample_array)
+
+        return image_ligandmap, True
+    else:
+        return sample_array, False
+
+
+class PanDDADatasetTorchLigandmap(Dataset):
+    def __init__(self,
+                 pandda_event_dataset: PanDDAEventDataset,
+
+                 transform_image=lambda x: x,
+                 transform_annotation=lambda x: x
+                 ):
+        self.pandda_event_dataset = pandda_event_dataset
+
+        self.transform_image = transform_image
+        self.transform_annotation = transform_annotation
+
+    def __len__(self):
+        return len(self.pandda_event_dataset.pandda_events)
+
+    def __getitem__(self, idx: int):
+        time_begin_load_item = time.time()
+        event = self.pandda_event_dataset.pandda_events[idx]
+
+        annotation = event.hit
+
+        image, loaded_classification, transform, xmap_event = self.transform_image(event)
+
+        ligandmap, loaded_ligandmap = self.transform_ligandmap(event, xmap_event, transform, )
+
+        label = self.transform_annotation(annotation, )
+
+        time_finish_load_item = time.time()
+        # print(f"Loaded item in: {round(time_finish_load_item-time_begin_load_item, 2)}")
+        return image, label, ligandmap, loaded_classification, loaded_ligandmap, idx
