@@ -918,7 +918,7 @@ class PanDDADatasetTorchLigandmap(Dataset):
         time_finish_load_item = time.time()
         # print(f"Loaded item in: {round(time_finish_load_item-time_begin_load_item, 2)}")
         # Censor if a hit and no ligandmap
-        if event.hit and not loaded_ligandmap:
+        if event.hit and (not loaded_ligandmap):
             return np.zeros((4,30,30,30), dtype=np.float32), label, np.zeros((30,30,30), dtype=np.float32), loaded_classification, loaded_ligandmap, idx
         else:
             return image, label, ligandmap, loaded_classification, loaded_ligandmap, idx
