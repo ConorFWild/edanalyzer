@@ -1069,6 +1069,7 @@ def train_ligandmap(
             #     continue
             image_c = image.to(dev)
             annotation_c = annotation.to(dev)
+            ligandmap_c = ligandmap.to(dev)
 
             optimizer.zero_grad()
 
@@ -1086,7 +1087,7 @@ def train_ligandmap(
             running_loss_classification.append(loss.item())
 
             # if loaded_ligandmap:
-            loss = criterion2(model_annotation_ligandmap, ligandmap)
+            loss = criterion2(model_annotation_ligandmap, ligandmap_c)
             loss.backward()
             running_loss_ligandmap.append(loss.item())
 
