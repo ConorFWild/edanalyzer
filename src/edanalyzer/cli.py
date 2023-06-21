@@ -1083,7 +1083,7 @@ def train_ligandmap(
             # print(outputs.to("cpu").detach().numpy())
             # if loaded_classification:
             loss = criterion1(model_annotation_classification, annotation_c)
-            loss.backward()
+            loss.backward(retain_graph=True)
             running_loss_classification.append(loss.item())
 
             # if loaded_ligandmap:
