@@ -282,7 +282,7 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
         classification = self.fc(x)
-        ligand_map = self.fc2(x)
+        ligand_map = self.fc2(x).view(30,30,30)
 
         return self.act(classification), self.act_map(ligand_map)
 
