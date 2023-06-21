@@ -920,4 +920,4 @@ class PanDDADatasetTorchLigandmap(Dataset):
         if loaded_classification and loaded_ligandmap:
             return image, label, ligandmap, loaded_classification, loaded_ligandmap, idx
         else:
-            return np.zeros((4,30,30,30)), label, np.zeros((30,30,30)), loaded_classification, loaded_ligandmap, idx
+            return np.zeros((4,30,30,30), dtype=np.float32), label, np.zeros((30,30,30), dtype=np.float32), loaded_classification, loaded_ligandmap, idx
