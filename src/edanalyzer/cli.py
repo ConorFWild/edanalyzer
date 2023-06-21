@@ -16,7 +16,8 @@ from edanalyzer.torch_dataset import (
     PanDDAEventDatasetTorch, PanDDADatasetTorchXmapGroundState, get_annotation_from_event_annotation,
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented,
 get_annotation_from_event_hit, get_image_xmap_mean_map_augmented, get_image_xmap_mean_map,
-get_image_xmap_ligand_augmented, PanDDADatasetTorchLigand, get_image_xmap_ligand, get_image_ligandmap_augmented
+get_image_xmap_ligand_augmented, PanDDADatasetTorchLigand, get_image_xmap_ligand, get_image_ligandmap_augmented,
+PanDDADatasetTorchLigandmap
 )
 from edanalyzer.database import (
     populate_from_diamond, initialize_database, populate_partition_from_json,
@@ -2845,7 +2846,7 @@ class CLI:
                 transform_annotation=get_annotation_from_event_hit
             )
         elif data_type == "ligandmap":
-            dataset_torch = PanDDADatasetTorchLigand(
+            dataset_torch = PanDDADatasetTorchLigandmap(
                 dataset,
                 transform_image=get_image_xmap_ligand_augmented,
                 transform_annotation=get_annotation_from_event_hit,

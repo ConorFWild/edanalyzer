@@ -891,12 +891,14 @@ class PanDDADatasetTorchLigandmap(Dataset):
                  pandda_event_dataset: PanDDAEventDataset,
 
                  transform_image=lambda x: x,
-                 transform_annotation=lambda x: x
+                 transform_annotation=lambda x: x,
+                transform_ligandmap=lambda x: x
                  ):
         self.pandda_event_dataset = pandda_event_dataset
 
         self.transform_image = transform_image
         self.transform_annotation = transform_annotation
+        self.transform_ligandmap = transform_ligandmap
 
     def __len__(self):
         return len(self.pandda_event_dataset.pandda_events)
