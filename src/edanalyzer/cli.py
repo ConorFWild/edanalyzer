@@ -16,12 +16,12 @@ from edanalyzer.torch_dataset import (
     PanDDAEventDatasetTorch, PanDDADatasetTorchXmapGroundState, get_annotation_from_event_annotation,
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented,
 get_annotation_from_event_hit, get_image_xmap_mean_map_augmented, get_image_xmap_mean_map,
-get_image_xmap_ligand_augmented, PanDDADatasetTorchLigand, get_image_xmap_ligand
+get_image_xmap_ligand_augmented, PanDDADatasetTorchLigand, get_image_xmap_ligand, get_image_ligandmap_augmented
 )
 from edanalyzer.database import (
     populate_from_diamond, initialize_database, populate_partition_from_json,
     parse_old_annotation_update_dir, populate_from_custom_panddas, EventORM, PanDDAORM, AnnotationORM,
-    get_image_ligandmap_augmented
+
 )
 from edanalyzer.losses import categorical_loss
 
