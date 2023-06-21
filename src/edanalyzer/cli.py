@@ -1063,6 +1063,7 @@ def train_ligandmap(
             # print(annotation)
             # print(image.shape)
             if not loaded_classification or loaded_ligandmap:
+                print(f"Failed to load!")
                 continue
             image_c = image.to(dev)
             annotation_c = annotation.to(dev)
