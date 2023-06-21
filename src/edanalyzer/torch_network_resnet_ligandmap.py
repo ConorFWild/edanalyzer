@@ -282,9 +282,9 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
         classification = self.fc(x)
-        ligand_map = self.fc2(x).view(30,30,30)
+        ligand_map = self.fc2(x)
 
-        return self.act(classification), self.act_map(ligand_map)
+        return self.act(classification), self.act_map(ligand_map.view(30,30,30))
 
     def forward(self, x: Tensor) -> Tensor:
         return self._forward_impl(x)
