@@ -1126,7 +1126,7 @@ def train_ligandmap(
                 print(f"Recent ligandmap loss is: {sum(running_loss_ligandmap[-98:]) / 98}")
                 logger.debug(f"Recent ligandmap loss is: {sum(running_loss_ligandmap[-98:]) / 98}")
 
-                save_example_ligandmap(ligandmaps_np[0, :,:,:], "./example.ccp4")
+                save_example_ligandmap(ligandmaps_np[0], "./example.ccp4")
 
                 for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
                     mod_an = round(float(model_annotation_np[1]), 2)
