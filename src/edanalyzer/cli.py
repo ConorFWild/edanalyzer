@@ -1025,6 +1025,7 @@ def save_example_ligandmap(ligandmap, output_path):
     grid.set_unit_cell(gemmi.UnitCell(15, 15, 15, 90.0, 90.0, 90.0))
     grid.spacegroup = gemmi.find_spacegroup_by_name("P1")
     m = gemmi.Ccp4Map()
+    m.grid = grid
     m.update_ccp4_header()
     # m.set_extent(...)
     m.write_ccp4_map(output_path)
