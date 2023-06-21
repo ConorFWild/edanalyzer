@@ -1086,7 +1086,7 @@ def train_ligandmap(
             running_loss_classification.append(loss.item())
 
             # if loaded_ligandmap:
-            loss = criterion2(model_annotation_ligandmap, annotation_c)
+            loss = criterion2(model_annotation_ligandmap, ligandmap)
             loss.backward()
             running_loss_ligandmap.append(loss.item())
 
