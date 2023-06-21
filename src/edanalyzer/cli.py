@@ -1033,6 +1033,7 @@ def train_ligandmap(
     train_dataloader = DataLoader(
         dataset_torch,
         # batch_size=batch_size,
+        batch_size=1,
         shuffle=True,
         num_workers=num_workers,
     )
