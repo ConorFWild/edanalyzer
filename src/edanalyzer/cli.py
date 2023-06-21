@@ -1021,6 +1021,7 @@ def save_example_ligandmap(ligandmap, output_path):
     grid = gemmi.FloatGrid(30,30,30)
 
     grid_array = np.array(grid, copy=False)
+    grid_array[:,:,:] = ligandmap[:,:,:]
     grid.set_unit_cell(gemmi.UnitCell(15, 15, 15, 90.0, 90.0, 90.0))
     grid.spacegroup = gemmi.find_spacegroup_by_name("P1")
     m = gemmi.Ccp4Map()
