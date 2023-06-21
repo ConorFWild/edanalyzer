@@ -1032,8 +1032,8 @@ def train_ligandmap(
     # Get the dataloader
     train_dataloader = DataLoader(
         dataset_torch,
-        # batch_size=batch_size,
-        batch_size=1,
+        batch_size=batch_size,
+        # batch_size=12,
         shuffle=True,
         num_workers=num_workers,
     )
@@ -1064,9 +1064,9 @@ def train_ligandmap(
             # print(image)
             # print(annotation)
             # print(image.shape)
-            if not loaded_classification or loaded_ligandmap:
-                print(f"Failed to load!")
-                continue
+            # if not loaded_classification or loaded_ligandmap:
+            #     print(f"Failed to load!")
+            #     continue
             image_c = image.to(dev)
             annotation_c = annotation.to(dev)
 
@@ -1080,15 +1080,15 @@ def train_ligandmap(
             finish_annotate = time.time()
             # logger.debug(f"Annotated 12 datasets in {finish_annotate - begin_annotate}")
             # print(outputs.to("cpu").detach().numpy())
-            if loaded_classification:
-                loss = criterion1(model_annotation_classification, annotation_c)
-                loss.backward()
-                running_loss_classification.append(loss.item())
+            # if loaded_classification:
+            loss = criterion1(model_annotation_classification, annotation_c)
+            loss.backward()
+            running_loss_classification.append(loss.item())
 
-            if loaded_ligandmap:
-                loss = criterion2(model_annotation_ligandmap, annotation_c)
-                loss.backward()
-                running_loss_ligandmap.append(loss.item())
+            # if loaded_ligandmap:
+            loss = criterion2(model_annotation_ligandmap, annotation_c)
+            loss.backward()
+            running_loss_ligandmap.append(loss.item())
 
             optimizer.step()
 
@@ -1098,54 +1098,56 @@ def train_ligandmap(
             i += 1
             if i % 100 == 99:  # print every 100 mini-batches
 
-                # model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation_classification]
-                # annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
-                # print([(x, type(x)) for x in annotation])
-                # idxs = [int(x) for x in idx]
-                # # print("Loss at epoch {}, iteration {} is {}".format(epoch,
-                # #                                                     i,
-                # #                                                     running_loss / i) + "\n")
-                # print(f"Recent loss is: {sum(running_loss[-98:]) / 98}")
-                # logger.debug(f"Recent loss is: {sum(running_loss[-98:]) / 98}")
-                #
-                # for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
-                #     mod_an = round(float(model_annotation_np[1]), 2)
-                #     an = round(float(annotation_np[1]), 2)
-                #     # event = dataset[_idx]
-                #     # event_path = event.event_map
-                #     print(
-                #         f"{mod_an} : {an} "
-                #     )
-                #     # print(
-                #     #     f"{mod_an} : {an} : {event_path}"
-                #     # )
-                #     # print("{}".format() + "\n")
-                # print("#################################################" + "\n")
-                model_annotation_np = model_annotation_classification.to(torch.device("cpu")).detach().numpy()
-                annotation_np = annotation.to(torch.device("cpu")).detach().numpy()
-                # print([(x, type(x)) for x in annotation])
-                _idx = int(idx)
+                model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation_classification]
+                annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
+                print([(x, type(x)) for x in annotation])
+                idxs = [int(x) for x in idx]
                 # print("Loss at epoch {}, iteration {} is {}".format(epoch,
                 #                                                     i,
                 #                                                     running_loss / i) + "\n")
                 print(f"Recent loss is: {sum(running_loss_classification[-98:]) / 98}")
                 logger.debug(f"Recent loss is: {sum(running_loss_classification[-98:]) / 98}")
-                print(f"Recent reconstruction loss is: {sum(running_loss_ligandmap[-98:]) / 98}")
-                logger.debug(f"Recent reconstruction loss is: {sum(running_loss_ligandmap[-98:]) / 98}")
+                print(f"Recent loss is: {sum(running_loss_ligandmap[-98:]) / 98}")
+                logger.debug(f"Recent loss is: {sum(running_loss_ligandmap[-98:]) / 98}")
 
-                # for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
-                mod_an = round(float(model_annotation_np[1]), 2)
-                an = round(float(annotation_np[1]), 2)
-                # event = dataset[_idx]
-                # event_path = event.event_map
-                print(
-                    f"{mod_an} : {an} "
-                )
-                # print(
-                #     f"{mod_an} : {an} : {event_path}"
-                # )
-                # print("{}".format() + "\n")
-            print("#################################################" + "\n")
+                for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
+                    mod_an = round(float(model_annotation_np[1]), 2)
+                    an = round(float(annotation_np[1]), 2)
+                    # event = dataset[_idx]
+                    # event_path = event.event_map
+                    print(
+                        f"{mod_an} : {an} "
+                    )
+                    # print(
+                    #     f"{mod_an} : {an} : {event_path}"
+                    # )
+                    # print("{}".format() + "\n")
+                print("#################################################" + "\n")
+            #     model_annotation_np = model_annotation_classification.to(torch.device("cpu")).detach().numpy()
+            #     annotation_np = annotation.to(torch.device("cpu")).detach().numpy()
+            #     # print([(x, type(x)) for x in annotation])
+            #     _idx = int(idx)
+            #     # print("Loss at epoch {}, iteration {} is {}".format(epoch,
+            #     #                                                     i,
+            #     #                                                     running_loss / i) + "\n")
+            #     print(f"Recent loss is: {sum(running_loss_classification[-98:]) / 98}")
+            #     logger.debug(f"Recent loss is: {sum(running_loss_classification[-98:]) / 98}")
+            #     print(f"Recent reconstruction loss is: {sum(running_loss_ligandmap[-98:]) / 98}")
+            #     logger.debug(f"Recent reconstruction loss is: {sum(running_loss_ligandmap[-98:]) / 98}")
+            #
+            #     # for model_annotation_np, annotation_np, _idx in zip(model_annotations_np, annotations_np, idxs):
+            #     mod_an = round(float(model_annotation_np[1]), 2)
+            #     an = round(float(annotation_np[1]), 2)
+            #     # event = dataset[_idx]
+            #     # event_path = event.event_map
+            #     print(
+            #         f"{mod_an} : {an} "
+            #     )
+            #     # print(
+            #     #     f"{mod_an} : {an} : {event_path}"
+            #     # )
+            #     # print("{}".format() + "\n")
+            # print("#################################################" + "\n")
 
         logger.info(f"Saving state dict for model at epoch: {epoch}")
         torch.save(
