@@ -1097,14 +1097,17 @@ def train_ligandmap(
             # logger.debug(f"Annotated 12 datasets in {finish_annotate - begin_annotate}")
             # print(outputs.to("cpu").detach().numpy())
             # if loaded_classification:
-            loss = criterion1(model_annotation_classification, annotation_c)
-            loss.backward(retain_graph=True)
-            running_loss_classification.append(loss.item())
+            loss_classification = criterion1(model_annotation_classification, annotation_c)
+            # loss1.backward(retain_graph=True)
+            running_loss_classification.append(loss_classification.item())
 
             # if loaded_ligandmap:
-            loss = criterion2(model_annotation_ligandmap, ligandmap_c)
-            loss.backward()
+            loss_ligandmap = criterion2(model_annotation_ligandmap, ligandmap_c)
+            # loss.backward()
             running_loss_ligandmap.append(loss.item())
+
+            loss = loss_classification + loss_ligandmap
+            loss.backward()
 
             optimizer.step()
 
