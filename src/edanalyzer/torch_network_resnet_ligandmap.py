@@ -205,7 +205,14 @@ class ResNet(nn.Module):
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2])
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
-        self.fc2 = nn.Linear(512 * block.expansion, 30*30*30)
+        self.fc2 = nn.Sequential([
+            nn.Linear(512 * block.expansion, 512 * block.expansion),
+            nn.ReLU(inplace=True),
+            nn.Linear(512 * block.expansion, 512 * block.expansion),
+            nn.ReLU(inplace=True),
+            nn.Linear(512 * block.expansion, 30 * 30 * 30),
+        ]
+        )
         self.act = nn.Softmax()
         self.act_map = nn.Sigmoid()
 
