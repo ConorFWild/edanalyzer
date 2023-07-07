@@ -345,7 +345,7 @@ def get_structure_ligands(pdb_path):
 #     dataset.save(options.working_dir)
 
 
-def get_event_ligand(inspect_model_path, x, y, z, cutoff=9.0):
+def get_event_ligand(inspect_model_path, x, y, z, cutoff=10.0):
     structure_ligands = get_structure_ligands(str(inspect_model_path))
 
     ligand_distances = {}
