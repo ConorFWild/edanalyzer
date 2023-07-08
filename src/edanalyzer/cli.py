@@ -36,6 +36,8 @@ from numpy.random import default_rng
 import numpy as np
 import traceback
 import pandas as pd
+from joblib import Parallel, delayed
+
 import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
@@ -2274,6 +2276,37 @@ def test_dataset_and_annotations_from_database(options):
     return dataset, annotation_dataset, updated_annotations, {event.id: event for event in test_partition_events + finetune_test_partition_events}
 
 
+def check_accessible(event):
+    processed_dataset_path = Path(event.pandda.path) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag
+
+    ground_state_structure_path = processed_dataset_path / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
+        dtag=event.dtag)
+
+    mtz_path = processed_dataset_path / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=event.dtag)
+
+    ground_state_map_path = processed_dataset_path / constants.PANDDA_GROUND_STATE_MAP_TEMPLATE.format(dtag=event.dtag)
+
+    bound_state_structure_path = processed_dataset_path / constants.PANDDA_INSPECT_MODEL_DIR / constants.PANDDA_MODEL_FILE.format(
+        dtag=event.dtag)
+
+    annotations = {annotation.source: annotation for annotation in event.annotations}
+    if "manual" in annotations:
+        annotation = annotations["manual"]
+    else:
+        annotation = annotations["auto"]
+
+    # if ground_state_structure_path.exists() & ground_state_map_path.exists() & mtz_path.exists():
+    try:
+        gemmi.read_structure(str(ground_state_structure_path))
+        gemmi.read_mtz_file(str(mtz_path))
+        gemmi.read_ccp4_map(str(ground_state_map_path))
+        return event
+
+    except Exception as e:
+        print(e)
+        return None
+
+
 class CLI:
 
     def download_dataset(self, options_json_path: str = "./options.json"):
@@ -2837,6 +2870,307 @@ class CLI:
             num_workers=20
         )
 
+    def make_train_dataset(
+            self,
+    ):
+        DATASET_ID = "pandda_2_2023_06_27"
+
+        # get the events
+        engine = create_engine("sqlite:///test/database.db")
+        session = Session(engine)
+        events_stmt = select(EventORM).options(
+            selectinload(EventORM.partitions),
+            selectinload(EventORM.annotations),
+            selectinload(EventORM.ligand),
+            selectinload(EventORM.pandda).options(
+                selectinload(PanDDAORM.system),
+                selectinload(PanDDAORM.experiment)
+
+            )
+        )
+        events = session.scalars(events_stmt).unique().all()
+
+        # Get the events with partitions
+        partitioned_events = [event for event in events if event.partitions]
+
+        # Get which events have accessible data
+        with Parallel(n_jobs=-2, prefer="threads", verbose=10) as parallel:
+            possible_events = parallel(
+                delayed(check_accessible)(_event)
+                for _event
+                in partitioned_events
+            )
+
+        complete_events = [_event for _event in possible_events if _event is not None]
+
+        # Get the train systems
+        train_systems = {
+            event.pandda.system.name: event.pandda.system
+            for event
+            in complete_events
+            if event.partitions.name == constants.INITIAL_TRAIN_PARTITION
+        }
+        print(len(train_systems))
+
+        # Define which partitions to use for train data
+        partitions_used = ["pandda_2_2023_04_28", "pandda_2_2023_06_27", "train"]
+
+        # Get the potential train events
+        train_events = [
+            event
+            for event
+            in complete_events
+            if (event.pandda.system.name in train_systems) and (event.partitions.name in partitions_used)]
+        print(len(train_events))
+
+        # Get the train events with parsable pdbs
+        LIGAND_IGNORE_REGEXES = [
+            "merged",
+            "LIG-[a-zA-Z]+-",
+            "dimple",
+            "refine",
+            "init",
+            "pipedream",
+            "phenix",
+            "None",
+            "blank",
+            "control",
+            "DMSO",
+        ]
+
+        train_events_with_parsable_ligand_pdbs = []
+        for event in train_events:
+            # processed_dataset_dir = Path(event.pandda.path) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag
+            dataset_dir = Path(event.pandda.experiment.model_dir) / event.dtag / "compound"
+
+            event_added = False
+            # ligand_files_dir = processed_dataset_dir / "ligand_files"
+            if dataset_dir.exists():
+                ligand_pdbs = [
+                    x
+                    for x
+                    in dataset_dir.glob("*.pdb")
+                    if (x.exists()) and (x.stem not in LIGAND_IGNORE_REGEXES)
+                ]
+                if len(ligand_pdbs) > 0:
+                    train_events_with_parsable_ligand_pdbs.append(event)
+
+        print(len(train_events_with_parsable_ligand_pdbs))
+
+        # Get the hit and non-hit events
+        hits = []
+        non_hits = []
+        for event in train_events_with_parsable_ligand_pdbs:
+
+            annotations = {annotation.source: annotation for annotation in event.annotations}
+            if "manual" in annotations:
+                # print("manual!")
+                annotation = annotations["manual"]
+            else:
+                annotation = annotations["auto"]
+
+            # Only get non hits from old PanDDA
+            if event.partitions.name == "pandda_2_2023_04_28":
+                if annotation.annotation:
+                    continue
+                else:
+                    non_hits.append(event)
+
+
+            elif event.partitions.name == "pandda_2_2023_06_27":
+
+                # print(annotation.annotation)
+                if event.hit_confidence == "High":
+                    hits.append(event)
+                else:
+                    non_hits.append(event)
+
+            elif event.partitions.name == "train":
+
+                # print(annotation.annotation)
+                if annotation.annotation:
+                    hits.append(event)
+                else:
+                    non_hits.append(event)
+        print(len(hits))
+        print(len(non_hits))
+
+        # Balance the dataset by repeating hits
+        num_hits = len(hits)
+        num_non_hits = len(non_hits)
+        repeated_hits = (hits * int(num_non_hits / num_hits)) + hits[: num_non_hits % num_hits]
+
+        # Make the dataset
+        train_events_pyd = []
+        num_ligand_centroids = 0
+        for event in repeated_hits + non_hits:
+            annotations = {annotation.source: annotation for annotation in event.annotations}
+
+            if "manual" in annotations:
+                annotation = annotations["manual"]
+            else:
+                annotation = annotations["auto"]
+
+            if event.partitions.name == "pandda_2_2023_04_28":
+                if annotation.annotation:
+                    continue
+                else:
+                    x, y, z = event.x, event.y, event.z
+
+
+            elif event.partitions.name == "pandda_2_2023_06_27":
+                if event.ligand & (event.hit_confidence == "High"):
+                    x, y, z = event.ligand.x, event.ligand.y, event.ligand.z
+                    num_ligand_centroids += 1
+                else:
+                    x, y, z = event.x, event.y, event.z
+
+            elif event.partitions.name == "train":
+                x, y, z = event.x, event.y, event.z
+
+            else:
+                continue
+
+            event_pyd = PanDDAEvent(
+                id=event.id,
+                pandda_dir=event.pandda.path,
+                model_building_dir=event.pandda.experiment.model_dir,
+                system_name=event.pandda.system.name,
+                dtag=event.dtag,
+                event_idx=event.event_idx,
+                event_map=event.event_map,
+                x=x,
+                y=y,
+                z=z,
+                hit=annotation.annotation,
+                ligand=None,
+            )
+            train_events_pyd.append(event_pyd)
+
+        print(len(train_events_pyd))
+        print(num_ligand_centroids)
+
+        # Output the dataset
+        train_dataset = PanDDAEventDataset(pandda_events=train_events_pyd)
+        train_dataset.save(path=Path("."), name=f"train_dataset_{DATASET_ID}.json")
+
+        # Get the test systems
+        test_systems = {
+            event.pandda.system.name: event.pandda.system
+            for event
+            in complete_events
+            if event.partitions.name == constants.INITIAL_TEST_PARTITION
+        }
+        print(len(test_systems))
+
+        # Define the partitions to use for test data
+        partitions_used = ["pandda_2_2023_06_27", ]
+        test_events = [
+            event
+            for event
+            in complete_events
+            if (event.pandda.system.name in test_systems) and (event.partitions.name in partitions_used)
+        ]
+        print(len(test_events))
+
+        # Get the test events with ligand data
+        test_events_with_parsable_ligand_pdbs = []
+        for event in test_events:
+            # processed_dataset_dir = Path(event.pandda.path) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag
+            dataset_dir = Path(event.pandda.experiment.model_dir) / event.dtag / "compound"
+
+            event_added = False
+            # ligand_files_dir = processed_dataset_dir / "ligand_files"
+            if dataset_dir.exists():
+                ligand_pdbs = [
+                    x
+                    for x
+                    in dataset_dir.glob("*.pdb")
+                    if (x.exists()) and (x.stem not in LIGAND_IGNORE_REGEXES)
+                ]
+                if len(ligand_pdbs) > 0:
+                    test_events_with_parsable_ligand_pdbs.append(event)
+
+        print(len(test_events_with_parsable_ligand_pdbs))
+
+        # Get the hit and non-hit test events
+        hits = []
+        non_hits = []
+        for event in test_events_with_parsable_ligand_pdbs:
+            annotations = {annotation.source: annotation for annotation in event.annotations}
+            if "manual" in annotations:
+                # print("manual!")
+                annotation = annotations["manual"]
+            else:
+                annotation = annotations["auto"]
+
+            # print(annotation.annotation)
+            if annotation.annotation:
+                hits.append(event)
+            else:
+                non_hits.append(event)
+        print(len(hits))
+        print(len(non_hits))
+
+        # Get the baseline precisiion of the test set
+        baseline_precission = len(hits) / (len(hits) + len(non_hits))
+        print(baseline_precission)
+
+
+        # Make the test dataset
+        train_events_pyd = []
+        # for event in (hits+[x for x in rng.choice(non_hits, len(hits), replace=False)]):
+        # for event in test_events_with_parsable_ligand_pdbs:
+        for event in test_events_with_parsable_ligand_pdbs:
+
+            annotations = {annotation.source: annotation for annotation in event.annotations}
+
+            if "manual" in annotations:
+                annotation = annotations["manual"]
+            else:
+                annotation = annotations["auto"]
+
+            if event.partitions.name == "pandda_2_2023_04_28":
+                if annotation.annotation:
+                    continue
+                else:
+                    x, y, z = event.x, event.y, event.z
+
+
+            elif event.partitions.name == "pandda_2_2023_06_27":
+                if event.ligand & (event.hit_confidence == "High"):
+                    x, y, z = event.ligand.x, event.ligand.y, event.ligand.z
+                    num_ligand_centroids += 1
+                else:
+                    x, y, z = event.x, event.y, event.z
+
+            elif event.partitions.name == "test":
+                x, y, z = event.x, event.y, event.z
+
+            else:
+                continue
+
+            event_pyd = PanDDAEvent(
+                id=event.id,
+                pandda_dir=event.pandda.path,
+                model_building_dir=event.pandda.experiment.model_dir,
+                system_name=event.pandda.system.name,
+                dtag=event.dtag,
+                event_idx=event.event_idx,
+                event_map=event.event_map,
+                x=x,
+                y=y,
+                z=z,
+                hit=annotation.annotation,
+                ligand=None,
+            )
+            train_events_pyd.append(event_pyd)
+
+        print(len(train_events_pyd))
+
+        # Output the test dataset
+        train_dataset = PanDDAEventDataset(pandda_events=train_events_pyd)
+        train_dataset.save(path=Path("."), name=f"test_dataset_{DATASET_ID}.json")
     def train(self,
               dataset_path,
               model_path=None,
