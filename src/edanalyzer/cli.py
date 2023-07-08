@@ -3029,7 +3029,7 @@ class CLI:
 
 
             elif event.partitions.name == "pandda_2_2023_06_27":
-                if event.ligand & (event.hit_confidence == "High"):
+                if (event.ligand is not None) & (event.hit_confidence == "High"):
                     x, y, z = event.ligand.x, event.ligand.y, event.ligand.z
                     num_ligand_centroids += 1
                 else:
@@ -3160,7 +3160,7 @@ class CLI:
 
 
             elif event.partitions.name == "pandda_2_2023_06_27":
-                if event.ligand & (event.hit_confidence == "High"):
+                if (event.ligand is not None) & (event.hit_confidence == "High"):
                     x, y, z = event.ligand.x, event.ligand.y, event.ligand.z
                     num_ligand_centroids += 1
                 else:
