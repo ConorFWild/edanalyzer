@@ -2889,6 +2889,8 @@ class CLI:
             )
         )
         events = session.scalars(events_stmt).unique().all()
+        print(f"Number of events: {len(events)}")
+
 
         # Get the events with partitions
         partitioned_events = [event for event in events if event.partitions]
@@ -2902,6 +2904,8 @@ class CLI:
             )
 
         complete_events = [_event for _event in possible_events if _event is not None]
+        print(f"Number of compeleye events: {len(complete_events)}")
+
 
         # Get the train systems
         train_systems = {
@@ -2910,7 +2914,7 @@ class CLI:
             in complete_events
             if event.partitions.name == constants.INITIAL_TRAIN_PARTITION
         }
-        print(len(train_systems))
+        print(f"Number of train systems: {len(train_systems)}")
 
         # Define which partitions to use for train data
         partitions_used = ["pandda_2_2023_04_28", "pandda_2_2023_06_27", "train"]
@@ -2921,7 +2925,9 @@ class CLI:
             for event
             in complete_events
             if (event.pandda.system.name in train_systems) and (event.partitions.name in partitions_used)]
-        print(len(train_events))
+        # print(len(train_events))
+        print(f"Number of potential train events: {len(train_systems)}")
+
 
         # Get the train events with parsable pdbs
         LIGAND_IGNORE_REGEXES = [
@@ -2955,7 +2961,8 @@ class CLI:
                 if len(ligand_pdbs) > 0:
                     train_events_with_parsable_ligand_pdbs.append(event)
 
-        print(len(train_events_with_parsable_ligand_pdbs))
+        # print(len(train_events_with_parsable_ligand_pdbs))
+        print(f"Number of train events with ligand pdbs: {len(train_events_with_parsable_ligand_pdbs)}")
 
         # Get the hit and non-hit events
         hits = []
@@ -2992,8 +2999,11 @@ class CLI:
                     hits.append(event)
                 else:
                     non_hits.append(event)
-        print(len(hits))
-        print(len(non_hits))
+        # print(len(hits))
+        # print(len(non_hits))
+        print(f"Number of hits: {len(hits)}")
+        print(f"Number of non-hits: {len(non_hits)}")
+
 
         # Balance the dataset by repeating hits
         num_hits = len(hits)
@@ -3047,8 +3057,12 @@ class CLI:
             )
             train_events_pyd.append(event_pyd)
 
-        print(len(train_events_pyd))
-        print(num_ligand_centroids)
+        # print(len(train_events_pyd))
+        # print(num_ligand_centroids)
+        print(f"Number of events to train on: {len(train_events_pyd)}")
+        print(f"Number of events with updated centroid: {num_ligand_centroids}")
+
+
 
         # Output the dataset
         train_dataset = PanDDAEventDataset(pandda_events=train_events_pyd)
@@ -3061,7 +3075,8 @@ class CLI:
             in complete_events
             if event.partitions.name == constants.INITIAL_TEST_PARTITION
         }
-        print(len(test_systems))
+        # print(len(test_systems))
+        print(f"Number of test stsyems: {len(test_systems)}")
 
         # Define the partitions to use for test data
         partitions_used = ["pandda_2_2023_06_27", ]
@@ -3071,7 +3086,9 @@ class CLI:
             in complete_events
             if (event.pandda.system.name in test_systems) and (event.partitions.name in partitions_used)
         ]
-        print(len(test_events))
+        # print(len(test_events))
+        print(f"Number of potential test events: {len(test_events)}")
+
 
         # Get the test events with ligand data
         test_events_with_parsable_ligand_pdbs = []
@@ -3091,7 +3108,8 @@ class CLI:
                 if len(ligand_pdbs) > 0:
                     test_events_with_parsable_ligand_pdbs.append(event)
 
-        print(len(test_events_with_parsable_ligand_pdbs))
+        # print(len(test_events_with_parsable_ligand_pdbs))
+        print(f"Number of test events with ligand pdbs: {len(test_events)}")
 
         # Get the hit and non-hit test events
         hits = []
@@ -3109,18 +3127,22 @@ class CLI:
                 hits.append(event)
             else:
                 non_hits.append(event)
-        print(len(hits))
-        print(len(non_hits))
-
+        # print(len(hits))
+        # print(len(non_hits))
+        print(f"Number of hits: {len(hits)}")
+        print(f"Number of non-hits: {len(non_hits)}")
         # Get the baseline precisiion of the test set
         baseline_precission = len(hits) / (len(hits) + len(non_hits))
-        print(baseline_precission)
+        # print(baseline_precission)
+        print(f"Precission: {len(baseline_precission)}")
 
 
         # Make the test dataset
         train_events_pyd = []
         # for event in (hits+[x for x in rng.choice(non_hits, len(hits), replace=False)]):
         # for event in test_events_with_parsable_ligand_pdbs:
+
+        num_ligand_centroids = 0
         for event in test_events_with_parsable_ligand_pdbs:
 
             annotations = {annotation.source: annotation for annotation in event.annotations}
@@ -3166,7 +3188,9 @@ class CLI:
             )
             train_events_pyd.append(event_pyd)
 
-        print(len(train_events_pyd))
+        # print(len(train_events_pyd))
+        print(f"Number of events to test on: {len(train_events_pyd)}")
+        print(f"Number of events with updated centroid: {num_ligand_centroids}")
 
         # Output the test dataset
         train_dataset = PanDDAEventDataset(pandda_events=train_events_pyd)
