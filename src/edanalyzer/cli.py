@@ -2341,9 +2341,9 @@ class CLI:
     #     options = Options.load(options_json_path)
     #     dataset = StructureReflectionsDataset.load(options.working_dir)
 
-    def test(self, options_json_path: str = "./options.json"):
-        options = Options.load(options_json_path)
-        dataset = StructureReflectionsDataset.load(options.working_dir)
+    # def test(self, options_json_path: str = "./options.json"):
+    #     options = Options.load(options_json_path)
+    #     dataset = StructureReflectionsDataset.load(options.working_dir)
 
     def parse_pandda_dataset(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
@@ -3339,6 +3339,142 @@ class CLI:
         #     num_workers=20
         # )
 
+    def test(self,
+              dataset_path,
+              model_path=None,
+              data_type="ligand",
+              # data_type="ligandmap",
+              # model_type="squeeze+ligand",
+              model_type="resnet+ligand",
+              # model_type="resnet+ligandmap",
+              # model_type="mobilenet+ligand",
+              # model_key="squeeze_ligand_",
+              model_key="resnet_ligand_masked_",
+              # model_key="resnet_ligandmap_",
+              # model_key="mobilenet_ligand_",
+
+              options_json_path: str = "./options.json"):
+        logger.info(f"Model type: {model_type}")
+        logger.info(f"Model key: {model_key}")
+        logger.info(f"Options path is: {options_json_path}")
+        logger.info(f"Dataset path is: {dataset_path}")
+
+        options = Options.load(options_json_path)
+
+        # Make the dataset
+        # dataset = PanDDAEventDataset.load(dataset_path)
+        dataset = load_model(
+            dataset_path,
+            PanDDAEventDataset,
+        )
+        logger.info(f"Training on {len(dataset.pandda_events)} events!")
+
+        if data_type == "ligand":
+            dataset_torch = PanDDADatasetTorchLigand(
+                dataset,
+                transform_image=get_image_xmap_ligand_augmented,
+                transform_annotation=get_annotation_from_event_hit
+            )
+        elif data_type == "ligandmap":
+            dataset_torch = PanDDADatasetTorchLigandmap(
+                dataset,
+                transform_image=get_image_xmap_ligand_augmented,
+                transform_annotation=get_annotation_from_event_hit,
+                transform_ligandmap=get_image_ligandmap_augmented,
+            )
+
+        else:
+            raise Exception
+
+        # Get the output model file
+        if model_path:
+            model_path = Path(model_path)
+            file_name = model_path.name
+            match = re.match(
+                model_key,
+                file_name,
+            )
+            if match:
+                re.match(
+                    ".*([0-9]).pt",
+                    file_name
+                )
+                epoch = int(match[1])
+                model_file = model_path
+            else:
+                epoch = 0
+                model_file = None
+        else:
+            epoch = 0
+            model_file = None
+
+        logger.info(f"Beggining from epoch: {epoch}")
+
+        # Get the device
+        if torch.cuda.is_available():
+            logger.info(f"Using cuda!")
+            dev = "cuda:0"
+        else:
+            logger.info(f"Using cpu!")
+            dev = "cpu"
+
+        # Load the model
+        if model_type == "squeeze+ligand":
+            # model = squeezenet1_0(num_classes=2, num_features=4)
+            model = squeezenet1_1(num_classes=2, num_features=4)
+
+            model.to(dev)
+
+            if model_file:
+                model.load_state_dict(torch.load(model_file, map_location=dev),
+                                      )
+        elif model_type== "resnet+ligand":
+            model = resnet18(num_classes=2, num_input=4)
+            model.to(dev)
+
+            if model_file:
+                model.load_state_dict(torch.load(model_file, map_location=dev),
+                                      )
+        elif model_type== "resnet+ligandmap":
+            model = resnet18_ligandmap(num_classes=2, num_input=4)
+            model.to(dev)
+
+            if model_file:
+                model.load_state_dict(torch.load(model_file, map_location=dev),
+                                      )
+        elif model_type== "mobilenet+ligand":
+            model = mobilenet_v3_large_3d(num_classes=2, num_input=4)
+            model.to(dev)
+
+            if model_file:
+                model.load_state_dict(torch.load(model_file, map_location=dev),
+                                      )
+
+        else:
+            raise Exception
+        model = model.train()
+
+        if data_type == "ligand":
+            train(
+            options,
+            dataset_torch,
+            model,
+            epoch,
+            model_key,
+            dev,
+            num_workers=20,
+        )
+        elif data_type == "ligandmap":
+            train_ligandmap(
+                options,
+                dataset_torch,
+                model,
+                epoch,
+                model_key,
+                dev,
+                num_workers=20,
+            )
+
     def annotate_train_dataset_all(self, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
         dataset, annotations, updated_annotations, events = dataset_and_annotations_from_database(options)
@@ -3593,7 +3729,7 @@ class CLI:
                 f"Epoch: {epoch} : Cutoff: {cutoff} : Precission : {precission} : Recall : {recall}"
             )
 
-    def score_models_on_dataset(self, test_dataset_path, epoch=15, options_json_path: str = "./options.json"):
+    def score_models_on_dataset(self, test_dataset_path, epoch=0, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
 
         epoch = int(epoch)
@@ -3638,8 +3774,8 @@ class CLI:
             )
             print(f"Epoch {epoch}: Precission at recall: {results_this_epoch[selected_key][1]} is: {results_this_epoch[selected_key][0]} at cutoff: {selected_key}")
 
-            # epoch += 1
-            epoch -= 10
+            epoch += 1
+            # epoch -= 10
 
             model_file = Path(options.working_dir) /constants.MODEL_FILE_EPOCH_XMAP_MEAN.format(epoch=epoch)
 
