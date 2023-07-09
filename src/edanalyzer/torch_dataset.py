@@ -845,7 +845,7 @@ class PanDDADatasetTorchLigand(Dataset):
 
         annotation = event.hit
 
-        image, loaded, transform = self.transform_image(event)
+        image, loaded, transform, dmap = self.transform_image(event)
 
         if loaded:
             label = self.transform_annotation(annotation)
