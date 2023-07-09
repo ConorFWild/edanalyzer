@@ -772,7 +772,9 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
         event,
         step,
         n,
-        3.5
+        # 3.5
+        2.0
+
     )
     time_finish_get_transform = time.time()
     time_get_transform = round(time_finish_get_transform - time_begin_get_transform, 2)
