@@ -3134,7 +3134,7 @@ class CLI:
         # Get the baseline precisiion of the test set
         baseline_precission = len(hits) / (len(hits) + len(non_hits))
         # print(baseline_precission)
-        print(f"Precission: {len(baseline_precission)}")
+        print(f"Precission: {baseline_precission}")
 
 
         # Make the test dataset
