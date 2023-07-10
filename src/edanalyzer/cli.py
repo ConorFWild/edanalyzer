@@ -3795,7 +3795,7 @@ class CLI:
             )
 
 
-    def score_models_on_dataset_ligand(self, test_dataset_path, epoch=0, options_json_path: str = "./options.json"):
+    def score_models_on_dataset_ligand(self, test_dataset_path, model_key="resnet_ligand_masked_", epoch=0, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
 
         epoch = int(epoch)
@@ -3811,7 +3811,9 @@ class CLI:
         #         epoch = int(match[1])
         #         model_files[epoch] = model_file
 
-        model_file = (Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch)).resolve()
+        # model_file = (Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch)).resolve()
+        model_file = Path(options.working_dir) / f"{model_key}{epoch}.pt",
+
         print(f"Initial model path is: {model_file}")
         model_pr = {}
         while model_file.exists():
@@ -3849,7 +3851,9 @@ class CLI:
             epoch += 1
             # epoch += 2
 
-            model_file = Path(options.working_dir) /constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch)
+            # model_file = Path(options.working_dir) /constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch)
+            model_file =Path(options.working_dir) / f"{model_key}{epoch}.pt",
+
 
         # Filter by precission > 0.4
         def filter_precission(_key):
