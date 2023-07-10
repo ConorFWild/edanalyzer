@@ -3812,7 +3812,7 @@ class CLI:
         #         model_files[epoch] = model_file
 
         # model_file = (Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch)).resolve()
-        model_file = Path(options.working_dir) / f"{model_key}{epoch}.pt",
+        model_file = Path(options.working_dir) / f"{model_key}{epoch}.pt"
 
         print(f"Initial model path is: {model_file}")
         model_pr = {}
@@ -3852,7 +3852,7 @@ class CLI:
             # epoch += 2
 
             # model_file = Path(options.working_dir) /constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch)
-            model_file =Path(options.working_dir) / f"{model_key}{epoch}.pt",
+            model_file =Path(options.working_dir) / f"{model_key}{epoch}.pt"
 
 
         # Filter by precission > 0.4
