@@ -3795,7 +3795,7 @@ class CLI:
             )
 
 
-    def score_models_on_dataset_ligand(self, test_dataset_path, model_key="resnet_ligand_masked_", epoch=0, options_json_path: str = "./options.json"):
+    def score_models_on_dataset_ligand(self, test_dataset_path, model_key="resnet_ligand_masked_", epoch=1, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
 
         epoch = int(epoch)
