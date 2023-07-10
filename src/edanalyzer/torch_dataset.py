@@ -758,9 +758,9 @@ def get_image_xmap_ligand(event: PanDDAEvent, ):
 
     except Exception as e:
         # print(e)
-        return np.stack([sample_array, sample_array, sample_array, sample_array], axis=0), False
+        return np.stack([sample_array, sample_array, sample_array, sample_array], axis=0), False, None, None
 
-    return np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=0), True
+    return np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=0), True, sample_transform, xmap_dmap
 
 
 def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
