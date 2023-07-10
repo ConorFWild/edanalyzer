@@ -3795,7 +3795,7 @@ class CLI:
             )
 
 
-    def score_models_on_dataset_ligand(self, test_dataset_path, epoch=15, options_json_path: str = "./options.json"):
+    def score_models_on_dataset_ligand(self, test_dataset_path, epoch=0, options_json_path: str = "./options.json"):
         options = Options.load(options_json_path)
 
         epoch = int(epoch)
@@ -3846,8 +3846,8 @@ class CLI:
             print(
                 f"\tEpoch {epoch}: Recall at precission: {results_this_epoch[selected_key_high_prec][0]} is: {results_this_epoch[selected_key_high_prec][1]} at cutoff: {selected_key_high_prec}")
             # epoch -= 10
-            # epoch += 1
-            epoch += 2
+            epoch += 1
+            # epoch += 2
 
             model_file = Path(options.working_dir) /constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch)
 
