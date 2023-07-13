@@ -3870,6 +3870,82 @@ class CLI:
                 f"Epoch: {epoch} : Cutoff: {cutoff} : Precission : {precission} : Recall : {recall}"
             )
 
+    def score_against_historical_hits(self, test_partition_key="pandda_2_2023_06_27", model_key="resnet_ligand_masked_"):
+        options = Options.load(options_json_path)
+
+        engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+
+        # Get the models
+        models = get_models(model_key, options.working_dir)
+
+        # Get the database session
+        with Session(engine) as session:
+
+            events_stmt = select(EventORM).options(
+                selectinload(EventORM.partitions),
+                selectinload(EventORM.annotations),
+                selectinload(EventORM.ligand),
+                selectinload(EventORM.pandda).options(
+                    selectinload(PanDDAORM.system),
+                    selectinload(PanDDAORM.experiment)
+
+                )
+            )
+            events = session.scalars(events_stmt).unique().all()
+            partitioned_events = [event for event in events if event.partitions]
+
+            test_systems = {
+                event.pandda.system.name: event.pandda.system
+                for event
+                in partitioned_events
+                if event.partitions.name == constants.INITIAL_TEST_PARTITION
+            }
+
+            # Get the new PanDDA events in the partition
+            initial_test_events = [
+                event
+                for event
+                in partitioned_events
+                if (event.pandda.system.name in test_systems) and (event.partitions.name == test_partition_key)
+            ]
+
+            # Assign them to their system
+            test_events = {}
+
+
+            # Get the historical events
+            initial_reference_events = [
+                event
+                for event
+                in partitioned_events
+                if (event.pandda.system.name in test_systems) and (event.partitions.name == "test")
+            ]
+
+            # Match them to their system
+            reference_events = {}
+
+
+            # Iterate the systems
+            for system, test_system_events in test_events.items():
+
+                # Get the corresponding reference events
+                reference_system_events = reference_events[system]
+
+                # Get the matched events
+                matched_events = get_matched_events(test_system_events, reference_system_events)
+
+                # Score the events against each model
+                model_scores = {}
+                for model_number, model in model.items():
+                    model_scores[model_number] = get_model_scores(model, matched_events)
+
+                # Get the scoring statistics
+                scoring_statistics = get_scoring_statistics(model_scores)
+
+                # Render scoring statistics
+                print_scoring_statistics(scoring_statistics)
+
+
 
 
 
