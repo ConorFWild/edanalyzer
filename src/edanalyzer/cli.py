@@ -4121,6 +4121,8 @@ def _get_matched_events(_test_system_events, _reference_system_events):
             x, y, z = test_event.x, test_event.y, test_event.z
 
         for reference_event in _reference_system_events:
+            if reference_event.dtag != test_event.dtag:
+                continue
 
             event_annotations = {annotation.source: annotation for annotation in reference_event.annotations}
 
