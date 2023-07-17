@@ -3989,6 +3989,8 @@ class CLI:
 
                 # Get the corresponding reference events
                 reference_system_events = reference_events[system_name]
+                print(f"Got {len(reference_system_events)} reference events!")
+
                 for experiment in test_experiments[system_name]:
                     print(f"Experiment: {experiment.path}")
 
