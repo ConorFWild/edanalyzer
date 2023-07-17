@@ -3984,14 +3984,14 @@ class CLI:
 
             # Iterate the systems
             for system_name, system in test_systems.items():
-                print(f"System: {system_name}")
+                print(f"########## System: {system_name} ##########˚")
 
                 # Get the corresponding reference events
                 reference_system_events = reference_events[system_name]
                 print(f"Got {len(reference_system_events)} reference events!")
 
                 for experiment in test_experiments[system_name]:
-                    print(f"Experiment: {experiment.path}")
+                    print(f"# Experiment: {experiment.path}")
 
                     pandda_path = str(Path(experiment.path) / "processing" / "analysis" / test_partition_key / "1")
                     if pandda_path in panddas:
