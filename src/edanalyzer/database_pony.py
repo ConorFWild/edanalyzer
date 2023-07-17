@@ -28,7 +28,7 @@ class DatasetORM(db.Entity):
     reflections = Required(str)
 
     system = Required("SystemORM", column="system_id")
-    experiment = Required("ExperimentORM")
+    experiment = Required("ExperimentORM", column="experiment_id")
     panddas = Set("PanDDAORM", table=constants.TABLE_DATASET_PANDDA, column="pandda_id")
     events = Set("EventORM")
 
@@ -52,9 +52,9 @@ class EventORM(db.Entity):
     viewed = Required(bool)
     hit_confidence = Required(str)
 
-    ligand = Optional("LigandORM")
-    dataset = Optional("DatasetORM")
-    pandda = Required("PanDDAORM")
+    ligand = Optional("LigandORM", column="ligand_id")
+    dataset = Optional("DatasetORM", column="dataset_id")
+    pandda = Required("PanDDAORM", column="pandda_id")
     annotations = Set("AnnotationORM")
     partitions = Set("PartitionORM", table=constants.TABLE_EVENT_PARTITION, column="partition_id")
 
@@ -74,7 +74,7 @@ class LigandORM(db.Entity):
     y = Required(float)
     z = Required(float)
 
-    event = Required("EventORM")
+    event = Required("EventORM", column="event_id")
 
 class AnnotationORM(db.Entity):
     _table_ = constants.TABLE_ANNOTATION
@@ -114,7 +114,7 @@ class ExperimentORM(db.Entity):
     model_dir = Required(str)
 
     panddas = Set("PanDDAORM")
-    system = Required("SystemORM")
+    system = Required("SystemORM", column="system_id")
     datasets = Set("DatasetORM")
 
 
