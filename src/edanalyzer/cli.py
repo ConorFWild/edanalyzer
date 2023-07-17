@@ -25,7 +25,11 @@ from edanalyzer.database import (
 
 )
 from edanalyzer.losses import categorical_loss
+
+from edanalyzer.database_pony import *
+
 from pony.orm import *
+
 
 from loguru import logger
 # from openbabel import pybel
