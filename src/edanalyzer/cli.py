@@ -3966,7 +3966,7 @@ class CLI:
                 event
                 for event
                 in partitioned_events
-                if (event.pandda.system.name in test_systems) and (event.partitions.name == "test")
+                if (event.pandda.system.name in test_systems) and ([x for x in event.partitions][0].name == "test")
             ]
 
             # Match them to their system
@@ -3977,7 +3977,6 @@ class CLI:
             }
 
             panddas_list = pony.orm.select(pandda for pandda in PanDDAORM)[:]
-
 
             panddas = {pandda.path: pandda for pandda in panddas_list}
 
