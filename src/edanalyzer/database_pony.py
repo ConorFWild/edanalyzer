@@ -15,8 +15,8 @@ class PanDDAORM(db.Entity):
     events = Set("EventORM")
     datasets = Set("DatasetORM", table=constants.TABLE_DATASET_PANDDA, column="dataset_id")
 
-    system = Required("SystemORM")
-    experiment = Required("ExperimentORM")
+    system = Required("SystemORM", column="system_id")
+    experiment = Required("ExperimentORM", column="experiment_id")
 
 class DatasetORM(db.Entity):
     _table_ = constants.TABLE_DATASET
@@ -106,8 +106,6 @@ class SystemORM(db.Entity):
 class ExperimentORM(db.Entity):
     _table_ = constants.TABLE_EXPERIMENT
 
-
-
     id = PrimaryKey(int, auto=True)
 
     path = Optional(str, unique=True)
@@ -121,9 +119,7 @@ class ExperimentORM(db.Entity):
 class PartitionORM(db.Entity):
     _table_ = constants.TABLE_PARTITION
 
-
     id = PrimaryKey(int, auto=True)
-
 
     name = Required(str, unique=True)
     events = Set("EventORM", table=constants.TABLE_EVENT_PARTITION, column="event_id")
