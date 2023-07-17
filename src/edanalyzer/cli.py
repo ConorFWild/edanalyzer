@@ -25,7 +25,7 @@ from edanalyzer.database import (
 
 )
 from edanalyzer.losses import categorical_loss
-
+from pony.orm import *
 
 from loguru import logger
 # from openbabel import pybel
@@ -3878,7 +3878,7 @@ class CLI:
 
 
         options = Options.load(options_json_path)
-        from edanalyzer.database_pony import *
+        # from edanalyzer.database_pony import *
         import pony
 
         db.bind(provider='sqlite', filename=f"{options.working_dir}/{constants.SQLITE_FILE}")
