@@ -44,7 +44,6 @@ class DatasetORM(db.Entity):
     structure = Required(str)
     reflections = Required(str)
 
-   ed[List["EventORM"]] = relationship(back_populates="dataset")
     system = Required("SystemORM")
     experiment = Required("ExperimentORM")
     panddas = Set("PanDDAORM", table=constants.TABLE_DATASET_PANDDA, column="pandda_id")
