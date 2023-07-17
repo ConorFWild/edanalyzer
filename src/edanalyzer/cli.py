@@ -4005,6 +4005,7 @@ class CLI:
                         experiment=experiment,
                     )
 
+                    print(f"Getting test events...")
                     experiment_events = _get_test_events(
                         experiment,
                         pandda,
