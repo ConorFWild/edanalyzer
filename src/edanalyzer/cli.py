@@ -4026,11 +4026,13 @@ def _get_models(_model_key, _working_dir):
     return models
 
 
+from edanalyzer.database_pony_utils import parse_analyse_table_row
+
+
 def _get_test_events(
         experiment,
         test_partition_key,
 ):
-    from edanalyzer.database import parse_analyse_table_row
 
     test_events = []
     # for system_name, experiments in test_experiments.items():
