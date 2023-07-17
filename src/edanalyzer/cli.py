@@ -3979,7 +3979,7 @@ class CLI:
             print(f"For a total of {len(initial_reference_events)} reference events")
 
             # Iterate the systems
-            for system_name in test_systems:
+            for system_name, system in test_systems.items():
                 print(f"System: {system_name}")
 
                 # Get the corresponding reference events
@@ -3987,8 +3987,17 @@ class CLI:
                 for experiment in test_experiments[system_name]:
                     print(f"Experiment: {experiment.path}")
 
+                    pandda = PanDDAORM(
+                        path=Path(experiment.path) / "processing" / "analysis" / test_partition_key / "1",
+                        events=[],
+                        datasets=[],
+                        system=system,
+                        experiment=experiment,
+                    )
+
                     experiment_events = _get_test_events(
                         experiment,
+                        pandda,
                         test_partition_key,
                     )
                     if not experiment_events:
@@ -4031,6 +4040,7 @@ from edanalyzer.database_pony_utils import parse_analyse_table_row
 
 def _get_test_events(
         experiment,
+pandda,
         test_partition_key,
 ):
 
@@ -4072,7 +4082,8 @@ def _get_test_events(
             None,
             test_system_pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR,
             None,
-            annotation_type="auto",
+            pandda,
+        annotation_type="auto",
         )
 
         #

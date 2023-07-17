@@ -115,6 +115,8 @@ def parse_analyse_table_row(
         pandda_dir,
         pandda_processed_datasets_dir,
         model_building_dir,
+pandda,
+
         annotation_type="auto",
 ):
     dtag = str(row[constants.PANDDA_INSPECT_DTAG])
@@ -195,13 +197,15 @@ def parse_analyse_table_row(
         bdc=float(bdc),
         initial_structure=initial_structure,
         initial_reflections=initial_reflections,
-        structure="NA",
+        structure=None,
         event_map=str(event_map_path),
         z_map=z_map_path,
         ligand=None,
         viewed=False,
         hit_confidence="NA",
-        annotations=[]
+        annotations=[],
+        partitions=[],
+        pandda=pandda,
     )
     if inspect_model_path.exists():
         ligand = get_event_ligand(
