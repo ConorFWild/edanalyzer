@@ -16,7 +16,7 @@ class PanDDAORM(db.Entity):
     datasets = Set("DatasetORM", table=constants.TABLE_DATASET_PANDDA, column="dataset_id")
 
     system = Required("SystemORM")
-    experiment = Required("Experiment")
+    experiment = Required("ExperimentORM")
 
 class DatasetORM(db.Entity):
     _table_ = constants.TABLE_DATASET
