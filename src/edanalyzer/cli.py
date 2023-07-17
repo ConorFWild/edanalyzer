@@ -3878,8 +3878,12 @@ class CLI:
 
 
         options = Options.load(options_json_path)
+        from edanalyzer.database_pony import *
 
-        engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
+        db.bind(provider='sqlite', filename=f"{options.working_dir}/{constants.SQLITE_FILE}")
+        db.generate_mapping()
+
+        # engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
 
         # Get the models
         models = _get_models(model_key, Path(options.working_dir))
@@ -3889,7 +3893,7 @@ class CLI:
 
         # Get the database session
         # with Session(engine) as session:
-        session = Session(engine)
+        # session = Session(engine)
 
         print(f"Getting events... (slow)")
         events_pickle = Path(options.working_dir) / "events.pickle"
@@ -3897,99 +3901,106 @@ class CLI:
         #     with open(events_pickle, "rb") as f:
         #         events = pickle.load(f)
         # else:
-        events_stmt = select(EventORM).options(
-            selectinload(EventORM.partitions),
-            selectinload(EventORM.annotations),
-            selectinload(EventORM.ligand),
-            selectinload(EventORM.pandda).options(
-                selectinload(PanDDAORM.system),
-                selectinload(PanDDAORM.experiment)
+        # events_stmt = select(EventORM).options(
+        #     selectinload(EventORM.partitions),
+        #     selectinload(EventORM.annotations),
+        #     selectinload(EventORM.ligand),
+        #     selectinload(EventORM.pandda).options(
+        #         selectinload(PanDDAORM.system),
+        #         selectinload(PanDDAORM.experiment)
+        #
+        #     )
+        # )
+        # events = session.scalars(events_stmt).unique().all()
 
-            )
-        )
-        events = session.scalars(events_stmt).unique().all()
             # with open(events_pickle, 'wb') as f:
             #     pickle.dump(events, f)
 
-        partitioned_events = [event for event in events if event.partitions]
-        print(f"Got {len(partitioned_events)} total partitioned events from database")
+        with pony.orm.db_session:
+            event_datas = pony.orm.select((event, event.partitions, event.annotations, event.ligand, event.pandda,
+                                           event.pandda.system, event.pandda.experiment) for event in EventORM)[:]
 
-        test_systems = {
-            event.pandda.system.name: event.pandda.system
-            for event
-            in partitioned_events
-            if event.partitions.name == constants.INITIAL_TEST_PARTITION
-        }
+            events = [event_data[0] for event_data in event_datas]
 
-        test_experiments = {
-            system_name: [experiment for experiment in system.experiments]
-            for system_name, system
-            in test_systems.items()
-        }
-        print(f"Got {len(test_systems)} test systems")
+            partitioned_events = [event for event in events if event.partitions]
+            print(f"Got {len(partitioned_events)} total partitioned events from database")
 
-        # Get the new PanDDA events in the partition
-        # initial_test_events = [
-        #     event
-        #     for event
-        #     in partitioned_events
-        #     if (event.pandda.system.name in test_systems) and (event.partitions.name == test_partition_key)
-        # ]
-        #
-        # # Assign them to their system
-        # test_events = {}
+            test_systems = {
+                event.pandda.system.name: event.pandda.system
+                for event
+                in partitioned_events
+                if event.partitions.name == constants.INITIAL_TEST_PARTITION
+            }
 
-        # Get the historical events
-        initial_reference_events = [
-            event
-            for event
-            in partitioned_events
-            if (event.pandda.system.name in test_systems) and (event.partitions.name == "test")
-        ]
+            test_experiments = {
+                system_name: [experiment for experiment in system.experiments]
+                for system_name, system
+                in test_systems.items()
+            }
+            print(f"Got {len(test_systems)} test systems")
 
-        # Match them to their system
-        reference_events = {
-            system_name: [event for event in initial_reference_events if event.pandda.system.name == system_name]
-            for system_name
-            in test_systems
-        }
+            # Get the new PanDDA events in the partition
+            # initial_test_events = [
+            #     event
+            #     for event
+            #     in partitioned_events
+            #     if (event.pandda.system.name in test_systems) and (event.partitions.name == test_partition_key)
+            # ]
+            #
+            # # Assign them to their system
+            # test_events = {}
 
-        print(f"For a total of {len(initial_reference_events)} reference events")
+            # Get the historical events
+            initial_reference_events = [
+                event
+                for event
+                in partitioned_events
+                if (event.pandda.system.name in test_systems) and (event.partitions.name == "test")
+            ]
 
-        # Iterate the systems
-        for system_name in test_systems:
-            print(f"System: {system_name}")
+            # Match them to their system
+            reference_events = {
+                system_name: [event for event in initial_reference_events if event.pandda.system.name == system_name]
+                for system_name
+                in test_systems
+            }
 
-            # Get the corresponding reference events
-            reference_system_events = reference_events[system_name]
-            for experiment in test_experiments[system_name]:
-                print(f"Experiment: {experiment.path}")
+            print(f"For a total of {len(initial_reference_events)} reference events")
 
-                experiment_events = _get_test_events(
-                    experiment,
-                    test_partition_key,
-                )
-                if not experiment_events:
-                    print(f"Got not experiment events! Skipping")
-                    continue
-                print(f"Got {len(experiment_events)} events from experiment PanDDA")
+            # Iterate the systems
+            for system_name in test_systems:
+                print(f"System: {system_name}")
+
+                # Get the corresponding reference events
+                reference_system_events = reference_events[system_name]
+                for experiment in test_experiments[system_name]:
+                    print(f"Experiment: {experiment.path}")
+
+                    experiment_events = _get_test_events(
+                        experiment,
+                        test_partition_key,
+                    )
+                    if not experiment_events:
+                        print(f"Got not experiment events! Skipping")
+                        continue
+                    print(f"Got {len(experiment_events)} events from experiment PanDDA")
 
 
-                # Get the matched events
-                matched_events = _get_matched_events(experiment_events, reference_system_events)
-                num_matched = len([event for event in matched_events if event.hit_confidence == "High"])
-                print(f"Got {len(matched_events)} events of which {num_matched} were matched")
+                    # Get the matched events
+                    matched_events = _get_matched_events(experiment_events, reference_system_events)
+                    num_matched = len([event for event in matched_events if event.hit_confidence == "High"])
+                    print(f"Got {len(matched_events)} events of which {num_matched} were matched")
 
-                # Score the events against each model
-                model_scores = {}
-                for model_number, model in models.items():
-                    model_scores[model_number] = _get_model_scores(model, matched_events)
+                    # Score the events against each model
+                    model_scores = {}
+                    for model_number, model in models.items():
+                        model_scores[model_number] = _get_model_scores(model, matched_events)
 
-                # Get the scoring statistics
-                scoring_statistics = _get_scoring_statistics(model_scores)
+                    # Get the scoring statistics
+                    scoring_statistics = _get_scoring_statistics(model_scores)
 
-                # Render scoring statistics
-                _print_scoring_statistics(scoring_statistics)
+                    # Render scoring statistics
+                    _print_scoring_statistics(scoring_statistics)
 
 
 
