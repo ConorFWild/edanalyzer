@@ -3879,6 +3879,7 @@ class CLI:
 
         options = Options.load(options_json_path)
         from edanalyzer.database_pony import *
+        import pony
 
         db.bind(provider='sqlite', filename=f"{options.working_dir}/{constants.SQLITE_FILE}")
         db.generate_mapping()
