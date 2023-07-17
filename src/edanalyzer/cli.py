@@ -4166,7 +4166,8 @@ def _get_model_scores(_model, _matched_events):
             raise Exception
 
         event_pyd = PanDDAEvent(
-                id=event.id,
+                # id=event.id,
+                id=0,
                 pandda_dir=event.pandda.path,
                 model_building_dir=event.pandda.experiment.model_dir,
                 system_name=event.pandda.system.name,
