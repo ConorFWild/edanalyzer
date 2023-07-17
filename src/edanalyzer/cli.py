@@ -3995,14 +3995,15 @@ class CLI:
                     pandda_path = str(Path(experiment.path) / "processing" / "analysis" / test_partition_key / "1")
                     if pandda_path in panddas:
                         pandda =panddas[pandda_path]
-                    else:
-                        pandda = PanDDAORM(
-                            path=pandda_path,
-                            events=[],
-                            datasets=[],
-                            system=system,
-                            experiment=experiment,
-                        )
+                        pandda.delete()
+                    # else:
+                    pandda = PanDDAORM(
+                        path=pandda_path,
+                        events=[],
+                        datasets=[],
+                        system=system,
+                        experiment=experiment,
+                    )
 
                     experiment_events = _get_test_events(
                         experiment,
