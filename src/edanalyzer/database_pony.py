@@ -1,5 +1,5 @@
 # from pony import *
-from pony import Database, Entity, Required, Optional, Set, PrimaryKey, composite_key, select
+from pony.orm import Database, Entity, Required, Optional, Set, PrimaryKey, composite_key, select
 
 from edanalyzer import constants
 
