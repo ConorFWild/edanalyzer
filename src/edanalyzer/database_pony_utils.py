@@ -24,7 +24,7 @@ def get_ligand_centroid(ligand):
     return np.mean(pos_array, axis=0)
 
 
-def get_structure_ligands(pdb_path):
+def get_structure_ligands(pdb_path, event):
     # logger.info(f"")
     structure = gemmi.read_structure(pdb_path)
     structure_ligands = []
@@ -55,15 +55,16 @@ def get_structure_ligands(pdb_path):
                         num_atoms=int(num_atoms),
                         x=float(ligand_centroid[0]),
                         y=float(ligand_centroid[1]),
-                        z=float(ligand_centroid[2])
+                        z=float(ligand_centroid[2]),
+                        event=event
                     )
                     structure_ligands.append(lig)
 
     return structure_ligands
 
 
-def get_event_ligand(inspect_model_path, x, y, z, cutoff=10.0):
-    structure_ligands = get_structure_ligands(str(inspect_model_path))
+def get_event_ligand(inspect_model_path, x, y, z, event, cutoff=10.0):
+    structure_ligands = get_structure_ligands(str(inspect_model_path), event)
 
     ligand_distances = {}
     ligand_dict = {}
@@ -167,17 +168,7 @@ def parse_analyse_table_row(
     inspect_model_path = inspect_model_dir / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
     # initial_model = processed_dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)
 
-    if inspect_model_path.exists():
-        ligand = get_event_ligand(
-            inspect_model_path,
-            x,
-            y,
-            z,
-        )
-        inspect_model_path = str(inspect_model_path)
-    else:
-        ligand = None
-        inspect_model_path = None
+
 
     # hyphens = [pos for pos, char in enumerate(dtag) if char == "-"]
     # if len(hyphens) == 0:
@@ -207,11 +198,25 @@ def parse_analyse_table_row(
         structure=inspect_model_path,
         event_map=str(event_map_path),
         z_map=z_map_path,
-        ligand=ligand,
+        ligand=None,
         viewed=False,
         hit_confidence="NA",
         annotations=[]
     )
+    if inspect_model_path.exists():
+        ligand = get_event_ligand(
+            inspect_model_path,
+            x,
+            y,
+            z,
+            event
+        )
+        inspect_model_path = str(inspect_model_path)
+        event.ligand = ligand
+    else:
+        ligand = None
+        inspect_model_path = None
+
     # annotation.event = event
 
     return event
