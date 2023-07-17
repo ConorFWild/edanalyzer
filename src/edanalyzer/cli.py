@@ -4055,7 +4055,7 @@ def _get_test_events(
     # test_events[system_name][experiment.path] = []
 
     for idx, row in analysis_table.iterrows():
-        event = parse_inspect_table_row(
+        event = parse_analyse_table_row(
             row,
             None,
             test_system_pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR,
