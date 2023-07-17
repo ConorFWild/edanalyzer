@@ -3927,6 +3927,7 @@ class CLI:
                                            event.pandda.system, event.pandda.experiment) for event in EventORM)[:]
 
             events = [event_data[0] for event_data in event_datas]
+            print(f"Got {len(events)} total events from database")
 
             partitioned_events = [event for event in events if event.partitions]
             print(f"Got {len(partitioned_events)} total partitioned events from database")
