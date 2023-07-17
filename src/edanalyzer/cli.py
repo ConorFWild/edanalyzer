@@ -3976,6 +3976,10 @@ class CLI:
                 in test_systems
             }
 
+            panddas = pony.orm.select(pandda for pandda in PanDDAORM)[:]
+            for pandda in panddas:
+                print(pandda.path)
+
             print(f"For a total of {len(initial_reference_events)} reference events")
 
             # Iterate the systems
