@@ -3988,7 +3988,7 @@ class CLI:
                     print(f"Experiment: {experiment.path}")
 
                     pandda = PanDDAORM(
-                        path=Path(experiment.path) / "processing" / "analysis" / test_partition_key / "1",
+                        path=str(Path(experiment.path) / "processing" / "analysis" / test_partition_key / "1"),
                         events=[],
                         datasets=[],
                         system=system,
