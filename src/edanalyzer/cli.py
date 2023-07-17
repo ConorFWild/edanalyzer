@@ -3875,7 +3875,8 @@ class CLI:
                 f"Epoch: {epoch} : Cutoff: {cutoff} : Precission : {precission} : Recall : {recall}"
             )
 
-    def score_against_historical_hits(self, test_partition_key="pandda_2_2023_06_27",
+    def score_against_historical_hits(self,
+                                      test_partition_key="pandda_2_2023_06_27",
                                       model_key="resnet_ligand_masked_",
                                       options_json_path="./options.json"
                                       ):
@@ -3934,7 +3935,7 @@ class CLI:
                 event.pandda.system.name: event.pandda.system
                 for event
                 in partitioned_events
-                if event.partitions.name == constants.INITIAL_TEST_PARTITION
+                if str(event.partitions.name) == constants.INITIAL_TEST_PARTITION
             }
 
             test_experiments = {
