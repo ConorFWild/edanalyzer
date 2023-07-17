@@ -4018,19 +4018,25 @@ def _get_test_events(
     test_system_panddas_dir = Path(experiment.path) / test_partition_key
 
     if not test_system_panddas_dir.exists():
+        print(f"Could not find test system panddas dir: {test_system_panddas_dir}")
+
         return None
 
     test_system_pandda_dir = test_system_panddas_dir / "1"
 
     if not test_system_pandda_dir.exists():
+        print(f"Could not find test system pandda dir: {test_system_pandda_dir}")
         return None
 
     analyses_dir = test_system_pandda_dir / constants.PANDDA_ANALYSIS_DIR
     if not analyses_dir.exists():
+        print(f"Could not find analysis dir: {analyses_dir}")
+
         return None
 
     analysis_table_path = analyses_dir / constants.PANDDA_EVENT_TABLE_PATH
     if not analysis_table_path.exists():
+        print(f"Could not find analysis table: {analysis_table_path}")
         return None
 
     analysis_table = pd.read_csv(analysis_table_path)
