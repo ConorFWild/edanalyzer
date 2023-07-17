@@ -3997,7 +3997,7 @@ class CLI:
                         pandda =panddas[pandda_path]
                     else:
                         pandda = PanDDAORM(
-                            path=,
+                            path=pandda_path,
                             events=[],
                             datasets=[],
                             system=system,
