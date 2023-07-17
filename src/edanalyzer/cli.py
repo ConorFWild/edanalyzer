@@ -3891,6 +3891,7 @@ class CLI:
         # with Session(engine) as session:
         session = Session(engine)
 
+        print(f"Getting events... (slow)")
         events_stmt = select(EventORM).options(
             selectinload(EventORM.partitions),
             selectinload(EventORM.annotations),
