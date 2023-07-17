@@ -46,7 +46,7 @@ class EventORM(db.Entity):
     bdc = Required(float)
     initial_structure = Optional(str)
     initial_reflections = Optional(str)
-    structure = Optional(str)
+    structure = Optional(str, nullable=True)
     event_map = Required(str)
     z_map = Optional(str)
     viewed = Required(bool)

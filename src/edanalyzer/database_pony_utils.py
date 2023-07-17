@@ -218,9 +218,9 @@ pandda,
         # inspect_model_path = str(inspect_model_path)
         event.structure = str(inspect_model_path)
         event.ligand = ligand
-    else:
-        ligand = None
-        inspect_model_path = None
+    # else:
+    #     ligand = None
+    #     inspect_model_path = None
 
     # annotation.event = event
 
