@@ -195,7 +195,7 @@ def parse_analyse_table_row(
         bdc=float(bdc),
         initial_structure=initial_structure,
         initial_reflections=initial_reflections,
-        structure=inspect_model_path,
+        structure="NA",
         event_map=str(event_map_path),
         z_map=z_map_path,
         ligand=None,
@@ -211,7 +211,8 @@ def parse_analyse_table_row(
             z,
             event
         )
-        inspect_model_path = str(inspect_model_path)
+        # inspect_model_path = str(inspect_model_path)
+        event.structure = str(inspect_model_path)
         event.ligand = ligand
     else:
         ligand = None
