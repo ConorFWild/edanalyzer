@@ -4015,7 +4015,7 @@ def _get_test_events(
     #     test_events[system_name] = {}
 
     # for experiment in experiments:
-    test_system_panddas_dir = Path(experiment.path) / test_partition_key
+    test_system_panddas_dir = Path(experiment.path) / "processing" / "analysis" / test_partition_key
 
     if not test_system_panddas_dir.exists():
         print(f"Could not find test system panddas dir: {test_system_panddas_dir}")
