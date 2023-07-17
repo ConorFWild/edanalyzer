@@ -3976,9 +3976,10 @@ class CLI:
                 in test_systems
             }
 
-            panddas = pony.orm.select(pandda for pandda in PanDDAORM)[:]
-            for pandda in panddas:
-                print(pandda.path)
+            panddas_list = pony.orm.select(pandda for pandda in PanDDAORM)[:]
+
+
+            panddas = {pandda.path: pandda for pandda in panddas_list}
 
             print(f"For a total of {len(initial_reference_events)} reference events")
 
@@ -3991,13 +3992,17 @@ class CLI:
                 for experiment in test_experiments[system_name]:
                     print(f"Experiment: {experiment.path}")
 
-                    pandda = PanDDAORM(
-                        path=str(Path(experiment.path) / "processing" / "analysis" / test_partition_key / "1"),
-                        events=[],
-                        datasets=[],
-                        system=system,
-                        experiment=experiment,
-                    )
+                    pandda_path = str(Path(experiment.path) / "processing" / "analysis" / test_partition_key / "1")
+                    if pandda_path in panddas:
+                        pandda =
+                    else:
+                        pandda = PanDDAORM(
+                            path=,
+                            events=[],
+                            datasets=[],
+                            system=system,
+                            experiment=experiment,
+                        )
 
                     experiment_events = _get_test_events(
                         experiment,
@@ -4025,6 +4030,8 @@ class CLI:
 
                     # Render scoring statistics
                     _print_scoring_statistics(scoring_statistics)
+
+            db.rollback()
 
 
 
