@@ -52,7 +52,7 @@ class EventORM(db.Entity):
     viewed = Required(bool)
     hit_confidence = Required(str)
 
-    ligand = Optional("LigandORM")
+    ligand = Optional("LigandORM", cascade_delete=True)
     dataset = Optional("DatasetORM", column="dataset_id")
     pandda = Required("PanDDAORM", column="pandda_id")
     annotations = Set("AnnotationORM")
