@@ -3892,17 +3892,25 @@ class CLI:
         session = Session(engine)
 
         print(f"Getting events... (slow)")
-        events_stmt = select(EventORM).options(
-            selectinload(EventORM.partitions),
-            selectinload(EventORM.annotations),
-            selectinload(EventORM.ligand),
-            selectinload(EventORM.pandda).options(
-                selectinload(PanDDAORM.system),
-                selectinload(PanDDAORM.experiment)
+        events_pickle = Path(options.working_dir) / "events.pickle"
+        if events_pickle.exists():
+            with open(events_pickle, "rb") as f:
+                events = pickle.load(f)
+        else:
+            events_stmt = select(EventORM).options(
+                selectinload(EventORM.partitions),
+                selectinload(EventORM.annotations),
+                selectinload(EventORM.ligand),
+                selectinload(EventORM.pandda).options(
+                    selectinload(PanDDAORM.system),
+                    selectinload(PanDDAORM.experiment)
 
+                )
             )
-        )
-        events = session.scalars(events_stmt).unique().all()
+            events = session.scalars(events_stmt).unique().all()
+            with open(events_pickle, 'wb') as f:
+                pickle.dump(events, f)
+
         partitioned_events = [event for event in events if event.partitions]
         print(f"Got {len(partitioned_events)} total partitioned events from database")
 
