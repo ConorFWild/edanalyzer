@@ -4020,8 +4020,12 @@ class CLI:
                     # Get the matched events
                     matched_events = _get_matched_events(experiment_events, reference_system_events)
                     num_matched = len([event for event in matched_events if event.hit_confidence == "High"])
+
                     print(f"Got {len(matched_events)} events of which {num_matched} were matched")
 
+                    if num_matched == 0:
+                        print(f"Matched none! Skipping!")
+                        continue
                     # Score the events against each model
                     model_scores = {}
                     for model_number, model in models.items():
