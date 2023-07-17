@@ -4182,9 +4182,7 @@ def _get_model_scores(_model, _matched_events):
                 ligand=None,
             )
         events_pyd.append(event_pyd)
-    dataset = PanDDAEventDataset(
-        events_pyd
-    )
+    dataset = PanDDAEventDataset(events_pyd=events_pyd)
     records = get_annotations_from_dataset_ligand(dataset, dataset)
 
     return records
