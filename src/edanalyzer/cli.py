@@ -3882,7 +3882,7 @@ class CLI:
         engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
 
         # Get the models
-        models = _get_models(model_key, options.working_dir)
+        models = _get_models(model_key, Path(options.working_dir))
         print(f"Got {len(models)} models!")
 
         # Get the test events
