@@ -27,7 +27,7 @@ class DatasetORM(db.Entity):
     structure = Required(str)
     reflections = Required(str)
 
-    system = Required("SystemORM")
+    system = Required("SystemORM", column="system_id")
     experiment = Required("ExperimentORM")
     panddas = Set("PanDDAORM", table=constants.TABLE_DATASET_PANDDA, column="pandda_id")
     events = Set("EventORM")
