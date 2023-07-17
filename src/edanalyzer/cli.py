@@ -3933,7 +3933,7 @@ class CLI:
             print(f"Got {len(partitioned_events)} total partitioned events from database")
 
             for event in partitioned_events:
-                print(event.partitions)
+                print(event.partitions[0])
                 print(event.partitions.name)
 
             test_systems = {
