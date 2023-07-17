@@ -3932,6 +3932,9 @@ class CLI:
             partitioned_events = [event for event in events if event.partitions]
             print(f"Got {len(partitioned_events)} total partitioned events from database")
 
+            for event in partitioned_events:
+                print(event.partitions.name)
+
             test_systems = {
                 event.pandda.system.name: event.pandda.system
                 for event
