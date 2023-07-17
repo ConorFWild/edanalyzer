@@ -3949,8 +3949,8 @@ class CLI:
 
         # Match them to their system
         reference_events = {
-            system.name: [event for event in initial_reference_events if event.pandda.system.name == system.name]
-            for system
+            system_name: [event for event in initial_reference_events if event.pandda.system.name == system_name]
+            for system_name
             in test_systems
         }
 
