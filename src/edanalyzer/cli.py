@@ -1943,8 +1943,9 @@ def get_annotations_from_dataset_ligand(
 
         #
         for _annotation, _model_annotation, _idx in zip(annotation_np, model_annotation_np, idx_np):
-            records[_idx] = {"annotation": _annotation[1], "model_annotation": _model_annotation[1]}
             event = dataset.pandda_events[_idx]
+            records[_idx] = {"annotation": _annotation[1], "model_annotation": _model_annotation[1], "event": event}
+
             # logger.debug(f"{event.dtag} {event.event_idx} {_annotation[1]} {_model_annotation[1]}")
 
     # Save a model annotations json
@@ -3870,84 +3871,319 @@ class CLI:
                 f"Epoch: {epoch} : Cutoff: {cutoff} : Precission : {precission} : Recall : {recall}"
             )
 
-    def score_against_historical_hits(self, test_partition_key="pandda_2_2023_06_27", model_key="resnet_ligand_masked_"):
+    def score_against_historical_hits(self, test_partition_key="pandda_2_2023_06_27",
+                                      model_key="resnet_ligand_masked_",
+                                      options_json_path="./options.json"
+                                      ):
+
+
         options = Options.load(options_json_path)
 
         engine = create_engine(f"sqlite:///{options.working_dir}/{constants.SQLITE_FILE}")
 
         # Get the models
-        models = get_models(model_key, options.working_dir)
+        models = _get_models(model_key, options.working_dir)
+        print(f"Got {len(models)} models!")
+
+        # Get the test events
 
         # Get the database session
-        with Session(engine) as session:
+        # with Session(engine) as session:
+        session = Session(engine)
 
-            events_stmt = select(EventORM).options(
-                selectinload(EventORM.partitions),
-                selectinload(EventORM.annotations),
-                selectinload(EventORM.ligand),
-                selectinload(EventORM.pandda).options(
-                    selectinload(PanDDAORM.system),
-                    selectinload(PanDDAORM.experiment)
+        events_stmt = select(EventORM).options(
+            selectinload(EventORM.partitions),
+            selectinload(EventORM.annotations),
+            selectinload(EventORM.ligand),
+            selectinload(EventORM.pandda).options(
+                selectinload(PanDDAORM.system),
+                selectinload(PanDDAORM.experiment)
 
-                )
             )
-            events = session.scalars(events_stmt).unique().all()
-            partitioned_events = [event for event in events if event.partitions]
+        )
+        events = session.scalars(events_stmt).unique().all()
+        partitioned_events = [event for event in events if event.partitions]
+        print(f"Got {len(partitioned_events)} total partitioned events from database")
 
-            test_systems = {
-                event.pandda.system.name: event.pandda.system
-                for event
-                in partitioned_events
-                if event.partitions.name == constants.INITIAL_TEST_PARTITION
-            }
+        test_systems = {
+            event.pandda.system.name: event.pandda.system
+            for event
+            in partitioned_events
+            if event.partitions.name == constants.INITIAL_TEST_PARTITION
+        }
 
-            # Get the new PanDDA events in the partition
-            initial_test_events = [
-                event
-                for event
-                in partitioned_events
-                if (event.pandda.system.name in test_systems) and (event.partitions.name == test_partition_key)
-            ]
+        test_experiments = {
+            system.name: [experiment for experiment in system.experiments]
+            for system
+            in test_systems
+        }
+        print(f"Got {len(test_systems)} test systems")
 
-            # Assign them to their system
-            test_events = {}
+        # Get the new PanDDA events in the partition
+        # initial_test_events = [
+        #     event
+        #     for event
+        #     in partitioned_events
+        #     if (event.pandda.system.name in test_systems) and (event.partitions.name == test_partition_key)
+        # ]
+        #
+        # # Assign them to their system
+        # test_events = {}
 
+        # Get the historical events
+        initial_reference_events = [
+            event
+            for event
+            in partitioned_events
+            if (event.pandda.system.name in test_systems) and (event.partitions.name == "test")
+        ]
 
-            # Get the historical events
-            initial_reference_events = [
-                event
-                for event
-                in partitioned_events
-                if (event.pandda.system.name in test_systems) and (event.partitions.name == "test")
-            ]
+        # Match them to their system
+        reference_events = {
+            system.name: [event for event in initial_reference_events if event.pandda.system.name == system.name]
+            for system
+            in test_systems
+        }
 
-            # Match them to their system
-            reference_events = {}
+        print(f"For a total of {len(initial_reference_events)} reference events")
 
+        # Iterate the systems
+        for system_name in test_systems:
+            print(f"System: {system_name}")
 
-            # Iterate the systems
-            for system, test_system_events in test_events.items():
+            # Get the corresponding reference events
+            reference_system_events = reference_events[system_name]
+            for experiment in test_experiments[system_name]:
+                print(f"Experiment: {experiment.path}")
 
-                # Get the corresponding reference events
-                reference_system_events = reference_events[system]
+                experiment_events = _get_test_events(
+                    experiment,
+                    test_partition_key,
+                )
+                print(f"Got {len(experiment_events)} events from experiment PanDDA")
+                if not experiment_events:
+                    continue
 
                 # Get the matched events
-                matched_events = get_matched_events(test_system_events, reference_system_events)
+                matched_events = _get_matched_events(experiment_events, reference_system_events)
+                num_matched = len([event for event in matched_events if event.hit_confidence == "High"])
+                print(f"Got {len(matched_events)} events of which {num_matched} were matched")
 
                 # Score the events against each model
                 model_scores = {}
-                for model_number, model in model.items():
-                    model_scores[model_number] = get_model_scores(model, matched_events)
+                for model_number, model in models.items():
+                    model_scores[model_number] = _get_model_scores(model, matched_events)
 
                 # Get the scoring statistics
-                scoring_statistics = get_scoring_statistics(model_scores)
+                scoring_statistics = _get_scoring_statistics(model_scores)
 
                 # Render scoring statistics
-                print_scoring_statistics(scoring_statistics)
+                _print_scoring_statistics(scoring_statistics)
 
 
 
 
+def _get_models(_model_key, _working_dir):
+    models = {}
+    for path in _working_dir.glob("*"):
+        match = re.match(f"{_model_key}([0-9]+).pt", path.name)
+        if match is not None:
+            models[match] = path
+
+    return models
+
+
+def _get_test_events(
+        experiment,
+        test_partition_key,
+):
+    from edanalyzer.database import parse_analyse_table_row
+
+    test_events = []
+    # for system_name, experiments in test_experiments.items():
+    #     test_events[system_name] = {}
+
+    # for experiment in experiments:
+    test_system_panddas_dir = Path(experiment.path) / test_partition_key
+
+    if not test_system_panddas_dir.exists():
+        return None
+
+    test_system_pandda_dir = test_system_panddas_dir / "1"
+
+    if not test_system_pandda_dir.exists():
+        return None
+
+    analyses_dir = test_system_pandda_dir / constants.PANDDA_ANALYSIS_DIR
+    if not analyses_dir.exists():
+        return None
+
+    analysis_table_path = analyses_dir / constants.PANDDA_EVENT_TABLE_PATH
+    if not analysis_table_path.exists():
+        return None
+
+    analysis_table = pd.read_csv(analysis_table_path)
+    # test_events[system_name][experiment.path] = []
+
+    for idx, row in analysis_table.iterrows():
+        event = parse_inspect_table_row(
+            row,
+            None,
+            test_system_pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR,
+            None,
+            annotation_type="auto",
+        )
+
+        #
+        test_events.append(event)
+
+    return test_events
+
+
+def _get_matched_events(_test_system_events, _reference_system_events):
+    matched_events = []
+
+    for test_event in _test_system_events:
+        matched = False
+        if test_event.ligand:
+            x, y, z = test_event.ligand.x, test_event.ligand.y, test_event.ligand.z
+        else:
+            x, y, z = test_event.x, test_event.y, test_event.z
+
+        for reference_event in _reference_system_events:
+
+            event_annotations = {annotation.source: annotation for annotation in reference_event.annotations}
+
+            if "manual" in event_annotations:
+                annotation_orm = event_annotations["manual"]
+            else:
+                annotation_orm = event_annotations["auto"]
+
+            # Reference event is a hit: check for match
+            if annotation_orm.annotation:
+                rx, ry, rz = reference_event.x, reference_event.y, reference_event.z
+
+                distance = np.linalg.norm(np.array([x - rx, y - ry, z - rz]))
+                # Successful match
+                if distance < 3.0:
+                    test_event.hit_confidence = "High"
+                    matched = True
+                    break
+
+        if not matched:
+            test_event.hit_confidence = "Low"
+
+        matched_events.append(test_event)
+
+    return matched_events
+
+    ...
+
+
+def _get_model_scores(_model, _matched_events):
+    events_pyd = []
+    for event in _matched_events:
+        if event.ligand:
+            ligand = event.ligand
+            x, y, z = ligand.x, ligand.y, ligand.z
+        else:
+            x, y, z = event.x, event.y, event.z
+
+        if event.hit_confidence == "High":
+            hit = True
+        elif event.hit_confidence == "Low":
+            hit = False
+        else:
+            raise Exception
+
+        event_pyd = PanDDAEvent(
+                id=event.id,
+                pandda_dir=event.pandda.path,
+                model_building_dir=event.pandda.experiment.model_dir,
+                system_name=event.pandda.system.name,
+                dtag=event.dtag,
+                event_idx=event.event_idx,
+                event_map=event.event_map,
+                x=x,
+                y=y,
+                z=z,
+                hit=hit,
+                ligand=None,
+            )
+        events_pyd.append(event_pyd)
+    dataset = PanDDAEventDataset(
+        events_pyd
+    )
+    records = get_annotations_from_dataset_ligand(dataset, dataset)
+
+    return records
+
+
+def _get_scoring_statistics(_model_scores, recalls=[0.95, 0.975, 0.99, 1.0]):
+
+    scoring_statistics = {}
+    for model_number, model_scores in _model_scores.items():
+        cutoff_precission_recall = []
+        for cutoff in np.linspace(0.0,1.0,num=101):
+            cutoff = round(cutoff, 2)
+            tp, tn, fp, fn = 0,0,0,0
+            for record in model_scores:
+                if record["model_annotation"] > cutoff:
+                    if record["annotation"] == 0.0:
+                        fp += 1
+                    elif record["annotation"] == 1.0:
+                        tp += 1
+                    else:
+                        raise Exception
+                else:
+                    if record["annotation"] == 0.0:
+                        tn += 1
+                    elif record["annotation"] == 1.0:
+                        fn += 1
+                    else:
+                        raise Exception
+
+            p = tp + fn
+            n = tn + fp
+            if p != 0:
+                recall = tp / p
+            else:
+                recall = 0
+
+            ap = tp+fp
+            an = tn+fn
+            if ap != 0:
+                prec = tp/ap
+            else:
+                prec = 0
+
+            cutoff_precission_recall.append(
+                {
+                    "cutoff": cutoff,
+                    "precision": prec,
+                    "recall": recall
+                }
+            )
+
+        cutoff_precission_recall_table = pd.DataFrame(cutoff_precission_recall)
+        for recall in recalls:
+            delta_recall_series = cutoff_precission_recall_table["recall"] - recall
+            highest_recall_table = cutoff_precission_recall_table[delta_recall_series == delta_recall_series.min()]
+            highest_recall_row = highest_recall_table.iloc[0]
+            precision = highest_recall_row["precision"]
+            cutoff = highest_recall_row["cutoff"]
+            scoring_statistics[recall] = {"cutoff": cutoff, "precision": precision}
+
+        return scoring_statistics
+
+    ...
+
+
+def _print_scoring_statistics(model_scoring_statistics):
+    for model_number, scoring_statistics in model_scoring_statistics.items():
+        for recall, statistics in scoring_statistics.items():
+            precision, cutoff = scoring_statistics['precision'], scoring_statistics['cutoff']
+            print(f"\tRecall: {recall} : Precision : {precision} : Cutoff : {cutoff}")
 
 def update_from_annotations_v2_get_annotations(
     events: dict[int, EventORM],
