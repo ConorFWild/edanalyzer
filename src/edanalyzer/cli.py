@@ -3932,15 +3932,15 @@ class CLI:
             partitioned_events = [event for event in events if event.partitions]
             print(f"Got {len(partitioned_events)} total partitioned events from database")
 
-            for event in partitioned_events:
-                print([x for x in event.partitions][0])
-                print(event.partitions.name)
+            # for event in partitioned_events:
+            #     print([x for x in event.partitions][0])
+            #     print(event.partitions.name)
 
             test_systems = {
                 event.pandda.system.name: event.pandda.system
                 for event
                 in partitioned_events
-                if str(event.partitions.name) == constants.INITIAL_TEST_PARTITION
+                if [x for x in event.partitions][0].name == constants.INITIAL_TEST_PARTITION
             }
 
             test_experiments = {
