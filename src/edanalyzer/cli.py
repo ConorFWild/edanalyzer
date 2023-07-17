@@ -3969,9 +3969,10 @@ class CLI:
                     experiment,
                     test_partition_key,
                 )
-                print(f"Got {len(experiment_events)} events from experiment PanDDA")
                 if not experiment_events:
                     continue
+                print(f"Got {len(experiment_events)} events from experiment PanDDA")
+
 
                 # Get the matched events
                 matched_events = _get_matched_events(experiment_events, reference_system_events)
