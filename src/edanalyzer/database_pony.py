@@ -55,6 +55,7 @@ class EventORM(db.Entity):
     ligand = Optional("LigandORM")
     dataset = Optional("DatasetORM")
     pandda = Required("PanDDAORM")
+    annotations = Set("AnnotationORM")
     partitions = Set("PartitionORM", table=constants.TABLE_EVENT_PARTITION, column="partition_id")
 
     composite_key(pandda, dtag, event_idx)
@@ -84,7 +85,7 @@ class AnnotationORM(db.Entity):
     annotation = Required(bool)
     source = Required(str)
 
-    event= Required("EventORM")
+    event = Required("EventORM", )
 
     composite_key(source, event)
 
