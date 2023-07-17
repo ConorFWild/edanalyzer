@@ -3914,9 +3914,9 @@ class CLI:
         }
 
         test_experiments = {
-            system.name: [experiment for experiment in system.experiments]
-            for system
-            in test_systems
+            system_name: [experiment for experiment in system.experiments]
+            for system_name, system
+            in test_systems.items()
         }
         print(f"Got {len(test_systems)} test systems")
 
