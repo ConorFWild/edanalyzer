@@ -85,7 +85,7 @@ class AnnotationORM(db.Entity):
     annotation = Required(bool)
     source = Required(str)
 
-    event = Required("EventORM")
+    event = Required("EventORM", column="event_id")
 
     composite_key(source, event)
 
