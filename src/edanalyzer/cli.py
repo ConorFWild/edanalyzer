@@ -3970,6 +3970,7 @@ class CLI:
                     test_partition_key,
                 )
                 if not experiment_events:
+                    print(f"Got not experiment events! Skipping")
                     continue
                 print(f"Got {len(experiment_events)} events from experiment PanDDA")
 

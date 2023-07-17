@@ -5,23 +5,6 @@ from edanalyzer import constants
 
 db = Database()
 
-#
-# event_partition_association_table = Table(
-#     constants.TABLE_EVENT_PARTITION,
-#     db.Entity.metadata,
-#     Column("id", Integer, primary_key=True),
-#     Column("event_id", Integer, ForeignKey(f"{constants.TABLE_EVENT}.id"), ),
-#     Column("partition_id", Integer, ForeignKey(f"{constants.TABLE_PARTITION}.id"), ),
-# )
-#
-# dataset_pandda_association_table = Table(
-#     constants.TABLE_DATASET_PANDDA,
-#     db.Entity.metadata,
-#     Column("id", Integer, primary_key=True),
-#     Column("dataset_id", Integer, ForeignKey(f"{constants.TABLE_DATASET}.id"), ),
-#     Column("pandda_id", Integer, ForeignKey(f"{constants.TABLE_PANDDA}.id"), ),
-# )
-
 class PanDDAORM(db.Entity):
     _table_ = constants.TABLE_PANDDA
 
