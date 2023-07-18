@@ -3982,6 +3982,8 @@ class CLI:
 
             print(f"For a total of {len(initial_reference_events)} reference events")
 
+            records = []
+
             # Iterate the systems
             for system_name, system in test_systems.items():
                 print(f"########## System: {system_name} ##########˚")
@@ -4040,6 +4042,22 @@ class CLI:
 
                     # Render scoring statistics
                     _print_scoring_statistics(scoring_statistics)
+
+                    for model_number, model_statistics in scoring_statistics.items():
+                        for recall, recall_statistics in model_statistics.items():
+                            records.append(
+                                {
+                                    "System": system_name,
+                                    "Experiment": experiment.path,
+                                    "Model": model_number,
+                                    "Recall": recall,
+                                    "Precision": recall_statistics["precision"],
+                                    "Cutoff": recall_statistics["cutoff"]
+                                }
+                            )
+
+                    table = pd.DataFrame(records)
+                    table.to_csv(table, Path(options.working_dir) / "model_statistics.csv")
 
             db.rollback()
 
