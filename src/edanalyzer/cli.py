@@ -4004,6 +4004,8 @@ class CLI:
                     if annotation_orm.annotation:
                         reference_hits.append(event)
 
+                hit_dtags = [event.dtag for event in reference_hits]
+
                 print(f"Got {len(reference_system_events)} reference events, of which {len(reference_hits)} are hits!")
 
                 for experiment in test_experiments[system_name]:
@@ -4028,6 +4030,7 @@ class CLI:
                         experiment,
                         pandda,
                         test_partition_key,
+                        hit_dtags
                     )
                     if not experiment_events:
                         print(f"Got not find experiment events! Skipping")
@@ -4095,8 +4098,9 @@ from edanalyzer.database_pony_utils import parse_analyse_table_row
 
 def _get_test_events(
         experiment,
-pandda,
+        pandda,
         test_partition_key,
+hit_dtags
 ):
 
     test_events = []
@@ -4132,6 +4136,8 @@ pandda,
     # test_events[system_name][experiment.path] = []
 
     for idx, row in analysis_table.iterrows():
+        if row[constants.PANDDA_INSPECT_DTAG] not in hit_dtags:
+            continue
         event = parse_analyse_table_row(
             row,
             None,
