@@ -4052,7 +4052,8 @@ class CLI:
                                     "Model": model_number,
                                     "Recall": recall,
                                     "Precision": recall_statistics["precision"],
-                                    "Cutoff": recall_statistics["cutoff"]
+                                    "Cutoff": recall_statistics["cutoff"],
+                                    "Actual Recall": recall_statistics["actual_recall"]
                                 }
                             )
 
@@ -4271,7 +4272,7 @@ def _get_scoring_statistics(_model_scores, recalls=[0.95, 0.975, 0.99, 1.0]):
             precision = round(highest_recall_row["precision"], 3)
             cutoff = round(highest_recall_row["cutoff"], 3)
             observed_recall = round(highest_recall_row["recall"], 3)
-            scoring_statistics[model_number][observed_recall] = {"cutoff": cutoff, "precision": precision}
+            scoring_statistics[model_number][recall] = {"cutoff": cutoff, "precision": precision, "actual_recall": observed_recall}
 
     return scoring_statistics
 
@@ -4281,8 +4282,8 @@ def _get_scoring_statistics(_model_scores, recalls=[0.95, 0.975, 0.99, 1.0]):
 def _print_scoring_statistics(model_scoring_statistics):
     for model_number, scoring_statistics in model_scoring_statistics.items():
         for recall, statistics in scoring_statistics.items():
-            precision, cutoff = statistics['precision'], statistics['cutoff']
-            print(f"\tModel Number: {model_number}: Recall: {recall} : Precision : {precision} : Cutoff : {cutoff}")
+            precision, cutoff, actual_recall = statistics['precision'], statistics['cutoff'], statistics['actual_recall']
+            print(f"\tModel Number: {model_number}: Recall: {recall} : Actual Recall: {actual_recall} :  Precision : {precision} : Cutoff : {cutoff}")
 
 def update_from_annotations_v2_get_annotations(
     events: dict[int, EventORM],
