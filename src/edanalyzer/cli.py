@@ -4050,6 +4050,7 @@ def _get_models(_model_key, _working_dir):
     for path in _working_dir.glob("*"):
         match = re.match(f"{_model_key}([0-9]+).pt", path.name)
         if match is not None:
+            print(match)
             models[int(match)] = path
 
     return models
