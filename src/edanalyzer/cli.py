@@ -4113,7 +4113,7 @@ def _get_test_events(
         experiment,
         pandda,
         test_partition_key,
-hit_dtags
+        hit_dtags
 ):
 
     test_events = []
@@ -4149,8 +4149,8 @@ hit_dtags
     # test_events[system_name][experiment.path] = []
 
     for idx, row in analysis_table.iterrows():
-        if row[constants.PANDDA_INSPECT_DTAG] not in hit_dtags:
-            continue
+        # if row[constants.PANDDA_INSPECT_DTAG] not in hit_dtags:
+        #     continue
         event = parse_analyse_table_row(
             row,
             None,
