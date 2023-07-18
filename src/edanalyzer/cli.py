@@ -4258,7 +4258,7 @@ def _get_scoring_statistics(_model_scores, recalls=[0.95, 0.975, 0.99, 1.0]):
 def _print_scoring_statistics(model_scoring_statistics):
     for model_number, scoring_statistics in model_scoring_statistics.items():
         for recall, statistics in scoring_statistics.items():
-            precision, cutoff = scoring_statistics['precision'], scoring_statistics['cutoff']
+            precision, cutoff = statistics['precision'], statistics['cutoff']
             print(f"\tModel Number: {model_number}: Recall: {recall} : Precision : {precision} : Cutoff : {cutoff}")
 
 def update_from_annotations_v2_get_annotations(
