@@ -4159,7 +4159,8 @@ def _get_test_events(
         )
 
         #
-        test_events.append(event)
+        if event:
+            test_events.append(event)
 
     return test_events
 
