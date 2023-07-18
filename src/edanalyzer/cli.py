@@ -4190,6 +4190,8 @@ def _get_model_scores(_model, _matched_events):
         events_pyd.append(event_pyd)
     dataset = PanDDAEventDataset(pandda_events=events_pyd)
     records = get_annotations_from_dataset_ligand(dataset, _model)
+    for record in records:
+        print(record)
 
     return records
 
