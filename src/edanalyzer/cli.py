@@ -4033,8 +4033,8 @@ class CLI:
                     # Score the events against each model
                     model_scores = {}
                     for model_number, model in models.items():
-                        if model_number != 10:
-                            continue
+                        # if model_number != 10:
+                        #     continue
                         model_scores[model_number] = _get_model_scores(model, matched_events)
 
                     # Get the scoring statistics
