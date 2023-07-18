@@ -3990,7 +3990,21 @@ class CLI:
 
                 # Get the corresponding reference events
                 reference_system_events = reference_events[system_name]
-                print(f"Got {len(reference_system_events)} reference events!")
+
+                reference_hits = []
+                for event in reference_events:
+                    event_annotations = {annotation.source: annotation for annotation in event.annotations}
+
+                    if "manual" in event_annotations:
+                        annotation_orm = event_annotations["manual"]
+                    else:
+                        annotation_orm = event_annotations["auto"]
+
+                    # Reference event is a hit: check for match
+                    if annotation_orm.annotation:
+                        reference_hits.append(event)
+
+                print(f"Got {len(reference_system_events)} reference events, of which {len(reference_hits)} are hits!")
 
                 for experiment in test_experiments[system_name]:
                     print(f"# Experiment: {experiment.path}")
