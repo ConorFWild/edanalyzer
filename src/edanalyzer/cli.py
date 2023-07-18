@@ -4030,7 +4030,6 @@ class CLI:
                         experiment,
                         pandda,
                         test_partition_key,
-                        hit_dtags
                     )
                     if not experiment_events:
                         print(f"Got not find experiment events! Skipping")
@@ -4113,7 +4112,6 @@ def _get_test_events(
         experiment,
         pandda,
         test_partition_key,
-        hit_dtags
 ):
 
     test_events = []
@@ -4157,7 +4155,7 @@ def _get_test_events(
             test_system_pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR,
             None,
             pandda,
-        annotation_type="auto",
+            annotation_type="auto",
         )
 
         #
