@@ -4268,7 +4268,7 @@ def _get_scoring_statistics(_model_scores, recalls=[0.95, 0.975, 0.99, 1.0]):
             highest_recall_table = cutoff_precission_recall_table[delta_recall_series == delta_recall_series.min()]
             highest_recall_row = highest_recall_table[highest_recall_table["cutoff"] == highest_recall_table["cutoff"].max()].iloc[0]
             print(highest_recall_row)
-            precision = round(highest_recall_row["precision"])
+            precision = round(highest_recall_row["precision"], 3)
             cutoff = round(highest_recall_row["cutoff"], 3)
             observed_recall = round(highest_recall_row["recall"], 3)
             scoring_statistics[model_number][observed_recall] = {"cutoff": cutoff, "precision": precision}
