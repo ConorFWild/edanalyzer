@@ -4019,6 +4019,7 @@ class CLI:
 
 
                     # Get the matched events
+                    print(f"Matching events...")
                     matched_events = _get_matched_events(experiment_events, reference_system_events)
                     num_matched = len([event for event in matched_events if event.hit_confidence == "High"])
 
