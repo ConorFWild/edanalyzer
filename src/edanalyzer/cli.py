@@ -3992,7 +3992,7 @@ class CLI:
                 reference_system_events = reference_events[system_name]
 
                 reference_hits = []
-                for event in reference_events:
+                for event in reference_system_events:
                     event_annotations = {annotation.source: annotation for annotation in event.annotations}
 
                     if "manual" in event_annotations:
