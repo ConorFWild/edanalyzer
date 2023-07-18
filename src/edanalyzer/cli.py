@@ -4208,8 +4208,8 @@ def _get_model_scores(_model, _matched_events):
         events_pyd.append(event_pyd)
     dataset = PanDDAEventDataset(pandda_events=events_pyd)
     records = get_annotations_from_dataset_ligand(dataset, _model)
-    for record in records:
-        print(record)
+    # for record in records:
+    #     print(record)
 
     return records
 
@@ -4262,12 +4262,12 @@ def _get_scoring_statistics(_model_scores, recalls=[0.95, 0.975, 0.99, 1.0]):
             )
 
         cutoff_precission_recall_table = pd.DataFrame(cutoff_precission_recall)
-        print(cutoff_precission_recall_table)
+        # print(cutoff_precission_recall_table)
         for recall in recalls:
             delta_recall_series = (cutoff_precission_recall_table["recall"] - recall).abs()
             highest_recall_table = cutoff_precission_recall_table[delta_recall_series == delta_recall_series.min()]
             highest_recall_row = highest_recall_table[highest_recall_table["cutoff"] == highest_recall_table["cutoff"].max()].iloc[0]
-            print(highest_recall_row)
+            # print(highest_recall_row)
             precision = round(highest_recall_row["precision"], 3)
             cutoff = round(highest_recall_row["cutoff"], 3)
             observed_recall = round(highest_recall_row["recall"], 3)
