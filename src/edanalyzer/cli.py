@@ -4158,7 +4158,7 @@ def _get_matched_events(_test_system_events, _reference_system_events):
 
 def _get_model_scores(_model, _matched_events):
     events_pyd = []
-    for event in _matched_events:
+    for j, event in enumerate(_matched_events):
         if event.ligand:
             ligand = event.ligand
             x, y, z = ligand.x, ligand.y, ligand.z
@@ -4174,7 +4174,7 @@ def _get_model_scores(_model, _matched_events):
 
         event_pyd = PanDDAEvent(
                 # id=event.id,
-                id=0,
+                id=j,
                 pandda_dir=event.pandda.path,
                 model_building_dir=event.pandda.experiment.model_dir,
                 system_name=event.pandda.system.name,
