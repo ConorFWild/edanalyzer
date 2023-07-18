@@ -4247,7 +4247,7 @@ def _get_scoring_statistics(_model_scores, recalls=[0.95, 0.975, 0.99, 1.0]):
             highest_recall_row = highest_recall_table.iloc[0]
             precision = highest_recall_row["precision"]
             cutoff = highest_recall_row["cutoff"]
-            scoring_statistics[model_number][recall] = {"cutoff": cutoff, "precision": precision}
+            scoring_statistics[model_number][highest_recall_row['recall']] = {"cutoff": cutoff, "precision": precision}
 
     return scoring_statistics
 
