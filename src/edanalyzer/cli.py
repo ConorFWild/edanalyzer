@@ -4047,8 +4047,8 @@ class CLI:
                         for recall, recall_statistics in model_statistics.items():
                             records.append(
                                 {
-                                    "System": system_name,
-                                    "Experiment": experiment.path,
+                                    "System": str(system_name),
+                                    "Experiment": str(experiment.path),
                                     "Model": model_number,
                                     "Recall": recall,
                                     "Precision": recall_statistics["precision"],
@@ -4057,7 +4057,7 @@ class CLI:
                             )
 
                     table = pd.DataFrame(records)
-                    table.to_csv(table, Path(options.working_dir) / "model_statistics.csv")
+                    table.to_csv(Path(options.working_dir) / "model_statistics.csv")
 
             db.rollback()
 
