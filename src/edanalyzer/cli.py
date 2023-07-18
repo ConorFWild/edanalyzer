@@ -3994,6 +3994,7 @@ class CLI:
                     print(f"# Experiment: {experiment.path}")
 
                     pandda_path = str(Path(experiment.path) / "processing" / "analysis" / test_partition_key / "1")
+                    print(f"Deleting previous pandda if in database...")
                     if pandda_path in panddas:
                         pandda =panddas[pandda_path]
                         pandda.delete()
@@ -4016,7 +4017,6 @@ class CLI:
                         print(f"Got not find experiment events! Skipping")
                         continue
                     print(f"Got {len(experiment_events)} events from experiment PanDDA")
-
 
                     # Get the matched events
                     print(f"Matching events...")
