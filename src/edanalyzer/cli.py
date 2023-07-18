@@ -4262,6 +4262,7 @@ def _get_scoring_statistics(_model_scores, recalls=[0.95, 0.975, 0.99, 1.0]):
                 }
             )
 
+
         cutoff_precission_recall_table = pd.DataFrame(cutoff_precission_recall)
         # print(cutoff_precission_recall_table)
         for recall in recalls:
