@@ -4055,22 +4055,35 @@ class CLI:
                         model_scores[model_number] = _get_model_scores(model, matched_events)
 
                     # Get the scoring statistics
-                    scoring_statistics = _get_scoring_statistics(model_scores)
+                    scoring_statistics, pr_curve_tables = _get_scoring_statistics(model_scores)
+
 
                     # Render scoring statistics
                     _print_scoring_statistics(scoring_statistics)
 
-                    for model_number, model_statistics in scoring_statistics.items():
-                        for recall, recall_statistics in model_statistics.items():
+                    # for model_number, model_statistics in scoring_statistics.items():
+                    #     for recall, recall_statistics in model_statistics.items():
+                    #         records.append(
+                    #             {
+                    #                 "System": str(system_name),
+                    #                 "Experiment": str(experiment.path),
+                    #                 "Model": model_number,
+                    #                 "Recall": recall,
+                    #                 "Precision": recall_statistics["precision"],
+                    #                 "Cutoff": recall_statistics["cutoff"],
+                    #                 "Actual Recall": recall_statistics["actual_recall"]
+                    #             }
+                    #         )
+                    for model_number, pr_curve_table in pr_curve_tables.items():
+                        for idx, row in pr_curve_table.iterrows():
                             records.append(
                                 {
                                     "System": str(system_name),
                                     "Experiment": str(experiment.path),
                                     "Model": model_number,
-                                    "Recall": recall,
-                                    "Precision": recall_statistics["precision"],
-                                    "Cutoff": recall_statistics["cutoff"],
-                                    "Actual Recall": recall_statistics["actual_recall"]
+                                    "Recall": row['recall'],
+                                    "Precision": row["precision"],
+                                    "Cutoff": row["cutoff"],
                                 }
                             )
 
@@ -4238,6 +4251,7 @@ def _get_model_scores(_model, _matched_events):
 def _get_scoring_statistics(_model_scores, recalls=[0.95, 0.975, 0.99, 1.0]):
 
     scoring_statistics = {}
+    pr_curve_tables = {}
     for model_number, model_scores in _model_scores.items():
         scoring_statistics[model_number] = {}
         cutoff_precission_recall = []
@@ -4284,6 +4298,7 @@ def _get_scoring_statistics(_model_scores, recalls=[0.95, 0.975, 0.99, 1.0]):
 
 
         cutoff_precission_recall_table = pd.DataFrame(cutoff_precission_recall)
+        pr_curve_tables[model_number] = cutoff_precission_recall_table
         # print(cutoff_precission_recall_table)
         for recall in recalls:
             delta_recall_series = (cutoff_precission_recall_table["recall"] - recall).abs()
@@ -4295,7 +4310,7 @@ def _get_scoring_statistics(_model_scores, recalls=[0.95, 0.975, 0.99, 1.0]):
             observed_recall = round(highest_recall_row["recall"], 3)
             scoring_statistics[model_number][recall] = {"cutoff": cutoff, "precision": precision, "actual_recall": observed_recall}
 
-    return scoring_statistics
+    return scoring_statistics, pr_curve_tables
 
     ...
 
