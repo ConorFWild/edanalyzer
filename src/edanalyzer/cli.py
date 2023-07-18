@@ -4030,6 +4030,8 @@ class CLI:
                     # Score the events against each model
                     model_scores = {}
                     for model_number, model in models.items():
+                        if model_number != 10:
+                            continue
                         model_scores[model_number] = _get_model_scores(model, matched_events)
 
                     # Get the scoring statistics
@@ -4048,7 +4050,7 @@ def _get_models(_model_key, _working_dir):
     for path in _working_dir.glob("*"):
         match = re.match(f"{_model_key}([0-9]+).pt", path.name)
         if match is not None:
-            models[match] = path
+            models[int(match)] = path
 
     return models
 
@@ -4198,7 +4200,7 @@ def _get_scoring_statistics(_model_scores, recalls=[0.95, 0.975, 0.99, 1.0]):
         for cutoff in np.linspace(0.0,1.0,num=101):
             cutoff = round(cutoff, 2)
             tp, tn, fp, fn = 0,0,0,0
-            for record in model_scores:
+            for record_idx, record in model_scores.items():
                 if record["model_annotation"] > cutoff:
                     if record["annotation"] == 0.0:
                         fp += 1
