@@ -100,6 +100,6 @@ def _rescore(dataset, dataset_torch, model, dev, initial_scores):
         event = dataset.pandda_events[_idx]
 
         event_id = (event.dtag, event.event_idx)
-        new_scores[event_id] = model_annotation.to(torch.device("cpu")).detach().numpy()
+        new_scores[event_id] = model_annotation.to(torch.device("cpu")).detach().numpy()[1]
 
         print(f"{event_id[0]} {event_id[1]} : Old Score: {initial_scores[event_id]} : New Score: {new_scores[event_id]}")
