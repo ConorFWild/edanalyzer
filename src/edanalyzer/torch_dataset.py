@@ -778,6 +778,7 @@ def get_image_xmap_ligand(event: PanDDAEvent, ):
         image_model = sample_xmap(model_map, sample_transform, sample_array_model)
         print(f"Model: {np.mean(image_model)}")
 
+
         # ligand_map_array = np.copy(sample_array)
         ligand_map = get_ligand_map(event)
         image_ligand = np.array(ligand_map)
