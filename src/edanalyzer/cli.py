@@ -93,7 +93,10 @@ class CLI:
         options = _parse_rescore_options(rescore_options_yaml)
 
         # Transform PanDDA dir to dataset
+        time_get_dataset_begin = time.time()
         dataset, initial_scores = _pandda_dir_to_dataset(options.pandda_dir, options.data_dir)
+        time_get_dataset_finish = time.time()
+        print(f"Got dataset in {time_get_dataset_finish-time_get_dataset_begin}")
 
         if options.data_type == "ligand":
             dataset_torch = PanDDADatasetTorchLigand(
@@ -157,7 +160,7 @@ class CLI:
         model = model.eval()
 
         scores: dict[tuple[str, int], float] = _rescore(
-            dataset, dataset_torch, model, dev
+            dataset, dataset_torch, model, dev, initial_scores
         )
 
         for event_id, new_score in scores.items():

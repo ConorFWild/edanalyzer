@@ -81,7 +81,7 @@ def _pandda_dir_to_dataset(pandda_dir: Path, data_dir: Path):
     return PanDDAEventDataset(pandda_events=events_pyd), scores
 
 
-def _rescore(dataset, dataset_torch, model, dev):
+def _rescore(dataset, dataset_torch, model, dev, initial_scores):
     # Get the dataloader
     train_dataloader = DataLoader(
         dataset_torch,
@@ -99,4 +99,7 @@ def _rescore(dataset, dataset_torch, model, dev):
         # Get corresponding event
         event = dataset.pandda_events[_idx]
 
-        new_scores[(event.dtag, event.event_idx)] = model_annotation.to(torch.device("cpu")).detach().numpy()
+        event_id = (event.dtag, event.event_idx)
+        new_scores[event_id] = model_annotation.to(torch.device("cpu")).detach().numpy()
+
+        print(f"{event_id[0]} {event_id[1]} : Old Score: {initial_scores[event_id]} : New Score: {new_scores[event_id]}")
