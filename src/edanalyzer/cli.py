@@ -93,7 +93,7 @@ class CLI:
         options = _parse_rescore_options(rescore_options_yaml)
 
         # Transform PanDDA dir to dataset
-        dataset, initial_scores = _pandda_dir_to_dataset(options.pandda_dir)
+        dataset, initial_scores = _pandda_dir_to_dataset(options.pandda_dir, options.data_dir)
 
         if options.data_type == "ligand":
             dataset_torch = PanDDADatasetTorchLigand(
