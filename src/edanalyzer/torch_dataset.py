@@ -296,7 +296,13 @@ def get_raw_xmap_from_event(event: PanDDAEvent):
     #     event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(
     #     dtag=event.dtag)
     # return load_xmap_from_mtz(mtz_path)
-    return Path(event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / "xmap.ccp4"
+    path = Path(event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / "xmap.ccp4"
+    ccp4 = gemmi.read_ccp4_map(str(path))
+    ccp4.setup(float('nan'))
+    m = ccp4.grid
+
+    return m
+
 
 
 def get_image_event_map_and_raw_from_event(event: PanDDAEvent):
