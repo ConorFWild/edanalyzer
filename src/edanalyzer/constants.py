@@ -93,3 +93,17 @@ INITIAL_TRAIN_PARTITION = "train"
 INITIAL_TEST_PARTITION = "test"
 FINETUNE_TRAIN_PARTITION = "finetune_train"
 FINETUNE_TEST_PARTITION = "finetune_test"
+
+LIGAND_IGNORE_REGEXES = [
+    "merged",
+    "LIG-[a-zA-Z]+-",
+    "dimple",
+    "refine",
+    "init",
+    "pipedream",
+    "phenix",
+    "None",
+    "blank",
+    "control",
+    "DMSO",
+]
