@@ -292,10 +292,11 @@ def get_image_from_event_augmented(event: PanDDAEvent):
 
 
 def get_raw_xmap_from_event(event: PanDDAEvent):
-    mtz_path = Path(
-        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(
-        dtag=event.dtag)
-    return load_xmap_from_mtz(mtz_path)
+    # mtz_path = Path(
+    #     event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(
+    #     dtag=event.dtag)
+    # return load_xmap_from_mtz(mtz_path)
+    return Path(event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / "xmap.ccp4"
 
 
 def get_image_event_map_and_raw_from_event(event: PanDDAEvent):
