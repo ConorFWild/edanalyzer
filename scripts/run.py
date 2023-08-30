@@ -82,6 +82,7 @@ def _get_custom_annotations(path):
                         annotation = annotations["auto"]
                     custom_annotations[event_id] = annotation
 
+    db.disconnect()
     return custom_annotations
 
 
