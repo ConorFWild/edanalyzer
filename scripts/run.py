@@ -24,13 +24,13 @@ from edanalyzer import constants
 @dataclasses.dataclass
 class Ligand:
     path: str
-    smiles:str
-    chain:str
-    residue:int
-    num_atoms:int
-    x:float
-    y:float
-    z:float
+    smiles: str
+    chain: str
+    residue: int
+    num_atoms: int
+    x: float
+    y: float
+    z: float
 
 
 @dataclasses.dataclass
@@ -181,7 +181,7 @@ def _get_system_from_dtag(dtag):
         return None
     else:
         last_hypen_pos = hyphens[-1]
-        system_name = dtag[:last_hypen_pos ]
+        system_name = dtag[:last_hypen_pos]
 
         return system_name
 
@@ -275,6 +275,7 @@ def get_event_ligand(inspect_model_path, x, y, z, cutoff=10.0):
     else:
         return None
 
+
 def _parse_inspect_table_row(
         row,
         pandda_dir,
@@ -350,11 +351,19 @@ def _parse_inspect_table_row(
             z,
         )
         inspect_model_path = str(inspect_model_path)
-
+        ligand = LigandORM(
+            path=str(ligand.path),
+            smiles=str(ligand.smiles),
+            chain=str(ligand.chain),
+            residue=int(ligand.residue),
+            num_atoms=int(ligand.num_atoms),
+            x=float(ligand.x),
+            y=float(ligand.y),
+            z=float(ligand.z),
+        ),
     else:
         ligand = None
         inspect_model_path = None
-
 
     # hyphens = [pos for pos, char in enumerate(dtag) if char == "-"]
     # if len(hyphens) == 0:
@@ -370,10 +379,9 @@ def _parse_inspect_table_row(
         annotation_value = False
 
     if ligand and annotation_value:
-        rprint(f"For {(dtag, event_idx)}, updating event centroid using associated ligand centroid from {(x, y, z)} to {(ligand.x, ligand.y, ligand.z)}")
-        x,y,z = ligand.x, ligand.y, ligand.z
-
-
+        rprint(
+            f"For {(dtag, event_idx)}, updating event centroid using associated ligand centroid from {(x, y, z)} to {(ligand.x, ligand.y, ligand.z)}")
+        x, y, z = ligand.x, ligand.y, ligand.z
 
     event = Event(
         dtag=str(dtag),
@@ -462,7 +470,8 @@ def _make_database(
                     for idx, row
                     in inspect_table.iterrows()
                 )
-                rprint(f"Got {len(pandda_events)} of which {len([x for x in pandda_events if x is not None])} are not None!")
+                rprint(
+                    f"Got {len(pandda_events)} of which {len([x for x in pandda_events if x is not None])} are not None!")
                 for pandda_event in pandda_events:
                     if pandda_event:
                         dtag, event_idx = pandda_event.dtag, pandda_event.event_idx
@@ -480,7 +489,7 @@ def _make_database(
 
                         structure_path = Path(pandda_event.initial_structure).absolute().resolve()
                         dataset_dir_index = [j for j, part in enumerate(structure_path.parts) if part == dtag]
-                        dataset_path =Path(*structure_path.parts[:dataset_dir_index[0]+1])
+                        dataset_path = Path(*structure_path.parts[:dataset_dir_index[0] + 1])
                         experiment_path = dataset_path.parent
                         if experiment_path in experiments:
                             experiment = experiments[experiment_path]
