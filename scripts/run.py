@@ -442,7 +442,7 @@ def _make_database(
 
         # Partition the datasets
         for event_id, event in events.items():
-            rprint(event)
+            print(event)
 
         ...
 
