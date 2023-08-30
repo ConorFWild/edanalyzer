@@ -1,5 +1,7 @@
 import dataclasses
+import os
 import pickle
+import pathlib
 from pathlib import Path
 
 import yaml
@@ -83,6 +85,35 @@ def _get_custom_annotations(path):
     return custom_annotations
 
 
+def _make_database(
+        name,
+        working_directory,
+        datasets,
+        exclude,
+        cpus,
+        custom_annotations
+):
+    database_path = working_directory / "database.db"
+    db.bind(provider='sqlite', filename=f"{database_path}")
+    db.generate_mapping()
+
+    # Get the pandda paths
+    pandda_paths = [
+        path
+        for dataset_pattern
+        in datasets
+        for path
+        in Path('/').glob(dataset_pattern)
+        if not any([path.match(exclude_pattern) for exclude_pattern in exclude])
+
+    ]
+    print(pandda_paths)
+
+    with pony.orm.db_session:
+
+    ...
+
+
 def __main__(config_yaml="config.yaml"):
     # Initialize the config
     with open(config_yaml, "r") as f:
@@ -106,6 +137,9 @@ def __main__(config_yaml="config.yaml"):
         )
         rprint(config)
 
+    if not config.working_directory.exists():
+        os.mkdir(config.working_directory)
+
     # Parse custom annotations
     if "Annotations" in config.steps:
         custom_annotations_path = config.working_directory / "custom_annotations.pickle"
@@ -120,7 +154,13 @@ def __main__(config_yaml="config.yaml"):
 
     # Construct the dataset
     if "Collate" in config.steps:
-        ...
+        _make_database(
+            config.name,
+            config.working_directory,
+            config.datasets,
+            config.exclude,
+            config.cpus
+        )
 
     # Run training/testing
     if 'Train+Test' in config.steps:
