@@ -366,8 +366,8 @@ def _make_database(
                             )
                             systems[system_name] = system
 
-                        dataset_path = Path(event.initial_structure).absolute().resolve().parent
-                        experiment_path = Path(event.initial_structure).absolute().resolve().parent.parent
+                        dataset_path = Path(pandda_event.initial_structure).absolute().resolve().parent
+                        experiment_path = Path(pandda_event.initial_structure).absolute().resolve().parent.parent
                         if experiment_path in experiments:
                             experiment = experiments[experiment_path]
                         else:
@@ -384,10 +384,10 @@ def _make_database(
                             dataset = datasets[dtag]
                         else:
                             dataset = DatasetORM(
-                                dtag=event.dtag,
+                                dtag=pandda_event.dtag,
                                 path=str(dataset_path),
-                                structure=str(Path(event.initial_structure).absolute().resolve()),
-                                reflections=str(Path(event.initial_reflections).absolute().resolve()),
+                                structure=str(Path(pandda_event.initial_structure).absolute().resolve()),
+                                reflections=str(Path(pandda_event.initial_reflections).absolute().resolve()),
                                 system=system,
                                 experiment=experiment,
                                 panddas=[]
@@ -409,7 +409,7 @@ def _make_database(
                         if (str(pandda_path), dtag, event_idx) in custom_annotations:
                             _annotation = custom_annotations[(str(pandda_path), dtag, event_idx)]
                         else:
-                            _annotation = event.annotation
+                            _annotation = pandda_event.annotation
 
                         event = EventORM(
                             dtag=pandda_event.dtag,
