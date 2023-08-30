@@ -112,7 +112,7 @@ def _make_database(
 
     with pony.orm.db_session:
 
-    ...
+        ...
 
 
 def __main__(config_yaml="config.yaml"):
