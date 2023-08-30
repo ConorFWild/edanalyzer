@@ -540,8 +540,6 @@ def _make_database(
                         else:
                             _annotation = pandda_event.annotation
 
-
-
                         event = EventORM(
                             dtag=pandda_event.dtag,
                             event_idx=pandda_event.event_idx,
@@ -566,16 +564,16 @@ def _make_database(
 
                         if pandda_event.ligand:
                             ligand_orm = LigandORM(
-                                        path=str(pandda_event.ligand.path),
-                                        smiles=str(pandda_event.ligand.smiles),
-                                        chain=str(pandda_event.ligand.chain),
-                                        residue=int(pandda_event.ligand.residue),
-                                        num_atoms=int(pandda_event.ligand.num_atoms),
-                                        x=float(pandda_event.ligand.x),
-                                        y=float(pandda_event.ligand.y),
-                                        z=float(pandda_event.ligand.z),
+                                path=str(pandda_event.ligand.path),
+                                smiles=str(pandda_event.ligand.smiles),
+                                chain=str(pandda_event.ligand.chain),
+                                residue=int(pandda_event.ligand.residue),
+                                num_atoms=int(pandda_event.ligand.num_atoms),
+                                x=float(pandda_event.ligand.x),
+                                y=float(pandda_event.ligand.y),
+                                z=float(pandda_event.ligand.z),
                                 event=event
-                                    )
+                            )
                         else:
                             ligand_orm = None
 
