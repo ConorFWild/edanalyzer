@@ -9,6 +9,7 @@ import fire
 import pony
 import rich
 from rich import print as rprint
+import pandas as pd
 
 from edanalyzer.database_pony import db, EventORM  # import *
 
@@ -98,8 +99,8 @@ def _make_database(
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
     db.generate_mapping(create_tables=True)
 
-    # Get the pandda paths
-    pandda_paths = [
+    # Get the possible pandda paths
+    possible_pandda_paths = [
         path
         for dataset_pattern
         in datasets
@@ -108,10 +109,22 @@ def _make_database(
         if not any([path.match(exclude_pattern) for exclude_pattern in exclude])
 
     ]
-    rprint(f"Got {len(pandda_paths)} pandda paths!")
-    rprint(pandda_paths)
+    rprint(f"Got {len(possible_pandda_paths)} pandda paths!")
+    rprint(possible_pandda_paths)
+
+    # Get the pandda event tables
+    inspect_tables = {}
+    for possible_pandda_path in possible_pandda_paths:
+        analyse_table_path = possible_pandda_path / "analyses" / "pandda_inspect_events.csv"
+        if analyse_table_path.exists():
+            analyse_table = pd.read_csv(analyse_table_path)
+            inspect_tables[possible_pandda_path] = analyse_table
+    rprint(f"Got {len(inspect_tables)} pandda inspect tables!")
 
     with pony.orm.db_session:
+        # Multiprocess PanDDAs, returning valid events for addition to the
+            # Skip if no valid inspect file
+
 
         ...
 
