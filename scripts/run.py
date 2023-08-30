@@ -346,6 +346,7 @@ def _make_database(
                     for idx, row
                     in inspect_table.iterrows()
                 )
+                rprint(f"Got {len(pandda_events)} of which {[x for x in pandda_events if x is not None]} are not None!")
                 for pandda_event in pandda_events:
                     if pandda_event:
                         dtag, event_idx = pandda_event.dtag, pandda_event.event_idx
