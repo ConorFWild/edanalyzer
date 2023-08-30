@@ -384,6 +384,7 @@ def _parse_inspect_table_row(
             f"For {(dtag, event_idx)}, updating event centroid using associated ligand centroid from {(x, y, z)} to {(ligand.x, ligand.y, ligand.z)}")
         x, y, z = ligand.x, ligand.y, ligand.z
 
+    rprint(f"\tAdding event: {(dtag, event_idx)}!")
     event = Event(
         dtag=str(dtag),
         event_idx=int(event_idx),
