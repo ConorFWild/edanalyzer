@@ -95,7 +95,7 @@ def _make_database(
         custom_annotations
 ):
     database_path = working_directory / "database.db"
-    db.bind(provider='sqlite', filename=f"{database_path}")
+    db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
     db.generate_mapping()
 
     # Get the pandda paths
