@@ -117,8 +117,11 @@ def _make_database(
     for possible_pandda_path in possible_pandda_paths:
         analyse_table_path = possible_pandda_path / "analyses" / "pandda_inspect_events.csv"
         if analyse_table_path.exists():
-            analyse_table = pd.read_csv(analyse_table_path)
-            inspect_tables[possible_pandda_path] = analyse_table
+            try:
+                analyse_table = pd.read_csv(analyse_table_path)
+                inspect_tables[possible_pandda_path] = analyse_table
+            except Exception as e:
+                print(f"\tERROR READING INSPECT TABLE: {analyse_table_path} : {e}")
     rprint(f"Got {len(inspect_tables)} pandda inspect tables!")
 
     with pony.orm.db_session:
