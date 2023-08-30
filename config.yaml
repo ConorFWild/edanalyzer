@@ -1,5 +1,5 @@
 name: all_data
-working_directory:
+working_directory: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data
 steps:
   - Annotations
   - Collate
