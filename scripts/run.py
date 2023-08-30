@@ -470,13 +470,13 @@ def _make_database(
     with pony.orm.db_session:
         # Multiprocess PanDDAs, returning valid events for addition to the
         with joblib.Parallel(n_jobs=-1, verbose=50) as parallel:
-            j = 0
+            # j = 0
             for pandda_path, inspect_table in inspect_tables.items():
                 print(f"### {pandda_path} ")
 
-                if j > 10:
-                    continue
-                j += 1
+                # if j > 10:
+                #     continue
+                # j += 1
                 pandda_events: list[Event] = parallel(
                     joblib.delayed(_parse_inspect_table_row)(
                         row,
