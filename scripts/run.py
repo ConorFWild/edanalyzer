@@ -168,7 +168,7 @@ def _get_system_from_dtag(dtag):
         return None
     else:
         last_hypen_pos = hyphens[-1]
-        system_name = dtag[:last_hypen_pos + 1]
+        system_name = dtag[:last_hypen_pos ]
 
         return system_name
 
