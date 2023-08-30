@@ -462,11 +462,11 @@ def _make_database(
     with pony.orm.db_session:
         # Multiprocess PanDDAs, returning valid events for addition to the
         with joblib.Parallel(n_jobs=-1, verbose=50) as parallel:
-            # j = 0
+            j = 0
             for pandda_path, inspect_table in inspect_tables.items():
-                # if j > 10:
-                #     continue
-                # j += 1
+                if j > 10:
+                    continue
+                j += 1
                 pandda_events: list[Event] = parallel(
                     joblib.delayed(_parse_inspect_table_row)(
                         row,
@@ -586,14 +586,15 @@ def _make_database(
                         events[(pandda_path, pandda_event.dtag, pandda_event.event_idx)] = event
 
         # Partition the datasets
-        print(f"System")
-        pony.orm.select(p for p in SystemORM).show()
-        print(f"Experiment")
-        [print(k) for k in pony.orm.select(p.path for p in ExperimentORM)]
-        print(f"Datasets")
-        [print(k) for k in pony.orm.select(p.path for p in DatasetORM)]
-        pony.orm.select(p.path for p in PanDDAORM).show()
-        pony.orm.select((p.dtag, p.event_idx, p.pandda) for p in EventORM).show()
+        # print(f"System")
+        # pony.orm.select(p for p in SystemORM).show()
+        # print(f"Experiment")
+        # [print(k) for k in pony.orm.select(p.path for p in ExperimentORM)]
+        # print(f"Datasets")
+        # [print(k) for k in pony.orm.select(p.path for p in DatasetORM)]
+        # pony.orm.select(p.path for p in PanDDAORM).show()
+        # pony.orm.select((p.dtag, p.event_idx, p.pandda) for p in EventORM).show()
+        rprint(f"Got {len(events)} of which {len([x for x in events.values() if x.hit_confidence == 'High'])} are high confidence!")
 
         # for event_id, event in events.items():
         #     print(event)
