@@ -370,7 +370,7 @@ def _parse_inspect_table_row(
         annotation_value = False
 
     if ligand and annotation_value:
-        rprint(f"Updating event centroid using associated ligand centroid from {(x, y, z)} to {(ligand.x, ligand.y, ligand.z)}")
+        rprint(f"For {(dtag, event_idx)}, updating event centroid using associated ligand centroid from {(x, y, z)} to {(ligand.x, ligand.y, ligand.z)}")
         x,y,z = ligand.x, ligand.y, ligand.z
 
 
