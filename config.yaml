@@ -12,6 +12,7 @@ datasets:
 exclude:
   - /dls/labxchem/data/*/i*/processing/analysis/*
   - /dls/labxchem/data/*/s*/processing/analysis/*
+  - /dls/labxchem/data/*/n*/processing/analysis/*
 train:
   max_epochs: 200
 test:
