@@ -368,8 +368,8 @@ def _make_database(
                             )
                             systems[system_name] = system
 
-                        dataset_path = Path(pandda_event.initial_structure).absolute().resolve().parent
-                        experiment_path = Path(pandda_event.initial_structure).absolute().resolve().parent.parent
+                        dataset_path = Path(pandda_event.initial_structure).absolute().resolve().parent.parent
+                        experiment_path = Path(pandda_event.initial_structure).absolute().resolve().parent.parent.parent
                         if experiment_path in experiments:
                             experiment = experiments[experiment_path]
                         else:
