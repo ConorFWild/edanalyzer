@@ -90,8 +90,13 @@ def __main__(config_yaml="config.yaml"):
             working_directory=Path(dic['working_directory']),
             datasets=[x for x in dic['datasets']],
             exclude=[x for x in dic['exclude']],
-            train=ConfigTrain(dic['train']),
-            test=ConfigTest(dic['test']),
+            train=ConfigTrain(
+                dic['train']['max_epochs'],
+            ),
+            test=ConfigTest(
+                dic['test']['test_interrval'],
+                dic['test']['test_convergence_interval'],
+            ),
             custom_annotations=dic['custom_annotations'],
             cpus=dic['cpus']
         )
