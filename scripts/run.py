@@ -337,10 +337,10 @@ def _parse_inspect_table_row(
     inspect_model_path = inspect_model_dir / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
     # initial_model = processed_dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)
 
-    if inspect_model_path.exists():
-        inspect_model_path = str(inspect_model_path)
-    else:
-        inspect_model_path = None
+    # if inspect_model_path.exists():
+    #     inspect_model_path = str(inspect_model_path)
+    # else:
+    #     inspect_model_path = None
 
     if inspect_model_path.exists():
         ligand = get_event_ligand(
