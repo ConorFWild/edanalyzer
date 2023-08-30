@@ -448,7 +448,7 @@ def _make_database(
         print(f"Experiment")
         pony.orm.select(p.path for p in ExperimentORM).show()
         pony.orm.select(p.path for p in DatasetORM).show()
-        pony.orm.select(p for p in PanDDAORM).show()
+        pony.orm.select(p.path for p in PanDDAORM).show()
         pony.orm.select(p for p in EventORM).show()
 
         # for event_id, event in events.items():
