@@ -540,19 +540,7 @@ def _make_database(
                         else:
                             _annotation = pandda_event.annotation
 
-                        if pandda_event.ligand:
-                            ligand_orm = LigandORM(
-                                        path=str(pandda_event.ligand.path),
-                                        smiles=str(pandda_event.ligand.smiles),
-                                        chain=str(pandda_event.ligand.chain),
-                                        residue=int(pandda_event.ligand.residue),
-                                        num_atoms=int(pandda_event.ligand.num_atoms),
-                                        x=float(pandda_event.ligand.x),
-                                        y=float(pandda_event.ligand.y),
-                                        z=float(pandda_event.ligand.z),
-                                    )
-                        else:
-                            ligand_orm = None
+
 
                         event = EventORM(
                             dtag=pandda_event.dtag,
@@ -569,12 +557,28 @@ def _make_database(
                             viewed=pandda_event.viewed,
                             hit_confidence=pandda_event.hit_confidence,
 
-                            ligand=ligand_orm,
+                            ligand=None,
                             dataset=dataset,
                             pandda=pandda,
                             annotations=[],
                             partitions=[]
                         )
+
+                        if pandda_event.ligand:
+                            ligand_orm = LigandORM(
+                                        path=str(pandda_event.ligand.path),
+                                        smiles=str(pandda_event.ligand.smiles),
+                                        chain=str(pandda_event.ligand.chain),
+                                        residue=int(pandda_event.ligand.residue),
+                                        num_atoms=int(pandda_event.ligand.num_atoms),
+                                        x=float(pandda_event.ligand.x),
+                                        y=float(pandda_event.ligand.y),
+                                        z=float(pandda_event.ligand.z),
+                                event=event
+                                    )
+                        else:
+                            ligand_orm = None
+
                         AnnotationORM(
                             annotation=_annotation,
                             source='auto',
