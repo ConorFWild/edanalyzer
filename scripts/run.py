@@ -452,7 +452,7 @@ def _make_database(
         print(f"Datasets")
         [print(k) for k in pony.orm.select(p.path for p in DatasetORM)]
         pony.orm.select(p.path for p in PanDDAORM).show()
-        pony.orm.select(p for p in EventORM).show()
+        pony.orm.select((p.dtag, p.event_idx, p.pandda) for p in EventORM).show()
 
         # for event_id, event in events.items():
         #     print(event)
