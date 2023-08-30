@@ -362,6 +362,8 @@ def _parse_inspect_table_row(
                 y=float(ligand.y),
                 z=float(ligand.z),
             )
+        else:
+            ligand_orm = None
     else:
         ligand_orm = None
         inspect_model_path = None
