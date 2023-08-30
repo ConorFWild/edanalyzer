@@ -535,6 +535,7 @@ def _make_database(
                             panddas[pandda_path] = pandda
 
                         if (str(pandda_path), dtag, event_idx) in custom_annotations:
+                            print(f"\tUpdating annotation of {(dtag, event_idx)} using custom annotation!")
                             _annotation = custom_annotations[(str(pandda_path), dtag, event_idx)]
                         else:
                             _annotation = pandda_event.annotation
