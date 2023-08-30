@@ -322,12 +322,16 @@ def _parse_inspect_table_row(
         initial_structure = None
     else:
         initial_structure = str(initial_structure)
+    if not initial_structure:
+        return None
 
     initial_reflections = processed_dataset_dir / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dtag)
     if not try_open_reflections(initial_reflections):
         initial_reflections = None
     else:
         initial_reflections = str(initial_reflections)
+    if not initial_reflections:
+        return None
 
     if not try_open_map(event_map_path):
         return None
