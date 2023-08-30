@@ -116,6 +116,7 @@ def __main__(config_yaml="config.yaml"):
             custom_annotations: dict[tuple[str, str, int], bool] = _get_custom_annotations(config.custom_annotations)
             with open(custom_annotations_path, "wb") as f:
                 pickle.dump(custom_annotations, f)
+        rprint(f"\tGot {len(custom_annotations)} custom annotations!")
 
     # Construct the dataset
     if "Collate" in config.steps:
