@@ -186,6 +186,7 @@ def _parse_inspect_table_row(
     viewed = row[constants.PANDDA_INSPECT_VIEWED]
 
     if viewed != True:
+        rprint(f"Dataset not viewed! Skipping {dtag} {event_idx} {pandda_dir}!")
         return None
 
     hit_confidence = row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
@@ -198,6 +199,7 @@ def _parse_inspect_table_row(
     processed_dataset_dir = pandda_processed_datasets_dir / dtag
     compound_dir = processed_dataset_dir / "compound"
     if not _has_parsable_pdb(compound_dir):
+        rprint(f"No parsable pdb at {compound_dir}! Skipping!")
         return None
 
     inspect_model_dir = processed_dataset_dir / constants.PANDDA_INSPECT_MODEL_DIR
@@ -346,7 +348,7 @@ def _make_database(
                     for idx, row
                     in inspect_table.iterrows()
                 )
-                rprint(f"Got {len(pandda_events)} of which {[x for x in pandda_events if x is not None]} are not None!")
+                rprint(f"Got {len(pandda_events)} of which {len([x for x in pandda_events if x is not None])} are not None!")
                 for pandda_event in pandda_events:
                     if pandda_event:
                         dtag, event_idx = pandda_event.dtag, pandda_event.event_idx
