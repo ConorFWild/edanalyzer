@@ -5,18 +5,20 @@ from edanalyzer import constants
 
 db = Database()
 
+
 class PanDDAORM(db.Entity):
     _table_ = constants.TABLE_PANDDA
 
     id = PrimaryKey(int, auto=True)
 
-    path = Required(str, unique=True)  #*
+    path = Required(str, unique=True)  # *
 
     events = Set("EventORM")
     datasets = Set("DatasetORM", table=constants.TABLE_DATASET_PANDDA, column="dataset_id")
 
     system = Required("SystemORM", column="system_id")
     experiment = Required("ExperimentORM", column="experiment_id")
+
 
 class DatasetORM(db.Entity):
     _table_ = constants.TABLE_DATASET
@@ -60,6 +62,7 @@ class EventORM(db.Entity):
 
     composite_key(pandda, dtag, event_idx)
 
+
 class LigandORM(db.Entity):
     _table_ = constants.TABLE_LIGAND
 
@@ -76,9 +79,9 @@ class LigandORM(db.Entity):
 
     event = Required("EventORM", column="event_id")
 
+
 class AnnotationORM(db.Entity):
     _table_ = constants.TABLE_ANNOTATION
-
 
     id = PrimaryKey(int, auto=True)
 
@@ -90,17 +93,15 @@ class AnnotationORM(db.Entity):
     composite_key(source, event)
 
 
-
 class SystemORM(db.Entity):
     _table_ = constants.TABLE_SYSTEM
 
-
     id = PrimaryKey(int, auto=True)
-    name= Required(str, unique=True)
+    name = Required(str, unique=True)
 
     experiments = Set("ExperimentORM")
-    panddas= Set("PanDDAORM")
-    datasets= Set("DatasetORM")
+    panddas = Set("PanDDAORM")
+    datasets = Set("DatasetORM")
 
 
 class ExperimentORM(db.Entity):
