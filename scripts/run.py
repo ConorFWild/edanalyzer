@@ -320,7 +320,7 @@ def _make_database(
                 analyse_table = pd.read_csv(analyse_table_path)
                 if len(analyse_table[analyse_table[constants.PANDDA_INSPECT_VIEWED] == True]) < 15:
                     continue
-                if len(analyse_table[analyse_table[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] != "High"]) < 2:
+                if len(analyse_table[analyse_table[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == "High"]) < 2:
                     continue
                 inspect_tables[possible_pandda_path] = analyse_table
             except Exception as e:
