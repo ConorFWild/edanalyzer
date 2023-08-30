@@ -441,6 +441,8 @@ def _make_database(
                         events[(pandda_path, pandda_event.dtag, pandda_event.event_idx)] = event
 
         # Partition the datasets
+        for event_id, event in events.items():
+            pony.orm.show(event)
 
         ...
 
