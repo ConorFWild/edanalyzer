@@ -341,7 +341,7 @@ def _make_database(
         with joblib.Parallel(n_jobs=-1, verbose=50) as parallel:
             j = 0
             for pandda_path, inspect_table in inspect_tables.items():
-                if j > 3:
+                if j > 6:
                     continue
                 j += 1
                 pandda_events: list[Event] = parallel(
