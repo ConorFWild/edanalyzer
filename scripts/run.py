@@ -78,9 +78,9 @@ def _get_custom_annotations(path):
 
                     if "manual" in annotations:
                         annotation = annotations["manual"]
-                    else:
-                        annotation = annotations["auto"]
-                    custom_annotations[event_id] = annotation
+                    # else:
+                    #     annotation = annotations["auto"]
+                        custom_annotations[event_id] = annotation
 
     db.disconnect()
     return custom_annotations
