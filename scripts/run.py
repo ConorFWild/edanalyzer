@@ -197,7 +197,7 @@ def _parse_inspect_table_row(
 
     pandda_processed_datasets_dir = pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
     processed_dataset_dir = pandda_processed_datasets_dir / dtag
-    compound_dir = processed_dataset_dir / "compound"
+    compound_dir = processed_dataset_dir / "ligand_files"
     if not _has_parsable_pdb(compound_dir):
         rprint(f"No parsable pdb at {compound_dir}! Skipping!")
         return None
