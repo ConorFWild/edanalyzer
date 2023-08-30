@@ -317,6 +317,10 @@ def _parse_inspect_table_row(
     else:
         z_map_path = str(z_map_path)
 
+    mean_map_path = processed_dataset_dir / constants.PANDDA_GROUND_STATE_MAP_TEMPLATE.format(dtag=dtag)
+    if not try_open_map(mean_map_path):
+        return None
+
     initial_structure = processed_dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)
     if not try_open_structure(initial_structure):
         initial_structure = None
