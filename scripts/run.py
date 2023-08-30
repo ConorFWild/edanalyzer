@@ -104,7 +104,7 @@ def _make_database(
         for dataset_pattern
         in datasets
         for path
-        in Path('/').glob(dataset_pattern)
+        in Path('/').glob(dataset_pattern[1:])
         if not any([path.match(exclude_pattern) for exclude_pattern in exclude])
 
     ]
