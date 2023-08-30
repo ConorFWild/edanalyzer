@@ -107,7 +107,8 @@ def _make_database(
         if not any([path.match(exclude_pattern) for exclude_pattern in exclude])
 
     ]
-    print(pandda_paths)
+    rprint(f"Got {len(pandda_paths)} pandda paths!")
+    rprint(pandda_paths)
 
     with pony.orm.db_session:
 
@@ -159,7 +160,8 @@ def __main__(config_yaml="config.yaml"):
             config.working_directory,
             config.datasets,
             config.exclude,
-            config.cpus
+            config.cpus,
+            custom_annotations
         )
 
     # Run training/testing
