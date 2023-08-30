@@ -6,7 +6,7 @@ steps:
   - Train+Test
   - Summarize
 datasets:
-  - /dls/labxchem/data/*/*/processing/analysis/panddas
+  - /dls/labxchem/data/*/*/processing/analysis/*
   - /dls/labxchem/data/*/*/processing/analysis/pandda_2_2023_06_27/1
   - /dls/labxchem/data/lb32633/lb32633-1/processing/analysis/pandda_2_2023_08_22/pandda
 exclude:
