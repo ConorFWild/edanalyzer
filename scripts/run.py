@@ -491,6 +491,8 @@ def _make_database(
                     if pandda_event:
                         dtag, event_idx = pandda_event.dtag, pandda_event.event_idx
                         system_name = _get_system_from_dtag(dtag)
+                        if not system_name:
+                            continue
                         if system_name in systems:
                             system = systems[system_name]
                         else:
