@@ -94,7 +94,7 @@ def __main__(config_yaml="config.yaml"):
                 dic['train']['max_epochs'],
             ),
             test=ConfigTest(
-                dic['test']['test_interrval'],
+                dic['test']['test_interval'],
                 dic['test']['test_convergence_interval'],
             ),
             custom_annotations=dic['custom_annotations'],
