@@ -363,7 +363,7 @@ def _parse_inspect_table_row(
                 z=float(ligand.z),
             )
     else:
-        ligand = None
+        ligand_orm = None
         inspect_model_path = None
 
     # hyphens = [pos for pos, char in enumerate(dtag) if char == "-"]
