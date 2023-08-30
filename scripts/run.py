@@ -443,9 +443,11 @@ def _make_database(
                         events[(pandda_path, pandda_event.dtag, pandda_event.event_idx)] = event
 
         # Partition the datasets
+        print(f"System")
         pony.orm.select(p for p in SystemORM).show()
-        pony.orm.select(p for p in ExperimentORM).show()
-        pony.orm.select(p for p in DatasetORM).show()
+        print(f"Experiment")
+        pony.orm.select(p.path for p in ExperimentORM).show()
+        pony.orm.select(p.path for p in DatasetORM).show()
         pony.orm.select(p for p in PanDDAORM).show()
         pony.orm.select(p for p in EventORM).show()
 
