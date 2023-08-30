@@ -445,7 +445,6 @@ def _make_database(
     # Get the pandda event tables
     inspect_tables = {}
     for possible_pandda_path in possible_pandda_paths:
-        print(f"### {possible_pandda_path} ")
         analyse_table_path = possible_pandda_path / "analyses" / "pandda_inspect_events.csv"
         if analyse_table_path.exists():
             try:
@@ -473,6 +472,8 @@ def _make_database(
         with joblib.Parallel(n_jobs=-1, verbose=50) as parallel:
             j = 0
             for pandda_path, inspect_table in inspect_tables.items():
+                print(f"### {pandda_path} ")
+
                 if j > 10:
                     continue
                 j += 1
