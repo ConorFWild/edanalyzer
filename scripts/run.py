@@ -12,13 +12,26 @@ from rich import print as rprint
 import pandas as pd
 import joblib
 import gemmi
+import numpy as np
 
 from edanalyzer.database_pony import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
-    ExperimentORM  # import *
+    ExperimentORM, LigandORM  # import *
 from edanalyzer import constants
 
 
 # from pony.orm import *
+
+@dataclasses.dataclass
+class Ligand:
+    path: str
+    smiles:str
+    chain:str
+    residue:int
+    num_atoms:int
+    x:float
+    y:float
+    z:float
+
 
 @dataclasses.dataclass
 class Event:
@@ -173,6 +186,95 @@ def _get_system_from_dtag(dtag):
         return system_name
 
 
+def get_ligand_num_atoms(ligand):
+    num_atoms = 0
+    for atom in ligand:
+        num_atoms += 1
+
+    return num_atoms
+
+
+def get_ligand_centroid(ligand):
+    poss = []
+    for atom in ligand:
+        pos = atom.pos
+        poss.append([pos.x, pos.y, pos.z])
+
+    pos_array = np.array(poss)
+
+    return np.mean(pos_array, axis=0)
+
+
+def get_structure_ligands(pdb_path):
+    # logger.info(f"")
+    structure = gemmi.read_structure(pdb_path)
+    structure_ligands = []
+    for model in structure:
+        for chain in model:
+            ligands = chain.get_ligands()
+            for res in chain:
+                # structure_ligands.append(
+                if res.name == "LIG":
+                    num_atoms = get_ligand_num_atoms(res)
+
+                    ligand_centroid = get_ligand_centroid(res)
+
+                    # smiles = parse_ligand(
+                    #     structure,
+                    #     chain,
+                    #     ligand,
+                    # )
+                    smiles = ""
+                    # logger.debug(f"Ligand smiles: {smiles}")
+                    # logger.debug(f"Num atoms: {num_atoms}")
+                    # logger.debug(f"Centroid: {ligand_centroid}")
+                    lig = Ligand(
+                        path=str(pdb_path),
+                        smiles=str(smiles),
+                        chain=str(chain.name),
+                        residue=int(res.seqid.num),
+                        num_atoms=int(num_atoms),
+                        x=float(ligand_centroid[0]),
+                        y=float(ligand_centroid[1]),
+                        z=float(ligand_centroid[2])
+                    )
+                    structure_ligands.append(lig)
+
+    return structure_ligands
+
+
+# def generate_smiles(options: Options, dataset: StructureReflectionsDataset):
+#     logger.info(f"Generating smiles for dataset")
+#     for data in dataset.data:
+#         ligands = get_structure_ligands(data)
+#         data.ligands = ligands
+#
+#     logger.info(f"Generated smiles, saving to {options.working_dir}")
+#     dataset.save(options.working_dir)
+
+
+def get_event_ligand(inspect_model_path, x, y, z, cutoff=10.0):
+    structure_ligands = get_structure_ligands(str(inspect_model_path))
+
+    ligand_distances = {}
+    ligand_dict = {}
+    for lig in structure_ligands:
+        ligand_distances[(lig.chain, lig.residue)] = gemmi.Position(lig.x, lig.y, lig.z).dist(gemmi.Position(x, y, z))
+
+        ligand_dict[(lig.chain, lig.residue)] = lig
+
+    if len(ligand_dict) == 0:
+        # logger.warning(f"Modelled structure but no ligands: {inspect_model_path}!")
+        return None
+
+    min_dist_id = min(ligand_distances, key=lambda _id: ligand_distances[_id])
+
+    if ligand_distances[min_dist_id] < cutoff:
+        # logger.warning(f"Modelled structure has ligand")
+        return ligand_dict[min_dist_id]
+    else:
+        return None
+
 def _parse_inspect_table_row(
         row,
         pandda_dir,
@@ -240,17 +342,19 @@ def _parse_inspect_table_row(
     else:
         inspect_model_path = None
 
-    # if inspect_model_path.exists():
-    #     ligand = get_event_ligand(
-    #         inspect_model_path,
-    #         x,
-    #         y,
-    #         z,
-    #     )
-    #     inspect_model_path = str(inspect_model_path)
-    # else:
-    #     ligand = None
-    #     inspect_model_path = None
+    if inspect_model_path.exists():
+        ligand = get_event_ligand(
+            inspect_model_path,
+            x,
+            y,
+            z,
+        )
+        inspect_model_path = str(inspect_model_path)
+
+    else:
+        ligand = None
+        inspect_model_path = None
+
 
     # hyphens = [pos for pos, char in enumerate(dtag) if char == "-"]
     # if len(hyphens) == 0:
@@ -258,12 +362,18 @@ def _parse_inspect_table_row(
     # else:
     #     last_hypen_pos = hyphens[-1]
     #     system_name = dtag[:last_hypen_pos + 1]
-    ligand = None
+    # ligand = None
 
     if hit_confidence not in ["Low", "low"]:
         annotation_value = True
     else:
         annotation_value = False
+
+    if ligand and annotation_value:
+        rprint(f"Updating event centroid using associated ligand centroid from {(x, y, z)} to {(ligand.x, ligand.y, ligand.z)}")
+        x,y,z = ligand.x, ligand.y, ligand.z
+
+
 
     event = Event(
         dtag=str(dtag),
