@@ -63,7 +63,8 @@ def _get_custom_annotations(path):
                                   event.pandda.system, event.pandda.experiment) for event in EventORM)[:]
 
         custom_annotations = {}
-        for event in events:
+        for event_info in events:
+            event = event_info[0]
             if event.pandda:
                 event_id = (
                     str(event.pandda.path),
