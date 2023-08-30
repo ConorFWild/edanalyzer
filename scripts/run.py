@@ -351,16 +351,17 @@ def _parse_inspect_table_row(
             z,
         )
         inspect_model_path = str(inspect_model_path)
-        ligand = LigandORM(
-            path=str(ligand.path),
-            smiles=str(ligand.smiles),
-            chain=str(ligand.chain),
-            residue=int(ligand.residue),
-            num_atoms=int(ligand.num_atoms),
-            x=float(ligand.x),
-            y=float(ligand.y),
-            z=float(ligand.z),
-        ),
+        if ligand:
+            ligand = LigandORM(
+                path=str(ligand.path),
+                smiles=str(ligand.smiles),
+                chain=str(ligand.chain),
+                residue=int(ligand.residue),
+                num_atoms=int(ligand.num_atoms),
+                x=float(ligand.x),
+                y=float(ligand.y),
+                z=float(ligand.z),
+            )
     else:
         ligand = None
         inspect_model_path = None
