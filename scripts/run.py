@@ -318,6 +318,8 @@ def _make_database(
         if analyse_table_path.exists():
             try:
                 analyse_table = pd.read_csv(analyse_table_path)
+                if len(len(analyse_table[analyse_table[constants.PANDDA_INSPECT_VIEWED == True]]) < 15):
+                    continue
                 inspect_tables[possible_pandda_path] = analyse_table
             except Exception as e:
                 print(f"\tERROR READING INSPECT TABLE: {analyse_table_path} : {e}")
