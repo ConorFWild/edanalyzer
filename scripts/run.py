@@ -72,6 +72,7 @@ def __main__(config_yaml="config.yaml"):
             # **yaml.safe_load(f)
             yaml.safe_load(f)
         )
+        print(config)
 
     # Parse custom annotations
     if "Annotations" in config.steps:
