@@ -122,6 +122,8 @@ def _make_database(
                 inspect_tables[possible_pandda_path] = analyse_table
             except Exception as e:
                 print(f"\tERROR READING INSPECT TABLE: {analyse_table_path} : {e}")
+        else:
+            print(f"\tERROR READING INSPECT TABLE : {analyse_table_path} : NO SUCH TABLE!")
     rprint(f"Got {len(inspect_tables)} pandda inspect tables!")
 
     with pony.orm.db_session:
