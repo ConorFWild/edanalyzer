@@ -96,7 +96,7 @@ def _make_database(
 ):
     database_path = working_directory / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
-    db.generate_mapping()
+    db.generate_mapping(create_tables=True)
 
     # Get the pandda paths
     pandda_paths = [
