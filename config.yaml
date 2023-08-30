@@ -1,0 +1,21 @@
+name: all_data
+working_directory:
+steps:
+  - Annotations
+  - Collate
+  - Train+Test
+  - Summarize
+datasets:
+  - /dls/labxchem/data/*/*/processing/analysis/panddas
+  - /dls/labxchem/data/*/*/processing/analysis/pandda_2_2023_06_27
+  - /dls/labxchem/data/lb32633/lb32633-1/processing/analysis/pandda_2_2023_08_22/pandda
+exclude:
+  - /dls/labxchem/data/*/i*
+  - /dls/labxchem/data/*/s*
+train:
+  max_epochs: 200
+test:
+  test_interval: 1
+  test_convergence_interval: 10
+custom_annotations: /dls/science/groups/i04-1/conor_dev/edanalyzer/test/diamond.db
+cpus: 20
