@@ -61,19 +61,20 @@ def _get_custom_annotations(path):
 
         custom_annotations = {}
         for event in events:
-            event_id = (
-                str(event.pandda.path),
-                str(event.dtag),
-                int(event.event_idx)
-            )
-            if event.annotations:
-                annotations = {_a.source: _a.annotation for _a in event.annotations}
+            if event.pandda:
+                event_id = (
+                    str(event.pandda.path),
+                    str(event.dtag),
+                    int(event.event_idx)
+                )
+                if event.annotations:
+                    annotations = {_a.source: _a.annotation for _a in event.annotations}
 
-                if "manual" in annotations:
-                    annotation = annotations["manual"]
-                else:
-                    annotation = annotations["auto"]
-                custom_annotations[event_id] = annotation
+                    if "manual" in annotations:
+                        annotation = annotations["manual"]
+                    else:
+                        annotation = annotations["auto"]
+                    custom_annotations[event_id] = annotation
 
     return custom_annotations
 
