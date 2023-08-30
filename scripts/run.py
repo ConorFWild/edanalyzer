@@ -445,6 +445,7 @@ def _make_database(
     # Get the pandda event tables
     inspect_tables = {}
     for possible_pandda_path in possible_pandda_paths:
+        print(f"### {possible_pandda_path} ")
         analyse_table_path = possible_pandda_path / "analyses" / "pandda_inspect_events.csv"
         if analyse_table_path.exists():
             try:
