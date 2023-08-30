@@ -5,6 +5,9 @@ from pathlib import Path
 import yaml
 import fire
 import pony
+import rich
+from rich import print as rprint
+
 from edanalyzer.database_pony import db, EventORM  # import *
 
 
@@ -100,7 +103,7 @@ def __main__(config_yaml="config.yaml"):
             custom_annotations=dic['custom_annotations'],
             cpus=dic['cpus']
         )
-        print(config)
+        rprint(config)
 
     # Parse custom annotations
     if "Annotations" in config.steps:
