@@ -1049,6 +1049,7 @@ def train(
             print(annotations)
 
 
+
         logger.info(f"Saving state dict for model at epoch: {epoch}")
         torch.save(
             model.state_dict(),
