@@ -619,10 +619,10 @@ def _test_partition_solution(_partition_vector, _num_items_vector):
     for j in range(0,10):
         sums[j] = np.sum(_num_items_vector[_partition_vector == j])
 
-    print(_partition_vector)
-    print(sums)
+    # print(_partition_vector)
+    # print(sums)
     res = np.std([x for x in sums.values()])
-    print(res)
+    # print(res)/
     return res
 
 def _partition_dataset(working_directory):
