@@ -656,11 +656,11 @@ def _partition_dataset(working_directory):
         for x, system in zip([j for j in result.x], systems):
             if not x in partitions:
                 partitions[x] = []
-            partitions[x].append(systems)
+            partitions[x].append(system)
 
         sums = {}
         for j, _systems in partitions.items():
-            sums[j] = sum([len(system.datasets) for system in _systems])
+            sums[j] = sum([len(_system.datasets) for _system in _systems])
 
         rprint(sums)
 
