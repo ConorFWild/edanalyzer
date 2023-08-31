@@ -603,7 +603,6 @@ def _make_database(
                             source = "pandda_1"
                         elif pickled_panddas_dir.exists():
                             source = "pandda_1"
-
                         else:
                             source = "pandda_2"
                         AnnotationORM(
