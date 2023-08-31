@@ -591,9 +591,19 @@ def _make_database(
                             ligand_orm = None
 
 
-                        picled_data_dir = pandda_path / "pickled_data"
-                        if picled_data_dir.exists():
+                        pickled_data_dir = pandda_path / "pickled_data"
+                        pandda_done = pandda_path / "pandda.done"
+                        statistical_maps = pandda_path / "statistical_maps"
+                        pickled_panddas_dir = pandda_path /"pickled_panddas"
+                        if pickled_data_dir.exists():
                             source = "pandda_1"
+                        elif pandda_done.exists():
+                            source = "pandda_1"
+                        elif statistical_maps.exists():
+                            source = "pandda_1"
+                        elif pickled_panddas_dir.exists():
+                            source = "pandda_1"
+
                         else:
                             source = "pandda_2"
                         AnnotationORM(
