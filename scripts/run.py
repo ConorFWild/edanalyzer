@@ -622,7 +622,7 @@ def _partition_dataset(working_directory):
 
         systems = pony.orm.select(system for system in SystemORM)
         rprint(f"Got {len(systems)}")
-        rprint({system.system_name: len(system.datasets) for system in systems})
+        rprint({system.name: len(system.datasets) for system in systems})
 
 
 
