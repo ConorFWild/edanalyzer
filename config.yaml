@@ -17,6 +17,7 @@ exclude:
   - /dls/labxchem/data/*/n*/processing/analysis/*
 train:
   max_epochs: 200
+  model_file:
 test:
   test_interval: 1
   test_convergence_interval: 10

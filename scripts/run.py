@@ -73,6 +73,7 @@ class Event:
 @dataclasses.dataclass
 class ConfigTrain:
     max_epochs: int
+    model_file: Path | None
     # def __init__(self, dic):
     #     self.max_epochs = dic['max_epochs']
 
@@ -818,12 +819,12 @@ def _train_and_test(working_dir, test_partition, test_interval):
         # logger.info(f"Using cpu!")
         dev = "cpu"
 
-    if model_type == "resnet+ligand":
-        model = resnet18(num_classes=2, num_input=4)
-        model.to(dev)
+    # if model_type == "resnet+ligand":
+    model = resnet18(num_classes=2, num_input=4)
+    model.to(dev)
 
-        if model_file:
-            model.load_state_dict(torch.load(model_file, map_location=dev),
+    if model_file:
+        model.load_state_dict(torch.load(model_file, map_location=dev),
                                   )
 
     train(
@@ -845,7 +846,10 @@ def __main__(config_yaml="config.yaml"):
     # Initialize the config
     with open(config_yaml, "r") as f:
         dic = yaml.safe_load(f)
-
+        if dic['train']['model_file']:
+            model_file = Path(dic['train']['model_file'])
+        else:
+            model_file = None
         config = Config(
             name=dic["name"],
             steps=dic['steps'],
@@ -854,6 +858,7 @@ def __main__(config_yaml="config.yaml"):
             exclude=[x for x in dic['exclude']],
             train=ConfigTrain(
                 dic['train']['max_epochs'],
+                model_file
             ),
             test=ConfigTest(
                 dic['test']['test_interval'],
