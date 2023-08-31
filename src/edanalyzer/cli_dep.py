@@ -972,6 +972,7 @@ def train(
     running_loss = []
 
     # for epoch in range(initial_epoch + 1, initial_epoch + num_epochs):
+    annotations = {}
     for epoch in range(num_epochs):
         i = 0
         print(f"Epoch: {epoch}")
@@ -1036,7 +1037,7 @@ def train(
         if epoch % test_interval == 0:
             logger.info(f"Evaluating on test dataset!")
             model.eval()
-            annotations = {}
+            annotations[i] = {}
             for image, annotation, idx in test_dataloader:
                 image_c = image.to(dev)
                 annotation_c = annotation.to(dev)
@@ -1046,13 +1047,14 @@ def train(
                 # forward + backward + optimize
                 # begin_annotate = time.time()
                 model_annotation = model(image_c)
-                annotations[int(idx)] = (
+                annotations[i][int(idx)] = (
                     float(annotation.to(torch.device("cpu")).detach().numpy()[0][1]),
                     float(model_annotation.to(torch.device("cpu")).detach().numpy()[0][1]),
                 )
-            print(annotations)
+            print(annotations[i])
 
-
+            with open( Path(working_dir)/ "annotations.pickle", 'wb') as f:
+                pickle.dump(annotations, f)
 
         logger.info(f"Saving state dict for model at epoch: {epoch}")
         torch.save(
