@@ -789,7 +789,7 @@ def _train_and_test(working_dir, test_partition, test_interval, model_file, mode
             transform_image=get_image_xmap_ligand_augmented,
             transform_annotation=get_annotation_from_event_hit
         )
-        rprint(f"Got {len(train_dataset_torch)} test events!")
+        rprint(f"Got {len(train_dataset_torch)} train events!")
 
         test_dataset_torch = PanDDADatasetTorchLigand(
             PanDDAEventDataset(

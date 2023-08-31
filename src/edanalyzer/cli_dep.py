@@ -1028,6 +1028,7 @@ def train(
                 print("#################################################" + "\n")
 
         if epoch % test_interval == 0:
+            logger.info(f"Evaluating on test dataset!")
             model.eval()
             annotations = {}
             for image, annotation, idx in test_dataloader:
@@ -1040,6 +1041,8 @@ def train(
                 # begin_annotate = time.time()
                 model_annotation = model(image_c)
                 annotations[int(idx)] = (annotation, float(model_annotation[1]))
+
+
 
 
 
