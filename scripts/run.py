@@ -607,16 +607,18 @@ def _make_database(
         # [print(k) for k in pony.orm.select(p.path for p in DatasetORM)]
         # pony.orm.select(p.path for p in PanDDAORM).show()
         # pony.orm.select((p.dtag, p.event_idx, p.pandda) for p in EventORM).show()
-        rprint(f"Got {len(events)} of which {len([x for x in events.values() if x.hit_confidence == 'High'])} are high confidence!")
+        rprint(
+            f"Got {len(events)} of which {len([x for x in events.values() if x.hit_confidence == 'High'])} are high confidence!")
 
         # for event_id, event in events.items():
         #     print(event)
 
         ...
 
+
 def _test_partition_solution(_partition_vector, _num_items_vector):
     sums = {}
-    for j in range(0,10):
+    for j in range(0, 10):
         sums[j] = np.sum(_num_items_vector[_partition_vector == j])
 
     # print(_partition_vector)
@@ -625,6 +627,7 @@ def _test_partition_solution(_partition_vector, _num_items_vector):
     # print(res)/
     return res
 
+
 def _partition_dataset(working_directory):
     database_path = working_directory / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
@@ -632,38 +635,49 @@ def _partition_dataset(working_directory):
 
     with pony.orm.db_session:
 
-        systems = pony.orm.select(system for system in SystemORM)
+        query = pony.orm.select((event, event.pandda.system, event.annotations) for event in EventORM)
+        # systems = pony.orm.select(system for system in SystemORM)
+        systems = {}
+        for res in query:
+            _system = res[1]
+            _hit = res[2][0].annotation
+            if _hit:
+                if _system not in systems:
+                    systems[_system.name] = 0
+                systems[_system.name] += 1
+        rprint(systems)
         rprint(f"Got {len(systems)}")
-        rprint(
-            {
-                system.name: len(system.datasets)
-                for system
-                in systems
-            }
-        )
+        # rprint(
+        #     {
+        #         system.name: len(system.datasets)
+        #         for system
+        #         in systems
+        #     }
+        # )
 
         # Get an approximate partitioning
-        num_items_vector = np.array([len(x.datasets) for x in systems])
+        # num_items_vector = np.array([len(x.datasets) for x in systems])
+        num_items_vector = np.array([x for x in systems.values()])
         rprint(num_items_vector)
         result = scipy.optimize.differential_evolution(
             func=lambda _test_partition_vector: _test_partition_solution(
                 _test_partition_vector,
                 num_items_vector,
             ),
-            bounds=[(0,9) for x in range(len(systems))],
+            bounds=[(0, 9) for x in range(len(systems))],
             integrality=np.array([True for x in range(len(systems))])
         )
         rprint([result.x, result.fun])
 
         partitions = {}
-        for x, system in zip([j for j in result.x], systems):
+        for x, system_name in zip([j for j in result.x], systems):
             if not x in partitions:
                 partitions[x] = []
-            partitions[x].append(system)
+            partitions[x].append(system_name)
 
         sums = {}
-        for j, _systems in partitions.items():
-            sums[j] = sum([len(_system.datasets) for _system in _systems])
+        for j, _system_names in partitions.items():
+            sums[j] = sum([systems[_system_name] for _system_name in _system_names])
 
         rprint(sums)
 
