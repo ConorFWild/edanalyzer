@@ -763,7 +763,7 @@ def _train_and_test(working_dir, test_partition, test_interval, model_file, mode
         #     if partition.name in event_partitions
         #     event_partitions[]
         for res in query:
-            print(res[0].annotations.annotation)
+            print("Annotation: {res[0].annotations.annotation}")
         train_dataset_torch = PanDDADatasetTorchLigand(
             PanDDAEventDataset(
                 [
