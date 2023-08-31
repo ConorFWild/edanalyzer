@@ -741,7 +741,7 @@ def _partition_dataset(working_directory):
             )
 
 
-def _train_and_test(working_dir, test_partition, test_interval):
+def _train_and_test(working_dir, test_partition, test_interval, model_file, model_key):
     database_path = working_dir / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
     db.generate_mapping(create_tables=True)
@@ -907,7 +907,9 @@ def __main__(config_yaml="config.yaml"):
         _train_and_test(
             config.working_directory,
             config.test.partition,
-            config.test.test_interval
+            config.test.test_interval,
+            config.train.model_file,
+            config.name
         )
     # Summarize train/test results
     if 'Summarize' in config.steps:
