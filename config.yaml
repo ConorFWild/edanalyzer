@@ -1,9 +1,9 @@
 name: all_data
 working_directory: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data
 steps:
-#  - Annotations
-#  - Collate
-#  - Partition
+  - Annotations
+  - Collate
+  - Partition
   - Train+Test
   - Summarize
 datasets:
