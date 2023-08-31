@@ -703,10 +703,19 @@ def _partition_dataset(working_directory):
 
         # PanDDA 1 partitions
         pandda_1_partitions = partition_events([x for x in query if x[2].source == "pandda_1"])
+        for partition_number, system_names in pandda_1_partitions.items():
+            partition = PartitionORM(
+                name=f"pandda_1_{partition_number}",
+                events=[result[0] for result in query if result[1].name in system_names],
+            )
 
         # PanDDA 2 partitions
         pandda_2_partitions = partition_events([x for x in query if x[2].source == "pandda_2"])
-
+        for partition_number, system_names in pandda_2_partitions.items():
+            partition = PartitionORM(
+                name=f"pandda_2_{partition_number}",
+                events=[result[0] for result in query if result[1].name in system_names],
+            )
 
 
 
