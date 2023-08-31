@@ -712,7 +712,7 @@ def get_ligand_map(
 ):
     # Get the path to the ligand cif
     # dataset_dir = Path(event.model_building_dir) / event.dtag / "compound"
-    dataset_dir = Path(event.pandda_dir) / "processed_datasets" / event.dtag / "ligand_files"
+    dataset_dir = Path(event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / "ligand_files"
     paths = [x for x in dataset_dir.glob("*.pdb")]
     pdb_paths = [x for x in paths if (x.exists()) and (x.stem not in LIGAND_IGNORE_REGEXES)]
     assert len(pdb_paths) > 0, f"No pdb paths that are not to be ignored in {dataset_dir}: {[x.stem for x in paths]}"
