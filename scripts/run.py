@@ -64,6 +64,7 @@ class ConfigTrain:
 class ConfigTest:
     test_interval: int
     test_convergence_interval: int
+    partition: int
     # def __init__(self, dic):
     #     self.test_interval = dic['test_interval']
     #     self.test_convergence_interval = dic['test_convergence_interval']
@@ -700,6 +701,7 @@ def __main__(config_yaml="config.yaml"):
             test=ConfigTest(
                 dic['test']['test_interval'],
                 dic['test']['test_convergence_interval'],
+                dic['test']['partition']
             ),
             custom_annotations=dic['custom_annotations'],
             cpus=dic['cpus']
