@@ -675,12 +675,14 @@ def _partition_dataset(working_directory):
             if not x in partitions:
                 partitions[x] = []
             partitions[x].append(system_name)
+        rprint(partitions)
 
         sums = {}
         for j, _system_names in partitions.items():
             sums[j] = sum([systems[_system_name] for _system_name in _system_names])
 
         rprint(sums)
+
 
 
 
