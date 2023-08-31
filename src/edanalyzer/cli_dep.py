@@ -1045,7 +1045,10 @@ def train(
                 # forward + backward + optimize
                 # begin_annotate = time.time()
                 model_annotation = model(image_c)
-                annotations[int(idx)] = (annotation, float(model_annotation[1]))
+                annotations[int(idx)] = (
+                    annotation.to(torch.device("cpu")).detach().numpy()[1],
+                    model_annotation.to(torch.device("cpu")).detach().numpy()[1],
+                )
             print(annotations)
 
 
