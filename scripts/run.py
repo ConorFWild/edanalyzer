@@ -613,6 +613,17 @@ def _make_database(
 
         ...
 
+def _partition_dataset(working_directory):
+    database_path = working_directory / "database.db"
+    db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
+    db.generate_mapping(create_tables=True)
+
+    with pony.orm.db_session:
+
+        systems = pony.orm.select(system for system in SystemORM)
+        rprint(f"Got {len(systems)}")
+        rprint(systems)
+
 
 def __main__(config_yaml="config.yaml"):
     # Initialize the config
@@ -661,6 +672,12 @@ def __main__(config_yaml="config.yaml"):
             config.exclude,
             config.cpus,
             custom_annotations
+        )
+
+    # Partition the data
+    if "Partition" in config.steps:
+        _partition_dataset(
+            config.working_directory
         )
 
     # Run training/testing
