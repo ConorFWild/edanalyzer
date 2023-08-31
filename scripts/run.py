@@ -766,7 +766,7 @@ def _train_and_test(working_dir, test_partition, test_interval, model_file, mode
         #     print(f"Annotation: {res[0].annotations.annotation}")
         train_dataset_torch = PanDDADatasetTorchLigand(
             PanDDAEventDataset(
-                [
+                pandda_events=[
                     PanDDAEvent(
                         id=res[0].id,
                         pandda_dir=res[0].pandda.path,
@@ -784,14 +784,15 @@ def _train_and_test(working_dir, test_partition, test_interval, model_file, mode
                     for res
                     in query
                     if res[0].pandda.system.name not in test_partition_event_systems
-                ]),
+                ]
+            ),
             transform_image=get_image_xmap_ligand_augmented,
             transform_annotation=get_annotation_from_event_hit
         )
 
         test_dataset_torch = PanDDADatasetTorchLigand(
             PanDDAEventDataset(
-                [
+                pandda_events=[
                     PanDDAEvent(
                         # id=event.id,
                         # pandda_dir=event.pandda.path,
@@ -821,7 +822,8 @@ def _train_and_test(working_dir, test_partition, test_interval, model_file, mode
                     for res
                     in query
                     if res[2].name == test_partition
-                ]),            transform_image=get_image_xmap_ligand_augmented,
+                ]),
+            transform_image=get_image_xmap_ligand_augmented,
             transform_annotation=get_annotation_from_event_hit
         )
         rprint(f"Got {len(test_dataset_torch)} test events!")
