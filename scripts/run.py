@@ -619,7 +619,7 @@ def _test_partition_solution(_partition_vector, _num_items_vector):
     for j in range(0,10):
         sums[j] = np.sum(_num_items_vector[_partition_vector == j])
 
-    return np.var(sums)
+    return np.var(sums.values())
 
 def _partition_dataset(working_directory):
     database_path = working_directory / "database.db"
