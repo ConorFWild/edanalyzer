@@ -678,7 +678,7 @@ def partition_events(query):
     rprint([result.x, result.fun])
 
     partitions = {}
-    for x, system_name in zip([j for j in result.x], systems):
+    for x, system_name in zip([int(j) for j in result.x], systems):
         if not x in partitions:
             partitions[x] = []
         partitions[x].append(system_name)
@@ -689,6 +689,8 @@ def partition_events(query):
         sums[j] = sum([systems[_system_name] for _system_name in _system_names])
 
     rprint(sums)
+
+    return partitions
 
 def _partition_dataset(working_directory):
     database_path = working_directory / "database.db"
