@@ -642,7 +642,7 @@ def _partition_dataset(working_directory):
             _system = res[1]
             _hit = res[2].annotation
             if _hit:
-                if _system not in systems:
+                if _system.name not in systems:
                     systems[_system.name] = 0
                 systems[_system.name] += 1
         rprint(systems)
