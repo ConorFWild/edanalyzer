@@ -784,7 +784,7 @@ def _train_and_test(working_dir, test_partition, test_interval, model_file, mode
                     for res
                     in query
                     if res[0].pandda.system.name not in test_partition_event_systems
-                ]
+                ][:1785]
             ),
             transform_image=get_image_xmap_ligand_augmented,
             transform_annotation=get_annotation_from_event_hit
