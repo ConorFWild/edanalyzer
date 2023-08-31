@@ -647,7 +647,7 @@ def _partition_dataset(working_directory):
         rprint(num_items_vector)
         result = scipy.optimize.differential_evolution(
             func=lambda _test_partition_vector: _test_partition_solution(
-                _test_partition_solution,
+                _test_partition_vector,
                 num_items_vector,
             ),
             bounds=[(0,9) for x in range(len(systems))],
