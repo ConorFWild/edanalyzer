@@ -642,6 +642,7 @@ def _partition_dataset(working_directory):
 
         # Get an approximate partitioning
         num_items_vector = np.array([len(x.datasets) for x in systems])
+        rprint(num_items_vector)
         result = scipy.optimize.differential_evolution(
             func=lambda _test_partition_vector: _test_partition_solution(
                 _test_partition_solution,
