@@ -13,6 +13,7 @@ import pandas as pd
 import joblib
 import gemmi
 import numpy as np
+import scipy
 
 from edanalyzer.database_pony import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM  # import *
@@ -613,6 +614,13 @@ def _make_database(
 
         ...
 
+def _test_partition_solution(_partition_vector, _num_items_vector):
+    sums = {}
+    for j in range(0,10):
+        sums[j] = np.sum(_num_items_vector[_partition_vector == j])
+
+    return np.var(sums)
+
 def _partition_dataset(working_directory):
     database_path = working_directory / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
@@ -622,7 +630,37 @@ def _partition_dataset(working_directory):
 
         systems = pony.orm.select(system for system in SystemORM)
         rprint(f"Got {len(systems)}")
-        rprint({system.name: len(system.datasets) for system in systems})
+        rprint(
+            {
+                system.name: len(system.datasets)
+                for system
+                in systems
+            }
+        )
+
+        # Get an approximate partitioning
+        num_items_vector = np.array([len(x.datasets) for x in systems])
+        result = scipy.optimize.differential_evolution(
+            func=lambda _test_partition_vector: _test_partition_solution(
+                _test_partition_solution,
+                num_items_vector,
+            ),
+            bounds=[(0,9) for x in range(len(systems))],
+            integrality=np.array([True for x in range(len(systems))])
+        )
+        rprint([result.x, result.fun])
+
+        partitions = {}
+        for x, system in zip([j for j in result.x], systems):
+            if not x in partitions:
+                partitions[x] = []
+            partitions[x].append(systems)
+
+        sums = {}
+        for j, _systems in partitions.items():
+            sums[j] = sum([len(system.datasets) for system in _systems])
+
+        rprint(sums)
 
 
 
