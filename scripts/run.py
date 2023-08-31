@@ -619,7 +619,7 @@ def _test_partition_solution(_partition_vector, _num_items_vector):
     for j in range(0,10):
         sums[j] = np.sum(_num_items_vector[_partition_vector == j])
 
-    res = np.var(sums.values())
+    res = np.var([x for x in sums.values()])
     print(res)
     return res
 
