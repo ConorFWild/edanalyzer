@@ -640,7 +640,7 @@ def _partition_dataset(working_directory):
         systems = {}
         for res in query:
             _system = res[1]
-            _hit = res[2][0].annotation
+            _hit = res[2].annotation
             if _hit:
                 if _system not in systems:
                     systems[_system.name] = 0
