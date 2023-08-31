@@ -977,9 +977,9 @@ def train(
         model.train()
 
         for image, annotation, idx in train_dataloader:
-            if i > 1000:
-                if i < 4180:
-                    continue
+            # if i > 1000:
+            #     if i < 4180:
+            #         continue
             # print(f"\tBatch: {i}")
             # print(image)
             # print(annotation)
