@@ -1001,7 +1001,7 @@ def train(
 
             # print statistics per epoch
             i += 1
-            if i % 100 == 99:  # print every 100 mini-batches
+            if i % 1000 == 999:  # print every 100 mini-batches
 
                 model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]
                 annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
