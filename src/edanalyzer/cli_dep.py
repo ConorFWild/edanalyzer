@@ -1047,7 +1047,7 @@ def train(
                 # forward + backward + optimize
                 # begin_annotate = time.time()
                 model_annotation = model(image_c)
-                event = test_dataset_torch[idx]
+                event = test_dataset_torch.pandda_event_dataset[idx]
                 print(event)
                 annotations[i][(event.pandda_dir, event.dtag, event.event_idx)] = (
                     float(annotation.to(torch.device("cpu")).detach().numpy()[0][1]),
