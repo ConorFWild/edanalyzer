@@ -974,6 +974,8 @@ def train(
     for epoch in range(num_epochs):
         i = 0
         print(f"Epoch: {epoch}")
+        model.train()
+
         for image, annotation, idx in train_dataloader:
             # print(f"\tBatch: {i}")
             # print(image)
@@ -1041,15 +1043,7 @@ def train(
                 # begin_annotate = time.time()
                 model_annotation = model(image_c)
                 annotations[int(idx)] = (annotation, float(model_annotation[1]))
-
-
-
-
-
-
-        model.train()
-
-
+            print(annotations)
 
 
         logger.info(f"Saving state dict for model at epoch: {epoch}")
