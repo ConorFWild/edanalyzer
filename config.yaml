@@ -20,6 +20,6 @@ train:
 test:
   test_interval: 1
   test_convergence_interval: 10
-  partition:
+  source: pandda_2
 custom_annotations: /dls/science/groups/i04-1/conor_dev/edanalyzer/test/database.db
 cpus: 20
