@@ -775,7 +775,7 @@ def _train_and_test(working_dir, test_partition, test_interval):
                         x=res[0].x,
                         y=res[0].y,
                         z=res[0].z,
-                        hit=res[0].hit,
+                        hit=res[0].annotations[0].annotation,
                         ligand=None
                     )
                     for res
