@@ -729,7 +729,7 @@ def _partition_dataset(working_directory):
         for partition_number, system_names in pandda_1_partitions.items():
             partition = PartitionORM(
                 name=f"pandda_1_{partition_number}",
-                events=[result[0] for result in query if result[1].name in system_names],
+                events=[result[0] for result in query if (result[1].name in system_names) and (result[2].source == "pandda_1")],
             )
 
         # PanDDA 2 partitions
@@ -737,7 +737,7 @@ def _partition_dataset(working_directory):
         for partition_number, system_names in pandda_2_partitions.items():
             partition = PartitionORM(
                 name=f"pandda_2_{partition_number}",
-                events=[result[0] for result in query if result[1].name in system_names],
+                events=[result[0] for result in query if (result[1].name in system_names) and (result[2].source == "pandda_2")],
             )
 
 
@@ -792,7 +792,7 @@ def _train_and_test(working_dir, test_partition, test_interval, model_file, mode
                     for res
                     in query
                     if res[0].pandda.system.name not in test_partition_event_systems
-                ][:1785]
+                ]
             ),
             transform_image=get_image_xmap_ligand_augmented,
             transform_annotation=get_annotation_from_event_hit
