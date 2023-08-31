@@ -775,7 +775,7 @@ def _train_and_test(working_dir, test_partition, test_interval):
                         x=res[0].x,
                         y=res[0].y,
                         z=res[0].z,
-                        hit=res[0].annotations[0].annotation,
+                        hit=res[0].annotations.annotation,
                         ligand=None
                     )
                     for res
@@ -800,7 +800,7 @@ def _train_and_test(working_dir, test_partition, test_interval):
                         x=event.x,
                         y=event.y,
                         z=event.z,
-                        hit=event.hit,
+                        hit=event.annotations.annotation,
                         ligand=None
                     )
                     for event
