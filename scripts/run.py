@@ -699,6 +699,11 @@ def _partition_dataset(working_directory):
 
     with pony.orm.db_session:
 
+        partitions = pony.orm.select(p for p in PartitionORM)
+        if len(partitions) > 0:
+            rprint(f"Already have {len(partitions)} partitions!")
+            return
+
         query = pony.orm.select((event, event.pandda.system, event.annotations) for event in EventORM)
 
         # PanDDA 1 partitions
@@ -771,6 +776,7 @@ def __main__(config_yaml="config.yaml"):
 
     # Partition the data
     if "Partition" in config.steps:
+
         _partition_dataset(
             config.working_directory
         )
