@@ -756,6 +756,9 @@ def _train_and_test(working_dir, test_partition, test_interval, model_file, mode
         test_partition_event_systems = set([event.pandda.system.name for event in test_partition_events.events])
         rprint(f"Test partition systems are: {test_partition_event_systems}")
 
+        for event in partitions[test_partition]:
+            print(event.pandda.path)
+
         # event_partitions = {}
         # for res in query:
         #     event = res[0]

@@ -1048,12 +1048,12 @@ def train(
                 # begin_annotate = time.time()
                 model_annotation = model(image_c)
                 event = test_dataset_torch.pandda_event_dataset[idx]
-                print(event)
+                # print(event)
                 annotations[i][(event.pandda_dir, event.dtag, event.event_idx)] = (
                     float(annotation.to(torch.device("cpu")).detach().numpy()[0][1]),
                     float(model_annotation.to(torch.device("cpu")).detach().numpy()[0][1]),
                 )
-            print(annotations[i])
+            # print(annotations[i])
 
             with open( Path(working_dir)/ "annotations.pickle", 'wb') as f:
                 pickle.dump(annotations, f)
