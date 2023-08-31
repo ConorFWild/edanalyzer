@@ -976,7 +976,7 @@ def train(
         print(f"Epoch: {epoch}")
         model.train()
 
-        for image, annotation, idx in train_dataloader:
+        for image, annotation, idx in test_dataloader:
             # print(f"\tBatch: {i}")
             # print(image)
             # print(annotation)
