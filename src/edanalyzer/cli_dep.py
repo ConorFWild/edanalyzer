@@ -952,6 +952,7 @@ def train(
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
+        drop_last=True
     )
 
     # Define loss function
