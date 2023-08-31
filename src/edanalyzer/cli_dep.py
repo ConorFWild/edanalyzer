@@ -926,20 +926,29 @@ def train_pandda_from_dataset_ligand(
                    Path(options.working_dir) / constants.MODEL_FILE_EPOCH_XMAP_LIGAND.format(epoch=epoch))
 
 def train(
-        options,
-        dataset_torch,
+        # options,
+        working_dir,
+        train_dataset_torch,
+        test_dataset_torch,
         model,
-        initial_epoch,
+        # initial_epoch,
         model_key,
         dev,
+        test_interval,
         batch_size=12,
         num_workers=20,
         num_epochs=1000,
 ):
 
     # Get the dataloader
+    test_dataloader = DataLoader(
+        test_dataset_torch,
+        batch_size=1,
+        shuffle=False,
+        num_workers=num_workers,
+    )
     train_dataloader = DataLoader(
-        dataset_torch,
+        train_dataset_torch,
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
@@ -961,7 +970,8 @@ def train(
 
     running_loss = []
 
-    for epoch in range(initial_epoch + 1, initial_epoch + num_epochs):
+    # for epoch in range(initial_epoch + 1, initial_epoch + num_epochs):
+    for epoch in range(num_epochs):
         i = 0
         print(f"Epoch: {epoch}")
         for image, annotation, idx in train_dataloader:
@@ -1017,10 +1027,32 @@ def train(
                     # print("{}".format() + "\n")
                 print("#################################################" + "\n")
 
+        if epoch % test_interval == 0:
+            model.eval()
+            annotations = {}
+            for image, annotation, idx in test_dataloader:
+                image_c = image.to(dev)
+                annotation_c = annotation.to(dev)
+
+                optimizer.zero_grad()
+
+                # forward + backward + optimize
+                # begin_annotate = time.time()
+                model_annotation = model(image_c)
+                annotations[int(idx)] = (annotation, float(model_annotation[1]))
+
+
+
+
+        model.train()
+
+
+
+
         logger.info(f"Saving state dict for model at epoch: {epoch}")
         torch.save(
             model.state_dict(),
-            Path(options.working_dir) / f"{model_key}{epoch}.pt",
+            Path(working_dir) / f"{model_key}{epoch}.pt",
         )
 
 def save_example_ligandmap(ligandmap, output_path):

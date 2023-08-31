@@ -14,12 +14,29 @@ import joblib
 import gemmi
 import numpy as np
 import scipy
+import torch
+from torch.utils.data import DataLoader
+import torch.nn as nn
+import torch.optim as optim
+
+# from edanalyzer.torch_network import resnet18
+from edanalyzer.torch_network_resnet import resnet18
+from edanalyzer.torch_network_resnet_ligandmap import resnet18_ligandmap
+from edanalyzer.torch_network_squeezenet import squeezenet1_1, squeezenet1_0
+from edanalyzer.torch_network_mobilenet import mobilenet_v3_large_3d
 
 from edanalyzer.database_pony import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM  # import *
 from edanalyzer import constants
-
-
+from edanalyzer.cli_dep import train
+from edanalyzer.data import PanDDAEvent, PanDDAEventDataset
+from edanalyzer.torch_dataset import (
+    PanDDAEventDatasetTorch, PanDDADatasetTorchXmapGroundState, get_annotation_from_event_annotation,
+    get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented,
+    get_annotation_from_event_hit, get_image_xmap_mean_map_augmented, get_image_xmap_mean_map,
+    get_image_xmap_ligand_augmented, PanDDADatasetTorchLigand, get_image_xmap_ligand, get_image_ligandmap_augmented,
+    PanDDADatasetTorchLigandmap
+)
 # from pony.orm import *
 
 @dataclasses.dataclass
@@ -590,11 +607,10 @@ def _make_database(
                         else:
                             ligand_orm = None
 
-
                         pickled_data_dir = pandda_path / "pickled_data"
                         pandda_done = pandda_path / "pandda.done"
                         statistical_maps = pandda_path / "statistical_maps"
-                        pickled_panddas_dir = pandda_path /"pickled_panddas"
+                        pickled_panddas_dir = pandda_path / "pickled_panddas"
                         if pickled_data_dir.exists():
                             source = "pandda_1"
                         elif pandda_done.exists():
@@ -692,6 +708,7 @@ def partition_events(query):
 
     return partitions
 
+
 def _partition_dataset(working_directory):
     database_path = working_directory / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
@@ -722,6 +739,106 @@ def _partition_dataset(working_directory):
                 events=[result[0] for result in query if result[1].name in system_names],
             )
 
+
+def _train_and_test(working_dir, test_partition):
+    database_path = working_dir / "database.db"
+    db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
+    db.generate_mapping(create_tables=True)
+
+    with pony.orm.db_session:
+        partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
+        query = pony.orm.select(
+            (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
+            event in EventORM)
+
+        test_partition_events = partitions[test_partition]
+        test_partition_event_systems = set([event.pandda.system.name for event in test_partition_events.events])
+        rprint(f"Test partition systems are: {test_partition_event_systems}")
+
+        # event_partitions = {}
+        # for res in query:
+        #     event = res[0]
+        #     partition = event.partitions[0]
+        #     if partition.name in event_partitions
+        #     event_partitions[]
+        train_dataset_torch = PanDDADatasetTorchLigand(
+            PanDDAEventDataset(
+                [
+                    PanDDAEvent(
+                        id=res[0].id,
+                        pandda_dir=res[0].pandda.path,
+                        model_building_dir=res[0].pandda.experiment.model_dir,
+                        system_name=res[0].pandda.system.name,
+                        dtag=res[0].dtag,
+                        event_idx=res[0].event_idx,
+                        event_map=res[0].event_map,
+                        x=res[0].x,
+                        y=res[0].y,
+                        z=res[0].z,
+                        hit=res[0].hit,
+                        ligand=None
+                    )
+                    for res
+                    in query
+                    if res[0].pandda.system.name not in test_partition_event_systems
+                ]),
+            transform_image=get_image_xmap_ligand_augmented,
+            transform_annotation=get_annotation_from_event_hit
+        )
+
+        test_dataset_torch = PanDDADatasetTorchLigand(
+            PanDDAEventDataset(
+                [
+                    PanDDAEvent(
+                        id=event.id,
+                        pandda_dir=event.pandda.path,
+                        model_building_dir=event.pandda.experiment.model_dir,
+                        system_name=event.pandda.system.name,
+                        dtag=event.dtag,
+                        event_idx=event.event_idx,
+                        event_map=event.event_map,
+                        x=event.x,
+                        y=event.y,
+                        z=event.z,
+                        hit=event.hit,
+                        ligand=None
+                    )
+                    for event
+                    in test_partition_events
+                ]),            transform_image=get_image_xmap_ligand_augmented,
+            transform_annotation=get_annotation_from_event_hit
+        )
+        rprint(f"Got {len(test_dataset_torch)} test events!")
+
+    # Get the device
+    if torch.cuda.is_available():
+        # logger.info(f"Using cuda!")
+        dev = "cuda:0"
+    else:
+        # logger.info(f"Using cpu!")
+        dev = "cpu"
+
+    if model_type == "resnet+ligand":
+        model = resnet18(num_classes=2, num_input=4)
+        model.to(dev)
+
+        if model_file:
+            model.load_state_dict(torch.load(model_file, map_location=dev),
+                                  )
+
+    train(
+        working_dir,
+        train_dataset_torch,
+        test_dataset_torch,
+        model,
+        # initial_epoch,
+        model_key,
+        dev,
+        test_interval,
+        batch_size=12,
+        num_workers=20,
+        num_epochs=1000,
+    )
 
 
 def __main__(config_yaml="config.yaml"):
@@ -776,14 +893,15 @@ def __main__(config_yaml="config.yaml"):
 
     # Partition the data
     if "Partition" in config.steps:
-
         _partition_dataset(
             config.working_directory
         )
 
     # Run training/testing
     if 'Train+Test' in config.steps:
-        ...
+        _train_and_test(
+            config.working_directory
+        )
     # Summarize train/test results
     if 'Summarize' in config.steps:
         ...
