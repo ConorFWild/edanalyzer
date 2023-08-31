@@ -51,7 +51,7 @@ from edanalyzer.torch_network_resnet import resnet18
 from edanalyzer.torch_network_resnet_ligandmap import resnet18_ligandmap
 from edanalyzer.torch_network_squeezenet import squeezenet1_1, squeezenet1_0
 from edanalyzer.torch_network_mobilenet import mobilenet_v3_large_3d
-import download_dataset
+# import download_dataset
 import dataclasses
 import time
 
