@@ -871,9 +871,9 @@ def _get_precision_recall(epoch_results):
     pr = {}
     for cutoff in np.linspace(0.0,1.0,num=101):
         tp = [key for key, annotations in epoch_results.items() if (annotations[0] == 1.0) and (annotations[1] >= cutoff)]# *]
-        fp = [key for key, annotations in epoch_results.items() if (annotations[0] == 0.0) and (annotations[1] > cutoff)]
+        fp = [key for key, annotations in epoch_results.items() if (annotations[0] == 0.0) and (annotations[1] >= cutoff)]
         tn = [key for key, annotations in epoch_results.items() if (annotations[0] == 0.0) and (annotations[1] < cutoff)]
-        fn = [key for key, annotations in epoch_results.items() if (annotations[0] == 1.0) and (annotations[1] >= cutoff)]
+        fn = [key for key, annotations in epoch_results.items() if (annotations[0] == 1.0) and (annotations[1] < cutoff)]
 
         rprint([len(tp), len(fp), len(tn), len(fn)])
         try:
