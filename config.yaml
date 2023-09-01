@@ -4,7 +4,7 @@ steps:
 #  - Annotations
 #  - Collate
 #  - Partition
-#  - Train+Test
+  - Train+Test
   - Summarize
 datasets:
   - /dls/labxchem/data/*/*/processing/analysis/*
