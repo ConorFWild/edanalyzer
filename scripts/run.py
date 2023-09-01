@@ -800,10 +800,10 @@ def _make_dataset(
     import h5py
     import hdf5plugin
 
-    if Path("test_2.h5").exists():
+    if Path("test_3.h5").exists():
 
         begin_read_dataset = time.time()
-        with h5py.File('test_2.h5', 'r') as f:
+        with h5py.File('test_3.h5', 'r') as f:
             panddas = f["pandda_paths"]
             dtags = f["dtags"]
             event_idxs = f["event_idxs"]
@@ -823,7 +823,7 @@ def _make_dataset(
 
         begin_make_dataset = time.time()
 
-        with h5py.File('test_2.h5', 'w') as f:
+        with h5py.File('test_3.h5', 'w') as f:
             panddas = f.create_dataset("pandda_paths", (len(train_dataset_torch),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
             dtags = f.create_dataset("dtags", (len(train_dataset_torch),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
             event_idxs = f.create_dataset("event_idxs", (len(train_dataset_torch),), chunks=(12,), dtype='i')
@@ -833,7 +833,7 @@ def _make_dataset(
                 (len(train_dataset_torch), 4, 30,30,30),
                 chunks=(12,4,30,30,30),
                 dtype='float32',
-                **hdf5plugin.Blosc(cname='blosclz', clevel=9, shuffle=hdf5plugin.Blosc.BITSHUFFLE),
+                **hdf5plugin.Blosc2(cname='blosclz', clevel=9, shuffle=hdf5plugin.Blosc2.BITSHUFFLE),
             )
             annotations = f.create_dataset("annotations", (len(train_dataset_torch), 2), chunks=(12,2), dtype='float32')
 
