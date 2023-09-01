@@ -2,6 +2,7 @@ import dataclasses
 import os
 import pickle
 import pathlib
+import time
 from pathlib import Path
 
 import yaml
@@ -763,31 +764,31 @@ def _make_dataset(
         for partition_name, partition in partitions.items():
             print(f"{partition_name} : {len(partition.events)}")
 
-    train_dataset_torch = PanDDADatasetTorchLigand(
-        PanDDAEventDataset(
-            pandda_events=[
-                PanDDAEvent(
-                    id=res[0].id,
-                    pandda_dir=res[0].pandda.path,
-                    model_building_dir=res[0].pandda.experiment.model_dir,
-                    system_name=res[0].pandda.system.name,
-                    dtag=res[0].dtag,
-                    event_idx=res[0].event_idx,
-                    event_map=res[0].event_map,
-                    x=res[0].x,
-                    y=res[0].y,
-                    z=res[0].z,
-                    hit=res[1].annotation,
-                    ligand=None
-                )
-                for res
-                in query
-                if res[0].pandda.system.name not in test_partition_event_systems
-            ]
-        ),
-        transform_image=get_image_xmap_ligand_augmented,
-        transform_annotation=get_annotation_from_event_hit
-    )
+        train_dataset_torch = PanDDADatasetTorchLigand(
+            PanDDAEventDataset(
+                pandda_events=[
+                    PanDDAEvent(
+                        id=res[0].id,
+                        pandda_dir=res[0].pandda.path,
+                        model_building_dir=res[0].pandda.experiment.model_dir,
+                        system_name=res[0].pandda.system.name,
+                        dtag=res[0].dtag,
+                        event_idx=res[0].event_idx,
+                        event_map=res[0].event_map,
+                        x=res[0].x,
+                        y=res[0].y,
+                        z=res[0].z,
+                        hit=res[1].annotation,
+                        ligand=None
+                    )
+                    for res
+                    in query
+                    if res[0].pandda.system.name not in test_partition_event_systems
+                ]
+            ),
+            transform_image=get_image_xmap_ligand_augmented,
+            transform_annotation=get_annotation_from_event_hit
+        )
     train_dataloader = DataLoader(
         train_dataset_torch,
         batch_size=12,
@@ -798,6 +799,7 @@ def _make_dataset(
 
     import h5py
 
+    begin_make_dataset = time.time()
     with h5py.File('my_hdf5_file.h5', 'w') as f:
         panddas = f.create_dataset("pandda_paths", (len(train_dataloader),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
         dtags = f.create_dataset("dtags", (len(train_dataloader),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
@@ -817,7 +819,8 @@ def _make_dataset(
             images[j] = image
             annotations[j] = annotation[1]
 
-
+    finish_make_dataset = time.time()
+    print(f"Made dataset in: {finish_make_dataset-begin_make_dataset}")
 
 
     # j = 0
