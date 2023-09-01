@@ -805,7 +805,7 @@ def _make_dataset(
         dtags = f.create_dataset("dtags", (len(train_dataloader),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
         event_idxs = f.create_dataset("event_idxs", (len(train_dataloader),), chunks=(12,), dtype='i')
         images = f.create_dataset("images", (len(train_dataloader), 4, 30,30,30), chunks=(12,4,30,30,30), dtype='float32')
-        annotations = f.create_dataset("annotations", (len(train_dataloader), 2), chunks=(12,), dtype='float32')
+        annotations = f.create_dataset("annotations", (len(train_dataloader), 2), chunks=(12,2), dtype='float32')
 
         for j in range(len(train_dataset_torch)):
             image, annotation, idx = train_dataset_torch[j]
