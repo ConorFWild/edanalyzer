@@ -897,7 +897,7 @@ def _summarize(working_dir):
 
     for epoch, epoch_results in test_results.items():
         precision_recall = _get_precision_recall(epoch_results)
-        rprint(precision_recall)
+        # rprint(precision_recall)
         recall_greater_than_95 = {cutoff: pr for cutoff, pr in precision_recall.items() if pr['recall'] > 0.95}
 
         if len(recall_greater_than_95) > 0:
