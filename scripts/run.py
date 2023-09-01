@@ -870,11 +870,12 @@ def _train_and_test(working_dir, test_partition, test_interval, model_file, mode
 def _get_precision_recall(epoch_results):
     pr = {}
     for cutoff in np.linspace(0.0,1.0,num=101):
-        tp = [key for key, annotations in epoch_results.items() if (annotations[0] == 1.0) and (annotations[1] > cutoff)]# *]
+        tp = [key for key, annotations in epoch_results.items() if (annotations[0] == 1.0) and (annotations[1] >= cutoff)]# *]
         fp = [key for key, annotations in epoch_results.items() if (annotations[0] == 0.0) and (annotations[1] > cutoff)]
         tn = [key for key, annotations in epoch_results.items() if (annotations[0] == 0.0) and (annotations[1] < cutoff)]
-        fn = [key for key, annotations in epoch_results.items() if (annotations[0] == 1.0) and (annotations[1] > cutoff)]
+        fn = [key for key, annotations in epoch_results.items() if (annotations[0] == 1.0) and (annotations[1] >= cutoff)]
 
+        rprint([len(tp), len(fp), len(tn), len(fn)])
         try:
             recall = len(tp) / len(tp+fn)
         except:
@@ -884,7 +885,7 @@ def _get_precision_recall(epoch_results):
         except:
             precision = 0.0
 
-        pr[float(cutoff)] = {'precision': precision, 'recall': recall}
+        pr[round(float(cutoff), 2)] = {'precision': round(precision, 3), 'recall': round(recall, 3)}
 
     return pr
 
