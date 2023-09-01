@@ -809,12 +809,18 @@ def _make_dataset(
             event_idxs = f["event_idxs"]
             images = f["images"]
             annotations = f['annotations']
-            for j in range(len(dtags) // 12):
-                _panddas = panddas[j*12:min((j+1)*12, len(dtags))]
-                _dtags = dtags[j * 12:min((j + 1) * 12, len(dtags))]
-                _event_idxs = event_idxs[j * 12:min((j + 1) * 12, len(dtags))]
-                _images = images[j * 12:min((j + 1) * 12, len(dtags))]
-                _annotations = annotations[j * 12:min((j + 1) * 12, len(dtags))]
+            # for j in range(len(dtags) // 12):
+            #     _panddas = panddas[j*12:min((j+1)*12, len(dtags))]
+            #     _dtags = dtags[j * 12:min((j + 1) * 12, len(dtags))]
+            #     _event_idxs = event_idxs[j * 12:min((j + 1) * 12, len(dtags))]
+            #     _images = images[j * 12:min((j + 1) * 12, len(dtags))]
+            #     _annotations = annotations[j * 12:min((j + 1) * 12, len(dtags))]
+            for j in range(len(dtags)):
+                _panddas = panddas[j]
+                _dtag = dtags[j]
+                _event_idx = event_idxs[j]
+                _image = images[j]
+                _annotation = annotations[j]
 
         finish_read_dataset = time.time()
         rprint(f"Read dataset in:{finish_read_dataset-begin_read_dataset}")
