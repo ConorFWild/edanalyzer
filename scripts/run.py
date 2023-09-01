@@ -800,6 +800,8 @@ def _make_dataset(
     import h5py
 
     if Path("my_hdf5_file.h5").exists():
+
+        begin_read_dataset = time.time()
         with h5py.File('my_hdf5_file.h5', 'r') as f:
             panddas = f["pandda_paths"]
             dtags = f["dtags"]
@@ -812,6 +814,9 @@ def _make_dataset(
                 _event_idxs = event_idxs[j * 12:min((j + 1) * 12, len(dtags))]
                 _images = images[j * 12:min((j + 1) * 12, len(dtags))]
                 _annotations = annotations[j * 12:min((j + 1) * 12, len(dtags))]
+
+        finish_read_dataset = time.time()
+        rprint(f"Read dataset in:{finish_read_dataset-begin_read_dataset}")
 
     else:
 
