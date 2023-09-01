@@ -833,7 +833,7 @@ def _make_dataset(
                 (len(train_dataset_torch), 4, 30,30,30),
                 chunks=(12,4,30,30,30),
                 dtype='float32',
-                **hdf5plugin.Blosc2(cname='blosclz', clevel=9, shuffle=hdf5plugin.Blosc2.BITSHUFFLE),
+                **hdf5plugin.Blosc2(cname='blosclz', clevel=9, filters=hdf5plugin.Blosc2.BITSHUFFLE),
             )
             annotations = f.create_dataset("annotations", (len(train_dataset_torch), 2), chunks=(12,2), dtype='float32')
 
