@@ -802,7 +802,7 @@ def _make_dataset(
     if Path("my_hdf5_file.h5").exists():
 
         begin_read_dataset = time.time()
-        with h5py.File('my_hdf5_file.h5', 'r') as f:
+        with h5py.File('test.h5', 'r') as f:
             panddas = f["pandda_paths"]
             dtags = f["dtags"]
             event_idxs = f["event_idxs"]
@@ -822,7 +822,7 @@ def _make_dataset(
 
         begin_make_dataset = time.time()
 
-        with h5py.File('my_hdf5_file.h5', 'w') as f:
+        with h5py.File('test.h5', 'w') as f:
             panddas = f.create_dataset("pandda_paths", (len(train_dataset_torch),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
             dtags = f.create_dataset("dtags", (len(train_dataset_torch),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
             event_idxs = f.create_dataset("event_idxs", (len(train_dataset_torch),), chunks=(12,), dtype='i')
