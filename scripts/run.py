@@ -800,12 +800,13 @@ def _make_dataset(
     import h5py
 
     begin_make_dataset = time.time()
+
     with h5py.File('my_hdf5_file.h5', 'w') as f:
-        panddas = f.create_dataset("pandda_paths", (len(train_dataloader),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
-        dtags = f.create_dataset("dtags", (len(train_dataloader),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
-        event_idxs = f.create_dataset("event_idxs", (len(train_dataloader),), chunks=(12,), dtype='i')
-        images = f.create_dataset("images", (len(train_dataloader), 4, 30,30,30), chunks=(12,4,30,30,30), dtype='float32')
-        annotations = f.create_dataset("annotations", (len(train_dataloader), 2), chunks=(12,2), dtype='float32')
+        panddas = f.create_dataset("pandda_paths", (len(train_dataset_torch),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
+        dtags = f.create_dataset("dtags", (len(train_dataset_torch),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
+        event_idxs = f.create_dataset("event_idxs", (len(train_dataset_torch),), chunks=(12,), dtype='i')
+        images = f.create_dataset("images", (len(train_dataset_torch), 4, 30,30,30), chunks=(12,4,30,30,30), dtype='float32')
+        annotations = f.create_dataset("annotations", (len(train_dataset_torch), 2), chunks=(12,2), dtype='float32')
 
         for j in range(len(train_dataset_torch)):
             image, annotation, idx = train_dataset_torch[j]
