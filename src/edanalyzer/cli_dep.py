@@ -1037,7 +1037,8 @@ def train(
         if epoch % test_interval == 0:
             logger.info(f"Evaluating on test dataset!")
             model.eval()
-            annotations[i] = {}
+            # annotations[i] = {}
+            annotations[epoch] = {}
             for image, annotation, idx in test_dataloader:
                 image_c = image.to(dev)
                 annotation_c = annotation.to(dev)
