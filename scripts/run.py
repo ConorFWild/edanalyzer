@@ -867,6 +867,37 @@ def _train_and_test(working_dir, test_partition, test_interval, model_file, mode
         num_epochs=1000,
     )
 
+def _get_precision_recall(epoch_results):
+    pr = {}
+    for cutoff in np.linspace(0.0,1.0,num=101):
+        tp = [key for key, annotations in epoch_results.items() if (annotations[0] == 1.0) and (annotations[1] > cutoff)]# *]
+        fp = [key for key, annotations in epoch_results.items() if (annotations[0] == 0.0) and (annotations[1] > cutoff)]
+        tn = [key for key, annotations in epoch_results.items() if (annotations[0] == 0.0) and (annotations[1] < cutoff)]
+        fn = [key for key, annotations in epoch_results.items() if (annotations[0] == 1.0) and (annotations[1] > cutoff)]
+
+        try:
+            recall = len(tp) / len(tp+fn)
+        except:
+            recall = 0.0
+        try:
+            precision = len(tp) / len(tp + fp)
+        except:
+            precision = 0.0
+
+        pr[float(cutoff)] = {'precision': precision, 'recall': recall}
+
+    return pr
+
+def _summarize(working_dir):
+    with open(Path(working_dir) / "annotations.pickle", 'rb') as f:
+        test_results = pickle.load(f)
+
+    for epoch, epoch_results in test_results.items():
+        precision_recall = _get_precision_recall(epoch_results)
+        recall_greater_than_95 = {cutoff: pr for cutoff, pr in precision_recall if pr['recall'] > 0.95}
+        if len(recall_greater_than_95) > 0:
+            max_prec_cutoff = max(recall_greater_than_95, key=lambda x: recall_greater_than_95[x]['precision'])
+            rprint(f"Epoch: {epoch} : Recall: {precision_recall[max_prec_cutoff]['recall']} : Precision: {precision_recall[max_prec_cutoff]['precision']}")
 
 def __main__(config_yaml="config.yaml"):
     # Initialize the config
@@ -939,7 +970,7 @@ def __main__(config_yaml="config.yaml"):
         )
     # Summarize train/test results
     if 'Summarize' in config.steps:
-        ...
+        _summarize(config.working_directory)
 
 
 if __name__ == "__main__":
