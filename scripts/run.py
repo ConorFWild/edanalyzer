@@ -799,7 +799,7 @@ def _make_dataset(
 
     import h5py
 
-    if Path("my_hdf5_file.h5").exists():
+    if Path("test.h5").exists():
 
         begin_read_dataset = time.time()
         with h5py.File('test.h5', 'r') as f:
