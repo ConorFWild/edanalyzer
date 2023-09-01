@@ -793,7 +793,7 @@ def _make_dataset(
         train_dataset_torch,
         batch_size=12,
         shuffle=False,
-        num_workers=20,
+        num_workers=36,
         drop_last=True
     )
 
@@ -838,7 +838,10 @@ def _make_dataset(
             annotations = f.create_dataset("annotations", (len(train_dataset_torch), 2), chunks=(12,2), dtype='float32')
 
             # for j in range(len(train_dataset_torch)):
+            _k = 0
             for image, annotation, idx in train_dataloader:
+                print(f"Iteration: {_k} / {len(train_dataloader)}")
+                _k = _k + 1
                 # image, annotation, idx = train_dataset_torch[j]
                 image_np = image.detach().numpy()
                 annotation_np = annotation.detach().numpy()
