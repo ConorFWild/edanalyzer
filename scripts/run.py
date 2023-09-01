@@ -894,7 +894,7 @@ def _summarize(working_dir):
 
     for epoch, epoch_results in test_results.items():
         precision_recall = _get_precision_recall(epoch_results)
-        recall_greater_than_95 = {cutoff: pr for cutoff, pr in precision_recall if pr['recall'] > 0.95}
+        recall_greater_than_95 = {cutoff: pr for cutoff, pr in precision_recall.items() if pr['recall'] > 0.95}
         if len(recall_greater_than_95) > 0:
             max_prec_cutoff = max(recall_greater_than_95, key=lambda x: recall_greater_than_95[x]['precision'])
             rprint(f"Epoch: {epoch} : Recall: {precision_recall[max_prec_cutoff]['recall']} : Precision: {precision_recall[max_prec_cutoff]['precision']}")
