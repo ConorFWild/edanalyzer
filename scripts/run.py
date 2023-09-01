@@ -741,6 +741,97 @@ def _partition_dataset(working_directory):
             )
 
 
+def _make_dataset(
+            working_dir,
+        test_partition
+        ):
+    database_path = working_dir / "database.db"
+    db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
+    db.generate_mapping(create_tables=True)
+
+    with pony.orm.db_session:
+        partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
+        query = pony.orm.select(
+            (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
+            event in EventORM)
+
+        test_partition_events = partitions[test_partition]
+        test_partition_event_systems = set([event.pandda.system.name for event in test_partition_events.events])
+        rprint(f"Test partition systems are: {test_partition_event_systems}")
+
+        print(partitions)
+        for partition_name, partition in partitions.items():
+            print(f"{partition_name} : {len(partition.events)}")
+
+    train_dataset_torch = PanDDADatasetTorchLigand(
+        PanDDAEventDataset(
+            pandda_events=[
+                PanDDAEvent(
+                    id=res[0].id,
+                    pandda_dir=res[0].pandda.path,
+                    model_building_dir=res[0].pandda.experiment.model_dir,
+                    system_name=res[0].pandda.system.name,
+                    dtag=res[0].dtag,
+                    event_idx=res[0].event_idx,
+                    event_map=res[0].event_map,
+                    x=res[0].x,
+                    y=res[0].y,
+                    z=res[0].z,
+                    hit=res[1].annotation,
+                    ligand=None
+                )
+                for res
+                in query
+                if res[0].pandda.system.name not in test_partition_event_systems
+            ]
+        ),
+        transform_image=get_image_xmap_ligand_augmented,
+        transform_annotation=get_annotation_from_event_hit
+    )
+    train_dataloader = DataLoader(
+        train_dataset_torch,
+        batch_size=12,
+        shuffle=False,
+        num_workers=12,
+        drop_last=True
+    )
+
+    import h5py
+
+    with h5py.File('my_hdf5_file.h5', 'w') as f:
+        panddas = f.create_dataset("pandda_paths", (len(train_dataloader),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
+        dtags = f.create_dataset("dtags", (len(train_dataloader),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
+        event_idxs = f.create_dataset("event_idxs", (len(train_dataloader),), chunks=(12,), dtype='i')
+        images = f.create_dataset("images", (len(train_dataloader), 4, 30,30,30), chunks=(12,4,30,30,30), dtype='f32')
+        annotations = f.create_dataset("annotations", (len(train_dataloader), 2), chunks=(12,), dtype='f32')
+
+        for j in range(len(train_dataset_torch)):
+            image, annotation, idx = train_dataset_torch[j]
+            image_np = image.detach().numpy()
+            annotation_np = annotation.detach().numpy()
+            idx_np = idx.detach().numpy()
+            event = train_dataset_torch.pandda_event_dataset[int(idx_np)]
+            panddas[j] = event.pandda_dir
+            dtags[j] = event.dtag
+            event_idxs[j] = event.event_idx
+            images[j] = image
+            annotations[j] = annotation[1]
+
+
+
+
+    # j = 0
+    # for images, annotations, idxs in train_dataloader:
+    #     images_np = images.detach().numpy()
+    #     annotations_np = annotations.detach().numpy()
+    #     idxs_np = idxs.detach().numpy()
+    #
+    #     events = [train_dataset_torch.pandda_event_dataset[idx] for idx in idxs_np]
+    #     panddas[j*12:(j+1)*12] = [event.pandda_dir for event in events]
+    #     dtags[j*12:(j+1)*12] = [event.dtag for event in events]
+    #     event_idxs[j * 12:(j + 1) * 12] = [event.event_idx for event in events]
+
+
 def _train_and_test(working_dir, test_partition, test_interval, model_file, model_key):
     database_path = working_dir / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
@@ -962,6 +1053,12 @@ def __main__(config_yaml="config.yaml"):
     if "Partition" in config.steps:
         _partition_dataset(
             config.working_directory
+        )
+
+    if "MakeDataset" in config.steps:
+        _make_dataset(
+            config.working_directory,
+            config.test.partition
         )
 
     # Run training/testing
