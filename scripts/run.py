@@ -875,7 +875,7 @@ def _get_precision_recall(epoch_results):
         tn = [key for key, annotations in epoch_results.items() if (annotations[0] == 0.0) and (annotations[1] < cutoff)]
         fn = [key for key, annotations in epoch_results.items() if (annotations[0] == 1.0) and (annotations[1] < cutoff)]
 
-        rprint([len(tp), len(fp), len(tn), len(fn)])
+        # rprint([len(tp), len(fp), len(tn), len(fn)])
         try:
             recall = len(tp) / len(tp+fn)
         except:
@@ -893,7 +893,7 @@ def _summarize(working_dir):
     with open(Path(working_dir) / "annotations.pickle", 'rb') as f:
         test_results = pickle.load(f)
 
-    rprint(test_results)
+    # rprint(test_results)
 
     for epoch, epoch_results in test_results.items():
         precision_recall = _get_precision_recall(epoch_results)
