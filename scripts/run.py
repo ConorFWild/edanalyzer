@@ -794,7 +794,7 @@ def _make_dataset(
         batch_size=12,
         shuffle=False,
         num_workers=12,
-        drop_last=True
+        drop_last=#
     )
 
     import h5py
@@ -811,7 +811,7 @@ def _make_dataset(
             image, annotation, idx = train_dataset_torch[j]
             image_np = image#.detach().numpy()
             annotation_np = annotation#.detach().numpy()
-            idx_np = idx.detach().numpy()
+            idx_np = idx#.detach().numpy()
             event = train_dataset_torch.pandda_event_dataset[int(idx_np)]
             panddas[j] = event.pandda_dir
             dtags[j] = event.dtag
