@@ -892,6 +892,8 @@ def _summarize(working_dir):
     with open(Path(working_dir) / "annotations.pickle", 'rb') as f:
         test_results = pickle.load(f)
 
+    rprint(test_results)
+
     for epoch, epoch_results in test_results.items():
         precision_recall = _get_precision_recall(epoch_results)
         rprint(precision_recall)
