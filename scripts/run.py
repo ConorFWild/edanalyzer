@@ -793,17 +793,17 @@ def _make_dataset(
         train_dataset_torch,
         batch_size=12,
         shuffle=False,
-        num_workers=12,
-        drop_last=False
+        num_workers=20,
+        drop_last=True
     )
 
     import h5py
     import hdf5plugin
 
-    if Path("test.h5").exists():
+    if Path("test_2.h5").exists():
 
         begin_read_dataset = time.time()
-        with h5py.File('test.h5', 'r') as f:
+        with h5py.File('test_2.h5', 'r') as f:
             panddas = f["pandda_paths"]
             dtags = f["dtags"]
             event_idxs = f["event_idxs"]
@@ -823,7 +823,7 @@ def _make_dataset(
 
         begin_make_dataset = time.time()
 
-        with h5py.File('test.h5', 'w') as f:
+        with h5py.File('test_2.h5', 'w') as f:
             panddas = f.create_dataset("pandda_paths", (len(train_dataset_torch),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
             dtags = f.create_dataset("dtags", (len(train_dataset_torch),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
             event_idxs = f.create_dataset("event_idxs", (len(train_dataset_torch),), chunks=(12,), dtype='i')
@@ -837,17 +837,20 @@ def _make_dataset(
             )
             annotations = f.create_dataset("annotations", (len(train_dataset_torch), 2), chunks=(12,2), dtype='float32')
 
-            for j in range(len(train_dataset_torch)):
-                image, annotation, idx = train_dataset_torch[j]
-                image_np = image#.detach().numpy()
-                annotation_np = annotation#.detach().numpy()
-                idx_np = idx#.detach().numpy()
-                event = train_dataset_torch.pandda_event_dataset[int(idx_np)]
-                panddas[j] = event.pandda_dir
-                dtags[j] = event.dtag
-                event_idxs[j] = event.event_idx
-                images[j] = image_np
-                annotations[j] = annotation_np[1]
+            # for j in range(len(train_dataset_torch)):
+            for image, annotation, idx in train_dataloader:
+                # image, annotation, idx = train_dataset_torch[j]
+                image_np = image.detach().numpy()
+                annotation_np = annotation.detach().numpy()
+                idx_np = idx.detach().numpy()
+
+                for j in idx_np:
+                    event = train_dataset_torch.pandda_event_dataset[int(j)]
+                    panddas[int(j)] = event.pandda_dir
+                    dtags[int(j)] = event.dtag
+                    event_idxs[int(j)] = event.event_idx
+                    images[int(j)] = image_np
+                    annotations[int(j)] = annotation_np[1]
 
         finish_make_dataset = time.time()
         print(f"Made dataset in: {finish_make_dataset-begin_make_dataset}")
