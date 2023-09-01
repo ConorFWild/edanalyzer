@@ -824,18 +824,18 @@ def _make_dataset(
         begin_make_dataset = time.time()
 
         with h5py.File('test_3.h5', 'w') as f:
-            panddas = f.create_dataset("pandda_paths", (len(train_dataset_torch),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
-            dtags = f.create_dataset("dtags", (len(train_dataset_torch),), chunks=(12,), dtype=h5py.string_dtype(encoding='utf-8'))
-            event_idxs = f.create_dataset("event_idxs", (len(train_dataset_torch),), chunks=(12,), dtype='i')
+            panddas = f.create_dataset("pandda_paths", (len(train_dataset_torch),), chunks=(1,), dtype=h5py.string_dtype(encoding='utf-8'))
+            dtags = f.create_dataset("dtags", (len(train_dataset_torch),), chunks=(1,), dtype=h5py.string_dtype(encoding='utf-8'))
+            event_idxs = f.create_dataset("event_idxs", (len(train_dataset_torch),), chunks=(1,), dtype='i')
             # images = f.create_dataset("images", (len(train_dataset_torch), 4, 30,30,30), chunks=(12,4,30,30,30), dtype='float32', compression="gzip", compression_opts=9)
             images = f.create_dataset(
                 "images",
                 (len(train_dataset_torch), 4, 30,30,30),
-                chunks=(12,4,30,30,30),
+                chunks=(1,4,30,30,30),
                 dtype='float32',
                 **hdf5plugin.Blosc2(cname='blosclz', clevel=9, filters=hdf5plugin.Blosc2.BITSHUFFLE),
             )
-            annotations = f.create_dataset("annotations", (len(train_dataset_torch), 2), chunks=(12,2), dtype='float32')
+            annotations = f.create_dataset("annotations", (len(train_dataset_torch), 2), chunks=(1,2), dtype='float32')
 
             # for j in range(len(train_dataset_torch)):
             _k = 0
