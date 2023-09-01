@@ -816,8 +816,8 @@ def _make_dataset(
             panddas[j] = event.pandda_dir
             dtags[j] = event.dtag
             event_idxs[j] = event.event_idx
-            images[j] = image
-            annotations[j] = annotation[1]
+            images[j] = image_np
+            annotations[j] = annotation_np[1]
 
     finish_make_dataset = time.time()
     print(f"Made dataset in: {finish_make_dataset-begin_make_dataset}")
