@@ -794,7 +794,7 @@ def _make_dataset(
         batch_size=12,
         shuffle=False,
         num_workers=12,
-        drop_last=#
+        drop_last=False
     )
 
     import h5py
