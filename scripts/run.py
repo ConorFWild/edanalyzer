@@ -844,13 +844,13 @@ def _make_dataset(
                 annotation_np = annotation.detach().numpy()
                 idx_np = idx.detach().numpy()
 
-                for j in idx_np:
-                    event = train_dataset_torch.pandda_event_dataset[int(j)]
-                    panddas[int(j)] = event.pandda_dir
-                    dtags[int(j)] = event.dtag
-                    event_idxs[int(j)] = event.event_idx
-                    images[int(j)] = image_np
-                    annotations[int(j)] = annotation_np[1]
+                for _j, _idx in enumerate(idx_np):
+                    event = train_dataset_torch.pandda_event_dataset[int(_idx)]
+                    panddas[int(_idx)] = event.pandda_dir
+                    dtags[int(_idx)] = event.dtag
+                    event_idxs[int(_idx)] = event.event_idx
+                    images[int(_idx)] = image_np[_j]
+                    annotations[int(_idx)] = annotation_np[_j][1]
 
         finish_make_dataset = time.time()
         print(f"Made dataset in: {finish_make_dataset-begin_make_dataset}")
