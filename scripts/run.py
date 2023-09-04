@@ -780,7 +780,7 @@ def _make_test_dataset_psuedo_pandda(
                 else:
                     inspect_tables[pandda.path] = pd.read_csv(Path(pandda.path) / "analyses" / "pandda_inspect_events.csv")
         rprint(f"Got {len(inspect_tables)} inspect tables.")
-        rprint(inspect_tables)
+        # rprint(inspect_tables)
 
         # Select events and Organise by dtag
         events = {}
