@@ -803,6 +803,7 @@ def _make_test_dataset_psuedo_pandda(
                     'annotation': annotation,
                     'row': row
                 }
+        rprint(f"Got {len(events)} events!")
 
         psuedo_pandda_dir = working_dir / "test_datasets_pandda"
         analyses_dir = psuedo_pandda_dir / "analyses"
