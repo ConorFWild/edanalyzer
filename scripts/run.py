@@ -859,8 +859,8 @@ def _make_test_dataset_psuedo_pandda(
                 {
                     "site_idx": int(site_id)+1,
                     "centroid": (0.0,0.0,0.0),
-                    # "Name": None,
-                    # "Comment": None
+                    "Name": None,
+                    "Comment": None
                 }
             )
         print(len(site_records))
