@@ -809,8 +809,10 @@ def _make_test_dataset_psuedo_pandda(
         psuedo_pandda_dir = working_dir / "test_datasets_pandda"
         analyses_dir = psuedo_pandda_dir / "analyses"
         processed_datasets_dir = psuedo_pandda_dir / "processed_datasets"
-        analyse_inspect_table_path = analyses_dir / "pandda_inspect_events.csv"
-        analyse_site_table_path = analyses_dir / "pandda_inspect_sites.csv"
+        analyse_table_path = analyses_dir / "pandda_analyse_events.csv"
+        inspect_table_path = analyses_dir / "pandda_inspect_events.csv"
+        analyse_site_table_path = analyses_dir / "pandda_analyse_sites.csv"
+        inspect_site_table_path = analyses_dir / "pandda_inspect_sites.csv"
 
         # Spoof the main directories
         try_make(psuedo_pandda_dir)
@@ -844,7 +846,9 @@ def _make_test_dataset_psuedo_pandda(
 
         event_table = pd.concat(rows).reset_index()
         event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
-        event_table.to_csv(analyse_inspect_table_path, index=False)
+        event_table.to_csv(analyse_table_path, index=False)
+        event_table.to_csv(inspect_table_path, index=False)
+
 
         # Spoof the site table
         site_records = []
@@ -862,6 +866,7 @@ def _make_test_dataset_psuedo_pandda(
         print(len(site_records))
         site_table = pd.DataFrame(site_records)
         site_table.to_csv(analyse_site_table_path, index=False)
+        site_table.to_csv(inspect_site_table_path, index=False)
 
 
 
