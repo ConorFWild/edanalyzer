@@ -840,11 +840,14 @@ def _make_test_dataset_psuedo_pandda(
         for dtag in events:
             for event_idx, event_info in events[dtag].items():
                 row = event_info['row']
-                row.loc[0, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
+                # row.loc[0, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
                 rows.append(row)
-                j = j + 1
+                # j = j + 1
 
         event_table = pd.concat(rows).reset_index()
+        for j in range(len(event_table)):
+            event_table.loc[j, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
+
         event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
         event_table.to_csv(analyse_table_path, index=False)
         event_table.to_csv(inspect_table_path, index=False)
@@ -852,7 +855,7 @@ def _make_test_dataset_psuedo_pandda(
 
         # Spoof the site table
         site_records = []
-        num_sites = ((j-1) // 100) + 1
+        num_sites = ((j) // 100) + 1
         print(f"Num sites is: {num_sites}")
         for site_id in np.arange(0, num_sites+1):
             site_records.append(
