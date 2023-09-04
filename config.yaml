@@ -6,7 +6,7 @@ steps:
 #  - Partition
   - MakeTestDatasetPsuedoPanDDA
 #  - MakeDataset
-  - Train+Test
+#  - Train+Test
 #  - Summarize
 datasets:
   - /dls/labxchem/data/*/*/processing/analysis/*
