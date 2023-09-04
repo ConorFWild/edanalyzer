@@ -81,6 +81,7 @@ class ConfigTrain:
 
 @dataclasses.dataclass
 class ConfigTest:
+    initial_epoch: int
     test_interval: int
     test_convergence_interval: int
     partition: int
@@ -878,7 +879,7 @@ def _make_dataset(
     #     event_idxs[j * 12:(j + 1) * 12] = [event.event_idx for event in events]
 
 
-def _train_and_test(working_dir, test_partition, test_interval, model_file, model_key):
+def _train_and_test(working_dir, test_partition, initial_epoch, test_interval, model_file, model_key):
     database_path = working_dir / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
     db.generate_mapping(create_tables=True)
@@ -995,7 +996,7 @@ def _train_and_test(working_dir, test_partition, test_interval, model_file, mode
         train_dataset_torch,
         test_dataset_torch,
         model,
-        # initial_epoch,
+        initial_epoch,
         model_key,
         dev,
         test_interval,
@@ -1060,6 +1061,7 @@ def __main__(config_yaml="config.yaml"):
                 model_file
             ),
             test=ConfigTest(
+                dic['test']['initial_epoch'],
                 dic['test']['test_interval'],
                 dic['test']['test_convergence_interval'],
                 dic['test']['partition']
@@ -1112,6 +1114,7 @@ def __main__(config_yaml="config.yaml"):
         _train_and_test(
             config.working_directory,
             config.test.partition,
+            config.test.initial_epoch,
             config.test.test_interval,
             config.train.model_file,
             config.name

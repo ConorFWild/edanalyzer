@@ -20,6 +20,7 @@ train:
   max_epochs: 200
   model_file: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data/all_data21.pt
 test:
+  initial_epoch: 21
   test_interval: 1
   test_convergence_interval: 10
   partition: pandda_2_5

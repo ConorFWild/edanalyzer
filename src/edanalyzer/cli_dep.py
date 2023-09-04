@@ -931,7 +931,7 @@ def train(
         train_dataset_torch,
         test_dataset_torch,
         model,
-        # initial_epoch,
+        initial_epoch,
         model_key,
         dev,
         test_interval,
@@ -973,7 +973,7 @@ def train(
 
     # for epoch in range(initial_epoch + 1, initial_epoch + num_epochs):
     annotations = {}
-    for epoch in range(num_epochs):
+    for epoch in range(initial_epoch + 1, num_epochs):
         i = 0
         print(f"Epoch: {epoch}")
         model.train()
