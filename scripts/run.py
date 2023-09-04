@@ -773,7 +773,7 @@ def _make_test_dataset_psuedo_pandda(
         # Get the test partition pandda's and their inspect tables
         inspect_tables = {}
         for res in query:
-            if res[2] == test_partition:
+            if res[2].name == test_partition:
                 pandda = res[3]
                 if pandda.path in inspect_tables:
                     continue
