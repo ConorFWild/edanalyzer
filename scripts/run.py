@@ -840,7 +840,7 @@ def _make_test_dataset_psuedo_pandda(
         for dtag in events:
             for event_idx, event_info in events[dtag].items():
                 row = event_info['row']
-                row.iloc[0][constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
+                row.loc[0, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
                 rows.append(row)
                 j = j + 1
 
