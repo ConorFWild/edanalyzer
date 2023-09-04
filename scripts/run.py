@@ -770,96 +770,96 @@ def _make_test_dataset_psuedo_pandda(
             (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
             event in EventORM)
 
-    # Get the test partition pandda's and their inspect tables
-    inspect_tables = {}
-    for res in query:
-        if res[2] == test_partition:
-            pandda = res[3]
-            if pandda.path in inspect_tables:
-                continue
-            else:
-                inspect_tables[pandda.path] = pd.read_csv(Path(pandda.path) / "analyses" / "pandda_inspect_events.csv")
+        # Get the test partition pandda's and their inspect tables
+        inspect_tables = {}
+        for res in query:
+            if res[2] == test_partition:
+                pandda = res[3]
+                if pandda.path in inspect_tables:
+                    continue
+                else:
+                    inspect_tables[pandda.path] = pd.read_csv(Path(pandda.path) / "analyses" / "pandda_inspect_events.csv")
 
 
-    # Select events and Organise by dtag
-    events = {}
-    for res in query:
-        if res[2] == test_partition:
-            event = res[0]
-            annotation = res[1]
-            dtag = event.dtag
-            event_idx = event.event_idx
-            if dtag not in events:
-                events[dtag] = {}
+        # Select events and Organise by dtag
+        events = {}
+        for res in query:
+            if res[2] == test_partition:
+                event = res[0]
+                annotation = res[1]
+                dtag = event.dtag
+                event_idx = event.event_idx
+                if dtag not in events:
+                    events[dtag] = {}
 
-            table = inspect_tables[event.pandda_path]
-            row = table[
-                (table[constants.PANDDA_INSPECT_DTAG] == dtag)
-                & (table[constants.PANDDA_INSPECT_EVENT_IDX == event_idx])
-            ]
+                table = inspect_tables[event.pandda_path]
+                row = table[
+                    (table[constants.PANDDA_INSPECT_DTAG] == dtag)
+                    & (table[constants.PANDDA_INSPECT_EVENT_IDX == event_idx])
+                ]
 
-            events[dtag][event_idx] = {
-                'event': event,
-                'annotation': annotation,
-                'row': row
-            }
+                events[dtag][event_idx] = {
+                    'event': event,
+                    'annotation': annotation,
+                    'row': row
+                }
 
-    psuedo_pandda_dir = working_dir / "test_datasets_pandda"
-    analyses_dir = psuedo_pandda_dir / "analyses"
-    processed_datasets_dir = psuedo_pandda_dir / "processed_datasets"
-    analyse_inspect_table_path = analyses_dir / "pandda_inspect_events.csv"
-    analyse_site_table_path = analyses_dir / "pandda_inspect_sites.csv"
+        psuedo_pandda_dir = working_dir / "test_datasets_pandda"
+        analyses_dir = psuedo_pandda_dir / "analyses"
+        processed_datasets_dir = psuedo_pandda_dir / "processed_datasets"
+        analyse_inspect_table_path = analyses_dir / "pandda_inspect_events.csv"
+        analyse_site_table_path = analyses_dir / "pandda_inspect_sites.csv"
 
-    # Spoof the main directories
-    try_make(psuedo_pandda_dir)
-    try_make(analyses_dir)
-    try_make(processed_datasets_dir)
+        # Spoof the main directories
+        try_make(psuedo_pandda_dir)
+        try_make(analyses_dir)
+        try_make(processed_datasets_dir)
 
-    # Spoof the dataset directories
-    for dtag in events:
-        dtag_dir = processed_datasets_dir / dtag
-        try_make(dtag_dir)
-        modelled_structures_dir = dtag_dir / "modelled_structures"
-        try_make(modelled_structures_dir)
+        # Spoof the dataset directories
+        for dtag in events:
+            dtag_dir = processed_datasets_dir / dtag
+            try_make(dtag_dir)
+            modelled_structures_dir = dtag_dir / "modelled_structures"
+            try_make(modelled_structures_dir)
 
-        for event_idx, event_info in events[dtag].items():
-            event, annotation = event_info['event'], event_info['annotation']
-            try_link(event.initial_structure, dtag_dir / Path(event.initial_structure).name)
-            try_link(event.initial_reflections, dtag_dir / Path(event.initial_reflections).name)
-            try_link(event.event_map, dtag_dir / Path(event.event_map).name)
-            if event.structure:
-                try_link(event.structure, modelled_structures_dir / Path(event.structure).name)
+            for event_idx, event_info in events[dtag].items():
+                event, annotation = event_info['event'], event_info['annotation']
+                try_link(event.initial_structure, dtag_dir / Path(event.initial_structure).name)
+                try_link(event.initial_reflections, dtag_dir / Path(event.initial_reflections).name)
+                try_link(event.event_map, dtag_dir / Path(event.event_map).name)
+                if event.structure:
+                    try_link(event.structure, modelled_structures_dir / Path(event.structure).name)
 
-    # Spoof the event table
-    rows = []
-    j = 0
-    for dtag in events:
-        for event_idx, event_info in events[dtag].items():
-            row = event_info['row']
-            row.iloc[0][constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
-            rows.append(row)
-            j = j + 1
+        # Spoof the event table
+        rows = []
+        j = 0
+        for dtag in events:
+            for event_idx, event_info in events[dtag].items():
+                row = event_info['row']
+                row.iloc[0][constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
+                rows.append(row)
+                j = j + 1
 
-    event_table = pd.concat(rows).reset_index()
-    event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
-    event_table.to_csv(analyse_inspect_table_path, index=False)
+        event_table = pd.concat(rows).reset_index()
+        event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
+        event_table.to_csv(analyse_inspect_table_path, index=False)
 
-    # Spoof the site table
-    site_records = []
-    num_sites = ((j-1) // 100) + 1
-    print(f"Num sites is: {num_sites}")
-    for site_id in np.arange(0, num_sites+1):
-        site_records.append(
-            {
-                "site_idx": int(site_id)+1,
-                "centroid": (0.0,0.0,0.0),
-                # "Name": None,
-                # "Comment": None
-            }
-        )
-    print(len(site_records))
-    site_table = pd.DataFrame(site_records)
-    site_table.to_csv(analyse_site_table_path, index=False)
+        # Spoof the site table
+        site_records = []
+        num_sites = ((j-1) // 100) + 1
+        print(f"Num sites is: {num_sites}")
+        for site_id in np.arange(0, num_sites+1):
+            site_records.append(
+                {
+                    "site_idx": int(site_id)+1,
+                    "centroid": (0.0,0.0,0.0),
+                    # "Name": None,
+                    # "Comment": None
+                }
+            )
+        print(len(site_records))
+        site_table = pd.DataFrame(site_records)
+        site_table.to_csv(analyse_site_table_path, index=False)
 
 
 
