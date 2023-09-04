@@ -784,7 +784,7 @@ def _make_test_dataset_psuedo_pandda(
         # Select events and Organise by dtag
         events = {}
         for res in query:
-            if res[2] == test_partition:
+            if res[2].name == test_partition:
                 event = res[0]
                 annotation = res[1]
                 dtag = event.dtag
