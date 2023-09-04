@@ -796,7 +796,7 @@ def _make_test_dataset_psuedo_pandda(
                 table = inspect_tables[event.pandda.path]
                 row = table[
                     (table[constants.PANDDA_INSPECT_DTAG] == dtag)
-                    & (table[constants.PANDDA_INSPECT_EVENT_IDX == event_idx])
+                    & (table[constants.PANDDA_INSPECT_EVENT_IDX] == event_idx)
                 ]
 
                 events[dtag][event_idx] = {
