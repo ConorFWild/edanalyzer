@@ -4,9 +4,9 @@ steps:
 #  - Annotations
 #  - Collate
 #  - Partition
-#  - MakeDataset
+  - MakeDataset
 #  - Train+Test
-  - Summarize
+#  - Summarize
 datasets:
   - /dls/labxchem/data/*/*/processing/analysis/*
   - /dls/labxchem/data/*/*/processing/analysis/pandda_2_2023_06_27/1
@@ -25,4 +25,4 @@ test:
   partition: pandda_2_5
   source: pandda_2
 custom_annotations: /dls/science/groups/i04-1/conor_dev/edanalyzer/test/database.db
-cpus: 20
+cpus: 36
