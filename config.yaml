@@ -4,6 +4,7 @@ steps:
 #  - Annotations
 #  - Collate
 #  - Partition
+  - MakeTestDatasetPsuedoPanDDA
 #  - MakeDataset
   - Train+Test
 #  - Summarize
