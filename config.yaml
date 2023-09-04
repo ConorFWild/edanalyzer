@@ -4,8 +4,8 @@ steps:
 #  - Annotations
 #  - Collate
 #  - Partition
-  - MakeDataset
-#  - Train+Test
+#  - MakeDataset
+  - Train+Test
 #  - Summarize
 datasets:
   - /dls/labxchem/data/*/*/processing/analysis/*
@@ -18,11 +18,11 @@ exclude:
   - /dls/labxchem/data/*/n*/processing/analysis/*
 train:
   max_epochs: 200
-  model_file:
+  model_file: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data/all_data21.pt
 test:
   test_interval: 1
   test_convergence_interval: 10
   partition: pandda_2_5
   source: pandda_2
 custom_annotations: /dls/science/groups/i04-1/conor_dev/edanalyzer/test/database.db
-cpus: 36
+cpus: 20

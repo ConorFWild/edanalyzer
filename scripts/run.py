@@ -969,7 +969,7 @@ def _train_and_test(working_dir, test_partition, test_interval, model_file, mode
                     in query
                     if res[2].name == test_partition
                 ]),
-            transform_image=get_image_xmap_ligand_augmented,
+            transform_image=get_image_xmap_ligand,
             transform_annotation=get_annotation_from_event_hit
         )
         rprint(f"Got {len(test_dataset_torch)} test events!")
