@@ -816,6 +816,7 @@ def _make_dataset(
             #     _images = images[j * 12:min((j + 1) * 12, len(dtags))]
             #     _annotations = annotations[j * 12:min((j + 1) * 12, len(dtags))]
             for j in range(len(dtags)):
+
                 _panddas = panddas[j]
                 _dtag = dtags[j]
                 _event_idx = event_idxs[j]

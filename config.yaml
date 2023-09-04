@@ -4,7 +4,7 @@ steps:
 #  - Annotations
 #  - Collate
 #  - Partition
-  - MakeDataset
+#  - MakeDataset
 #  - Train+Test
   - Summarize
 datasets:
