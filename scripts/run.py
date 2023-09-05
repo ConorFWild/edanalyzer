@@ -712,6 +712,38 @@ def partition_events(query):
     return partitions
 
 
+def _print_pandda_2_systems(working_directory):
+    database_path = working_directory / "database.db"
+    db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
+    db.generate_mapping(create_tables=True)
+
+    with pony.orm.db_session:
+
+        partitions = pony.orm.select(p for p in PartitionORM)
+        if len(partitions) > 0:
+            rprint(f"Already have {len(partitions)} partitions!")
+            return
+
+        query = pony.orm.select((event, event.pandda.system, event.annotations) for event in EventORM)
+
+        pandda_2_results = [
+            result
+            for result
+            in query
+            if (result[2].source == "pandda_2")
+        ]
+
+        systems = {}
+        for res in query:
+            _system = res[1]
+            _hit = res[2].annotation
+            if _hit:
+                if _system.name not in systems:
+                    systems[_system.name] = 0
+                systems[_system.name] += 1
+        rprint(systems)
+
+
 def _partition_dataset(working_directory):
     database_path = working_directory / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
