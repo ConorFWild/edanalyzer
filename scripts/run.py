@@ -1258,7 +1258,7 @@ def __main__(config_yaml="config.yaml"):
             config.cpus,
             custom_annotations
         )
-
+    _print_pandda_2_systems(config.working_directory)
     # Partition the data
     if "Partition" in config.steps:
         _partition_dataset(
