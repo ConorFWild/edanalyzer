@@ -1233,6 +1233,7 @@ def __main__(config_yaml="config.yaml"):
             cpus=dic['cpus']
         )
         rprint(config)
+    _print_pandda_2_systems(config.working_directory)
 
     if not config.working_directory.exists():
         os.mkdir(config.working_directory)
@@ -1259,7 +1260,6 @@ def __main__(config_yaml="config.yaml"):
             config.cpus,
             custom_annotations
         )
-    _print_pandda_2_systems(config.working_directory)
     # Partition the data
     if "Partition" in config.steps:
         _partition_dataset(
