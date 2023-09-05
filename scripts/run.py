@@ -720,9 +720,6 @@ def _print_pandda_2_systems(working_directory):
     with pony.orm.db_session:
 
         partitions = pony.orm.select(p for p in PartitionORM)
-        if len(partitions) > 0:
-            rprint(f"Already have {len(partitions)} partitions!")
-            return
 
         query = pony.orm.select((event, event.pandda.system, event.annotations) for event in EventORM)
 
