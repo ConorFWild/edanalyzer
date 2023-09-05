@@ -732,9 +732,10 @@ def _print_pandda_2_systems(working_directory):
             in query
             if (result[2].source == "pandda_2")
         ]
+        rprint(f"Got {len(pandda_2_results)} pandda 2 results")
 
         systems = {}
-        for res in query:
+        for res in pandda_2_results:
             _system = res[1]
             _hit = res[2].annotation
             if _hit:
