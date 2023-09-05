@@ -1233,6 +1233,7 @@ def __main__(config_yaml="config.yaml"):
             cpus=dic['cpus']
         )
         rprint(config)
+    rprint(f"Printing pandda 2 systems...")
     _print_pandda_2_systems(config.working_directory)
 
     if not config.working_directory.exists():
