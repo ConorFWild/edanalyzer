@@ -856,6 +856,7 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
         event_table.loc[_j, constants.PANDDA_INSPECT_SITE_IDX] = (_j // 100) + 1
         event_table.loc[_j, constants.PANDDA_INSPECT_Z_PEAK] = annotations[_j]
 
+    rprint(event_table['z_peak'])
 
     event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
     event_table.to_csv(analyse_table_path, index=False)
