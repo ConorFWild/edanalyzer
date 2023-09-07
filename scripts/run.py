@@ -1059,7 +1059,7 @@ def _make_reannotation_psuedo_pandda(
             else:
                 inspect_path = Path(pandda.path) / "analyses" / "pandda_inspect_events.csv"
                 if inspect_path.exists():
-                    inspect_tables[pandda.path] = pd.read_csv()
+                    inspect_tables[pandda.path] = pd.read_csv(inspect_path)
         rprint(f"Got {len(inspect_tables)} inspect tables.")
 
         # Get the device
