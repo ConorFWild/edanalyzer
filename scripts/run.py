@@ -787,8 +787,8 @@ def try_link(source_path, target_path):
         # print(e)
         return
 
-def _make_psuedo_pandda(working_dir, events, rows):
-    psuedo_pandda_dir = working_dir / "test_datasets_pandda"
+def _make_psuedo_pandda(psuedo_pandda_dir, events, rows):
+    # psuedo_pandda_dir = working_dir / "test_datasets_pandda"
     analyses_dir = psuedo_pandda_dir / "analyses"
     processed_datasets_dir = psuedo_pandda_dir / "processed_datasets"
     analyse_table_path = analyses_dir / "pandda_analyse_events.csv"
