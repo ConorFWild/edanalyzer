@@ -1057,7 +1057,9 @@ def _make_reannotation_psuedo_pandda(
             if pandda.path in inspect_tables:
                 continue
             else:
-                inspect_tables[pandda.path] = pd.read_csv(Path(pandda.path) / "analyses" / "pandda_inspect_events.csv")
+                inspect_path = Path(pandda.path) / "analyses" / "pandda_inspect_events.csv"
+                if inspect_path.exists():
+                    inspect_tables[pandda.path] = pd.read_csv()
         rprint(f"Got {len(inspect_tables)} inspect tables.")
 
         # Get the device
@@ -1076,7 +1078,7 @@ def _make_reannotation_psuedo_pandda(
             model.load_state_dict(torch.load(model_file, map_location=dev))
 
         # Create a dataset from all events
-        dataset = _make_dataset_from_events(query)
+        dataset = _make_dataset_from_events([res for res in query if res[3].path in inspect_tables])
 
         # Annotate it
         annotation_file = working_dir / "model_annotations.pickle"
