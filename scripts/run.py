@@ -824,7 +824,7 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
             dtag_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
                 dtag=_j,
                 event_idx=1,
-                bdc=row.loc[0, "1-BDC"],
+                bdc=row.iloc[0]["1-BDC"],
             ),
         )
         if event.structure:
