@@ -1073,6 +1073,7 @@ def _make_reannotation_psuedo_pandda(
         # if model_type == "resnet+ligand":
         model = resnet18(num_classes=2, num_input=4)
         model.to(dev)
+        model.eval()
 
         if model_file:
             model.load_state_dict(torch.load(model_file, map_location=dev))
