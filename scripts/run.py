@@ -805,6 +805,7 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows):
     _j = 0
     for event, row in zip(events, rows):
         dtag_dir = processed_datasets_dir / str(_j)
+        _j += 1
         try_make(dtag_dir)
         modelled_structures_dir = dtag_dir / "modelled_structures"
         try_make(modelled_structures_dir)
@@ -815,6 +816,7 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows):
         try_link(event.event_map, dtag_dir / Path(event.event_map).name)
         if event.structure:
             try_link(event.structure, modelled_structures_dir / Path(event.structure).name)
+
 
     # Spoof the event table, changing the site, dtag and eventidx
     # rows = []
