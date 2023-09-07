@@ -805,7 +805,6 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
     _j = 0
     for event, row in zip(events, rows):
         dtag_dir = processed_datasets_dir / str(_j)
-        _j += 1
         try_make(dtag_dir)
         modelled_structures_dir = dtag_dir / "modelled_structures"
         try_make(modelled_structures_dir)
@@ -832,6 +831,7 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
                 event.structure,
                 modelled_structures_dir / constants.PANDDA_MODEL_FILE.format(dtag=_j),
             )
+        _j += 1
 
 
     # Spoof the event table, changing the site, dtag and eventidx
