@@ -787,7 +787,7 @@ def try_link(source_path, target_path):
         # print(e)
         return
 
-def _make_psuedo_pandda(psuedo_pandda_dir, events, rows):
+def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
     # psuedo_pandda_dir = working_dir / "test_datasets_pandda"
     analyses_dir = psuedo_pandda_dir / "analyses"
     processed_datasets_dir = psuedo_pandda_dir / "processed_datasets"
@@ -821,7 +821,7 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows):
         )
         try_link(
             event.event_map,
-            dtag_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(dtag=_j, event_idx=1, bdc=row["1-BDC"]),
+            dtag_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(dtag=_j, event_idx=1, bdc=row.loc[0, "1-BDC"]),
         )
         if event.structure:
             try_link(
@@ -845,6 +845,8 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows):
         event_table.loc[_j, constants.PANDDA_INSPECT_DTAG] = str(_j)
         event_table.loc[_j, constants.PANDDA_INSPECT_EVENT_IDX] = 1
         event_table.loc[_j, constants.PANDDA_INSPECT_SITE_IDX] = (_j // 100) + 1
+        event_table.loc[_j, constants.PANDDA_INSPECT_SITE_IDX] = annotations[_j]
+
 
     event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
     event_table.to_csv(analyse_table_path, index=False)
@@ -1118,7 +1120,7 @@ def _make_reannotation_psuedo_pandda(
             else:
                 negatives.append(res)
 
-        hrnh_events, hrnh_rows = [], []
+        hrnh_events, hrnh_rows, hrnh_annotations = [], [], []
         for res in sorted(
                 positives,
                 key=lambda _res: model_annotations[(res[3].path, event.dtag, event.event_idx)][1],
@@ -1133,10 +1135,11 @@ def _make_reannotation_psuedo_pandda(
                 & (table[constants.PANDDA_INSPECT_EVENT_IDX] == event_idx)
                 ]
             row.loc[0, constants.PANDDA_INSPECT_Z_PEAK] = float(model_annotation)
+            hrnh_annotations = float(model_annotation)
             hrnh_events.append(event)
             hrnh_rows.append(row)
 
-        lrh_events, lrh_rows = [], []
+        lrh_events, lrh_rows, lrh_annotations = [], [], []
         for res in sorted(
                 negatives,
                 key=lambda _res: model_annotations[(res[3].path, event.dtag, event.event_idx)][1],
@@ -1149,13 +1152,13 @@ def _make_reannotation_psuedo_pandda(
                 (table[constants.PANDDA_INSPECT_DTAG] == dtag)
                 & (table[constants.PANDDA_INSPECT_EVENT_IDX] == event_idx)
                 ]
-            row.loc[0, constants.PANDDA_INSPECT_Z_PEAK] = float(model_annotation)
+            lrh_annotations = float(model_annotation)
             lrh_events.append(event)
             lrh_rows.append(row)
 
         # Create the fake panddas
-        _make_psuedo_pandda(working_dir / "high_ranking_non_hits", hrnh_events, hrnh_rows, )
-        _make_psuedo_pandda(working_dir / "low_ranking_hits", lrh_events, lrh_rows)
+        _make_psuedo_pandda(working_dir / "high_ranking_non_hits", hrnh_events, hrnh_rows, hrnh_annotations)
+        _make_psuedo_pandda(working_dir / "low_ranking_hits", lrh_events, lrh_rows, lrh_annotations)
 
 
 def _make_dataset(
