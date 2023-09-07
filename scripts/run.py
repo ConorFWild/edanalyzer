@@ -821,7 +821,11 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
         )
         try_link(
             event.event_map,
-            dtag_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(dtag=_j, event_idx=1, bdc=row.loc[0, "1-BDC"]),
+            dtag_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+                dtag=_j,
+                event_idx=1,
+                bdc=row.loc[0, "1-BDC"],
+            ),
         )
         if event.structure:
             try_link(
@@ -1129,7 +1133,7 @@ def _make_reannotation_psuedo_pandda(
             event = res[0]
             pandda_path, dtag, event_idx = res[3].path, event.dtag, event.event_idx
             human_annotation, model_annotation = model_annotations[(pandda_path, dtag, event_idx)]
-            table = inspect_tables[event.pandda.path]
+            table = inspect_tables[res[3].path]
             row = table[
                 (table[constants.PANDDA_INSPECT_DTAG] == dtag)
                 & (table[constants.PANDDA_INSPECT_EVENT_IDX] == event_idx)
