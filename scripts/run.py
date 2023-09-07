@@ -1095,7 +1095,7 @@ def _make_reannotation_psuedo_pandda(
 
         # Pick out the highest ranking non-hits and lowest ranking hits
         positives, negatives = [], []
-        for res in query:
+        for res in [_res for _res in query if _res[3].path in inspect_tables]:
             event = res[0]
             pandda_path, dtag, event_idx = res[3].path, event.dtag, event.event_idx
             human_annotation, model_annotation = model_annotations[(pandda_path, dtag, event_idx)]
