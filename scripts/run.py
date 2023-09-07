@@ -811,11 +811,23 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows):
         try_make(modelled_structures_dir)
 
         # event, annotation = event_info['event'], event_info['annotation']
-        try_link(event.initial_structure, dtag_dir / Path(event.initial_structure).name)
-        try_link(event.initial_reflections, dtag_dir / Path(event.initial_reflections).name)
-        try_link(event.event_map, dtag_dir / Path(event.event_map).name)
+        try_link(
+            event.initial_structure,
+            dtag_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=_j),
+        )
+        try_link(
+            event.initial_reflections,
+            dtag_dir / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=_j),
+        )
+        try_link(
+            event.event_map,
+            dtag_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(dtag=_j, event_idx=1, bdc=row["1-BDC"]),
+        )
         if event.structure:
-            try_link(event.structure, modelled_structures_dir / Path(event.structure).name)
+            try_link(
+                event.structure,
+                modelled_structures_dir / constants.PANDDA_MODEL_FILE.format(dtag=_j),
+            )
 
 
     # Spoof the event table, changing the site, dtag and eventidx
