@@ -1135,7 +1135,7 @@ def _make_reannotation_psuedo_pandda(
         hrnh_events, hrnh_rows, hrnh_annotations = [], [], []
         for res in sorted(
                 positives,
-                key=lambda _res: model_annotations[(res[3].path, event.dtag, event.event_idx)][1],
+                key=lambda _res: model_annotations[(_res[3].path, event.dtag, event.event_idx)][1],
                 reverse=True
         ):
             event = res[0]
