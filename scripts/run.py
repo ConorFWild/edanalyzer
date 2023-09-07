@@ -1175,6 +1175,7 @@ def _make_reannotation_psuedo_pandda(
         _make_psuedo_pandda(working_dir / "high_ranking_non_hits", hrnh_events, hrnh_rows, hrnh_annotations)
         _make_psuedo_pandda(working_dir / "low_ranking_hits", lrh_events, lrh_rows, lrh_annotations)
 
+    rprint(f"DONE!")
 
 def _make_dataset(
             working_dir,
