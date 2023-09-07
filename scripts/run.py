@@ -1153,6 +1153,7 @@ def _make_reannotation_psuedo_pandda(
             hrnh_annotations.append(float(model_annotation))
             hrnh_events.append(event)
             hrnh_rows.append(row)
+        print(hrnh_annotations[:20])
 
         lrh_events, lrh_rows, lrh_annotations = [], [], []
         for res in sorted(
@@ -1172,6 +1173,7 @@ def _make_reannotation_psuedo_pandda(
             lrh_annotations.append(float(model_annotation))
             lrh_events.append(event)
             lrh_rows.append(row)
+        print(lrh_annotations[:20])
 
         # Create the fake panddas
         _make_psuedo_pandda(working_dir / "high_ranking_non_hits", hrnh_events, hrnh_rows, hrnh_annotations)
