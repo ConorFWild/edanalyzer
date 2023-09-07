@@ -786,6 +786,74 @@ def try_link(source_path, target_path):
     except Exception as e:
         # print(e)
         return
+
+def _make_psuedo_pandda(working_dir, events, rows):
+    psuedo_pandda_dir = working_dir / "test_datasets_pandda"
+    analyses_dir = psuedo_pandda_dir / "analyses"
+    processed_datasets_dir = psuedo_pandda_dir / "processed_datasets"
+    analyse_table_path = analyses_dir / "pandda_analyse_events.csv"
+    inspect_table_path = analyses_dir / "pandda_inspect_events.csv"
+    analyse_site_table_path = analyses_dir / "pandda_analyse_sites.csv"
+    inspect_site_table_path = analyses_dir / "pandda_inspect_sites.csv"
+
+    # Spoof the main directories
+    try_make(psuedo_pandda_dir)
+    try_make(analyses_dir)
+    try_make(processed_datasets_dir)
+
+    # Spoof the dataset directories
+    _j = 0
+    for event, row in zip(events, rows):
+        dtag_dir = processed_datasets_dir / str(_j)
+        try_make(dtag_dir)
+        modelled_structures_dir = dtag_dir / "modelled_structures"
+        try_make(modelled_structures_dir)
+
+        # event, annotation = event_info['event'], event_info['annotation']
+        try_link(event.initial_structure, dtag_dir / Path(event.initial_structure).name)
+        try_link(event.initial_reflections, dtag_dir / Path(event.initial_reflections).name)
+        try_link(event.event_map, dtag_dir / Path(event.event_map).name)
+        if event.structure:
+            try_link(event.structure, modelled_structures_dir / Path(event.structure).name)
+
+    # Spoof the event table, changing the site, dtag and eventidx
+    # rows = []
+    # j = 0
+    # for dtag in events:
+    #     for event_idx, event_info in events[dtag].items():
+    #         row = event_info['row']
+    #         # row.loc[0, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
+    #         rows.append(row)
+            # j = j + 1
+
+    event_table = pd.concat(rows).reset_index()
+    for _j in range(len(event_table)):
+        event_table.loc[_j, constants.PANDDA_INSPECT_DTAG] = str(_j)
+        event_table.loc[_j, constants.PANDDA_INSPECT_EVENT_IDX] = 1
+        event_table.loc[_j, constants.PANDDA_INSPECT_SITE_IDX] = (_j // 100) + 1
+
+    event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
+    event_table.to_csv(analyse_table_path, index=False)
+    event_table.to_csv(inspect_table_path, index=False)
+
+    # Spoof the site table
+    site_records = []
+    num_sites = ((_j) // 100) + 1
+    print(f"Num sites is: {num_sites}")
+    for site_id in np.arange(0, num_sites + 1):
+        site_records.append(
+            {
+                "site_idx": int(site_id) + 1,
+                "centroid": (0.0, 0.0, 0.0),
+                "Name": None,
+                "Comment": None
+            }
+        )
+    print(len(site_records))
+    site_table = pd.DataFrame(site_records)
+    site_table.to_csv(analyse_site_table_path, index=False)
+    site_table.to_csv(inspect_site_table_path, index=False)
+
 def _make_test_dataset_psuedo_pandda(
             working_dir,
         test_partition
@@ -901,6 +969,174 @@ def _make_test_dataset_psuedo_pandda(
         site_table.to_csv(analyse_site_table_path, index=False)
         site_table.to_csv(inspect_site_table_path, index=False)
 
+def _make_dataset_from_events(query):
+    train_dataset_torch = PanDDADatasetTorchLigand(
+        PanDDAEventDataset(
+            pandda_events=[
+                PanDDAEvent(
+                    id=res[0].id,
+                    pandda_dir=res[0].pandda.path,
+                    model_building_dir=res[0].pandda.experiment.model_dir,
+                    system_name=res[0].pandda.system.name,
+                    dtag=res[0].dtag,
+                    event_idx=res[0].event_idx,
+                    event_map=res[0].event_map,
+                    x=res[0].x,
+                    y=res[0].y,
+                    z=res[0].z,
+                    hit=res[1].annotation,
+                    ligand=None
+                )
+                for res
+                in query
+                # if res[0].pandda.system.name not in test_partition_event_systems
+            ]
+        ),
+        transform_image=get_image_xmap_ligand,
+        transform_annotation=get_annotation_from_event_hit
+    )
+    # train_dataloader = DataLoader(
+    #     train_dataset_torch,
+    #     batch_size=12,
+    #     shuffle=False,
+    #     num_workers=36,
+    #     drop_last=True
+    # )
+
+    return train_dataset_torch
+
+def _get_model_annotations(model, test_dataset, dev):
+
+    test_dataloader = DataLoader(
+        test_dataset,
+        batch_size=1,
+        shuffle=False,
+        num_workers=20,
+        drop_last=False
+    )
+    annotations = {}
+    _j = 0
+    for image, annotation, idx in test_dataloader:
+        rprint(f"{_j} / {len(test_dataloader)}")
+        _j += 1
+        image_c = image.to(dev)
+        annotation_c = annotation.to(dev)
+
+        # optimizer.zero_grad()
+
+        # forward + backward + optimize
+        # begin_annotate = time.time()
+        model_annotation = model(image_c)
+        event = test_dataset.pandda_event_dataset[idx]
+        # print(event)
+        # annotations[i][(event.pandda_dir, event.dtag, event.event_idx)] = (
+        annotations[(event.pandda_dir, event.dtag, event.event_idx)] = (
+            float(annotation.to(torch.device("cpu")).detach().numpy()[0][1]),
+            float(model_annotation.to(torch.device("cpu")).detach().numpy()[0][1]),
+        )
+    return annotations
+
+def _make_reannotation_psuedo_pandda(
+            working_dir,
+        model_file
+        ):
+    database_path = working_dir / "database.db"
+    db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
+    db.generate_mapping(create_tables=True)
+
+    with pony.orm.db_session:
+        partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
+        query = pony.orm.select(
+            (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
+            event in EventORM)
+
+        # Get the test partition pandda's and their inspect tables
+        inspect_tables = {}
+        for res in query:
+            pandda = res[3]
+            if pandda.path in inspect_tables:
+                continue
+            else:
+                inspect_tables[pandda.path] = pd.read_csv(Path(pandda.path) / "analyses" / "pandda_inspect_events.csv")
+        rprint(f"Got {len(inspect_tables)} inspect tables.")
+
+        # Get the device
+        if torch.cuda.is_available():
+            # logger.info(f"Using cuda!")
+            dev = "cuda:0"
+        else:
+            # logger.info(f"Using cpu!")
+            dev = "cpu"
+
+        # if model_type == "resnet+ligand":
+        model = resnet18(num_classes=2, num_input=4)
+        model.to(dev)
+
+        if model_file:
+            model.load_state_dict(torch.load(model_file, map_location=dev))
+
+        # Create a dataset from all events
+        dataset = _make_dataset_from_events(query)
+
+        # Annotate it
+        annotation_file = working_dir / "model_annotations.pickle"
+        if annotation_file.exists():
+            with open(annotation_file, 'rb') as f:
+                model_annotations = pickle.load(f)
+        else:
+            model_annotations = _get_model_annotations(model, dataset, dev)
+            with open(annotation_file, 'wb') as f:
+                pickle.dump(model_annotations, f)
+
+        # Pick out the highest ranking non-hits and lowest ranking hits
+        positives, negatives = [], []
+        for res in query:
+            event = res[0]
+            pandda_path, dtag, event_idx = res[3].path, event.dtag, event.event_idx
+            human_annotation, model_annotation = model_annotations[(pandda_path, dtag, event_idx)]
+            if human_annotation > 0.5:
+                positives.append(res)
+            else:
+                negatives.append(res)
+
+        hrnh_events, hrnh_rows = [], []
+        for res in sorted(
+                positives,
+                key=lambda _res: model_annotations[(res[3].path, event.dtag, event.event_idx)][1],
+                reverse=True
+        ):
+            event = res[0]
+            pandda_path, dtag, event_idx = res[3].path, event.dtag, event.event_idx
+            human_annotation, model_annotation = model_annotations[(pandda_path, dtag, event_idx)]
+            table = inspect_tables[event.pandda.path]
+            row = table[
+                (table[constants.PANDDA_INSPECT_DTAG] == dtag)
+                & (table[constants.PANDDA_INSPECT_EVENT_IDX] == event_idx)
+                ]
+            row.loc[0, constants.PANDDA_INSPECT_Z_PEAK] = float(model_annotation)
+            hrnh_events.append(event)
+            hrnh_rows.append(row)
+
+        lrh_events, lrh_rows = [], []
+        for res in sorted(
+                negatives,
+                key=lambda _res: model_annotations[(res[3].path, event.dtag, event.event_idx)][1],
+        ):
+            event = res[0]
+            pandda_path, dtag, event_idx = res[3].path, event.dtag, event.event_idx
+            human_annotation, model_annotation = model_annotations[(pandda_path, dtag, event_idx)]
+            table = inspect_tables[event.pandda.path]
+            row = table[
+                (table[constants.PANDDA_INSPECT_DTAG] == dtag)
+                & (table[constants.PANDDA_INSPECT_EVENT_IDX] == event_idx)
+                ]
+            row.loc[0, constants.PANDDA_INSPECT_Z_PEAK] = float(model_annotation)
+            lrh_events.append(event)
+            lrh_rows.append(row)
+
+        # Create the fake panddas
+        _make_psuedo_pandda(working_dir / "high_ranking_non_hits", hrnh_events, hrnh_rows, )
+        _make_psuedo_pandda(working_dir / "low_ranking_hits", lrh_events, lrh_rows)
 
 
 def _make_dataset(
@@ -1269,6 +1505,15 @@ def __main__(config_yaml="config.yaml"):
             config.working_directory,
             config.test.partition
         )
+
+    if "MakeReannotationPsuedoPanDDA" in config.steps:
+        _make_reannotation_psuedo_pandda(
+            config.working_directory,
+            config.train.model_file
+        )
+
+    if "UpdateFromReannotationDir" in config.steps:
+        ...
 
     if "MakeDataset" in config.steps:
         _make_dataset(
