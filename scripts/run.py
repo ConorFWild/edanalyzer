@@ -861,6 +861,7 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
     event_table.to_csv(analyse_table_path, index=False)
     event_table.to_csv(inspect_table_path, index=False)
 
+
     # Spoof the site table
     site_records = []
     num_sites = ((_j) // 100) + 1
