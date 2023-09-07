@@ -1143,7 +1143,7 @@ def _make_reannotation_psuedo_pandda(
                 (table[constants.PANDDA_INSPECT_DTAG] == dtag)
                 & (table[constants.PANDDA_INSPECT_EVENT_IDX] == event_idx)
                 ]
-            print(row)
+            # print(row)
             # row.loc[0, constants.PANDDA_INSPECT_Z_PEAK] = float(model_annotation)
             hrnh_annotations.append(float(model_annotation))
             hrnh_events.append(event)
