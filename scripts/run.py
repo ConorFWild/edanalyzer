@@ -851,7 +851,7 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
     rprint(len(event_table))
     rprint(len(rows))
     for _j in range(len(event_table)):
-        assert events[0].dtag == event_table.loc[_j, constants.PANDDA_INSPECT_DTAG]
+        assert events[_j].dtag == event_table.loc[_j, constants.PANDDA_INSPECT_DTAG]
         event_table.loc[_j, constants.PANDDA_INSPECT_DTAG] = str(_j)
         event_table.loc[_j, constants.PANDDA_INSPECT_EVENT_IDX] = 1
         event_table.loc[_j, constants.PANDDA_INSPECT_SITE_IDX] = (_j // 100) + 1
