@@ -782,7 +782,7 @@ def try_make(path):
 
 def try_link(source_path, target_path):
     try:
-        os.symlink(source_path, target_path)
+        os.symlink(Path(source_path).resolve(), target_path)
     except Exception as e:
         # print(e)
         return
@@ -826,6 +826,17 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
                 bdc=row.iloc[0]["1-BDC"],
             ),
         )
+        ligand_files_dir = dtag_dir / "ligand_files"
+
+        try_make(ligand_files_dir)
+        original_compound_dir = Path(event.event_map).parent / "ligand_files"
+        if original_compound_dir.exists():
+            for path in original_compound_dir.glob("*"):
+                if path.stem not in constants.LIGAND_IGNORE_REGEXES:
+                    try_link(
+                        path,
+                        ligand_files_dir / path.name
+                    )
         if event.structure:
             try_link(
                 event.structure,
@@ -1134,9 +1145,9 @@ def _make_reannotation_psuedo_pandda(
 
         hrnh_events, hrnh_rows, hrnh_annotations = [], [], []
         for res in sorted(
-                positives,
+                negatives,
                 key=lambda _res: model_annotations[(_res[3].path, _res[0].dtag, _res[0].event_idx)][1],
-                reverse=True
+                # reverse=True
         ):
             event = res[0]
             pandda_path, dtag, event_idx = res[3].path, event.dtag, event.event_idx
@@ -1157,8 +1168,9 @@ def _make_reannotation_psuedo_pandda(
 
         lrh_events, lrh_rows, lrh_annotations = [], [], []
         for res in sorted(
-                negatives,
+                positives,
                 key=lambda _res: model_annotations[(_res[3].path, _res[0].dtag, _res[0].event_idx)][1],
+            reverse=True
         ):
             event = res[0]
             pandda_path, dtag, event_idx = res[3].path, event.dtag, event.event_idx
@@ -1176,8 +1188,17 @@ def _make_reannotation_psuedo_pandda(
         print(lrh_annotations[:20])
 
         # Create the fake panddas
-        _make_psuedo_pandda(working_dir / "high_ranking_non_hits", hrnh_events, hrnh_rows, hrnh_annotations)
-        _make_psuedo_pandda(working_dir / "low_ranking_hits", lrh_events, lrh_rows, lrh_annotations)
+        for chunk in np.array_split(range(len(hrnh_events)), 200):
+            event_chunk = hrnh_events[int(chunk[0]):int(chunk[-1])+1]
+            row_chunk = hrnh_rows[int(chunk[0]):int(chunk[-1])+1]
+            annotation_chunk = hrnh_annotations[int(chunk[0]):int(chunk[-1])+1]
+            _make_psuedo_pandda(working_dir / f"high_ranking_non_hits_{chunk[0]}", event_chunk, row_chunk, annotation_chunk)
+
+        for chunk in np.array_split(range(len(lrh_events)), 200):
+            event_chunk = lrh_events[int(chunk[0]):int(chunk[-1]) + 1]
+            row_chunk = lrh_rows[int(chunk[0]):int(chunk[-1]) + 1]
+            annotation_chunk = lrh_annotations[int(chunk[0]):int(chunk[-1]) + 1]
+            _make_psuedo_pandda(working_dir / f"low_ranking_hits_{chunk[0]}", event_chunk, row_chunk, annotation_chunk)
 
     rprint(f"DONE!")
 
