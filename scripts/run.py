@@ -872,7 +872,12 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
 
     rprint(event_table['z_peak'])
 
-    event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
+    if "index" in event_table.columns:
+        event_table.drop(["index", ], axis=1, inplace=True)
+    if "Unnamed: 0" in event_table.columns:
+        event_table.drop(["Unnamed: 0"], axis=1, inplace=True)
+
+
     event_table.to_csv(analyse_table_path, index=False)
     event_table.to_csv(inspect_table_path, index=False)
 
