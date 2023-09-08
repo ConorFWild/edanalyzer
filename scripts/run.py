@@ -1188,17 +1188,21 @@ def _make_reannotation_psuedo_pandda(
         print(lrh_annotations[:20])
 
         # Create the fake panddas
+        high_ranking_non_hits_dir = working_dir / "lrh"
+        try_make(high_ranking_non_hits_dir)
         for chunk in np.array_split(range(len(hrnh_events)), 200):
             event_chunk = hrnh_events[int(chunk[0]):int(chunk[-1])+1]
             row_chunk = hrnh_rows[int(chunk[0]):int(chunk[-1])+1]
             annotation_chunk = hrnh_annotations[int(chunk[0]):int(chunk[-1])+1]
-            _make_psuedo_pandda(working_dir / f"high_ranking_non_hits_{chunk[0]}", event_chunk, row_chunk, annotation_chunk)
+            _make_psuedo_pandda(high_ranking_non_hits_dir / f"high_ranking_non_hits_{int(chunk[0])}", event_chunk, row_chunk, annotation_chunk)
 
+        low_ranking_hits_dir = working_dir / "lrh"
+        try_make(low_ranking_hits_dir)
         for chunk in np.array_split(range(len(lrh_events)), 200):
             event_chunk = lrh_events[int(chunk[0]):int(chunk[-1]) + 1]
             row_chunk = lrh_rows[int(chunk[0]):int(chunk[-1]) + 1]
             annotation_chunk = lrh_annotations[int(chunk[0]):int(chunk[-1]) + 1]
-            _make_psuedo_pandda(working_dir / f"low_ranking_hits_{chunk[0]}", event_chunk, row_chunk, annotation_chunk)
+            _make_psuedo_pandda(low_ranking_hits_dir  / f"low_ranking_hits_{int(chunk[0])}", event_chunk, row_chunk, annotation_chunk)
 
     rprint(f"DONE!")
 
