@@ -684,8 +684,8 @@ def _make_database(
         # for event_id, event in events.items():
         #     print(event)
 
-        ...
 
+    db.disconnect()
 
 def _test_partition_solution(_partition_vector, _num_items_vector):
     sums = {}
@@ -779,6 +779,9 @@ def _print_pandda_2_systems(working_directory):
         rprint(systems)
 
 
+    db.disconnect()
+
+
 def _partition_dataset(working_directory):
     database_path = working_directory / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
@@ -812,7 +815,7 @@ def _partition_dataset(working_directory):
             )
 
 
-
+    db.disconnect()
 
 def try_make(path):
     try:
@@ -1523,6 +1526,8 @@ def _train_and_test(working_dir,
         num_epochs=1000,
     )
 
+    db.disconnect()
+
 
 def _get_precision_recall(epoch_results):
     pr = {}
@@ -1602,7 +1607,7 @@ def __main__(config_yaml="config.yaml"):
             cpus=dic['cpus']
         )
         rprint(config)
-    rprint(f"Printing pandda 2 systems...")
+    # rprint(f"Printing pandda 2 systems...")
     # _print_pandda_2_systems(config.working_directory)
 
     if not config.working_directory.exists():
