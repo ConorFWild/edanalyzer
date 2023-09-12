@@ -172,7 +172,7 @@ def _get_custom_annotations_from_pandda(path):
                 else:
                     annotation = False
                 event_identifier = row[constants.PANDDA_INSPECT_DTAG]
-                dataset_dir = processed_datasets / event_identifier
+                dataset_dir = processed_datasets / str(event_identifier)
                 event_map_path = [x for x in dataset_dir.glob("*.ccp4")][0]
                 real_event_map_path = event_map_path.resolve()
                 match = re.match("(.+)-event_([0-9]+)_1-BDC_[.0-9]+_", real_event_map_path.name)
