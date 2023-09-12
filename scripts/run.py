@@ -1490,7 +1490,7 @@ def _train_and_test(working_dir,
                     for res
                     in query
                     # if res[2].name == test_partition
-                    if res[2].name in test_systems
+                    if res[0].pandda.system.name in test_systems
                 ]),
             transform_image=get_image_xmap_ligand,
             transform_annotation=get_annotation_from_event_hit
