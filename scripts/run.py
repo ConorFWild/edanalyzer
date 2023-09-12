@@ -180,6 +180,7 @@ def _get_custom_annotations_from_pandda(path):
                 pandda_path = real_event_map_path.parent.parent.parent
                 custom_annotations[(str(pandda_path), dtag, event_idx)] = annotation
 
+    db.disconnect()
     return custom_annotations
 
 def try_open_structure(path):
