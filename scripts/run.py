@@ -1570,6 +1570,7 @@ def _summarize(working_dir):
 
 def __main__(config_yaml="config.yaml"):
     # Initialize the config
+    rprint(f"Getting config...")
     with open(config_yaml, "r") as f:
         dic = yaml.safe_load(f)
         if dic['train']['model_file']:
@@ -1610,6 +1611,7 @@ def __main__(config_yaml="config.yaml"):
     # Parse custom annotations
     custom_annotations: dict[tuple[str, str, int], bool] = {}
     if "Annotations" in config.steps:
+        rprint(f"Getting custom annotations...")
         custom_annotations_path = config.working_directory / "custom_annotations.pickle"
         if custom_annotations_path.exists():
             with open(custom_annotations_path, 'rb') as f:
@@ -1635,6 +1637,7 @@ def __main__(config_yaml="config.yaml"):
 
     # Construct the dataset
     if "Collate" in config.steps:
+        rprint(f"Making database...")
         _make_database(
             config.name,
             config.working_directory,
@@ -1645,11 +1648,13 @@ def __main__(config_yaml="config.yaml"):
         )
     # Partition the data
     if "Partition" in config.steps:
+        rprint(f"Partitioning dataset...")
         _partition_dataset(
             config.working_directory
         )
 
     if "MakeTestDatasetPsuedoPanDDA" in config.steps:
+        rprint(f"Getting config...")
         _make_test_dataset_psuedo_pandda(
             config.working_directory,
             config.test.partition
