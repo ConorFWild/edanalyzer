@@ -1641,7 +1641,7 @@ def __main__(config_yaml="config.yaml"):
 
         rprint(f"\tGot {len(custom_annotations)} custom annotations!")
         rprint(custom_annotations)
-        exit()
+        # exit()
 
     # Construct the dataset
     if "Collate" in config.steps:
