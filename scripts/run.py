@@ -1675,7 +1675,7 @@ def __main__(config_yaml="config.yaml"):
         _train_and_test(
             config.working_directory,
             # config.test.partition,
-            config.test.systems,
+            config.test.test_systems,
             config.test.initial_epoch,
             config.test.test_interval,
             config.train.model_file,
