@@ -1,13 +1,14 @@
 name: all_data
 working_directory: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data
 steps:
-#  - Annotations
-#  - Collate
-#  - Partition
+  - Annotations
+  - Collate
+  - Partition
 #  - MakeTestDatasetPsuedoPanDDA
 #  - MakeReannotationPsuedoPanDDA
+#  - KnownHitAlternateModel
 #  - MakeDataset
-#  - Train+Test
+  - Train+Test
 #  - Summarize
 datasets:
   - /dls/labxchem/data/*/*/processing/analysis/*
@@ -27,5 +28,14 @@ test:
   test_convergence_interval: 10
   partition: pandda_2_5
   source: pandda_2
-custom_annotations: /dls/science/groups/i04-1/conor_dev/edanalyzer/test/database.db
+  test_systems:
+  - MRE11AA
+  - SETDB1
+  - NSP15_B
+custom_annotations:
+  databases:
+  - /dls/science/groups/i04-1/conor_dev/edanalyzer/test/database.db
+  panddas:
+  - /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data/lrh/low_ranking_hits_*
+  - /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data/lrh/high_ranking_non_hits_*
 cpus: 20

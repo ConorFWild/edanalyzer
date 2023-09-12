@@ -4,6 +4,7 @@ import pickle
 import pathlib
 import time
 from pathlib import Path
+import re
 
 import yaml
 import fire
@@ -38,6 +39,8 @@ from edanalyzer.torch_dataset import (
     get_image_xmap_ligand_augmented, PanDDADatasetTorchLigand, get_image_xmap_ligand, get_image_ligandmap_augmented,
     PanDDADatasetTorchLigandmap
 )
+
+
 # from pony.orm import *
 
 @dataclasses.dataclass
@@ -85,9 +88,16 @@ class ConfigTest:
     test_interval: int
     test_convergence_interval: int
     partition: int
+    test_systems: list[str]
     # def __init__(self, dic):
     #     self.test_interval = dic['test_interval']
     #     self.test_convergence_interval = dic['test_convergence_interval']
+
+
+@dataclasses.dataclass
+class ConfigCustomAnnotations:
+    databases: list[str]
+    panddas: list[str]
 
 
 @dataclasses.dataclass
@@ -99,7 +109,7 @@ class Config:
     exclude: list[str]
     train: ConfigTrain
     test: ConfigTest
-    custom_annotations: Path
+    custom_annotations: ConfigCustomAnnotations
     cpus: int
 
     # def __init__(self, dic):
@@ -114,7 +124,7 @@ class Config:
     #     self.cpus = dic['cpus']
 
 
-def _get_custom_annotations(path):
+def _get_custom_annotations_from_database(path):
     # get the events
     db.bind(provider='sqlite', filename=f"{path}")
     db.generate_mapping()
@@ -144,6 +154,33 @@ def _get_custom_annotations(path):
     db.disconnect()
     return custom_annotations
 
+
+def _get_custom_annotations_from_pandda(path):
+    analyses_dir = path / constants.PANDDA_ANALYSIS_DIR
+    processed_datasets = path / constants.PANDDA_PROCESSED_DATASETS_DIR
+    pandda_inspect_path = analyses_dir / constants.PANDDA_INSPECT_TABLE_FILE
+    custom_annotations = {}
+    if pandda_inspect_path.exists():
+        inspect_table = pd.read_csv(pandda_inspect_path)
+
+        for idx, row in inspect_table.iterrows():
+            viewed = row[constants.PANDDA_INSPECT_VIEWED]
+            if viewed:
+                confidence = row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
+                if confidence not in ["low", "Low"]:
+                    annotation = True
+                else:
+                    annotation = False
+                event_identifier = row[constants.PANDDA_INSPECT_DTAG]
+                dataset_dir = processed_datasets / event_identifier
+                event_map_path = [x for x in dataset_dir.glob("*.ccp4")][0]
+                real_event_map_path = event_map_path.resolve()
+                match = re.match("(.+)-event_([0-9]+)_1-BDC_[.0-9]+_", real_event_map_path.name)
+                dtag, event_idx = match.groups()
+                pandda_path = real_event_map_path.parent.parent.parent
+                custom_annotations[(str(pandda_path), dtag, event_idx)] = annotation
+
+    return custom_annotations
 
 def try_open_structure(path):
     try:
@@ -761,7 +798,8 @@ def _partition_dataset(working_directory):
         for partition_number, system_names in pandda_1_partitions.items():
             partition = PartitionORM(
                 name=f"pandda_1_{partition_number}",
-                events=[result[0] for result in query if (result[1].name in system_names) and (result[2].source == "pandda_1")],
+                events=[result[0] for result in query if
+                        (result[1].name in system_names) and (result[2].source == "pandda_1")],
             )
 
         # PanDDA 2 partitions
@@ -769,8 +807,11 @@ def _partition_dataset(working_directory):
         for partition_number, system_names in pandda_2_partitions.items():
             partition = PartitionORM(
                 name=f"pandda_2_{partition_number}",
-                events=[result[0] for result in query if (result[1].name in system_names) and (result[2].source == "pandda_2")],
+                events=[result[0] for result in query if
+                        (result[1].name in system_names) and (result[2].source == "pandda_2")],
             )
+
+
 
 
 def try_make(path):
@@ -786,6 +827,7 @@ def try_link(source_path, target_path):
     except Exception as e:
         # print(e)
         return
+
 
 def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
     # psuedo_pandda_dir = working_dir / "test_datasets_pandda"
@@ -844,7 +886,6 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
             )
         _j += 1
 
-
     # Spoof the event table, changing the site, dtag and eventidx
     # rows = []
     # j = 0
@@ -853,7 +894,7 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
     #         row = event_info['row']
     #         # row.loc[0, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
     #         rows.append(row)
-            # j = j + 1
+    # j = j + 1
 
     event_table = pd.concat(rows).reset_index()
 
@@ -869,7 +910,6 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
         event_table.loc[_j, constants.PANDDA_INSPECT_Z_PEAK] = annotations[_j]
         event_table.loc[_j, constants.PANDDA_INSPECT_VIEWED] = False
 
-
     rprint(event_table['z_peak'])
 
     if "index" in event_table.columns:
@@ -877,10 +917,8 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
     if "Unnamed: 0" in event_table.columns:
         event_table.drop(["Unnamed: 0"], axis=1, inplace=True)
 
-
     event_table.to_csv(analyse_table_path, index=False)
     event_table.to_csv(inspect_table_path, index=False)
-
 
     # Spoof the site table
     site_records = []
@@ -900,10 +938,11 @@ def _make_psuedo_pandda(psuedo_pandda_dir, events, rows, annotations):
     site_table.to_csv(analyse_site_table_path, index=False)
     site_table.to_csv(inspect_site_table_path, index=False)
 
+
 def _make_test_dataset_psuedo_pandda(
-            working_dir,
+        working_dir,
         test_partition
-        ):
+):
     database_path = working_dir / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
     db.generate_mapping(create_tables=True)
@@ -922,7 +961,8 @@ def _make_test_dataset_psuedo_pandda(
                 if pandda.path in inspect_tables:
                     continue
                 else:
-                    inspect_tables[pandda.path] = pd.read_csv(Path(pandda.path) / "analyses" / "pandda_inspect_events.csv")
+                    inspect_tables[pandda.path] = pd.read_csv(
+                        Path(pandda.path) / "analyses" / "pandda_inspect_events.csv")
         rprint(f"Got {len(inspect_tables)} inspect tables.")
         # rprint(inspect_tables)
 
@@ -941,7 +981,7 @@ def _make_test_dataset_psuedo_pandda(
                 row = table[
                     (table[constants.PANDDA_INSPECT_DTAG] == dtag)
                     & (table[constants.PANDDA_INSPECT_EVENT_IDX] == event_idx)
-                ]
+                    ]
 
                 events[dtag][event_idx] = {
                     'event': event,
@@ -996,16 +1036,15 @@ def _make_test_dataset_psuedo_pandda(
         event_table.to_csv(analyse_table_path, index=False)
         event_table.to_csv(inspect_table_path, index=False)
 
-
         # Spoof the site table
         site_records = []
         num_sites = ((j) // 100) + 1
         print(f"Num sites is: {num_sites}")
-        for site_id in np.arange(0, num_sites+1):
+        for site_id in np.arange(0, num_sites + 1):
             site_records.append(
                 {
-                    "site_idx": int(site_id)+1,
-                    "centroid": (0.0,0.0,0.0),
+                    "site_idx": int(site_id) + 1,
+                    "centroid": (0.0, 0.0, 0.0),
                     "Name": None,
                     "Comment": None
                 }
@@ -1014,6 +1053,7 @@ def _make_test_dataset_psuedo_pandda(
         site_table = pd.DataFrame(site_records)
         site_table.to_csv(analyse_site_table_path, index=False)
         site_table.to_csv(inspect_site_table_path, index=False)
+
 
 def _make_dataset_from_events(query):
     train_dataset_torch = PanDDADatasetTorchLigand(
@@ -1051,8 +1091,8 @@ def _make_dataset_from_events(query):
 
     return train_dataset_torch
 
-def _get_model_annotations(model, test_dataset, dev):
 
+def _get_model_annotations(model, test_dataset, dev):
     test_dataloader = DataLoader(
         test_dataset,
         batch_size=1,
@@ -1082,10 +1122,11 @@ def _get_model_annotations(model, test_dataset, dev):
         )
     return annotations
 
+
 def _make_reannotation_psuedo_pandda(
-            working_dir,
+        working_dir,
         model_file
-        ):
+):
     database_path = working_dir / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
     db.generate_mapping(create_tables=True)
@@ -1197,10 +1238,11 @@ def _make_reannotation_psuedo_pandda(
         high_ranking_non_hits_dir = working_dir / "lrh"
         try_make(high_ranking_non_hits_dir)
         for chunk in np.array_split(range(len(hrnh_events)), 200):
-            event_chunk = hrnh_events[int(chunk[0]):int(chunk[-1])+1]
-            row_chunk = hrnh_rows[int(chunk[0]):int(chunk[-1])+1]
-            annotation_chunk = hrnh_annotations[int(chunk[0]):int(chunk[-1])+1]
-            _make_psuedo_pandda(high_ranking_non_hits_dir / f"high_ranking_non_hits_{int(chunk[0])}", event_chunk, row_chunk, annotation_chunk)
+            event_chunk = hrnh_events[int(chunk[0]):int(chunk[-1]) + 1]
+            row_chunk = hrnh_rows[int(chunk[0]):int(chunk[-1]) + 1]
+            annotation_chunk = hrnh_annotations[int(chunk[0]):int(chunk[-1]) + 1]
+            _make_psuedo_pandda(high_ranking_non_hits_dir / f"high_ranking_non_hits_{int(chunk[0])}", event_chunk,
+                                row_chunk, annotation_chunk)
 
         low_ranking_hits_dir = working_dir / "lrh"
         try_make(low_ranking_hits_dir)
@@ -1208,14 +1250,16 @@ def _make_reannotation_psuedo_pandda(
             event_chunk = lrh_events[int(chunk[0]):int(chunk[-1]) + 1]
             row_chunk = lrh_rows[int(chunk[0]):int(chunk[-1]) + 1]
             annotation_chunk = lrh_annotations[int(chunk[0]):int(chunk[-1]) + 1]
-            _make_psuedo_pandda(low_ranking_hits_dir  / f"low_ranking_hits_{int(chunk[0])}", event_chunk, row_chunk, annotation_chunk)
+            _make_psuedo_pandda(low_ranking_hits_dir / f"low_ranking_hits_{int(chunk[0])}", event_chunk, row_chunk,
+                                annotation_chunk)
 
     rprint(f"DONE!")
 
+
 def _make_dataset(
-            working_dir,
+        working_dir,
         test_partition
-        ):
+):
     database_path = working_dir / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
     db.generate_mapping(create_tables=True)
@@ -1286,7 +1330,6 @@ def _make_dataset(
             #     _images = images[j * 12:min((j + 1) * 12, len(dtags))]
             #     _annotations = annotations[j * 12:min((j + 1) * 12, len(dtags))]
             for j in range(len(dtags)):
-
                 _panddas = panddas[j]
                 _dtag = dtags[j]
                 _event_idx = event_idxs[j]
@@ -1294,25 +1337,27 @@ def _make_dataset(
                 _annotation = annotations[j]
 
         finish_read_dataset = time.time()
-        rprint(f"Read dataset in:{finish_read_dataset-begin_read_dataset}")
+        rprint(f"Read dataset in:{finish_read_dataset - begin_read_dataset}")
 
     else:
 
         begin_make_dataset = time.time()
 
         with h5py.File('test_3.h5', 'w') as f:
-            panddas = f.create_dataset("pandda_paths", (len(train_dataset_torch),), chunks=(1,), dtype=h5py.string_dtype(encoding='utf-8'))
-            dtags = f.create_dataset("dtags", (len(train_dataset_torch),), chunks=(1,), dtype=h5py.string_dtype(encoding='utf-8'))
+            panddas = f.create_dataset("pandda_paths", (len(train_dataset_torch),), chunks=(1,),
+                                       dtype=h5py.string_dtype(encoding='utf-8'))
+            dtags = f.create_dataset("dtags", (len(train_dataset_torch),), chunks=(1,),
+                                     dtype=h5py.string_dtype(encoding='utf-8'))
             event_idxs = f.create_dataset("event_idxs", (len(train_dataset_torch),), chunks=(1,), dtype='i')
             # images = f.create_dataset("images", (len(train_dataset_torch), 4, 30,30,30), chunks=(12,4,30,30,30), dtype='float32', compression="gzip", compression_opts=9)
             images = f.create_dataset(
                 "images",
-                (len(train_dataset_torch), 4, 30,30,30),
-                chunks=(1,4,30,30,30),
+                (len(train_dataset_torch), 4, 30, 30, 30),
+                chunks=(1, 4, 30, 30, 30),
                 dtype='float32',
                 **hdf5plugin.Blosc2(cname='blosclz', clevel=9, filters=hdf5plugin.Blosc2.BITSHUFFLE),
             )
-            annotations = f.create_dataset("annotations", (len(train_dataset_torch), 2), chunks=(1,2), dtype='float32')
+            annotations = f.create_dataset("annotations", (len(train_dataset_torch), 2), chunks=(1, 2), dtype='float32')
 
             # for j in range(len(train_dataset_torch)):
             _k = 0
@@ -1333,8 +1378,7 @@ def _make_dataset(
                     annotations[int(_idx)] = annotation_np[_j][1]
 
         finish_make_dataset = time.time()
-        print(f"Made dataset in: {finish_make_dataset-begin_make_dataset}")
-
+        print(f"Made dataset in: {finish_make_dataset - begin_make_dataset}")
 
     # j = 0
     # for images, annotations, idxs in train_dataloader:
@@ -1348,7 +1392,10 @@ def _make_dataset(
     #     event_idxs[j * 12:(j + 1) * 12] = [event.event_idx for event in events]
 
 
-def _train_and_test(working_dir, test_partition, initial_epoch, test_interval, model_file, model_key):
+def _train_and_test(working_dir,
+                    # test_partition,
+                    test_systems,
+                    initial_epoch, test_interval, model_file, model_key):
     database_path = working_dir / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
     db.generate_mapping(create_tables=True)
@@ -1359,14 +1406,13 @@ def _train_and_test(working_dir, test_partition, initial_epoch, test_interval, m
             (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
             event in EventORM)
 
-        test_partition_events = partitions[test_partition]
-        test_partition_event_systems = set([event.pandda.system.name for event in test_partition_events.events])
-        rprint(f"Test partition systems are: {test_partition_event_systems}")
+        # test_partition_events = partitions[test_partition]
+        # test_partition_event_systems = set([event.pandda.system.name for event in test_partition_events.events])
+        # rprint(f"Test partition systems are: {test_partition_event_systems}")
 
         print(partitions)
         for partition_name, partition in partitions.items():
             print(f"{partition_name} : {len(partition.events)}")
-
 
         # for event in partitions[test_partition].events:
         #     print(event.pandda.path)
@@ -1398,7 +1444,9 @@ def _train_and_test(working_dir, test_partition, initial_epoch, test_interval, m
                     )
                     for res
                     in query
-                    if res[0].pandda.system.name not in test_partition_event_systems
+                    # if res[0].pandda.system.name not in test_partition_event_systems
+                    if res[0].pandda.system.name not in test_systems
+
                 ]
             ),
             transform_image=get_image_xmap_ligand_augmented,
@@ -1437,7 +1485,8 @@ def _train_and_test(working_dir, test_partition, initial_epoch, test_interval, m
                     )
                     for res
                     in query
-                    if res[2].name == test_partition
+                    # if res[2].name == test_partition
+                    if res[2].name in test_systems
                 ]),
             transform_image=get_image_xmap_ligand,
             transform_annotation=get_annotation_from_event_hit
@@ -1458,7 +1507,7 @@ def _train_and_test(working_dir, test_partition, initial_epoch, test_interval, m
 
     if model_file:
         model.load_state_dict(torch.load(model_file, map_location=dev),
-                                  )
+                              )
 
     train(
         working_dir,
@@ -1474,17 +1523,22 @@ def _train_and_test(working_dir, test_partition, initial_epoch, test_interval, m
         num_epochs=1000,
     )
 
+
 def _get_precision_recall(epoch_results):
     pr = {}
-    for cutoff in np.linspace(0.0,1.0,num=101):
-        tp = [key for key, annotations in epoch_results.items() if (annotations[0] == 1.0) and (annotations[1] >= cutoff)]# *]
-        fp = [key for key, annotations in epoch_results.items() if (annotations[0] == 0.0) and (annotations[1] >= cutoff)]
-        tn = [key for key, annotations in epoch_results.items() if (annotations[0] == 0.0) and (annotations[1] < cutoff)]
-        fn = [key for key, annotations in epoch_results.items() if (annotations[0] == 1.0) and (annotations[1] < cutoff)]
+    for cutoff in np.linspace(0.0, 1.0, num=101):
+        tp = [key for key, annotations in epoch_results.items() if
+              (annotations[0] == 1.0) and (annotations[1] >= cutoff)]  # *]
+        fp = [key for key, annotations in epoch_results.items() if
+              (annotations[0] == 0.0) and (annotations[1] >= cutoff)]
+        tn = [key for key, annotations in epoch_results.items() if
+              (annotations[0] == 0.0) and (annotations[1] < cutoff)]
+        fn = [key for key, annotations in epoch_results.items() if
+              (annotations[0] == 1.0) and (annotations[1] < cutoff)]
 
         # rprint([len(tp), len(fp), len(tn), len(fn)])
         try:
-            recall = len(tp) / len(tp+fn)
+            recall = len(tp) / len(tp + fn)
         except:
             recall = 0.0
         try:
@@ -1495,6 +1549,7 @@ def _get_precision_recall(epoch_results):
         pr[round(float(cutoff), 2)] = {'precision': round(precision, 3), 'recall': round(recall, 3)}
 
     return pr
+
 
 def _summarize(working_dir):
     with open(Path(working_dir) / "annotations.pickle", 'rb') as f:
@@ -1509,7 +1564,9 @@ def _summarize(working_dir):
 
         if len(recall_greater_than_95) > 0:
             max_prec_cutoff = max(recall_greater_than_95, key=lambda x: recall_greater_than_95[x]['precision'])
-            rprint(f"Epoch: {epoch} : Recall: {precision_recall[max_prec_cutoff]['recall']} : Precision: {precision_recall[max_prec_cutoff]['precision']}")
+            rprint(
+                f"Epoch: {epoch} : Recall: {precision_recall[max_prec_cutoff]['recall']} : Precision: {precision_recall[max_prec_cutoff]['precision']}")
+
 
 def __main__(config_yaml="config.yaml"):
     # Initialize the config
@@ -1533,28 +1590,47 @@ def __main__(config_yaml="config.yaml"):
                 dic['test']['initial_epoch'],
                 dic['test']['test_interval'],
                 dic['test']['test_convergence_interval'],
-                dic['test']['partition']
+                dic['test']['partition'],
+                dic['test']['test_systems']
+
             ),
-            custom_annotations=dic['custom_annotations'],
+            custom_annotations=ConfigCustomAnnotations(
+                dic['custom_annotations']['databases'],
+                dic['custom_annotations']['panddas']
+            ),
             cpus=dic['cpus']
         )
         rprint(config)
     rprint(f"Printing pandda 2 systems...")
-    _print_pandda_2_systems(config.working_directory)
+    # _print_pandda_2_systems(config.working_directory)
 
     if not config.working_directory.exists():
         os.mkdir(config.working_directory)
 
     # Parse custom annotations
+    custom_annotations: dict[tuple[str, str, int], bool] = {}
     if "Annotations" in config.steps:
         custom_annotations_path = config.working_directory / "custom_annotations.pickle"
         if custom_annotations_path.exists():
             with open(custom_annotations_path, 'rb') as f:
                 custom_annotations = pickle.load(f)
+
         else:
-            custom_annotations: dict[tuple[str, str, int], bool] = _get_custom_annotations(config.custom_annotations)
+            # Parse old databases
+            for database_path_pattern in config.custom_annotations.databases:
+                for path in Path('/').glob(database_path_pattern[1:]):
+                    _custom_annotations: dict[tuple[str, str, int], bool] = _get_custom_annotations_from_database(path)
+                    custom_annotations.update(_custom_annotations)
+
+            # Parse custom panddas
+            for custom_pandda_path_pattern in config.custom_annotations.panddas:
+                for path in Path('/').glob(custom_pandda_path_pattern[1:]):
+                    _custom_annotations: dict[tuple[str, str, int], bool] = _get_custom_annotations_from_pandda(path)
+                    custom_annotations.update(_custom_annotations)
+
             with open(custom_annotations_path, "wb") as f:
                 pickle.dump(custom_annotations, f)
+
         rprint(f"\tGot {len(custom_annotations)} custom annotations!")
 
     # Construct the dataset
@@ -1598,7 +1674,8 @@ def __main__(config_yaml="config.yaml"):
     if 'Train+Test' in config.steps:
         _train_and_test(
             config.working_directory,
-            config.test.partition,
+            # config.test.partition,
+            config.test.systems,
             config.test.initial_epoch,
             config.test.test_interval,
             config.train.model_file,
