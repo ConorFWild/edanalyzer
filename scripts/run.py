@@ -1640,6 +1640,8 @@ def __main__(config_yaml="config.yaml"):
                 pickle.dump(custom_annotations, f)
 
         rprint(f"\tGot {len(custom_annotations)} custom annotations!")
+        rprint(custom_annotations)
+        exit()
 
     # Construct the dataset
     if "Collate" in config.steps:
