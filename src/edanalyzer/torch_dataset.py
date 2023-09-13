@@ -129,7 +129,8 @@ def get_mean_map_from_event(event: PanDDAEvent):
 def get_event_map_from_event(event: PanDDAEvent):
     zmap_path = str(Path(event.event_map) )
     ccp4 = gemmi.read_ccp4_map(zmap_path)
-    ccp4.setup(float('nan'))
+    # ccp4.setup(float('nan'))
+    ccp4.setup(0.0)
     m = ccp4.grid
 
     return m
