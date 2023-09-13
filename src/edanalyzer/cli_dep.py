@@ -959,8 +959,9 @@ def train(
     criterion = categorical_loss
 
     # Define optimizer
-    optimizer = optim.Adam(model.parameters(),
-                           # lr=0.001,
+    optimizer = optim.Adam(
+        model.parameters(),
+                           lr=0.001,
                            )
 
     optimizer.zero_grad()
