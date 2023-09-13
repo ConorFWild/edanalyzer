@@ -22,7 +22,7 @@ exclude:
   - /dls/labxchem/data/*/n*/processing/analysis/*
 train:
   max_epochs: 200
-  model_file: /dls/science/groups/i04-1/conor_dev/pandda_2_gemmi/pandda_gemmi/cnn/model_ligand.pt
+  model_file: # /dls/science/groups/i04-1/conor_dev/pandda_2_gemmi/pandda_gemmi/cnn/model_ligand.pt
 test:
   initial_epoch: 21
   test_interval: 1
