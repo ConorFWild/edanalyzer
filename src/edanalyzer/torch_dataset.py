@@ -126,6 +126,13 @@ def get_mean_map_from_event(event: PanDDAEvent):
 
     return m
 
+def get_event_map_from_event(event: PanDDAEvent):
+    zmap_path = str(Path(event.event_map) )
+    ccp4 = gemmi.read_ccp4_map(zmap_path)
+    ccp4.setup(float('nan'))
+    m = ccp4.grid
+
+    return m
 
 def get_sample_transform_from_event(event: PanDDAEvent,
                                     sample_distance: float,
@@ -854,6 +861,119 @@ def get_image_xmap_ligand_augmented(event: PanDDAEvent, ):
     # print(f"Loaded item in: transform {time_get_transform}: xmap {time_get_xmap}: mean {time_get_mean}: model {time_get_model}: ligand {time_get_ligand}")
 
     return np.stack([image_xmap, image_mean, image_model, image_ligand, ], axis=0), True, sample_transform, xmap_dmap
+
+def get_image_event_map_ligand(event: PanDDAEvent, ):
+    # logger.debug(f"Loading: {event.dtag}")
+    sample_transform, sample_array = get_sample_transform_from_event(
+        event,
+        0.5,
+        30,
+        3.5
+    )
+
+    try:
+        # print(event.dtag, event.event_idx)
+
+        sample_array_mean = np.copy(sample_array)
+        mean_dmap = get_event_map_from_event(event)
+        image_mean_initial = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
+        mean_mean, mean_std = np.mean(image_mean_initial), np.std(image_mean_initial)
+        image_event_map = (image_mean_initial - np.mean(image_mean_initial)) / np.std(image_mean_initial)
+        print(f"Mean: {[mean_mean, mean_std]}")
+
+        sample_array_model = np.copy(sample_array)
+        model_map = get_model_map(event, mean_dmap)
+        image_model = sample_xmap(model_map, sample_transform, sample_array_model)
+        print(f"Model: {np.mean(image_model)}")
+
+        # ligand_map_array = np.copy(sample_array)
+        ligand_map = get_ligand_map(event)
+        image_ligand = np.array(ligand_map)
+        print(f"Ligand: {np.mean(image_ligand)}")
+
+    except Exception as e:
+        print(e)
+
+        return np.stack([sample_array, sample_array, sample_array], axis=0), False, None, None
+
+    return np.stack([image_event_map, image_model, image_ligand, ], axis=0), True, sample_transform, mean_dmap
+
+
+def get_image_event_map_ligand_augmented(event: PanDDAEvent, ):
+    n = 30
+    step = 0.5
+    # logger.debug(f"Loading: {event.dtag}")
+    time_begin_get_transform = time.time()
+    sample_transform, sample_array = get_sample_transform_from_event_augmented(
+        event,
+        step,
+        n,
+        # 3.5
+        2.0
+
+    )
+    time_finish_get_transform = time.time()
+    time_get_transform = round(time_finish_get_transform - time_begin_get_transform, 2)
+
+    try:
+        sample_array_xmap = np.copy(sample_array)
+
+        # time_begin_get_xmap = time.time()
+        # xmap_dmap = get_raw_xmap_from_event(event)
+        # image_xmap_initial = sample_xmap(xmap_dmap, sample_transform, sample_array_xmap)
+        # image_xmap = (image_xmap_initial - np.mean(image_xmap_initial)) / np.std(image_xmap_initial)
+        # time_finish_get_xmap = time.time()
+        # time_get_xmap = round(time_finish_get_xmap - time_begin_get_xmap, 2)
+        #
+        # time_begin_get_mean = time.time()
+        # sample_array_mean = np.copy(sample_array)
+        # mean_dmap = get_mean_map_from_event(event)
+        # image_mean_initial = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
+        # std = np.std(image_mean_initial)
+        # if np.abs(std) < 0.0000001:
+        #     image_mean = np.copy(sample_array)
+        # else:
+        #     image_mean = (image_mean_initial - np.mean(image_mean_initial)) / std
+        # time_finish_get_mean = time.time()
+        # time_get_mean = round(time_finish_get_mean - time_begin_get_mean, 2)
+
+        time_begin_get_mean = time.time()
+        sample_array_mean = np.copy(sample_array)
+        mean_dmap = get_event_map_from_event(event)
+        image_mean_initial = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
+        std = np.std(image_mean_initial)
+        if np.abs(std) < 0.0000001:
+            image_event_map = np.copy(sample_array)
+        else:
+            image_event_map = (image_mean_initial - np.mean(image_mean_initial)) / std
+        time_finish_get_mean = time.time()
+        time_get_mean = round(time_finish_get_mean - time_begin_get_mean, 2)
+
+        get_event_map_from_event(event)
+
+        time_begin_get_model = time.time()
+        sample_array_model = np.copy(sample_array)
+        model_map = get_model_map(event, mean_dmap, )
+        image_model = sample_xmap(model_map, sample_transform, sample_array_model)
+        time_finish_get_model = time.time()
+        time_get_model = round(time_finish_get_model - time_begin_get_model, 2)
+
+        # ligand_map_array = np.copy(sample_array)
+        time_begin_get_ligand = time.time()
+        ligand_map = get_ligand_map(event, n=n, step=step)
+        image_ligand = np.array(ligand_map)
+        time_finish_get_ligand = time.time()
+        time_get_ligand = round(time_finish_get_ligand - time_begin_get_ligand, 2)
+
+    except Exception as e:
+        # print(f"Exception in loading data: {traceback.format_exc()}")
+        print(f"Exception in loading data: {e}")
+
+        return np.stack([sample_array, sample_array, sample_array], axis=0), False, None, None
+
+    # print(f"Loaded item in: transform {time_get_transform}: xmap {time_get_xmap}: mean {time_get_mean}: model {time_get_model}: ligand {time_get_ligand}")
+
+    return np.stack([image_event_map, image_model, image_ligand, ], axis=0), True, sample_transform, mean_dmap
 
 
 class PanDDADatasetTorchLigand(Dataset):

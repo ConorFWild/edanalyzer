@@ -37,7 +37,7 @@ from edanalyzer.torch_dataset import (
     get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented,
     get_annotation_from_event_hit, get_image_xmap_mean_map_augmented, get_image_xmap_mean_map,
     get_image_xmap_ligand_augmented, PanDDADatasetTorchLigand, get_image_xmap_ligand, get_image_ligandmap_augmented,
-    PanDDADatasetTorchLigandmap
+    PanDDADatasetTorchLigandmap, get_image_event_map_ligand, get_image_event_map_ligand_augmented
 )
 
 
@@ -1453,7 +1453,8 @@ def _train_and_test(working_dir,
 
                 ]
             ),
-            transform_image=get_image_xmap_ligand_augmented,
+            # transform_image=get_image_xmap_ligand_augmented,
+            transform_image=get_image_event_map_ligand_augmented,
             transform_annotation=get_annotation_from_event_hit
         )
         rprint(f"Got {len(train_dataset_torch)} train events!")
@@ -1492,7 +1493,8 @@ def _train_and_test(working_dir,
                     # if res[2].name == test_partition
                     if res[0].pandda.system.name in test_systems
                 ]),
-            transform_image=get_image_xmap_ligand,
+            # transform_image=get_image_xmap_ligand,
+            transform_image=get_image_event_map_ligand,
             transform_annotation=get_annotation_from_event_hit
         )
         rprint(f"Got {len(test_dataset_torch)} test events!")
