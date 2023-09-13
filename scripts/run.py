@@ -1512,9 +1512,9 @@ def _train_and_test(working_dir,
     model = resnet18(num_classes=2, num_input=3)
     model.to(dev)
 
-    if model_file:
-        model.load_state_dict(torch.load(model_file, map_location=dev),
-                              )
+    # if model_file:
+    #     model.load_state_dict(torch.load(model_file, map_location=dev),
+    #                           )
 
     train(
         working_dir,

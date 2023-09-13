@@ -949,8 +949,6 @@ def get_image_event_map_ligand_augmented(event: PanDDAEvent, ):
         time_finish_get_mean = time.time()
         time_get_mean = round(time_finish_get_mean - time_begin_get_mean, 2)
 
-        get_event_map_from_event(event)
-
         time_begin_get_model = time.time()
         sample_array_model = np.copy(sample_array)
         model_map = get_model_map(event, mean_dmap, )

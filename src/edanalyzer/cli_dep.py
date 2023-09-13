@@ -994,6 +994,10 @@ def train(
             # forward + backward + optimize
             begin_annotate = time.time()
             model_annotation = model(image_c)
+
+            print(f"Image: {image}")
+            print(f"Annotation: {annotation}")
+            print(f"Model annotation: {model_annotation}")
             # print(model_annotation)
 
             finish_annotate = time.time()
