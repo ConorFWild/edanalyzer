@@ -961,7 +961,7 @@ def train(
     # Define optimizer
     optimizer = optim.Adam(
         model.parameters(),
-                           lr=0.001,
+                           # lr=0.001,
                            )
 
     optimizer.zero_grad()
