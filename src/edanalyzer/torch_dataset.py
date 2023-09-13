@@ -880,17 +880,17 @@ def get_image_event_map_ligand(event: PanDDAEvent, ):
         image_mean_initial = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
         mean_mean, mean_std = np.mean(image_mean_initial), np.std(image_mean_initial)
         image_event_map = (image_mean_initial - np.mean(image_mean_initial)) / np.std(image_mean_initial)
-        print(f"Mean: {[mean_mean, mean_std]}")
+        # print(f"Mean: {[mean_mean, mean_std]}")
 
         sample_array_model = np.copy(sample_array)
         model_map = get_model_map(event, mean_dmap)
         image_model = sample_xmap(model_map, sample_transform, sample_array_model)
-        print(f"Model: {np.mean(image_model)}")
+        # print(f"Model: {np.mean(image_model)}")
 
         # ligand_map_array = np.copy(sample_array)
         ligand_map = get_ligand_map(event)
         image_ligand = np.array(ligand_map)
-        print(f"Ligand: {np.mean(image_ligand)}")
+        # print(f"Ligand: {np.mean(image_ligand)}")
 
     except Exception as e:
         print(e)
