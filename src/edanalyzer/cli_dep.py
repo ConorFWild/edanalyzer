@@ -1017,7 +1017,7 @@ def train(
 
                 model_annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in model_annotation]
                 annotations_np = [x.to(torch.device("cpu")).detach().numpy() for x in annotation]
-                print([(x, type(x)) for x in annotation])
+                # print([(x, type(x)) for x in annotation])
                 idxs = [int(x) for x in idx]
                 # print("Loss at epoch {}, iteration {} is {}".format(epoch,
                 #                                                     i,
