@@ -5,10 +5,10 @@ steps:
 #  - Collate
 #  - Partition
 #  - MakeTestDatasetPsuedoPanDDA
-#  - MakeReannotationPsuedoPanDDA
+  - MakeReannotationPsuedoPanDDA
 #  - KnownHitAlternateModel
 #  - MakeDataset
-  - Train+Test
+#  - Train+Test
 #  - Summarize
 datasets:
   - /dls/labxchem/data/*/*/processing/analysis/*
