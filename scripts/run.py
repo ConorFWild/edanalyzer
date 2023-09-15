@@ -1082,7 +1082,8 @@ def _make_dataset_from_events(query):
                 # if res[0].pandda.system.name not in test_partition_event_systems
             ]
         ),
-        transform_image=get_image_xmap_ligand,
+        # transform_image=get_image_xmap_ligand,
+        transform_image=get_image_event_map_ligand,
         transform_annotation=get_annotation_from_event_hit
     )
     # train_dataloader = DataLoader(
