@@ -1162,7 +1162,9 @@ def _make_reannotation_psuedo_pandda(
             dev = "cpu"
 
         # if model_type == "resnet+ligand":
-        model = resnet18(num_classes=2, num_input=4)
+        # model = resnet18(num_classes=2, num_input=4)
+        model = resnet18(num_classes=2, num_input=3)
+
         model.to(dev)
         model.eval()
 
