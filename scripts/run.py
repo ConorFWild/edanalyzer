@@ -1645,7 +1645,6 @@ def __main__(config_yaml="config.yaml"):
                     rprint(f"Getting annotations from: {path}")
                     _custom_annotations: dict[tuple[str, str, int], bool] = _get_custom_annotations_from_pandda(path)
                     rprint(f"\tGot {len(_custom_annotations)} annotations!")
-
                     custom_annotations.update(_custom_annotations)
 
             with open(custom_annotations_path, "wb") as f:
