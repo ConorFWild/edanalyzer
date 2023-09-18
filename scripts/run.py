@@ -1130,7 +1130,8 @@ def _get_model_annotations(model, test_dataset, dev):
 
 def _make_reannotation_psuedo_pandda(
         working_dir,
-        model_file
+        model_file,
+        custom_annotations
 ):
     database_path = working_dir / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
@@ -1192,6 +1193,8 @@ def _make_reannotation_psuedo_pandda(
         for res in [_res for _res in query if _res[3].path in inspect_tables]:
             event = res[0]
             pandda_path, dtag, event_idx = res[3].path, event.dtag, event.event_idx
+            if (str(pandda_path), str(dtag), int(event_idx)) in custom_annotations:
+                rprint("\tAlready has custom annotation! Skipping!")
             human_annotation, model_annotation = model_annotations[(pandda_path, dtag, event_idx)]
             if human_annotation > 0.5:
                 positives.append(res)
@@ -1682,7 +1685,8 @@ def __main__(config_yaml="config.yaml"):
     if "MakeReannotationPsuedoPanDDA" in config.steps:
         _make_reannotation_psuedo_pandda(
             config.working_directory,
-            config.train.model_file
+            config.train.model_file,
+            custom_annotations
         )
 
     if "UpdateFromReannotationDir" in config.steps:
