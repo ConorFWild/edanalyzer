@@ -1039,6 +1039,8 @@ def train(
                     # print("{}".format() + "\n")
                 print("#################################################" + "\n")
 
+
+
         if epoch % test_interval == 0:
             logger.info(f"Evaluating on test dataset!")
             model.eval()
