@@ -1636,6 +1636,7 @@ def __main__(config_yaml="config.yaml"):
                 for path in Path('/').glob(database_path_pattern[1:]):
                     rprint(f"Getting annotations from: {path}")
                     _custom_annotations: dict[tuple[str, str, int], bool] = _get_custom_annotations_from_database(path)
+                    rprint(f"\tGot {len(_custom_annotations)} annotations!")
                     custom_annotations.update(_custom_annotations)
 
             # Parse custom panddas
