@@ -1632,13 +1632,16 @@ def __main__(config_yaml="config.yaml"):
         else:
             # Parse old databases
             for database_path_pattern in config.custom_annotations.databases:
+
                 for path in Path('/').glob(database_path_pattern[1:]):
+                    rprint(f"Getting annotations from: {path}")
                     _custom_annotations: dict[tuple[str, str, int], bool] = _get_custom_annotations_from_database(path)
                     custom_annotations.update(_custom_annotations)
 
             # Parse custom panddas
             for custom_pandda_path_pattern in config.custom_annotations.panddas:
                 for path in Path('/').glob(custom_pandda_path_pattern[1:]):
+                    rprint(f"Getting annotations from: {path}")
                     _custom_annotations: dict[tuple[str, str, int], bool] = _get_custom_annotations_from_pandda(path)
                     custom_annotations.update(_custom_annotations)
 
