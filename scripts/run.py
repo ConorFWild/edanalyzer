@@ -1596,11 +1596,22 @@ def _summarize(working_dir, test_systems):
 
 
     for epoch, epoch_results in test_results.items():
-        rprint(f"{epoch}")
-        for system in test_systems:
-            rprint(f"\t{system}")
-            for pandda_type in ["pandda_1", "pandda_2"]:
-                rprint(f"\t\t{pandda_type}")
+        overall_precision_recall = _get_precision_recall(epoch_results)
+        # rprint(precision_recall)
+        recall_greater_than_95 = {cutoff: pr for cutoff, pr in overall_precision_recall.items() if pr['recall'] > 0.95}
+
+        # rprint(f"{system}}")
+        if len(recall_greater_than_95) > 0:
+            max_prec_cutoff = max(recall_greater_than_95, key=lambda x: recall_greater_than_95[x]['precision'])
+            rprint(
+                f"\t\t\tRecall: {overall_precision_recall[max_prec_cutoff]['recall']} : Precision: {overall_precision_recall[max_prec_cutoff]['precision']}")
+
+            rprint(f"{epoch}")
+        for pandda_type in ["pandda_1", "pandda_2"]:
+            rprint(f"\t{pandda_type}")
+
+            for system in test_systems:
+                rprint(f"\t\t{system}")
 
                 results = {
                     key: val
