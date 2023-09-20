@@ -1566,21 +1566,53 @@ def _get_precision_recall(epoch_results):
     return pr
 
 
-def _summarize(working_dir):
+def _summarize(working_dir, test_systems):
+    database_path = working_dir / "database.db"
+    db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
+    db.generate_mapping(create_tables=True)
+
+    with pony.orm.db_session:
+        partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
+        query = pony.orm.select(
+            (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
+            event in EventORM)
+
+        test_events = {
+            (res[0].pandda.path, res[0].dtag, res[0].event_idx): {
+                "Source": res[1].source,
+                "System":res[0].pandda.system.name
+            }
+            for res
+            in query
+            if res[0].pandda.system.name in test_systems
+        }
+
+
     with open(Path(working_dir) / "annotations.pickle", 'rb') as f:
         test_results = pickle.load(f)
 
     # rprint(test_results)
 
-    for epoch, epoch_results in test_results.items():
-        precision_recall = _get_precision_recall(epoch_results)
-        # rprint(precision_recall)
-        recall_greater_than_95 = {cutoff: pr for cutoff, pr in precision_recall.items() if pr['recall'] > 0.95}
 
-        if len(recall_greater_than_95) > 0:
-            max_prec_cutoff = max(recall_greater_than_95, key=lambda x: recall_greater_than_95[x]['precision'])
-            rprint(
-                f"Epoch: {epoch} : Recall: {precision_recall[max_prec_cutoff]['recall']} : Precision: {precision_recall[max_prec_cutoff]['precision']}")
+
+    for epoch, epoch_results in test_results.items():
+        for system in test_systems:
+            for pandda_type in ["pandda_1", "pandda_2"]:
+
+                results = {
+                    key: val
+                    for key, val
+                    in epoch_results.items()
+                    if (test_events[key]["System"] == system) & (test_events[key]["Source"] == pandda_type)
+                }
+                precision_recall = _get_precision_recall(results)
+                # rprint(precision_recall)
+                recall_greater_than_95 = {cutoff: pr for cutoff, pr in precision_recall.items() if pr['recall'] > 0.95}
+
+                if len(recall_greater_than_95) > 0:
+                    max_prec_cutoff = max(recall_greater_than_95, key=lambda x: recall_greater_than_95[x]['precision'])
+                    rprint(
+                        f"Epoch: {epoch} : Recall: {precision_recall[max_prec_cutoff]['recall']} : Precision: {precision_recall[max_prec_cutoff]['precision']}")
 
 
 def __main__(config_yaml="config.yaml"):
