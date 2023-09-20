@@ -1605,7 +1605,7 @@ def _summarize(working_dir, test_systems):
         if len(recall_greater_than_95) > 0:
             max_prec_cutoff = max(recall_greater_than_95, key=lambda x: recall_greater_than_95[x]['precision'])
             rprint(
-                f"\t\t\tRecall: {overall_precision_recall[max_prec_cutoff]['recall']} : Precision: {overall_precision_recall[max_prec_cutoff]['precision']}")
+                f"Recall: {overall_precision_recall[max_prec_cutoff]['recall']} : Precision: {overall_precision_recall[max_prec_cutoff]['precision']}")
 
         for pandda_type in ["pandda_1", "pandda_2"]:
             rprint(f"\t{pandda_type}")
