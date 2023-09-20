@@ -1612,7 +1612,7 @@ def _summarize(working_dir, test_systems):
                 if len(recall_greater_than_95) > 0:
                     max_prec_cutoff = max(recall_greater_than_95, key=lambda x: recall_greater_than_95[x]['precision'])
                     rprint(
-                        f"Epoch: {epoch} : Recall: {precision_recall[max_prec_cutoff]['recall']} : Precision: {precision_recall[max_prec_cutoff]['precision']}")
+                        f"\tEpoch: {epoch} : Recall: {precision_recall[max_prec_cutoff]['recall']} : Precision: {precision_recall[max_prec_cutoff]['precision']}")
 
 
 def __main__(config_yaml="config.yaml"):
@@ -1743,7 +1743,7 @@ def __main__(config_yaml="config.yaml"):
         )
     # Summarize train/test results
     if 'Summarize' in config.steps:
-        _summarize(config.working_directory)
+        _summarize(config.working_directory, config.test.test_systems)
 
 
 if __name__ == "__main__":
