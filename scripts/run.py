@@ -491,7 +491,7 @@ def _make_database(
     database_path = working_directory / "database.db"
     try:
         db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
-        db.generate_mapping()
+        db.generate_mapping(create_tables=True)
     except Exception as e:
         print(f"Exception setting up database: {e}")
 
