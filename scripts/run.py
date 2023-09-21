@@ -126,8 +126,11 @@ class Config:
 
 def _get_custom_annotations_from_database(path):
     # get the events
-    db.bind(provider='sqlite', filename=f"{path}")
-    db.generate_mapping()
+    try:
+        db.bind(provider='sqlite', filename=f"{path}")
+        db.generate_mapping()
+    except Exception as e:
+        print(e)
 
     with pony.orm.db_session:
         events = pony.orm.select((event, event.partitions, event.annotations, event.ligand, event.pandda,
@@ -486,8 +489,11 @@ def _make_database(
         custom_annotations
 ):
     database_path = working_directory / "database.db"
-    db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
-    db.generate_mapping(create_tables=True)
+    try:
+        db.bind(provider='sqlite', filename=f"{database_path}")
+        db.generate_mapping()
+    except Exception as e:
+        print(e)
 
     # Get the possible pandda paths
     possible_pandda_paths = [
@@ -785,8 +791,11 @@ def _print_pandda_2_systems(working_directory):
 
 def _partition_dataset(working_directory):
     database_path = working_directory / "database.db"
-    db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
-    db.generate_mapping(create_tables=True)
+    try:
+        db.bind(provider='sqlite', filename=f"{database_path}")
+        db.generate_mapping()
+    except Exception as e:
+        print(e)
 
     with pony.orm.db_session:
 
@@ -1407,8 +1416,11 @@ def _train_and_test(working_dir,
                     test_systems,
                     initial_epoch, test_interval, model_file, model_key):
     database_path = working_dir / "database.db"
-    db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
-    db.generate_mapping(create_tables=True)
+    try:
+        db.bind(provider='sqlite', filename=f"{database_path}")
+        db.generate_mapping()
+    except Exception as e:
+        print(e)
 
     with pony.orm.db_session:
         partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
@@ -1568,8 +1580,11 @@ def _get_precision_recall(epoch_results):
 
 def _summarize(working_dir, test_systems):
     database_path = working_dir / "database.db"
-    db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
-    db.generate_mapping(create_tables=True)
+    try:
+        db.bind(provider='sqlite', filename=f"{database_path}")
+        db.generate_mapping()
+    except Exception as e:
+        print(e)
 
     with pony.orm.db_session:
         partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
