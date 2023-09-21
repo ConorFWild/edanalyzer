@@ -45,4 +45,6 @@ custom_annotations:
   - /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data/lrh/high_ranking_non_hits_*
   - /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_2/high_ranking_non_hits/high_ranking_non_hits_*
   - /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_2/low_ranking_hits/low_ranking_hits_*
+  - /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_3/high_ranking_non_hits/high_ranking_non_hits_*
+  - /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_3/low_ranking_hits/low_ranking_hits_*
 cpus: 20
