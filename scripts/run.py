@@ -493,7 +493,7 @@ def _make_database(
         db.bind(provider='sqlite', filename=f"{database_path}")
         db.generate_mapping()
     except Exception as e:
-        print(e)
+        print(f"Exception setting up database: {e}")
 
     # Get the possible pandda paths
     possible_pandda_paths = [
