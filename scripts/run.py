@@ -1723,10 +1723,10 @@ def __main__(config_yaml="config.yaml"):
     if custom_annotations_path.exists():
         with open(custom_annotations_path, 'rb') as f:
             custom_annotations = pickle.load(f)
-    if "Annotations" in config.steps:
-        rprint(f"Getting custom annotations...")
+    else:
+        if "Annotations" in config.steps:
+            rprint(f"Getting custom annotations...")
 
-        else:
             # Parse old databases
             for database_path_pattern in config.custom_annotations.databases:
 
