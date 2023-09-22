@@ -1196,6 +1196,7 @@ def _make_reannotation_psuedo_pandda(
                 pickle.dump(model_annotations, f)
 
         # rprint(model_annotations)
+        print([key for key in custom_annotations][:5])
 
         # Pick out the highest ranking non-hits and lowest ranking hits
         positives, negatives = [], []
