@@ -1588,8 +1588,8 @@ def _get_precision_recall(epoch_results):
         pr[round(float(cutoff), 2)] = {
             'precision': round(precision, 3),
             'recall': round(recall, 3),
-            'fp': fpr,
-            'fn': fnr
+            'fp': round(fpr, 3),
+            'fn': round(fnr, 3)
         }
 
     return pr
