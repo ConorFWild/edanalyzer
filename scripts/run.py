@@ -1719,12 +1719,12 @@ def __main__(config_yaml="config.yaml"):
 
     # Parse custom annotations
     custom_annotations: dict[tuple[str, str, int], bool] = {}
+    custom_annotations_path = config.working_directory / "custom_annotations.pickle"
+    if custom_annotations_path.exists():
+        with open(custom_annotations_path, 'rb') as f:
+            custom_annotations = pickle.load(f)
     if "Annotations" in config.steps:
         rprint(f"Getting custom annotations...")
-        custom_annotations_path = config.working_directory / "custom_annotations.pickle"
-        if custom_annotations_path.exists():
-            with open(custom_annotations_path, 'rb') as f:
-                custom_annotations = pickle.load(f)
 
         else:
             # Parse old databases
@@ -1746,7 +1746,7 @@ def __main__(config_yaml="config.yaml"):
 
             with open(custom_annotations_path, "wb") as f:
                 pickle.dump(custom_annotations, f)
-        rprint(custom_annotations)
+        # rprint(custom_annotations)
         rprint(f"\tGot {len(custom_annotations)} custom annotations!")
         # rprint(custom_annotations)
         # exit()
