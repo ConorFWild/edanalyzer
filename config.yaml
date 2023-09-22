@@ -25,7 +25,8 @@ train:
   max_epochs: 200
 #  model_file: /dls/science/groups/i04-1/conor_dev/pandda_2_gemmi/pandda_gemmi/cnn/model_ligand.pt
 #  model_file: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_2/all_data220.pt
-  model_file: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_3/all_data372.pt
+#  model_file: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_3/all_data372.pt
+  model_file: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_4/all_data270.pt
 test:
   initial_epoch: 221
   test_interval: 1
