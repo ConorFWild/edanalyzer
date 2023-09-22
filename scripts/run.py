@@ -1566,6 +1566,7 @@ def _get_precision_recall(epoch_results):
         fn = [key for key, annotations in epoch_results.items() if
               (annotations[0] == 1.0) and (annotations[1] < cutoff)]
 
+        total = len(tp) + len(fp) + len(tn) + len(fn)
         # rprint([len(tp), len(fp), len(tn), len(fn)])
         try:
             recall = len(tp) / len(tp + fn)
@@ -1576,7 +1577,12 @@ def _get_precision_recall(epoch_results):
         except:
             precision = 0.0
 
-        pr[round(float(cutoff), 2)] = {'precision': round(precision, 3), 'recall': round(recall, 3)}
+        pr[round(float(cutoff), 2)] = {
+            'precision': round(precision, 3),
+            'recall': round(recall, 3),
+            'fp': len(fp) / total,
+            'fn': len(fn) / total
+        }
 
     return pr
 
