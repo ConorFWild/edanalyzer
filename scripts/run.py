@@ -779,10 +779,16 @@ def _print_pandda_2_systems(working_directory):
         for res in pandda_2_results:
             _system = res[1]
             _hit = res[2].annotation
+            if _system.name not in systems:
+                systems[_system.name] = {}
+                systems[_system.name]["Hit"] = 0
+                systems[_system.name]["Non Hit"] = 0
+
             if _hit:
-                if _system.name not in systems:
-                    systems[_system.name] = 0
-                systems[_system.name] += 1
+                systems[_system.name]["Hit"] += 1
+            else:
+                systems[_system.name]["Non Hit"] += 1
+
         rprint(systems)
 
 
