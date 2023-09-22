@@ -1568,6 +1568,14 @@ def _get_precision_recall(epoch_results):
 
         total = len(tp) + len(fp) + len(tn) + len(fn)
         # rprint([len(tp), len(fp), len(tn), len(fn)])
+
+        if total == 0:
+            fpr = 0.0
+            fnr = 0.0
+        else:
+            fpr =  len(fp) / total
+            fnr = len(fn) / total
+
         try:
             recall = len(tp) / len(tp + fn)
         except:
@@ -1580,8 +1588,8 @@ def _get_precision_recall(epoch_results):
         pr[round(float(cutoff), 2)] = {
             'precision': round(precision, 3),
             'recall': round(recall, 3),
-            'fp': len(fp) / total,
-            'fn': len(fn) / total
+            'fp': fpr,
+            'fn': fnr
         }
 
     return pr
