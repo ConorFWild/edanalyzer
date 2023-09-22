@@ -1665,7 +1665,7 @@ def _summarize(working_dir, test_systems):
                 if len(recall_greater_than_95) > 0:
                     max_prec_cutoff = max(recall_greater_than_95, key=lambda x: recall_greater_than_95[x]['precision'])
                     rprint(
-                        f"\t\t\tRecall: {precision_recall[max_prec_cutoff]['recall']} : Precision: {precision_recall[max_prec_cutoff]['precision']} : fp: {precision_recall[max_prec_cutoff]['fp']} : fn : {precision_recall[max_prec_cutoff]['fn']}")
+                        f"\t\t\tRecall: {precision_recall[max_prec_cutoff]['recall']} : Precision: {precision_recall[max_prec_cutoff]['precision']} : false pos.: {precision_recall[max_prec_cutoff]['fp']} : false neg. : {precision_recall[max_prec_cutoff]['fn']}")
 
 
 def __main__(config_yaml="config.yaml"):
