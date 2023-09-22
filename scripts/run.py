@@ -1747,7 +1747,7 @@ def __main__(config_yaml="config.yaml"):
             with open(custom_annotations_path, "wb") as f:
                 pickle.dump(custom_annotations, f)
         # rprint(custom_annotations)
-        rprint(f"\tGot {len(custom_annotations)} custom annotations!")
+    rprint(f"\tGot {len(custom_annotations)} custom annotations!")
         # rprint(custom_annotations)
         # exit()
 
