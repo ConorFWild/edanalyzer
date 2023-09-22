@@ -1199,16 +1199,19 @@ def _make_reannotation_psuedo_pandda(
 
         # Pick out the highest ranking non-hits and lowest ranking hits
         positives, negatives = [], []
+        num_custom_annotations = 0
         for res in [_res for _res in query if _res[3].path in inspect_tables]:
             event = res[0]
             pandda_path, dtag, event_idx = res[3].path, event.dtag, event.event_idx
             if (str(pandda_path), str(dtag), int(event_idx)) in custom_annotations:
-                rprint("\tAlready has custom annotation! Skipping!")
+                rprint(f"\tAlready has custom annotation! Skipping!")
+                num_custom_annotations += 1
             human_annotation, model_annotation = model_annotations[(pandda_path, dtag, event_idx)]
             if human_annotation > 0.5:
                 positives.append(res)
             else:
                 negatives.append(res)
+        rprint(f"Total of {num_custom_annotations} custom annotations!")
 
         hrnh_events, hrnh_rows, hrnh_annotations = [], [], []
         for res in sorted(
