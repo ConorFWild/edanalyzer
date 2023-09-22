@@ -687,7 +687,7 @@ def _make_database(
         # pony.orm.select((p.dtag, p.event_idx, p.pandda) for p in EventORM).show()
         rprint(
             f"Got {len(events)} of which {len([x for x in events.values() if x.hit_confidence == 'High'])} are high confidence!")
-
+        rprint(systems)
         # for event_id, event in events.items():
         #     print(event)
 
