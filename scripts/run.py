@@ -1148,9 +1148,16 @@ def _make_reannotation_psuedo_pandda(
         model_file,
         custom_annotations
 ):
-    database_path = working_dir / "database.db"
+    # database_path = working_dir / "database.db"
     # db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
     # db.generate_mapping(create_tables=True)
+
+    database_path = working_dir / "database.db"
+    try:
+        db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
+        db.generate_mapping(create_tables=True)
+    except Exception as e:
+        print(f"Exception setting up database: {e}")
 
     with pony.orm.db_session:
         partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
