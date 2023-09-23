@@ -1149,8 +1149,8 @@ def _make_reannotation_psuedo_pandda(
         custom_annotations
 ):
     database_path = working_dir / "database.db"
-    db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
-    db.generate_mapping(create_tables=True)
+    # db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
+    # db.generate_mapping(create_tables=True)
 
     with pony.orm.db_session:
         partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
