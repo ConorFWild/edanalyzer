@@ -1632,7 +1632,7 @@ def _summarize(working_dir, test_systems):
 
     # rprint(test_results)
 
-
+    pandda_2_epoch_prec = {}
 
     for epoch, epoch_results in test_results.items():
         rprint(f"{epoch}")
@@ -1661,7 +1661,8 @@ def _summarize(working_dir, test_systems):
             if len(recall_greater_than_95) > 0:
                 max_prec_cutoff = max(recall_greater_than_95, key=lambda x: recall_greater_than_95[x]['precision'])
                 rprint(f"\t\tRecall: {overall_precision_recall[max_prec_cutoff]['recall']} : Precision: {overall_precision_recall[max_prec_cutoff]['precision']}")
-
+                if pandda_type == "pandda_2":
+                    pandda_2_epoch_prec[epoch] = overall_precision_recall[max_prec_cutoff]
 
             for system in test_systems:
                 rprint(f"\t\t{system}")
@@ -1682,6 +1683,9 @@ def _summarize(working_dir, test_systems):
                     rprint(
                         f"\t\t\tRecall: {precision_recall[max_prec_cutoff]['recall']} : Precision: {precision_recall[max_prec_cutoff]['precision']} : false pos.: {precision_recall[max_prec_cutoff]['fp']} : false neg. : {precision_recall[max_prec_cutoff]['fn']}")
 
+    best_pandda_2_epoch = max(pandda_2_epoch_prec, key= lambda _key: pandda_2_epoch_prec[_key]['precision'])
+    rprint(f"Best PanDDA 2 performance at epoch: {best_pandda_2_epoch}")
+    rprint(pandda_2_epoch_prec[best_pandda_2_epoch])
 
 def __main__(config_yaml="config.yaml"):
     # Initialize the config
