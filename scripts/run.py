@@ -1764,10 +1764,8 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, ):
             rprint(indent_text(f"Job Script"))
             rprint(indent_text(submit_command))
 
-
             with open(job_script_path, 'w') as f:
                 f.write(job_script)
-
 
             # Create the submission command
             submit_command = SUBMIT_COMMAND.format(
