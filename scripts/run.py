@@ -1753,6 +1753,8 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, ):
 
             # Setup output directories
             try_make(result_dir)
+            if not result_dir.exists():
+                continue
 
             # Create the job script
             job_script_path = result_dir / "run.sh"
