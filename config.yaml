@@ -50,6 +50,6 @@ custom_annotations:
   - /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_3/low_ranking_hits/low_ranking_hits_*
 cpus: 20
 panddas:
-  pandda_key: 2023\_09\_24
+  pandda_key: 20230924
   cpus: 36
   mem: 180
