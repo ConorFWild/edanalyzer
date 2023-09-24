@@ -2,6 +2,7 @@ import dataclasses
 import os
 import pickle
 import pathlib
+import subprocess
 import time
 from pathlib import Path
 import re
@@ -1694,6 +1695,95 @@ def _summarize(working_dir, test_systems):
     rprint(f"Best PanDDA 2 performance at epoch: {best_pandda_2_epoch}")
     rprint(pandda_2_epoch_prec[best_pandda_2_epoch])
 
+JOB_SCRIPT = (
+    '#!/bin/sh \n'
+    'module load buster \n'
+    'export PYTHONPATH="" \n'
+    'source act_con \n'
+    'conda activate pandda2_ray \n'
+    'python -u /dls/science/groups/i04-1/conor_dev/pandda_2_gemmi/scripts/pandda.py '
+    '--local_cpus={num_cpus} ' 
+    '--data_dirs={data_dirs} ' 
+    '--out_dir={out_dir}'
+)
+
+SUBMIT_COMMAND = 'module load global/cluster; qsub -pe smp {num_cpus} -l m_mem_free={m_mem_free}G -o {out_path} -e {err_path} {script_path}'
+
+
+def indent_text(text, indent=4):
+    return Padding(
+        text,
+        (0, 0, 0, indent)
+    )
+
+def _run_panddas(working_directory, pandda_key, num_cpus, mem, ):
+    database_path = working_directory / "database.db"
+    try:
+        db.bind(provider='sqlite', filename=f"{database_path}")
+        db.generate_mapping()
+    except Exception as e:
+        print(e)
+
+    with pony.orm.db_session:
+        # partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
+        # query = pony.orm.select(
+        #     (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
+        #     event in EventORM)
+        query = pony.orm.select(
+            experiment for experiment in ExperimentORM
+        )
+
+        # Order experiments from least datasets to most for fast results
+
+        for experiment in query:
+            rprint(f"{experiment.system.name} : {experiment.path}")
+
+            model_building_dir = experiment.model_dir
+            result_dir = model_building_dir / f"../{pandda_key}"
+            pandda_dir = result_dir / "pandda"
+
+            # Setup output directories
+            try_make(result_dir)
+
+            # Create the job script
+            job_script_path = result_dir / "run.sh"
+            job_script = JOB_SCRIPT.format(
+                num_cpus=num_cpus,
+                data_dirs=model_building_dir,
+                out_dir=pandda_dir,
+            )
+            rprint(indent_text(f"Job Script"))
+            rprint(indent_text(submit_command))
+
+
+            with open(job_script_path, 'w') as f:
+                f.write(job_script)
+
+
+            # Create the submission command
+            submit_command = SUBMIT_COMMAND.format(
+                num_cpus=num_cpus,
+                m_mem_free=int(mem/num_cpus),
+                out_path=result_dir / "run.out",
+                err_path=result_dir / "run.err",
+                script_path=job_script_path
+            )
+            rprint(indent_text(f"Submission Command: {submit_command}"))
+
+            # Submit the job
+            p = subprocess.Popen(
+                submit_command,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            p.communicate()
+
+
+
+    ...
+
+
 def __main__(config_yaml="config.yaml"):
     # Initialize the config
     rprint(f"Getting config...")
@@ -1823,6 +1913,10 @@ def __main__(config_yaml="config.yaml"):
     # Summarize train/test results
     if 'Summarize' in config.steps:
         _summarize(config.working_directory, config.test.test_systems)
+
+    # Run PanDDAs
+    if "RunPanDDAs" in config.steps:
+        _run_panddas(config.working_directory)
 
 
 if __name__ == "__main__":

@@ -5,11 +5,11 @@ steps:
 #  - Collate
 #  - Partition
 #  - MakeTestDatasetPsuedoPanDDA
-  - MakeReannotationPsuedoPanDDA
+#  - MakeReannotationPsuedoPanDDA
 #  - KnownHitAlternateModel
 #  - MakeDataset
 #  - Train+Test
-#  - Summarize
+  - Summarize
 datasets:
   - /dls/labxchem/data/*/*/processing/analysis/*
   - /dls/labxchem/data/*/*/processing/analysis/pandda_2_2023_06_27/1
@@ -49,3 +49,7 @@ custom_annotations:
   - /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_3/high_ranking_non_hits/high_ranking_non_hits_*
   - /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_3/low_ranking_hits/low_ranking_hits_*
 cpus: 20
+panddas:
+  pandda_key: 2023_09_24
+  cpus: 36
+  mem: 180
