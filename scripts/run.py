@@ -1762,7 +1762,7 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, ):
                 out_dir=pandda_dir,
             )
             rprint(indent_text(f"Job Script"))
-            rprint(indent_text(submit_command))
+            rprint(indent_text(job_script))
 
             with open(job_script_path, 'w') as f:
                 f.write(job_script)
