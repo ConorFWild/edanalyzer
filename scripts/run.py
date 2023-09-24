@@ -12,6 +12,9 @@ import fire
 import pony
 import rich
 from rich import print as rprint
+from rich.panel import Panel
+from rich.align import Align
+from rich.padding import Padding
 import pandas as pd
 import joblib
 import gemmi
@@ -100,6 +103,11 @@ class ConfigCustomAnnotations:
     databases: list[str]
     panddas: list[str]
 
+@dataclasses.dataclass
+class ConfigPanDDAs:
+    pandda_key: str
+    cpus: int
+    mem: int
 
 @dataclasses.dataclass
 class Config:
@@ -112,6 +120,7 @@ class Config:
     test: ConfigTest
     custom_annotations: ConfigCustomAnnotations
     cpus: int
+    panddas: ConfigPanDDAs
 
     # def __init__(self, dic):
     #     self.name = dic["name"]
@@ -1815,7 +1824,12 @@ def __main__(config_yaml="config.yaml"):
                 dic['custom_annotations']['databases'],
                 dic['custom_annotations']['panddas']
             ),
-            cpus=dic['cpus']
+            cpus=dic['cpus'],
+            panddas=ConfigPanDDAs(
+                pandda_key=str(dic['panddas']['pandda_key']),
+                cpus=int(dic['panddas']['cpus']),
+                mem=int(dic['panddas']['mem'])
+            )
         )
         rprint(config)
     # rprint(f"Printing pandda 2 systems...")
@@ -1916,7 +1930,12 @@ def __main__(config_yaml="config.yaml"):
 
     # Run PanDDAs
     if "RunPanDDAs" in config.steps:
-        _run_panddas(config.working_directory)
+        _run_panddas(
+            config.working_directory,
+            config.panddas.pandda_key,
+            config.panddas.cpus,
+            config.panddas.mem
+        )
 
 
 if __name__ == "__main__":
