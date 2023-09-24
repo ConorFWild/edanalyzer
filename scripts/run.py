@@ -1747,7 +1747,7 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, ):
         for experiment in query:
             rprint(f"{experiment.system.name} : {experiment.path}")
 
-            model_building_dir = experiment.model_dir
+            model_building_dir = Path(experiment.model_dir)
             result_dir = model_building_dir / f"../{pandda_key}"
             pandda_dir = result_dir / "pandda"
 
