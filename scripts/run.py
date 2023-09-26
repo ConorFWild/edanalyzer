@@ -2026,7 +2026,8 @@ def _make_experiment_rank_graphs(table, working_directory,):
         code_pandda_2 = np.array([confidence_to_int[x] for x in pandda_2_table['confidence']])
         code_pandda_1 = np.array([confidence_to_int[x] for x in pandda_1_table['confidence']])
         fig, axs = plt.subplots(
-            (1, 2),
+            2,
+            1,
             figsize=(
                 max([len(code_pandda_2), len(code_pandda_1)]) * pixel_per_bar / dpi,
                 5
