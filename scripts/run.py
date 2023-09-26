@@ -2039,7 +2039,7 @@ def _make_experiment_rank_graphs(table, working_directory,):
                   interpolation='nearest')
         axs[1].imshow(code_pandda_1.reshape(1, -1), cmap=cmap, aspect='auto',
                   interpolation='nearest')
-        fig.save_fig(working_directory / f"{Path(experiment).name}.png")
+        fig.savefig(working_directory / f"{Path(experiment).name}.png")
     ...
 
 def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml, test_systems):
