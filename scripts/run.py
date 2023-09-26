@@ -1950,7 +1950,7 @@ def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key
         pandda_dir = experiment["pandda"]
         inspect_table_path = pandda_dir / 'analyses' / 'pandda_inspect_events.csv'
         if not inspect_table_path.exists():
-            rprint(indent_text(f"No inspect Table! Skipping!"))
+            rprint(indent_text(f"No test PanDDA 2 inspect Table! Skipping!"))
 
         # Get the rank table of the new PanDDA
         rank_table = _get_rank_table_pandda_2(
@@ -2008,7 +2008,7 @@ def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml
         for experiment in query:
             experiments[experiment.path] = {
             'system': experiment.system.name,
-            'pandda': Path(experiment.path) / pandda_key,
+            'pandda': Path(experiment.model_dir) / '..' / pandda_key,
             'old_panddas': [Path(pandda.path) for pandda in experiment.panddas],
                 'model_building_dir': Path(experiment.model_dir)
         }
