@@ -1916,8 +1916,23 @@ def _get_rank_table_pandda_2(experiment_path, pandda_path, high_confidence_ligan
     rank_table['test'] = True
     return rank_table
 
-def _get_comparator_pandda(old_panddas):
+def _get_comparator_pandda(old_panddas, high_confidence_ligands):
+    num_high_confidence_dtag_events = {}
     for pandda_path in old_panddas:
+        inspect_table_path = pandda_path / 'analyses' / 'pandda_inspect_events.csv'
+        if not inspect_table_path.exists():
+            continue
+        table = pd.read_csv(inspect_table_path)
+        num_high_confidence_dtag_events[pandda_path] = 0
+        for dtag in table['dtag'].unqiue():
+            if dtag in high_confidence_ligands:
+                num_high_confidence_dtag_events[pandda_path] += 1
+
+    rprint(num_high_confidence_dtag_events)
+
+    if len(high_confidence_ligands) > 0:
+        return max(num_high_confidence_dtag_events, key= lambda _key: num_high_confidence_dtag_events[_key])
+
 
 def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key):
     tables = []
@@ -1941,12 +1956,15 @@ def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key
         print(rank_table)
 
         # Choose the comparator pandda and get its rank table
-        compatator_pandda_path = _get_comparator_pandda(experiment['old_panddas'])
+        compatator_pandda_path = _get_comparator_pandda(experiment['old_panddas'], system_high_confidence_ligands)
+        if not compatator_pandda_path:
+            rprint(indent_text(f"No Comparator PanDDA! Skipping!"))
         comparator_rank_table = _get_rank_table_pandda_1(
             experiment_path,
             compatator_pandda_path,
             system_high_confidence_ligands
         )
+        print(comparator_rank_table)
 
         #
         tables.append(rank_table)
@@ -1986,8 +2004,8 @@ def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml
             experiments[experiment.path] = {
             'system': experiment.system.name,
             'pandda': Path(experiment.path) / pandda_key,
-            'old_panddas': [pandda.path for pandda in experiment.panddas],
-                'model_building_dir': experiment.model_dir
+            'old_panddas': [Path(pandda.path) for pandda in experiment.panddas],
+                'model_building_dir': Path(experiment.model_dir)
         }
     rprint(experiments)
 
