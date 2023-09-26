@@ -2004,20 +2004,20 @@ from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 
 def _make_experiment_rank_graphs(table, working_directory,):
     confidence_to_int = {
-        "Low": 0,
-        "low": 0,
-        "None": 0,
-        None: 0,
-        "Medium": 1,
-        "medium": 1,
-        "High": 2,
-        "high": 2,
-        "Confirmed High Confidence": 3,
-        "Unknown": 4
+        "Low": 1,
+        "low": 1,
+        "None": 1,
+        None: 1,
+        "Medium": 2,
+        "medium": 2,
+        "High": 3,
+        "high": 3,
+        "Confirmed High Confidence": 4,
+        "Unknown": 0
     }
     pixel_per_bar = 4
     dpi = 100
-    cmap = ListedColormap(["darkorange", "yellow", "lawngreen", "lightseagreen", "grey"])
+    cmap = ListedColormap(["grey", "darkorange", "yellow", "lawngreen", "lightseagreen", ])
 
     for experiment in table['experiment_path'].unique():
         pandda_2_table = table[
@@ -2035,9 +2035,10 @@ def _make_experiment_rank_graphs(table, working_directory,):
         print(len(code_pandda_2))
         code_pandda_1 = np.array([confidence_to_int[x] for x in pandda_1_table['confidence']])
         print(len(code_pandda_1))
-        highest_high_conf_rank = max(
-            max(np.nonzero(code_pandda_2 >1 )),
-            max(np.nonzero(code_pandda_1 >1 )),
+        highest_high_conf_rank = max([
+            max(np.nonzero(code_pandda_2 > 2)),
+            max(np.nonzero(code_pandda_1 > 2)),
+            ]
         )
         code_pandda_2_padded = np.ones(len(code_pandda_2)) * 4
         code_pandda_2_padded[:min(code_pandda_2.size, highest_high_conf_rank)] = code_pandda_2[:min(code_pandda_2.size, highest_high_conf_rank)]
