@@ -1827,9 +1827,11 @@ def _pandda_status(working_directory, pandda_key):
             elif inspect_table_path.exists():
                 statuses[experiment.system.name][experiment.path] = "Finished!"
             elif err_file.exists():
-                with open(err_file, 'r') as f:
-                    lines = f.readlines()
-                statuses[experiment.system.name][experiment.path] = lines[:-10]
+                # with open(err_file, 'r') as f:
+                #     lines = f.readlines()
+                p = subprocess.Popen(f"tail {err_file}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = p.communicate()
+                statuses[experiment.system.name][experiment.path] = str(stdout)
 
         rprint(statuses)
 
