@@ -1792,6 +1792,83 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, ):
 
     ...
 
+def _get_rank_table(pandda_path, high_confidence_ligands):
+    ...
+
+def _get_comparator_pandda(old_panddas):
+    ...
+
+def _get_experiment_rank_tables(experiments, high_confidence_ligands):
+    tables = []
+    for experiment_path, experiment in experiments.items():
+        system_high_confidence_ligands = high_confidence_ligands[experiment['system']],
+
+        # Get the rank table of the new PanDDA
+        rank_table = _get_rank_table(
+            experiment['pandda'],
+            system_high_confidence_ligands
+        )
+        rank_table['test'] = True
+
+        # Choose the comparator pandda and get its rank table
+        compatator_pandda_path = _get_comparator_pandda(experiment['old_panddas'])
+        comparator_rank_table = _get_rank_table(
+            compatator_pandda_path,
+            system_high_confidence_ligands
+        )
+        comparator_rank_table['test'] = False
+
+        #
+        tables.append(rank_table)
+        tables.append(comparator_rank_table)
+
+    # Combine and return tables
+    table = ...
+    return table
+
+def _make_experiment_rank_graphs(table, working_directory,):
+    ...
+
+def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml, ):
+    database_path = working_directory / "database.db"
+    try:
+        db.bind(provider='sqlite', filename=f"{database_path}")
+        db.generate_mapping()
+    except Exception as e:
+        print(e)
+
+    # Get the information on high confidence ligands
+    with open(high_confidence_ligand_yaml, 'r') as f:
+        high_confidence_ligands = yaml.safe_load(f)
+
+    # Query the database for information on the experiments
+    experiments = {}
+    with pony.orm.db_session:
+        # query = pony.orm.select(
+        #     (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
+        #     event in EventORM)
+        query = pony.orm.select(
+            experiment for experiment in ExperimentORM
+        )
+
+        for experiment in query:
+            experiments[experiment.path] = {
+            'system': experiment.system.name,
+            'pandda': Path(experiment.path) / pandda_key,
+            'old_panddas': [pandda.path for pandda in experiment.panddas]
+        }
+
+    # Get the rankings up to the last known high confidence ligand, and the PanDDA 1 versions if possible
+    # Table header: experiment_path, pandda_path, test, rank, dtag, event_idx, high_confidence, score
+    table_path = working_directory / "ranking_table.csv"
+    if table_path.exists():
+        table = pd.read_csv(table_path)
+    else:
+        table = _get_experiment_rank_tables(experiments, high_confidence_ligands)
+
+    # Make and save plots for each PanDDA vs its chosen comparator
+    _make_experiment_rank_graphs(table, working_directory,)
+
 
 def __main__(config_yaml="config.yaml"):
     # Initialize the config
@@ -1935,6 +2012,13 @@ def __main__(config_yaml="config.yaml"):
             config.panddas.pandda_key,
             config.panddas.cpus,
             config.panddas.mem
+        )
+
+    if "EvaluatePanDDAs" in config.steps:
+        _evaluate_panddas(
+            config.working_directory,
+            config.panddas.pandda_key,
+            config.evaluate.high_confidence_ligands,
         )
 
 

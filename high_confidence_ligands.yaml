@@ -9,9 +9,21 @@ high_confidence_hits:
     - [BAZ2BA-x559, A, 1888]
     - [BAZ2BA-x575, A, 1893]
     - [BAZ2BA-x583, A, 1893]
-#  SETDB1:
+  SETDB1:
 #    - [SETDB1, A, 122]
 #    - [SETDB1, A, 214]
+    - [SETDB1-x337, A, 300]
+    - [SETDB1-x153, A, 392]
+    - [SETDB1-x200, A, 300]
+    - [SETDB1-x96, A, 392]
+    - [SETDB1-x287, A, 300]
+    - [SETDB1-x297, A, 392]
+    - [SETDB1-x207, A, 392]
+    - [SETDB1-x285, A, 300]
+    - [SETDB1-x218, A, 238]
+    - [SETDB1-x208, A, 296]
+    - [SETDB1-x115, A, 300]
+    - [SETDB1-x45, A, 392]
   NSP15_B:
     - [NSP15_B-x0422, B, 43]
     - [NSP15_B-x0453, B, 182]
