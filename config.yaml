@@ -62,3 +62,5 @@ panddas:
   pandda_key: 20230924
   cpus: 36
   mem: 180
+evaluate:
+  high_confidence_ligands: /dls/science/groups/i04-1/conor_dev/edanalyzer/high_confidence_ligands.yaml

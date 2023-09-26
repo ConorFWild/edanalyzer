@@ -110,6 +110,10 @@ class ConfigPanDDAs:
     mem: int
 
 @dataclasses.dataclass
+class ConfigEvaluate:
+    high_confidence_ligands: dict
+
+@dataclasses.dataclass
 class Config:
     name: str
     steps: list[str]
@@ -121,6 +125,7 @@ class Config:
     custom_annotations: ConfigCustomAnnotations
     cpus: int
     panddas: ConfigPanDDAs
+    evaluate: ConfigEvaluate
 
     # def __init__(self, dic):
     #     self.name = dic["name"]
@@ -2058,7 +2063,8 @@ def __main__(config_yaml="config.yaml"):
                 pandda_key=str(dic['panddas']['pandda_key']),
                 cpus=int(dic['panddas']['cpus']),
                 mem=int(dic['panddas']['mem'])
-            )
+            ),
+            evaluate=ConfigEvaluate(high_confidence_ligands=)
         )
         rprint(config)
     # rprint(f"Printing pandda 2 systems...")
