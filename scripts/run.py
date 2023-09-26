@@ -1835,7 +1835,7 @@ def _pandda_status(working_directory, pandda_key):
             elif err_file.exists():
                 # with open(err_file, 'r') as f:
                 #     lines = f.readlines()
-                p = subprocess.Popen(f"tail -n 20 {err_file}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                p = subprocess.Popen(f"tail -n 30 {err_file}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = p.communicate()
                 err = stdout.decode(encoding='utf-8', errors='strict')
                 err_lines = err.split('\n')
