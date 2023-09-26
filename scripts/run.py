@@ -1929,6 +1929,10 @@ def _get_comparator_pandda(old_panddas, high_confidence_ligands):
         inspect_table_path = pandda_path / 'analyses' / 'pandda_inspect_events.csv'
         if not inspect_table_path.exists():
             continue
+        pandda_logs = pandda_path / 'logs'
+        if not pandda_logs.exists():
+            continue
+
         table = pd.read_csv(inspect_table_path)
         num_high_confidence_dtag_events[pandda_path] = 0
         # print(table['dtag'].unique())
