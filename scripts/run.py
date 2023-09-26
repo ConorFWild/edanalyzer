@@ -1923,6 +1923,7 @@ def _get_rank_table_pandda_2(experiment_path, pandda_path, high_confidence_ligan
     return rank_table
 
 def _get_comparator_pandda(old_panddas, high_confidence_ligands):
+    high_confidence_ligand_dtags = [x[0] for x in high_confidence_ligands]
     num_high_confidence_dtag_events = {}
     for pandda_path in old_panddas:
         inspect_table_path = pandda_path / 'analyses' / 'pandda_inspect_events.csv'
@@ -1932,7 +1933,7 @@ def _get_comparator_pandda(old_panddas, high_confidence_ligands):
         num_high_confidence_dtag_events[pandda_path] = 0
         print(table['dtag'].unique())
         for dtag in table['dtag'].unique():
-            if dtag in high_confidence_ligands:
+            if dtag in high_confidence_ligand_dtags:
                 num_high_confidence_dtag_events[pandda_path] += 1
 
     rprint(num_high_confidence_dtag_events)
