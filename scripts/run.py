@@ -2064,7 +2064,7 @@ def __main__(config_yaml="config.yaml"):
                 cpus=int(dic['panddas']['cpus']),
                 mem=int(dic['panddas']['mem'])
             ),
-            evaluate=ConfigEvaluate(high_confidence_ligands=)
+            evaluate=ConfigEvaluate(high_confidence_ligands=dic['evaluate']['high_confidence_ligands'])
         )
         rprint(config)
     # rprint(f"Printing pandda 2 systems...")
