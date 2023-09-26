@@ -2004,6 +2004,7 @@ from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 
 def _make_experiment_rank_graphs(table, working_directory,):
     confidence_to_int = {
+        "Unknown": 0,
         "Low": 1,
         "low": 1,
         "None": 1,
@@ -2013,7 +2014,6 @@ def _make_experiment_rank_graphs(table, working_directory,):
         "High": 3,
         "high": 3,
         "Confirmed High Confidence": 4,
-        "Unknown": 0
     }
     pixel_per_bar = 4
     dpi = 100
