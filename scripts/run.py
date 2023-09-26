@@ -1810,6 +1810,10 @@ def _pandda_status(working_directory, pandda_key):
         # Order experiments from least datasets to most for fast results
 
         statuses = {}
+        num_yet_to_begin = 0
+        num_finished = 0
+        num_errored = 0
+        num_running = 0
         for experiment in query:
             # rprint(f"{experiment.system.name} : {experiment.path}")
 
@@ -1823,18 +1827,25 @@ def _pandda_status(working_directory, pandda_key):
                 statuses[experiment.system.name] = {}
 
             if not pandda_dir.exists():
+                num_yet_to_begin +=1
                 statuses[experiment.system.name][experiment.path] = "Not Begun"
             elif inspect_table_path.exists():
+                num_finished += 1
                 statuses[experiment.system.name][experiment.path] = "Finished!"
             elif err_file.exists():
                 # with open(err_file, 'r') as f:
                 #     lines = f.readlines()
                 p = subprocess.Popen(f"tail {err_file}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = p.communicate()
-                statuses[experiment.system.name][experiment.path] = stdout.decode(encoding='utf-8', errors='strict').split('\n')
+                err = stdout.decode(encoding='utf-8', errors='strict').split('\n')
+                statuses[experiment.system.name][experiment.path] = err
+                if len(re.findall('Traceback', ' '.join(err))) > 0:
+                    num_errored += 1
+                else:
+                    num_running += 1
 
         rprint(statuses)
-
+        rprint({'Finished': num_finished, "Running": num_running, "Errored": num_errored, "Yet to Begin": num_yet_to_begin})
 
 
 def _get_rank_table(pandda_path, high_confidence_ligands):
