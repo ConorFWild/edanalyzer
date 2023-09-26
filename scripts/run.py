@@ -1790,9 +1790,54 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, ):
 
 
 
-    ...
+def _pandda_status(working_directory, pandda_key):
+    database_path = working_directory / "database.db"
+    try:
+        db.bind(provider='sqlite', filename=f"{database_path}")
+        db.generate_mapping()
+    except Exception as e:
+        print(e)
+
+    with pony.orm.db_session:
+        # partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
+        # query = pony.orm.select(
+        #     (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
+        #     event in EventORM)
+        query = pony.orm.select(
+            experiment for experiment in ExperimentORM
+        )
+
+        # Order experiments from least datasets to most for fast results
+
+        statuses = {}
+        for experiment in query:
+            # rprint(f"{experiment.system.name} : {experiment.path}")
+
+            model_building_dir = Path(experiment.model_dir)
+            result_dir = model_building_dir / f"../{pandda_key}"
+            err_file = result_dir / "run.err"
+            pandda_dir = result_dir / "pandda"
+            inspect_table_path = pandda_dir / "analyses" / "pandda_inspect_events.csv"
+
+            if experiment.system.name not in statuses:
+                statuses[experiment.system.name] = {}
+
+            if not pandda_dir.exists():
+                statuses[experiment.system.name][experiment.path] = "Not Begun"
+            elif inspect_table_path.exists():
+                statuses[experiment.system.name][experiment.path] = "Finished!"
+            elif err_file.exists():
+                with open(err_file, 'r') as f:
+                    lines = f.readlines()
+                statuses[experiment.system.name][experiment.path] = lines[:-10]
+
+        rprint(statuses)
+
+
 
 def _get_rank_table(pandda_path, high_confidence_ligands):
+
+    pandda_inspect_table_path = pandda_path / ...
     ...
 
 def _get_comparator_pandda(old_panddas):
@@ -2014,12 +2059,20 @@ def __main__(config_yaml="config.yaml"):
             config.panddas.mem
         )
 
+    if "PanDDAStatus":
+        _pandda_status(
+            config.working_directory,
+            config.panddas.pandda_key
+        )
+
     if "EvaluatePanDDAs" in config.steps:
         _evaluate_panddas(
             config.working_directory,
             config.panddas.pandda_key,
             config.evaluate.high_confidence_ligands,
         )
+
+
 
 
 if __name__ == "__main__":
