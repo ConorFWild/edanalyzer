@@ -2035,8 +2035,8 @@ def _make_experiment_rank_graphs(table, working_directory,):
         print(len(code_pandda_2))
         code_pandda_1 = np.array([confidence_to_int[x] for x in pandda_1_table['confidence']])
         print(len(code_pandda_1))
-        code_pandda_2_indicies = np.nonzero(code_pandda_2 > 2)
-        code_pandda_1_indicies = np.nonzero(code_pandda_1 > 2)
+        code_pandda_2_indicies = np.nonzero(code_pandda_2 > 2)[0]
+        code_pandda_1_indicies = np.nonzero(code_pandda_1 > 2)[0]
         highest_high_conf_rank = max(
             [
                 code_pandda_2_indicies.max(), code_pandda_1_indicies.max()
