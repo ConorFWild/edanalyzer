@@ -2058,6 +2058,7 @@ def _make_experiment_rank_graphs(table, working_directory,):
         )
         # ax = fig.add_axes([0, 0, 1, 1])  # span the whole figure
         # ax.set_axis_off()
+        print(code_pandda_2_padded[:10])
         axs[0].imshow(code_pandda_2_padded.reshape(1, -1), cmap=cmap, aspect='auto',
                   interpolation='nearest')
         axs[1].imshow(code_pandda_1_padded.reshape(1, -1), cmap=cmap, aspect='auto',
