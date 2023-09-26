@@ -1962,6 +1962,7 @@ def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key
         inspect_table_path = pandda_dir / 'analyses' / 'pandda_inspect_events.csv'
         if not inspect_table_path.exists():
             rprint(indent_text(f"No test PanDDA 2 inspect Table! Skipping!"))
+            continue
 
         # Get the rank table of the new PanDDA
         rank_table = _get_rank_table_pandda_2(
