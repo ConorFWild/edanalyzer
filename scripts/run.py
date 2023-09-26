@@ -1992,7 +1992,7 @@ def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key
         tables.append(comparator_rank_table)
 
     # Combine and return tables
-    table = ...
+    table = pd.concat(tables, axis=0, ignore_index=True)
     return table
 
 def _make_experiment_rank_graphs(table, working_directory,):
