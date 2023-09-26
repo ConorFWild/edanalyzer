@@ -2024,7 +2024,9 @@ def _make_experiment_rank_graphs(table, working_directory,):
         ]
 
         code_pandda_2 = np.array([confidence_to_int[x] for x in pandda_2_table['confidence']])
+        print(len(code_pandda_2))
         code_pandda_1 = np.array([confidence_to_int[x] for x in pandda_1_table['confidence']])
+        print(len(code_pandda_1))
         fig, axs = plt.subplots(
             2,
             1,
