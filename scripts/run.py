@@ -1946,6 +1946,9 @@ def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key
     tables = []
     for experiment_path, experiment in experiments.items():
         rprint(f"{experiment['system']} : {experiment_path}")
+        if experiment['system'] not in high_confidence_ligands:
+            rprint(indent_text(f"No known high confidence ligands! Skipping!"))
+            continue
         system_high_confidence_ligands = high_confidence_ligands[experiment['system']]
         # print(system_high_confidence_ligands)
         # rprint(indent_text(system_high_confidence_ligands))
