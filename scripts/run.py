@@ -2015,9 +2015,28 @@ def _make_experiment_rank_graphs(table, working_directory,):
         "high": 3,
         "Confirmed High Confidence": 4,
     }
+    int_to_colour = {
+        0: (128,128,128),
+        1: (255,165,0),
+        2: (255,255,0),
+        3: (124,252,0),
+        4: (46,139,87)
+    }
+    confidence_to_colour = {
+        "Unknown": (128,128,128),
+        "Low": (255,165,0),
+        "low": (255,165,0),
+        "None": (255,165,0),
+        None: (255,165,0),
+        "Medium": (255,255,0),
+        "medium": (255,255,0),
+        "High": (124,252,0),
+        "high": (124,252,0),
+        "Confirmed High Confidence": (46,139,87),
+    }
     pixel_per_bar = 4
     dpi = 100
-    cmap = ListedColormap(["grey", "darkorange", "yellow", "lawngreen", "lightseagreen", ])
+    # cmap = ListedColormap(["grey", "darkorange", "yellow", "lawngreen", "lightseagreen", ])
 
     for experiment in table['experiment_path'].unique():
         pandda_2_table = table[
@@ -2047,6 +2066,25 @@ def _make_experiment_rank_graphs(table, working_directory,):
         code_pandda_1_padded = np.ones(highest_high_conf_rank) * 0
         code_pandda_1_padded[:min(code_pandda_1.size, highest_high_conf_rank)] = code_pandda_1[:min(code_pandda_1.size, highest_high_conf_rank)]
 
+        code_pandda_2_padded_colour = np.array(
+            [
+                [
+                    int_to_colour[x]
+                    for x
+                    in code_pandda_2_padded
+                ]
+            ]
+        )
+        code_pandda_1_padded_colour = np.array(
+            [
+                [
+                    int_to_colour(x)
+                    for x
+                    in code_pandda_1_padded
+                ]
+            ]
+        )
+
         fig, axs = plt.subplots(
             2,
             1,
@@ -2059,9 +2097,13 @@ def _make_experiment_rank_graphs(table, working_directory,):
         # ax = fig.add_axes([0, 0, 1, 1])  # span the whole figure
         # ax.set_axis_off()
         print(code_pandda_2_padded[:10])
-        axs[0].imshow(code_pandda_2_padded.reshape(1, -1), cmap=cmap, aspect='auto',
+        axs[0].imshow(code_pandda_2_padded_colour.reshape(1, -1, 3),
+                      # cmap=cmap,
+                      aspect='auto',
                   interpolation='nearest')
-        axs[1].imshow(code_pandda_1_padded.reshape(1, -1), cmap=cmap, aspect='auto',
+        axs[1].imshow(code_pandda_1_padded_colour.reshape(1, -1, 3),
+                      # cmap=cmap,
+                      aspect='auto',
                   interpolation='nearest')
         fig.savefig(working_directory / f"{Path(experiment).name}.png")
     ...
