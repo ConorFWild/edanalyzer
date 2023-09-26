@@ -2078,7 +2078,7 @@ def _make_experiment_rank_graphs(table, working_directory,):
         code_pandda_1_padded_colour = np.array(
             [
                 [
-                    int_to_colour(x)
+                    int_to_colour[x]
                     for x
                     in code_pandda_1_padded
                 ]
