@@ -2009,10 +2009,11 @@ def _make_experiment_rank_graphs(table, working_directory,):
         "High": 2,
         "high": 2,
         "Confirmed High Confidence": 3
+        "Unknown": 4
     }
     pixel_per_bar = 4
     dpi = 100
-    cmap = ListedColormap(["darkorange", "yellow", "lawngreen", "lightseagreen"])
+    cmap = ListedColormap(["darkorange", "yellow", "lawngreen", "lightseagreen", "grey"])
 
     for experiment in table['experiment_path'].unique():
         pandda_2_table = table[
