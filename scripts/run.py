@@ -1866,7 +1866,7 @@ def _get_distance_to_res_ca(x,y,z,st, nearest_chain, nearest_res):
                 distance = pos.dist(gemmi.Position(x,y,z))
                 return distance
 
-def _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score='cluster_size', test=False):
+def _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score_key='cluster_size', test=False):
 
 
     pandda_inspect_table_path = pandda_path / 'analyses' / 'pandda_inspect_events.csv'
@@ -1878,7 +1878,7 @@ def _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score
     records = []
     rank = 1
     for idx, row in pd.read_csv(pandda_inspect_table_path).iterrows():
-        dtag, event_idx, score, viewed = row['dtag'], row['event_idx'], row[score], row[constants.PANDDA_INSPECT_VIEWED]
+        dtag, event_idx, score, viewed = row['dtag'], row['event_idx'], row[score_key], row[constants.PANDDA_INSPECT_VIEWED]
         confidence = None
 
         if dtag in high_confidence_ligand_by_dtags:
