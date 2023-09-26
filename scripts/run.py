@@ -2020,7 +2020,7 @@ def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml
     if table_path.exists():
         table = pd.read_csv(table_path)
     else:
-        table = _get_experiment_rank_tables(experiments, high_confidence_ligands)
+        table = _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key)
     print(table)
 
     # Make and save plots for each PanDDA vs its chosen comparator
