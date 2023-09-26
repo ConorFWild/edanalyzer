@@ -11,8 +11,8 @@ steps:
 #  - Train+Test
 #  - Summarize
 #  - RunPanDDAs
-#  - PanDDAStatus
-  - EvaluatePanDDAs
+  - PanDDAStatus
+#  - EvaluatePanDDAs
 datasets:
   - /dls/labxchem/data/*/*/processing/analysis/*
   - /dls/labxchem/data/*/*/processing/analysis/pandda_2_2023_06_27/1
