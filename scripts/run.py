@@ -1912,7 +1912,7 @@ def _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score
     return pd.DataFrame(records)
 
 def _get_rank_table_pandda_1(experiment_path, pandda_path, high_confidence_ligands):
-    comparator_rank_table = _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score_key='cluster_size')
+    comparator_rank_table = _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score_key='cluster_size', test=False)
     comparator_rank_table['test'] = False
 
     ...
@@ -1996,6 +1996,7 @@ def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key
     return table
 
 def _make_experiment_rank_graphs(table, working_directory,):
+
     ...
 
 def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml, test_systems):
