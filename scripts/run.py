@@ -1913,7 +1913,7 @@ def _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score
             }
         )
         rank +=1
-    return pd.DataFrame(records).sort_values(by='score')
+    return pd.DataFrame(records).sort_values(by='score', ascending=False)
 
 def _get_rank_table_pandda_1(experiment_path, pandda_path, high_confidence_ligands):
     comparator_rank_table = _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score_key='cluster_size', test=False)
