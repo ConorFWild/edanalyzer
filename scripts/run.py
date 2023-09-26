@@ -1878,7 +1878,7 @@ def _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score
     records = []
     rank = 1
     for idx, row in pd.read_csv(pandda_inspect_table_path).iterrows():
-        dtag, event_idx, score, viewed = row['dtag'], row['event_idx'], row[score], row['viewed']
+        dtag, event_idx, score, viewed = row['dtag'], row['event_idx'], row[score], row[constants.PANDDA_INSPECT_VIEWED]
         confidence = None
 
         if dtag in high_confidence_ligand_by_dtags:
@@ -1893,7 +1893,7 @@ def _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score
             if not viewed:
                 confidence = "Unknown"
             else:
-                confidence = row['ligand_confidence']
+                confidence = row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
 
 
         records.append(
