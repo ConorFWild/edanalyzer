@@ -2008,7 +2008,7 @@ def _make_experiment_rank_graphs(table, working_directory,):
         "medium": 1,
         "High": 2,
         "high": 2,
-        "Confirmed High Confidence": 3
+        "Confirmed High Confidence": 3,
         "Unknown": 4
     }
     pixel_per_bar = 4
