@@ -1831,7 +1831,7 @@ def _pandda_status(working_directory, pandda_key):
                 #     lines = f.readlines()
                 p = subprocess.Popen(f"tail {err_file}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = p.communicate()
-                statuses[experiment.system.name][experiment.path] = str(stdout)
+                statuses[experiment.system.name][experiment.path] = stdout.decode(encoding='utf-8', errors='strict')
 
         rprint(statuses)
 
