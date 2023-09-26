@@ -1944,7 +1944,7 @@ def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key
     for experiment_path, experiment in experiments.items():
         rprint(f"{experiment['system']} : {experiment_path}")
         system_high_confidence_ligands = high_confidence_ligands[experiment['system']],
-        rprint(indent_text(system_high_confidence_ligands))
+        # rprint(indent_text(system_high_confidence_ligands))
 
         # Determine if PanDDA is finished and skip if not
         pandda_dir = experiment["pandda"]
