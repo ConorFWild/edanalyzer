@@ -2042,9 +2042,9 @@ def _make_experiment_rank_graphs(table, working_directory,):
                 code_pandda_2_indicies.max(), code_pandda_1_indicies.max()
             ]
         )
-        code_pandda_2_padded = np.ones(len(code_pandda_2)) * 0
+        code_pandda_2_padded = np.ones(highest_high_conf_rank) * 0
         code_pandda_2_padded[:min(code_pandda_2.size, highest_high_conf_rank)] = code_pandda_2[:min(code_pandda_2.size, highest_high_conf_rank)]
-        code_pandda_1_padded = np.ones(len(code_pandda_2)) * 0
+        code_pandda_1_padded = np.ones(highest_high_conf_rank) * 0
         code_pandda_1_padded[:min(code_pandda_1.size, highest_high_conf_rank)] = code_pandda_1[:min(code_pandda_1.size, highest_high_conf_rank)]
 
         fig, axs = plt.subplots(
