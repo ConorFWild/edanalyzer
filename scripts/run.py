@@ -1995,8 +1995,50 @@ def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key
     table = pd.concat(tables, axis=0, ignore_index=True)
     return table
 
-def _make_experiment_rank_graphs(table, working_directory,):
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 
+def _make_experiment_rank_graphs(table, working_directory,):
+    confidence_to_int = {
+        "Low": 0,
+        "low": 0,
+        "None": 0,
+        "Medium": 1,
+        "medium": 1,
+        "High": 2,
+        "high": 2,
+        "Confirmed High Confidence": 3
+    }
+    pixel_per_bar = 4
+    dpi = 100
+    cmap = ListedColormap(["darkorange", "yellow", "lawngreen", "lightseagreen"])
+
+    for experiment in table['experiment_path'].unique():
+        pandda_2_table = table[
+            (table['experiment_path'] == "experiment") &
+            (table['test']==True)
+        ]
+        pandda_1_table = table[
+            (table['experiment_path'] == "experiment") &
+            (table['test']==False)
+        ]
+
+        code_pandda_2 = np.array([confidence_to_int[x] for x in pandda_2_table['confidence']])
+        code_pandda_1 = np.array([confidence_to_int[x] for x in pandda_1_table['confidence']])
+        fig, axs = plt.subplots(
+            (1, 2),
+            figsize=(
+                max([len(code_pandda_2), len(code_pandda_1)]) * pixel_per_bar / dpi,
+                5
+            ),
+            dpi=dpi)
+        # ax = fig.add_axes([0, 0, 1, 1])  # span the whole figure
+        # ax.set_axis_off()
+        axs[0].imshow(code_pandda_2.reshape(1, -1), cmap=cmap, aspect='auto',
+                  interpolation='nearest')
+        axs[1].imshow(code_pandda_1.reshape(1, -1), cmap=cmap, aspect='auto',
+                  interpolation='nearest')
+        fig.save_fig(working_directory / f"{Path(experiment).name}.png")
     ...
 
 def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml, test_systems):
