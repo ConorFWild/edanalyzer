@@ -1930,7 +1930,7 @@ def _get_comparator_pandda(old_panddas, high_confidence_ligands):
             continue
         table = pd.read_csv(inspect_table_path)
         num_high_confidence_dtag_events[pandda_path] = 0
-        for dtag in table['dtag'].unqiue():
+        for dtag in table['dtag'].unique():
             if dtag in high_confidence_ligands:
                 num_high_confidence_dtag_events[pandda_path] += 1
 
