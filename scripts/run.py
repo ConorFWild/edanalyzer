@@ -1942,10 +1942,13 @@ def _get_comparator_pandda(old_panddas, high_confidence_ligands):
         return max(num_high_confidence_dtag_events, key= lambda _key: num_high_confidence_dtag_events[_key])
 
 
-def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key):
+def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key, test_systems):
     tables = []
     for experiment_path, experiment in experiments.items():
+        if experiment['system'] not in test_systems:
+            continue
         rprint(f"{experiment['system']} : {experiment_path}")
+
         if experiment['system'] not in high_confidence_ligands:
             rprint(indent_text(f"No known high confidence ligands! Skipping!"))
             continue
@@ -1990,7 +1993,7 @@ def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key
 def _make_experiment_rank_graphs(table, working_directory,):
     ...
 
-def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml, ):
+def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml, test_systems):
     database_path = working_directory / "database.db"
     try:
         db.bind(provider='sqlite', filename=f"{database_path}")
@@ -2028,7 +2031,7 @@ def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml
     if table_path.exists():
         table = pd.read_csv(table_path)
     else:
-        table = _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key)
+        table = _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key, test_systems)
     print(table)
 
     # Make and save plots for each PanDDA vs its chosen comparator
@@ -2191,6 +2194,7 @@ def __main__(config_yaml="config.yaml"):
             config.working_directory,
             config.panddas.pandda_key,
             config.evaluate.high_confidence_ligands,
+            config.test.test_systems
         )
 
 
