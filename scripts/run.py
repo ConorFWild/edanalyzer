@@ -2015,11 +2015,11 @@ def _make_experiment_rank_graphs(table, working_directory,):
 
     for experiment in table['experiment_path'].unique():
         pandda_2_table = table[
-            (table['experiment_path'] == "experiment") &
+            (table['experiment_path'] == experiment) &
             (table['test']==True)
         ]
         pandda_1_table = table[
-            (table['experiment_path'] == "experiment") &
+            (table['experiment_path'] == experiment) &
             (table['test']==False)
         ]
 
