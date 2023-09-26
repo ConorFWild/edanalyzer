@@ -2032,12 +2032,13 @@ def _make_experiment_rank_graphs(table, working_directory,):
                 max([len(code_pandda_2), len(code_pandda_1)]) * pixel_per_bar / dpi,
                 5
             ),
-            dpi=dpi)
+            dpi=dpi,
+        )
         # ax = fig.add_axes([0, 0, 1, 1])  # span the whole figure
         # ax.set_axis_off()
-        axs[0].imshow(code_pandda_2.reshape(1, -1), cmap=cmap, aspect='auto',
+        axs[0].imshow(code_pandda_2.reshape(1, -1), cmap=cmap, #aspect='auto',
                   interpolation='nearest')
-        axs[1].imshow(code_pandda_1.reshape(1, -1), cmap=cmap, aspect='auto',
+        axs[1].imshow(code_pandda_1.reshape(1, -1), cmap=cmap, #aspect='auto',
                   interpolation='nearest')
         fig.savefig(working_directory / f"{Path(experiment).name}.png")
     ...
