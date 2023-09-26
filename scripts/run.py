@@ -1875,6 +1875,7 @@ def _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score
                                     for high_confidence_ligand
                                     in high_confidence_ligands
     }
+    used_high_confidence_ligand_dtags = []
     records = []
     rank = 1
     for idx, row in pd.read_csv(pandda_inspect_table_path).iterrows():
@@ -1882,12 +1883,15 @@ def _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score
         confidence = None
 
         if dtag in high_confidence_ligand_by_dtags:
+            if dtag in used_high_confidence_ligand_dtags:
+                    continue
             x,y,z,chain,res = row['x'], row['y'], row['z'], high_confidence_ligand_by_dtags[dtag][0], high_confidence_ligand_by_dtags[dtag][1]
 
             st = gemmi.read_structure(str(pandda_path / 'processed_datasets' / dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)))
             distance_to_res_ca = _get_distance_to_res_ca(x,y,z,st, chain, res)
             if distance_to_res_ca < 10.0:
                 confidence = "Confirmed High Confidence"
+                used_high_confidence_ligand_dtags.append(dtag)
 
         else:
             if not viewed:
