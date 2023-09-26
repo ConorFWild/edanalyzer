@@ -1839,7 +1839,7 @@ def _pandda_status(working_directory, pandda_key):
                 stdout, stderr = p.communicate()
                 err = stdout.decode(encoding='utf-8', errors='strict')
                 err_lines = err.split('\n')
-                statuses[experiment.system.name][experiment.path] = err_lines[:-5]
+                statuses[experiment.system.name][experiment.path] = err_lines[-5:]
                 if len(re.findall('Traceback ', err)) > 0:
                     num_errored += 1
                 else:
