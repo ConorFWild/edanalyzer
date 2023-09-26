@@ -2003,6 +2003,7 @@ def _make_experiment_rank_graphs(table, working_directory,):
         "Low": 0,
         "low": 0,
         "None": 0,
+        None: 0,
         "Medium": 1,
         "medium": 1,
         "High": 2,
