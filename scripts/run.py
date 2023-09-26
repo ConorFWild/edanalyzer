@@ -1848,34 +1848,105 @@ def _pandda_status(working_directory, pandda_key):
         rprint(statuses)
         rprint({'Finished': num_finished, "Running": num_running, "Errored": num_errored, "Yet to Begin": num_yet_to_begin})
 
+def _get_distance_to_res_ca(x,y,z,st, nearest_chain, nearest_res):
+    for model in st:
+        for chain in model:
+            if chain.name != nearest_chain:
+                continue
+            for res in chain:
+                if res.seqid.num != nearest_res:
+                    continue
+                ca = res['CA'][0]
+                pos = ca.pos
+                distance = pos.dist(gemmi.Position(x,y,z))
+                return distance
 
-def _get_rank_table(pandda_path, high_confidence_ligands):
+def _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score='cluster_size', test=False):
 
-    pandda_inspect_table_path = pandda_path / ...
+    pandda_inspect_table_path = pandda_path / 'analyses' / 'pandda_inspect_events.csv'
+    high_confidence_ligand_by_dtags = {
+        high_confidence_ligand[0]: (high_confidence_ligand[1], high_confidence_ligand[2])
+                                    for high_confidence_ligand
+                                    in high_confidence_ligands
+    }
+    records = []
+    rank = 1
+    for idx, row in pd.read_csv(pandda_inspect_table_path).iterrows():
+        dtag, event_idx, score, viewed = row['dtag'], row['event_idx'], row[score], row['viewed']
+        confidence = None
+
+        if dtag in high_confidence_ligand_by_dtags:
+            x,y,z,chain,res = row['x'], row['y'], row['z'], high_confidence_ligand_by_dtags[dtag][0], high_confidence_ligand_by_dtags[dtag][1]
+
+            st = gemmi.read_structure(str(pandda_path / 'processed_datasets' / dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)))
+            distance_to_res_ca = _get_distance_to_res_ca(x,y,z,st, chain, res)
+            if distance_to_res_ca < 10.0:
+                confidence = "Confirmed High Confidence"
+
+        else:
+            if not viewed:
+                confidence = "Unknown"
+            else:
+                confidence = row['ligand_confidence']
+
+
+        records.append(
+            {
+                "experiment_path": experiment_path,
+                "pandda_path": str(pandda_path),
+                "test": test,
+                "rank": rank,
+                "dtag": dtag,
+                "event_idx": event_idx,
+                "confidence": confidence,
+                "score": score
+            }
+        )
+        rank +=1
+    return pd.DataFrame(records)
+
+def _get_rank_table_pandda_1(experiment_path, pandda_path, high_confidence_ligands):
+    comparator_rank_table = _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score='cluster_size')
+    comparator_rank_table['test'] = False
+
     ...
+
+def _get_rank_table_pandda_2(experiment_path, pandda_path, high_confidence_ligands):
+    rank_table = _get_rank_table(experiment_path, pandda_path, high_confidence_ligands, score='z_peak')
+    rank_table['test'] = True
+    return rank_table
 
 def _get_comparator_pandda(old_panddas):
-    ...
+    for pandda_path in old_panddas:
 
-def _get_experiment_rank_tables(experiments, high_confidence_ligands):
+def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key):
     tables = []
     for experiment_path, experiment in experiments.items():
+        rprint(f"{experiment['system']} : {experiment_path}")
         system_high_confidence_ligands = high_confidence_ligands[experiment['system']],
+        rprint(indent_text(system_high_confidence_ligands))
+
+        # Determine if PanDDA is finished and skip if not
+        pandda_dir = experiment["pandda"]
+        inspect_table_path = pandda_dir / 'analyses' / 'pandda_inspect_events.csv'
+        if not inspect_table_path.exists():
+            rprint(indent_text(f"No inspect Table! Skipping!"))
 
         # Get the rank table of the new PanDDA
-        rank_table = _get_rank_table(
+        rank_table = _get_rank_table_pandda_2(
+            experiment_path,
             experiment['pandda'],
             system_high_confidence_ligands
         )
-        rank_table['test'] = True
+        print(rank_table)
 
         # Choose the comparator pandda and get its rank table
         compatator_pandda_path = _get_comparator_pandda(experiment['old_panddas'])
-        comparator_rank_table = _get_rank_table(
+        comparator_rank_table = _get_rank_table_pandda_1(
+            experiment_path,
             compatator_pandda_path,
             system_high_confidence_ligands
         )
-        comparator_rank_table['test'] = False
 
         #
         tables.append(rank_table)
@@ -1899,6 +1970,7 @@ def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml
     # Get the information on high confidence ligands
     with open(high_confidence_ligand_yaml, 'r') as f:
         high_confidence_ligands = yaml.safe_load(f)
+    rprint(high_confidence_ligands)
 
     # Query the database for information on the experiments
     experiments = {}
@@ -1914,8 +1986,10 @@ def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml
             experiments[experiment.path] = {
             'system': experiment.system.name,
             'pandda': Path(experiment.path) / pandda_key,
-            'old_panddas': [pandda.path for pandda in experiment.panddas]
+            'old_panddas': [pandda.path for pandda in experiment.panddas],
+                'model_building_dir': experiment.model_dir
         }
+    rprint(experiments)
 
     # Get the rankings up to the last known high confidence ligand, and the PanDDA 1 versions if possible
     # Table header: experiment_path, pandda_path, test, rank, dtag, event_idx, high_confidence, score
@@ -1924,6 +1998,7 @@ def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml
         table = pd.read_csv(table_path)
     else:
         table = _get_experiment_rank_tables(experiments, high_confidence_ligands)
+    print(table)
 
     # Make and save plots for each PanDDA vs its chosen comparator
     _make_experiment_rank_graphs(table, working_directory,)
