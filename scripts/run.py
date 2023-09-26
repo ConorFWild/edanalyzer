@@ -1837,9 +1837,10 @@ def _pandda_status(working_directory, pandda_key):
                 #     lines = f.readlines()
                 p = subprocess.Popen(f"tail {err_file}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = p.communicate()
-                err = stdout.decode(encoding='utf-8', errors='strict').split('\n')
+                err = stdout.decode(encoding='utf-8', errors='strict')
+                err_lines = err.split('\n')
                 statuses[experiment.system.name][experiment.path] = err
-                if len(re.findall('Traceback', ' '.join(err))) > 0:
+                if len(re.findall('Traceback ', err)) > 0:
                     num_errored += 1
                 else:
                     num_running += 1
