@@ -2029,24 +2029,35 @@ def _make_experiment_rank_graphs(table, working_directory,):
             (table['test']==False)
         ]
 
+
+
         code_pandda_2 = np.array([confidence_to_int[x] for x in pandda_2_table['confidence']])
         print(len(code_pandda_2))
         code_pandda_1 = np.array([confidence_to_int[x] for x in pandda_1_table['confidence']])
         print(len(code_pandda_1))
+        highest_high_conf_rank = max(
+            max(np.nonzero(code_pandda_2 >1 )),
+            max(np.nonzero(code_pandda_1 >1 )),
+        )
+        code_pandda_2_padded = np.ones(len(code_pandda_2)) * 4
+        code_pandda_2_padded[:min(code_pandda_2.size, highest_high_conf_rank)] = code_pandda_2[:min(code_pandda_2.size, highest_high_conf_rank)]
+        code_pandda_1_padded = np.ones(len(code_pandda_2)) * 4
+        code_pandda_1_padded[:min(code_pandda_1.size, highest_high_conf_rank)] = code_pandda_1[:min(code_pandda_1.size, highest_high_conf_rank)]
+
         fig, axs = plt.subplots(
             2,
             1,
             figsize=(
-                max([len(code_pandda_2), len(code_pandda_1)]) * pixel_per_bar / dpi,
+                highest_high_conf_rank * pixel_per_bar / dpi,
                 5
             ),
             dpi=dpi,
         )
         # ax = fig.add_axes([0, 0, 1, 1])  # span the whole figure
         # ax.set_axis_off()
-        axs[0].imshow(code_pandda_2.reshape(1, -1), cmap=cmap, aspect='auto',
+        axs[0].imshow(code_pandda_2_padded.reshape(1, -1), cmap=cmap, aspect='auto',
                   interpolation='nearest')
-        axs[1].imshow(code_pandda_1.reshape(1, -1), cmap=cmap, aspect='auto',
+        axs[1].imshow(code_pandda_1_padded.reshape(1, -1), cmap=cmap, aspect='auto',
                   interpolation='nearest')
         fig.savefig(working_directory / f"{Path(experiment).name}.png")
     ...
