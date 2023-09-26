@@ -1950,6 +1950,7 @@ def _get_experiment_rank_tables(experiments, high_confidence_ligands, pandda_key
 
         # Determine if PanDDA is finished and skip if not
         pandda_dir = experiment["pandda"]
+        rprint(pandda_dir)
         inspect_table_path = pandda_dir / 'analyses' / 'pandda_inspect_events.csv'
         if not inspect_table_path.exists():
             rprint(indent_text(f"No test PanDDA 2 inspect Table! Skipping!"))
@@ -2010,7 +2011,7 @@ def _evaluate_panddas(working_directory, pandda_key, high_confidence_ligand_yaml
         for experiment in query:
             experiments[experiment.path] = {
             'system': experiment.system.name,
-            'pandda': Path(experiment.model_dir) / '..' / pandda_key,
+            'pandda': Path(experiment.model_dir) / '..' / pandda_key / 'pandda',
             'old_panddas': [Path(pandda.path) for pandda in experiment.panddas],
                 'model_building_dir': Path(experiment.model_dir)
         }
