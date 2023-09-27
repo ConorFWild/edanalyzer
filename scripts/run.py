@@ -1686,6 +1686,9 @@ def _summarize(working_dir, test_systems):
 
 
             system_precisions = []
+            system_recalls = []
+            system_fps = []
+            system_fns = []
             for system in test_systems:
                 rprint(f"\t\t{system}")
 
@@ -1705,9 +1708,18 @@ def _summarize(working_dir, test_systems):
                     rprint(
                         f"\t\t\tRecall: {precision_recall[max_prec_cutoff]['recall']} : Precision: {precision_recall[max_prec_cutoff]['precision']} : false pos.: {precision_recall[max_prec_cutoff]['fp']} : false neg. : {precision_recall[max_prec_cutoff]['fn']}")
                     system_precisions.append(precision_recall[max_prec_cutoff]['precision'])
+                    system_recalls.append(precision_recall[max_prec_cutoff]['recall'])
+                    system_fps.append(precision_recall[max_prec_cutoff]['fp'])
+                    system_fns.append(precision_recall[max_prec_cutoff]['fn'])
             if pandda_type == "pandda_2":
                 if len(system_precisions) > 0:
-                    pandda_2_epoch_prec[epoch] = round(float(np.mean(system_precisions)), 3)
+                    pandda_2_epoch_prec[epoch] = {
+                        'precision': round(float(np.mean(system_precisions)), 3),
+                        'recall': round(float(np.mean(system_recalls)), 3),
+                        'fp': round(float(np.mean(system_fps)), 3),
+                        'fn': round(float(np.mean(system_fns)), 3)
+
+                    }
 
     best_pandda_2_epoch = max(pandda_2_epoch_prec, key= lambda _key: pandda_2_epoch_prec[_key]['precision'])
     rprint(f"Best PanDDA 2 performance at epoch: {best_pandda_2_epoch}")
