@@ -2298,7 +2298,7 @@ def __main__(config_yaml="config.yaml"):
             config.panddas.mem
         )
 
-    if "PanDDAStatus":
+    if "PanDDAStatus" in config.steps:
         _pandda_status(
             config.working_directory,
             config.panddas.pandda_key
