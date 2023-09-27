@@ -8,8 +8,8 @@ steps:
 #  - MakeReannotationPsuedoPanDDA
 #  - KnownHitAlternateModel
 #  - MakeDataset
-  - Train+Test
-#  - Summarize
+#  - Train+Test
+  - Summarize
 #  - RunPanDDAs
 #  - PanDDAStatus
 #  - EvaluatePanDDAs
