@@ -32,32 +32,45 @@ NSP15_B:
   - [NSP15_B-x0932, B, 93]
 JMJD2DA:
   - [JMJD2DA-x336, A, 299]
+  - [JMJD2DA-x353, A, 231]  # PanDDA 2
   - [JMJD2DA-x365, A, 325]
   - [JMJD2DA-x376, A, 242]
   - [JMJD2DA-x378, A, 277]
+  - [JMJD2DA-x381, A, 81]  # PanDDA 2
   - [JMJD2DA-x386, A, 240]
+  - [JMJD2DA-x390, A, 156]  # PanDDA 2
+  - [JMJD2DA-x391, A, 306]  # PanDDA 2
   - [JMJD2DA-x392, A, 242]
   - [JMJD2DA-x393, A, 310]
   - [JMJD2DA-x395, A, 310]
   - [JMJD2DA-x396, A, 242]
   - [JMJD2DA-401, A, 189]
   - [JMJD2DA-x402, A, 311]
+  - [JMJD2DA-x405, A, 81]  # PanDDA 2
+  - [JMJD2DA-x408, A, 231]  # PanDDA 2
+  - [JMJD2DA-x438, A, 325]  # PanDDA 2 - massive rearangement based
   - [JMJD2DA-x443, A, 190]
+  - [JMJD2DA-x448, A, 222]  # PanDDA 2
   - [JMJD2DA-x486, A, 87]
   - [JMJD2DA-x494, A, 306]
   - [JMJD2DA-x542, A, 296]
   - [JMJD2DA-x543, A, 64]
   - [JMJD2DA-x555, A, 240]
+  - [JMJD2DA-x567, A, 230]  # PanDDA 2
   - [JMJD2DA-x568, A, 265]
+  - [JMJD2DA-x573, A, 306]  # PanDDA 2
+  - [JMJD2DA-x576, A, 175]  # PanDDA 2
   - [JMJD2DA-x611, A, 37]
   - [JMJD2DA-x620, A, 176]
   - [JMJD2DA-x623, A, 317]
   - [JMJD2DA-x637, A, 87]
+  - [JMJD2DA-x638, A, 41]
   - [JMJD2DA-x639, A, 206]
 BRD1A:
   - [BRD1A-x038, A, 59]
   - [BRD1A-x044, B, 90]
   - [BRD1A-x047, B, 90]
+  - [BRD1A-x049, A, 59]  # PanDDA 2
   - [BRD1A-x050, B, 110]
   - [BRD1A-x062, A, 116]
   - [BRD1A-x066, B, 110]
@@ -69,12 +82,18 @@ BRD1A:
   - [BRD1A-x084, A, 116]
   - [BRD1A-x092, B, 90]
   - [BRD1A-x093, A, 59]
+  - [BRD1A-x094, B, 110]  # PanDDA 2
   - [BRD1A-x097, A, 59]
   - [BRD1A-x098, A, 59]
   - [BRD1A-x099, B, 54]
+  - [BRD1A-x104, A, 54]  # PanDDA 2
+  - [BRD1A-x107, B, 106]  # PanDDA 2
+  - [BRD1A-x108, A, 59]  # PanDDA 2
   - [BRD1A-x136, A, 116]
   - [BRD1A-x160, A, 116]
+  - [BRD1A-x165, A, 54]  # PanDDA 2
   - [BRD1A-x167, B, 116]
+  - [BRD1A-x178, B, 109]  # PanDDA 2
   - [BRD1A-x186, B, 116]
   - [BRD1A-x223, A, 116]
   - [BRD1A-x225, A, 116]
@@ -87,11 +106,14 @@ BRD1A:
   - [BRD1A-x271, B, 116]
   - [BRD1A-x274, A, 116]
   - [BRD1A-x276, A, 116]
+  - [BRD1A-x282, A, 110]  # PanDDA 2
   - [BRD1A-x284, B, 116]
   - [BRD1A-x292, A, 116]
+  - [BRD1A-x293, B, 110]  # PanDDA 2
   - [BRD1A-x295, A, 116]
   - [BRD1A-x298, A, 116]
   - [BRD1A-x310, A, 116]
+  - [BRD1A-x324, B, 64]  # PanDDA 2
   - [BRD1A-x325, A, 116]
   - [BRD1A-x334, B, 116]
 PTP1B:
