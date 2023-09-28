@@ -1781,7 +1781,7 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
 
         for experiment in sorted_experiments:
             print(num_cores_used())
-            while num_cores_used() > (max_cores-num_cpus):
+            while (num_cores_used()*num_cpus) > (max_cores-num_cpus):
                 time.sleep(1)
 
             rprint(f"{experiment.system.name} : {experiment.path} : {experiment_num_datasets[experiment.path]}")
