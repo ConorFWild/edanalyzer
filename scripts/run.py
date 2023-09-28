@@ -1751,7 +1751,7 @@ def num_cores_used():
     SCRIPT = "qstat | grep run.sh | wc -l"
     p = subprocess.Popen(SCRIPT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
-    return int(str(stdout))
+    return int(stdout.decode(encoding='utf-8', errors='strict'))
 
 def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
     database_path = working_directory / "database.db"
