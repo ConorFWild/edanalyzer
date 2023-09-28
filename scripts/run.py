@@ -1764,10 +1764,15 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, ):
         )
 
         # Order experiments from least datasets to most for fast results
-        sorted_experiments = sorted(query, key=lambda _experiment: len([x for x in Path(_experiment.model_dir).glob("*")]))
+        experiment_num_datasets = {
+            _experiment.path: len([x for x in Path(_experiment.model_dir).glob("*")])
+            for _experiment
+            in query
+        }
+        sorted_experiments = sorted(query, key=lambda _experiment: experiment_num_datasets[_experiment.path])
 
-        for experiment in sorted_experiments:
-            rprint(f"{experiment.system.name} : {experiment.path} : {len(experiment.datasets)}")
+        for experiment, num_datasets in sorted_experiments:
+            rprint(f"{experiment.system.name} : {experiment.path} : {experiment_num_datasets[experiment.path]}")
             continue
 
             model_building_dir = Path(experiment.model_dir)
