@@ -1833,7 +1833,7 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
                 stderr=subprocess.PIPE
             )
             p.communicate()
-
+            time.sleep(10)
 
 
 def _pandda_status(working_directory, pandda_key):
