@@ -61,7 +61,7 @@ custom_annotations:
 cpus: 20
 panddas:
   pandda_key: 20230928
-  cpus: 36
+  cpus: 12
   mem: 180
   max_cores: 80
 evaluate:
