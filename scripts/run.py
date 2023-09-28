@@ -1796,8 +1796,10 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
                 continue
 
             if pandda_dir.exists():
-                # if (pandda_dir / "analyses" / "pandda_analyse_events.csv").exists():
-                continue
+                if (pandda_dir / "analyses" / "pandda_analyse_events.csv").exists():
+                    continue
+                else:
+                    shutil.rmtree(pandda_dir)
 
 
             # Create the job script
