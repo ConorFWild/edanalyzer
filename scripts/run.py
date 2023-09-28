@@ -108,6 +108,7 @@ class ConfigPanDDAs:
     pandda_key: str
     cpus: int
     mem: int
+    max_cores: int
 
 @dataclasses.dataclass
 class ConfigEvaluate:
@@ -1746,7 +1747,13 @@ def indent_text(text, indent=4):
         (0, 0, 0, indent)
     )
 
-def _run_panddas(working_directory, pandda_key, num_cpus, mem, ):
+def num_cores_used():
+    SCRIPT = "qstat | grep run.sh | wc -l"
+    p = subprocess.Popen(SCRIPT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    return int(str(stdout))
+
+def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
     database_path = working_directory / "database.db"
     try:
         db.bind(provider='sqlite', filename=f"{database_path}")
@@ -1772,8 +1779,11 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, ):
         sorted_experiments = sorted(query, key=lambda _experiment: experiment_num_datasets[_experiment.path])
 
         for experiment in sorted_experiments:
+            while num_cores_used() > (max_cores-num_cpus):
+                time.sleep(1)
+
             rprint(f"{experiment.system.name} : {experiment.path} : {experiment_num_datasets[experiment.path]}")
-            continue
+            # continue
 
             model_building_dir = Path(experiment.model_dir)
             result_dir = model_building_dir / f"../{pandda_key}"
@@ -2211,7 +2221,8 @@ def __main__(config_yaml="config.yaml"):
             panddas=ConfigPanDDAs(
                 pandda_key=str(dic['panddas']['pandda_key']),
                 cpus=int(dic['panddas']['cpus']),
-                mem=int(dic['panddas']['mem'])
+                mem=int(dic['panddas']['mem']),
+                max_cores=int(dic['panddas']['max_cores'])
             ),
             evaluate=ConfigEvaluate(high_confidence_ligands=dic['evaluate']['high_confidence_ligands'])
         )
@@ -2319,7 +2330,8 @@ def __main__(config_yaml="config.yaml"):
             config.working_directory,
             config.panddas.pandda_key,
             config.panddas.cpus,
-            config.panddas.mem
+            config.panddas.mem,
+            config.panddas.max_cores
         )
 
     if "PanDDAStatus" in config.steps:
