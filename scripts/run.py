@@ -2,6 +2,7 @@ import dataclasses
 import os
 import pickle
 import pathlib
+import shutil
 import subprocess
 import time
 from pathlib import Path
@@ -1793,6 +1794,11 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
             try_make(result_dir)
             if not result_dir.exists():
                 continue
+
+            if pandda_dir.exists():
+                # if (pandda_dir / "analyses" / "pandda_analyse_events.csv").exists():
+                continue
+
 
             # Create the job script
             job_script_path = result_dir / "run.sh"
