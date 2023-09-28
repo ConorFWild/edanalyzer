@@ -1764,9 +1764,11 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, ):
         )
 
         # Order experiments from least datasets to most for fast results
+        sorted_experiments = sorted(query, key=lambda _experiment: len(_experiment.datasets))
 
-        for experiment in query:
-            rprint(f"{experiment.system.name} : {experiment.path}")
+        for experiment in sorted_experiments:
+            rprint(f"{experiment.system.name} : {experiment.path} : {len(experiment.datasets)}")
+            continue
 
             model_building_dir = Path(experiment.model_dir)
             result_dir = model_building_dir / f"../{pandda_key}"
