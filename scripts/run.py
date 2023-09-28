@@ -1780,7 +1780,7 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
         sorted_experiments = sorted(query, key=lambda _experiment: experiment_num_datasets[_experiment.path])
 
         for experiment in sorted_experiments:
-            print(num_cores_used())
+            print(num_cores_used()*12)
             while (num_cores_used()*num_cpus) > (max_cores-num_cpus):
                 time.sleep(1)
 
