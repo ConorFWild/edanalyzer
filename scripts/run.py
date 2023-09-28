@@ -1771,7 +1771,7 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, ):
         }
         sorted_experiments = sorted(query, key=lambda _experiment: experiment_num_datasets[_experiment.path])
 
-        for experiment, num_datasets in sorted_experiments:
+        for experiment in sorted_experiments:
             rprint(f"{experiment.system.name} : {experiment.path} : {experiment_num_datasets[experiment.path]}")
             continue
 
