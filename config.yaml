@@ -9,9 +9,9 @@ steps:
 #  - KnownHitAlternateModel
 #  - MakeDataset
 #  - Train+Test
-  - Summarize
-#  - RunPanDDAs
-  - PanDDAStatus
+#  - Summarize
+  - RunPanDDAs
+#  - PanDDAStatus
 #  - EvaluatePanDDAs
 datasets:
   - /dls/labxchem/data/*/*/processing/analysis/*
@@ -61,7 +61,7 @@ custom_annotations:
 cpus: 20
 panddas:
   pandda_key: 20230928
-  cpus: 12
+  cpus: 36
   mem: 180
   max_cores: 80
 evaluate:
