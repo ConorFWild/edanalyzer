@@ -1802,7 +1802,6 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
                 else:
                     shutil.rmtree(pandda_dir)
 
-
             # Create the job script
             job_script_path = result_dir / "run.sh"
             job_script = JOB_SCRIPT.format(
