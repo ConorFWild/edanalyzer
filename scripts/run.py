@@ -1868,7 +1868,7 @@ def _pandda_status(working_directory, pandda_key):
             err_file = result_dir / "run.err"
             out_file = result_dir / "run.out"
             pandda_dir = result_dir / "pandda"
-            inspect_table_path = pandda_dir / "analyses" / "pandda_inspect_events.csv"
+            inspect_table_path = pandda_dir / "analyses" / "pandda_anaylse_events.csv"
 
             if experiment.system.name not in statuses:
                 statuses[experiment.system.name] = {}
