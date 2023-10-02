@@ -806,7 +806,8 @@ def _print_pandda_2_systems(working_directory):
             else:
                 systems[_system.name]["Non Hit"] += 1
 
-        rprint(systems)
+        systems_sorted = {_k: _v for _k, _v in systems.items()}
+        rprint(systems_sorted)
 
 
     db.disconnect()
