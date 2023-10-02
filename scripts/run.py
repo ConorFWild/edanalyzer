@@ -806,7 +806,7 @@ def _print_pandda_2_systems(working_directory):
             else:
                 systems[_system.name]["Non Hit"] += 1
 
-        systems_sorted = {_k: systems[_k] for _k, _v in sorted(systems)}
+        systems_sorted = {_k: systems[_k] for _k in sorted(systems)}
         rprint(systems_sorted)
 
 
