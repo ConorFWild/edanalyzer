@@ -1892,7 +1892,7 @@ def _pandda_status(working_directory, pandda_key):
                 else:
                     num_running += 1
 
-                p = subprocess.Popen(f"tail -n 30 {err_file}", shell=True, stdout=subprocess.PIPE,
+                p = subprocess.Popen(f"tail -n 30 {out_file}", shell=True, stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE)
                 stdout, stderr = p.communicate()
                 err = stdout.decode(encoding='utf-8', errors='strict')
