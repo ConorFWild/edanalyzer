@@ -1866,6 +1866,7 @@ def _pandda_status(working_directory, pandda_key):
             model_building_dir = Path(experiment.model_dir)
             result_dir = model_building_dir / f"../{pandda_key}"
             err_file = result_dir / "run.err"
+            out_file = result_dir / "run.out"
             pandda_dir = result_dir / "pandda"
             inspect_table_path = pandda_dir / "analyses" / "pandda_inspect_events.csv"
 
@@ -1890,6 +1891,12 @@ def _pandda_status(working_directory, pandda_key):
                     num_errored += 1
                 else:
                     num_running += 1
+
+                p = subprocess.Popen(f"tail -n 30 {err_file}", shell=True, stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
+                stdout, stderr = p.communicate()
+                err = stdout.decode(encoding='utf-8', errors='strict')
+                rprint(err)
 
         rprint(statuses)
         rprint({'Finished': num_finished, "Running": num_running, "Errored": num_errored, "Yet to Begin": num_yet_to_begin})
