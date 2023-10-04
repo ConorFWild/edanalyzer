@@ -1,14 +1,14 @@
 name: all_data
 working_directory: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_6
 steps:
-  - Annotations
-#  - Collate
-#  - Partition
+#  - Annotations
+  - Collate
+  - Partition
 #  - MakeTestDatasetPsuedoPanDDA
 #  - MakeReannotationPsuedoPanDDA
 #  - KnownHitAlternateModel
 #  - MakeDataset
-#  - Train+Test
+  - Train+Test
 #  - Summarize
 #  - RunPanDDAs
 #  - PanDDAStatus
