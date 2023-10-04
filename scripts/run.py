@@ -1502,6 +1502,8 @@ def _train_and_test(working_dir,
                     # if res[0].pandda.system.name not in test_partition_event_systems
                     if (res[0].pandda.system.name not in test_systems) & res[1].annotation
         ]
+        rprint(f"Got {len(hits)} hit train events!")
+
         non_hits = [
                     PanDDAEvent(
                         id=res[0].id,
@@ -1522,6 +1524,8 @@ def _train_and_test(working_dir,
                     # if res[0].pandda.system.name not in test_partition_event_systems
                     if (res[0].pandda.system.name not in test_systems) & (not res[1].annotation)
         ]
+        rprint(f"Got {len(non_hits)} non-hit train events!")
+
         train_dataset_torch = PanDDADatasetTorchLigand(
             PanDDAEventDataset(
                 # pandda_events=[
