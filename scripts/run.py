@@ -1482,9 +1482,7 @@ def _train_and_test(working_dir,
         #     event_partitions[]
         # for res in query:
         #     print(f"Annotation: {res[0].annotations.annotation}")
-        train_dataset_torch = PanDDADatasetTorchLigand(
-            PanDDAEventDataset(
-                pandda_events=[
+        hits = [
                     PanDDAEvent(
                         id=res[0].id,
                         pandda_dir=res[0].pandda.path,
@@ -1502,9 +1500,51 @@ def _train_and_test(working_dir,
                     for res
                     in query
                     # if res[0].pandda.system.name not in test_partition_event_systems
-                    if res[0].pandda.system.name not in test_systems
-
-                ]
+                    if (res[0].pandda.system.name not in test_systems) & res[1].annotation
+        ]
+        non_hits = [
+                    PanDDAEvent(
+                        id=res[0].id,
+                        pandda_dir=res[0].pandda.path,
+                        model_building_dir=res[0].pandda.experiment.model_dir,
+                        system_name=res[0].pandda.system.name,
+                        dtag=res[0].dtag,
+                        event_idx=res[0].event_idx,
+                        event_map=res[0].event_map,
+                        x=res[0].x,
+                        y=res[0].y,
+                        z=res[0].z,
+                        hit=res[1].annotation,
+                        ligand=None
+                    )
+                    for res
+                    in query
+                    # if res[0].pandda.system.name not in test_partition_event_systems
+                    if (res[0].pandda.system.name not in test_systems) & (not res[1].annotation)
+        ]
+        train_dataset_torch = PanDDADatasetTorchLigand(
+            PanDDAEventDataset(
+                # pandda_events=[
+                #     PanDDAEvent(
+                #         id=res[0].id,
+                #         pandda_dir=res[0].pandda.path,
+                #         model_building_dir=res[0].pandda.experiment.model_dir,
+                #         system_name=res[0].pandda.system.name,
+                #         dtag=res[0].dtag,
+                #         event_idx=res[0].event_idx,
+                #         event_map=res[0].event_map,
+                #         x=res[0].x,
+                #         y=res[0].y,
+                #         z=res[0].z,
+                #         hit=res[1].annotation,
+                #         ligand=None
+                #     )
+                #     for res
+                #     in query
+                #     # if res[0].pandda.system.name not in test_partition_event_systems
+                #     if res[0].pandda.system.name not in test_systems
+                # ]
+                pandda_events = (hits * int(len(non_hits) / len(hits))) + non_hits
             ),
             # transform_image=get_image_xmap_ligand_augmented,
             transform_image=get_image_event_map_ligand_augmented,
