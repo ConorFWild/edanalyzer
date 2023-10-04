@@ -1879,7 +1879,8 @@ def _pandda_status(working_directory, pandda_key):
                 statuses[experiment.system.name][experiment.path] = "Not Begun"
             elif inspect_table_path.exists():
                 num_finished += 1
-                statuses[experiment.system.name][experiment.path] = "Finished!"
+                table = pd.read_csv(inspect_table_path)
+                statuses[experiment.system.name][experiment.path] = f"Finished! {len(table)} events!"
             elif err_file.exists():
                 # with open(err_file, 'r') as f:
                 #     lines = f.readlines()
