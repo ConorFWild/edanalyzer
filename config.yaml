@@ -35,7 +35,9 @@ train:
 #  model_file: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_2/all_data220.pt
 #  model_file: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_3/all_data372.pt
 #  model_file: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_4/all_data295.pt
-  model_file:
+  model_file: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_6/all_data36.pt
+#  model_file:
+
 test:
   initial_epoch: 1
   test_interval: 1
