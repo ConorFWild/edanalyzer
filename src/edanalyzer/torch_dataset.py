@@ -1259,7 +1259,7 @@ def _get_transform(event, sample_specification):
     return sample_specification
 
 
-def _make_event_map_layer(sample_specification):
+def _make_event_map_layer(event, sample_specification):
     try:
         sample_array = sample_specification['sample_grid']
         event_map_path = sample_specification['event_map_path']
@@ -1286,7 +1286,7 @@ def _make_event_map_layer(sample_specification):
 
     return sample_specification
 
-def _make_structure_map_layer(sample_specification):
+def _make_structure_map_layer(event, sample_specification):
     try:
         sample_array = sample_specification['sample_grid']
         structure_path = sample_specification['structure_path']
@@ -1306,7 +1306,7 @@ def _make_structure_map_layer(sample_specification):
         sample_specification['structure_map_layer'] = None
     return sample_specification
 
-def _make_ligand_map_layer(sample_specification):
+def _make_ligand_map_layer(event, sample_specification):
     try:
         # sample_array = sample_specification['sample_grid']
         ligand_path = sample_specification['ligand_path']
@@ -1401,7 +1401,7 @@ class PanDDADatasetTorchLigand(Dataset):
         )
 
         # Make the annotation
-        label = _make_label_from_specification(sample_specification)
+        label = _make_label_from_specification(sample_specification, self.layers)
 
         time_finish_load_item = time.time()
         # print(f"Loaded item in: {round(time_finish_load_item-time_begin_load_item, 2)}")
