@@ -1729,7 +1729,7 @@ def _summarize(working_dir, test_systems):
                                       pr['recall'] > 0.95}
             if len(recall_greater_than_95) > 0:
                 max_prec_cutoff = max(recall_greater_than_95, key=lambda x: recall_greater_than_95[x]['precision'])
-                rprint(f"\t\tRecall: {overall_precision_recall[max_prec_cutoff]['recall']} : Precision: {overall_precision_recall[max_prec_cutoff]['precision']}")
+                rprint(f"\t\tRecall: {overall_precision_recall[max_prec_cutoff]['recall']} : Precision: {overall_precision_recall[max_prec_cutoff]['precision']} : Cutoff: {max_prec_cutoff}")
 
 
             system_precisions = []
