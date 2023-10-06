@@ -1569,7 +1569,7 @@ def _train_and_test(working_dir,
                         y=res[0].y,
                         z=res[0].z,
                         hit=res[1].annotation,
-                        ligand=None
+                        ligand=_get_ligand_pdb_path(res[0].pandda.path, res[0].dtag)
                     )
                     for res
                     in query
@@ -1591,7 +1591,7 @@ def _train_and_test(working_dir,
                         y=res[0].y,
                         z=res[0].z,
                         hit=res[1].annotation,
-                        ligand=None
+                        ligand=_get_ligand_pdb_path(res[0].pandda.path, res[0].dtag)
                     )
                     for res
                     in query
