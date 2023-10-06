@@ -43,7 +43,7 @@ class PanDDAEvent(BaseModel):
     z: float
     hit: bool
     # ligand: Ligand | None
-    ligand: str
+    ligand: str | None
 
 class PanDDAEventAnnotation(BaseModel):
     annotation: bool
