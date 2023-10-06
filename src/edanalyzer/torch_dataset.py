@@ -1332,6 +1332,7 @@ def _make_label_from_specification(sample_specification, layers):
 
     for layer in layers:
         if not sample_specification[layer]:
+            print(f"Missing layer: {layer}")
             sample_specification['annotation'] = False
 
     if sample_specification['annotation']:
