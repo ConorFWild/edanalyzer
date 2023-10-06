@@ -5,11 +5,11 @@ steps:
 #  - Collate
 #  - Partition
 #  - MakeTestDatasetPsuedoPanDDA
-  - MakeReannotationPsuedoPanDDA
+#  - MakeReannotationPsuedoPanDDA
 #  - KnownHitAlternateModel
 #  - MakeDataset
 #  - Train+Test
-#  - Summarize
+  - Summarize
 #  - RunPanDDAs
 #  - PanDDAStatus
 #  - EvaluatePanDDAs
