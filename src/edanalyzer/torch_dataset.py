@@ -1120,10 +1120,10 @@ def _get_centroid_relative_to_ligand(event, sample_specification):  # updates ce
     rng = default_rng()
     val = rng.random()
     if (sample_specification['bound_state_structure_path'] is not None) & sample_specification['annotation']:
-        st = gemmi.read_structure(str(sample_specification['model_path']))
+        st = gemmi.read_structure(str(sample_specification['bound_state_structure_path']))
         original_centroid = [event.x, event.y, event.z]
         original_centroid_pos = gemmi.Position(*original_centroid)
-        lig_atom_poss = []
+        lig_atom_poss = [[event.x, event.y, event.z]]
         for model in st:
             for chain in model:
                 for residue in chain:
@@ -1135,7 +1135,7 @@ def _get_centroid_relative_to_ligand(event, sample_specification):  # updates ce
                                     [pos.x, pos.y, pos.z]
                                 )
 
-        if len(lig_atom_poss) < 2:
+        if len(lig_atom_poss) < 3:
             sample_specification['centroid'] = [event.x, event.y, event.z]
 
         else:
