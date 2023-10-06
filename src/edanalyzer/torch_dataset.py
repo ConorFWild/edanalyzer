@@ -1291,7 +1291,7 @@ def _make_structure_map_layer(event, sample_specification):
         sample_array = sample_specification['sample_grid']
         structure_path = sample_specification['structure_path']
         sample_transform = sample_specification['transform']
-        mean_dmap = sample_specification['event_map_layer']
+        mean_dmap = sample_specification['event_map']
 
         # time_begin_get_model = time.time()
         sample_array_model = np.copy(sample_array)
