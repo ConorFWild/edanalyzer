@@ -1114,7 +1114,7 @@ def _sample_point(lower, upper):
 
 def _sample_to_ligand_distance(point, ligand_array):
     distances = np.linalg.norm(ligand_array-point.reshape((1,3)), axis=1)
-    closest_distance = np.min()
+    closest_distance = np.min(distances)
     return closest_distance
 
 def _get_centroid_relative_to_ligand(event, sample_specification):  # updates centroid and annotation
