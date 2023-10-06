@@ -1280,7 +1280,7 @@ def _make_event_map_layer(event, sample_specification):
         sample_specification['event_map_layer'] = image_event_map
 
     except Exception as e:
-        print(e)
+        print(f"Error loading event map: {e}")
         sample_specification['event_map'] = None
         sample_specification['event_map_layer'] = None
 
@@ -1302,7 +1302,7 @@ def _make_structure_map_layer(event, sample_specification):
 
         sample_specification['structure_map_layer'] = image_model
     except Exception as e:
-        print(e)
+        print(f"Error loading structure map: {e}")
         sample_specification['structure_map_layer'] = None
     return sample_specification
 
@@ -1323,7 +1323,7 @@ def _make_ligand_map_layer(event, sample_specification):
 
         sample_specification['ligand_map_layer'] = image_ligand
     except Exception as e:
-        print(e)
+        print(f"Error loading ligand map: {e}")
         sample_specification['ligand_map_layer'] = None
 
     return sample_specification
