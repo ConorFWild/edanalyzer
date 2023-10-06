@@ -1101,7 +1101,7 @@ def _get_bound_state_model_path(event, sample_specification):
     return sample_specification
 
 def _get_annotation_from_event(event, sample_specification):  # Updates annotation
-    sample_specification['annotation'] = event.annotation
+    sample_specification['annotation'] = event.hit
     return sample_specification
 
 
