@@ -1144,14 +1144,17 @@ def _get_centroid_relative_to_ligand(event, sample_specification):  # updates ce
             upper = np.max(ligand_array, axis=0).flatten() + 4.0
 
 
-
+            j = 0
             # Sample a ligand point
             if val < 0.5:
                 sample_specification['annotation'] = sample_specification['annotation']
                 sample = _sample_point(lower, upper)
                 while _sample_to_ligand_distance(sample, ligand_array) > 2.0:
                     sample = _sample_point(lower, upper)
-
+                    j+=1
+                    if j > 200:
+                        print(f"Failed to get a sample point!")
+                        sample = [event.x, event.y, event.z]
 
             # Sample a non-ligand point
             else:
@@ -1159,6 +1162,10 @@ def _get_centroid_relative_to_ligand(event, sample_specification):  # updates ce
                 sample = _sample_point(lower, upper)
                 while _sample_to_ligand_distance(sample, ligand_array) < 2.0:
                     sample = _sample_point(lower, upper)
+                    j += 1
+                    if j > 200:
+                        print(f"Failed to get a sample point!")
+                        sample = [event.x, event.y, event.z]
 
             sample_specification['centroid'] = [sample[0], sample[1], sample[2]]
 
