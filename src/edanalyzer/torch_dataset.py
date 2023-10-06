@@ -135,6 +135,13 @@ def get_event_map_from_event(event: PanDDAEvent):
 
     return m
 
+def get_map_from_path(path):
+    ccp4 = gemmi.read_ccp4_map(path)
+    ccp4.setup(0.0)
+    m = ccp4.grid
+
+    return m
+
 def get_sample_transform_from_event(event: PanDDAEvent,
                                     sample_distance: float,
                                     n: int,
@@ -494,6 +501,27 @@ def get_model_map(event: PanDDAEvent, xmap_event):
     # )
     return new_xmap
 
+def get_model_map_from_path(pandda_input_pdb, xmap_event):
+    # pandda_input_pdb = Path(
+    #     event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
+    #     dtag=event.dtag)
+    structure = gemmi.read_structure(str(pandda_input_pdb))
+
+    new_xmap = gemmi.FloatGrid(xmap_event.nu, xmap_event.nv, xmap_event.nw)
+    new_xmap.spacegroup = xmap_event.spacegroup
+    new_xmap.set_unit_cell(xmap_event.unit_cell)
+    for model in structure:
+        for chain in model:
+            for residue in chain.get_polymer():
+                for atom in residue:
+                    new_xmap.set_points_around(
+                        atom.pos,
+                        radius=1.0,
+                        value=1.0,
+                    )
+
+    return new_xmap
+
 
 def get_image_event_map_and_raw_from_event_augmented(event: PanDDAEvent):
     # logger.debug(f"Loading: {event.dtag}")
@@ -720,11 +748,57 @@ def get_ligand_map(
 ):
     # Get the path to the ligand cif
     # dataset_dir = Path(event.model_building_dir) / event.dtag / "compound"
-    dataset_dir = Path(event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / "ligand_files"
-    paths = [x for x in dataset_dir.glob("*.pdb")]
-    pdb_paths = [x for x in paths if (x.exists()) and (x.stem not in LIGAND_IGNORE_REGEXES)]
-    assert len(pdb_paths) > 0, f"No pdb paths that are not to be ignored in {dataset_dir}: {[x.stem for x in paths]}"
-    path = pdb_paths[0]
+    # dataset_dir = Path(event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / "ligand_files"
+    # paths = [x for x in dataset_dir.glob("*.pdb")]
+    # pdb_paths = [x for x in paths if (x.exists()) and (x.stem not in LIGAND_IGNORE_REGEXES)]
+    # assert len(pdb_paths) > 0, f"No pdb paths that are not to be ignored in {dataset_dir}: {[x.stem for x in paths]}"
+    # path = pdb_paths[0]
+    path = event.ligand
+
+    # Get the ligand array
+    ligand_array = parse_pdb_file_for_ligand_array(path)
+    assert ligand_array.size > 0, f"Ligand array empty: {path}"
+    rotation_matrix = R.random().as_matrix()
+    rng = default_rng()
+    random_translation = ((rng.random(3) - 0.5) * 2 * translation).reshape((3, 1))
+    ligand_mean_pos = np.mean(ligand_array, axis=1).reshape((3, 1))
+    centre_translation = np.array([step * n, step * n, step * n]).reshape((3, 1)) / 2
+    zero_centred_array = ligand_array - ligand_mean_pos
+    rotated_array = np.matmul(rotation_matrix, zero_centred_array)
+    grid_centred_array = rotated_array + centre_translation
+    augmented_array = (grid_centred_array + random_translation).T
+
+    # Get a dummy grid to place density on
+    dummy_grid = gemmi.FloatGrid(n, n, n)
+    unit_cell = gemmi.UnitCell(step * n, step * n, step * n, 90.0, 90.0, 90.0)
+    dummy_grid.set_unit_cell(unit_cell)
+
+    for pos_array in augmented_array:
+        assert pos_array.size == 3
+        if np.all(pos_array > 0):
+            if np.all(pos_array < (n * step)):
+                dummy_grid.set_points_around(
+                    gemmi.Position(*pos_array),
+                    radius=1.0,
+                    value=1.0,
+                )
+
+    return dummy_grid
+
+def get_ligand_map_from_path(
+        path,
+        n=30,
+        step=0.5,
+        translation=2.5,
+):
+    # Get the path to the ligand cif
+    # dataset_dir = Path(event.model_building_dir) / event.dtag / "compound"
+    # dataset_dir = Path(event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / "ligand_files"
+    # paths = [x for x in dataset_dir.glob("*.pdb")]
+    # pdb_paths = [x for x in paths if (x.exists()) and (x.stem not in LIGAND_IGNORE_REGEXES)]
+    # assert len(pdb_paths) > 0, f"No pdb paths that are not to be ignored in {dataset_dir}: {[x.stem for x in paths]}"
+    # path = pdb_paths[0]
+    # path = event.ligand
 
     # Get the ligand array
     ligand_array = parse_pdb_file_for_ligand_array(path)
@@ -974,18 +1048,305 @@ def get_image_event_map_ligand_augmented(event: PanDDAEvent, ):
 
     return np.stack([image_event_map, image_model, image_ligand, ], axis=0), True, sample_transform, mean_dmap
 
+# def transform_event_random_ligand(event, dataset):
+#     rng = default_rng()
+#     random_number = rng.random()
+#     if random_number > 0.5:
+#         random_ligand = ...
+#         random_ligand_path = ...
+#         new_event = PanDDAEvent(
+#             id: event.id,
+#         pandda_dir: str,
+#         model_building_dir: str,
+#         system_name: str,
+#         dtag: str,
+#         event_idx: int,
+#         event_map: str,
+#         x: float,
+#         y: float,
+#         z: float,
+#         hit: bool,
+#         # ligand: Ligand | None
+#         ligand: str
+#         )
+#
+#     else:
+#         return event
+
+
+def _get_event_map_path(event, sample_specification):
+    sample_specification['event_map_path'] = event.event_map
+    return sample_specification
+
+def _get_xmap_path(event, sample_specification):
+    sample_specification['xmap_path'] = event.initial_reflections
+    return sample_specification
+def _get_structure_path(event, sample_specification):
+    sample_specification['structure_path'] = event.initial_structure
+    return sample_specification
+
+def _get_bound_state_model_path(event, sample_specification):
+    model_path = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INSPECT_MODEL_DIR / constants.PANDDA_MODEL_FILE.format(
+        dtag=event.dtag)
+    if model_path.exists():
+        sample_specification['bound_state_structure_path'] = str(model_path)
+    else:
+        sample_specification['bound_state_structure_path'] = None
+    return sample_specification
+
+def _get_annotation_from_event(event, sample_specification):  # Updates annotation
+    sample_specification['annotation'] = event.annotation
+    return sample_specification
+
+
+def _sample_point(lower, upper):
+    rng = default_rng()
+    val = rng.random_sample(3)
+
+    point = lower + (val*(upper-lower))
+    return point
+
+def _sample_to_ligand_distance(point, ligand_array):
+    closest_distance = np.min(np.linalg.norm(ligand_array-point.reshape((1,3)), axis=0))
+    return closest_distance
+
+def _get_centroid_relative_to_ligand(event, sample_specification):  # updates centroid and annotation
+    rng = default_rng()
+    val = rng.random_sample()
+    if sample_specification['bound_state_structure_path'] & sample_specification['annotation']:
+        st = gemmi.read_structure(str(sample_specification['model_path']))
+        original_centroid = [event.x, event.y, event.z]
+        original_centroid_pos = gemmi.Position(*original_centroid)
+        lig_atom_poss = []
+        for model in st:
+            for chain in model:
+                for residue in chain:
+                    if residue.name == "LIG":
+                        for atom in residue:
+                            pos = atom.pos
+                            if pos.dist(original_centroid_pos) < 10.0:
+                                lig_atom_poss.append(
+                                    [pos.x, pos.y, pos.z]
+                                )
+        ligand_array = np.array(lig_atom_poss)
+        lower = np.min(ligand_array, axis=0).flatten() - 4.0
+        upper = np.max(ligand_array, axis=0).flatten() + 4.0
+
+
+
+        # Sample a ligand point
+        if val < 0.5:
+            sample_specification['annotation'] = sample_specification['annotation']
+            sample = _sample_point(lower, upper)
+            while _sample_to_ligand_distance(sample, ligand_array) > 2.0:
+                sample = _sample_point(lower, upper)
+
+
+        # Sample a non-ligand point
+        else:
+            sample_specification['annotation'] = False
+            sample = _sample_point(lower, upper)
+            while _sample_to_ligand_distance(sample, ligand_array) < 2.0:
+                sample = _sample_point(lower, upper)
+
+        sample_specification['centroid'] = [sample[0], sample[1], sample[2]]
+
+
+    else:
+        sample_specification['centroid'] = [event.x, event.y, event.z]
+
+    return sample_specification
+
+def _get_random_ligand_path(event, sample_specification):  # Updates ligand_path and annotation
+    sample_specification['ligand_path'] = event.ligand
+    return sample_specification
+
+def _get_random_orientation(event, sample_specification):  # Updates orientation
+    rotation_matrix = R.random().as_matrix()
+
+    sample_specification['orientation'] = rotation_matrix
+    return sample_specification
+
+def _get_transform(event, sample_specification):
+    sample_distance: float = 0.5
+    n: int = 30
+    # translation: float):
+
+    # Get basic sample grid transform
+    initial_transform = gemmi.Transform()
+    scale_matrix = np.eye(3) * sample_distance
+    initial_transform.mat.fromlist(scale_matrix.tolist())
+
+    # Get sample grid centroid
+    sample_grid_centroid = (np.array([n, n, n]) * sample_distance) / 2
+    sample_grid_centroid_pos = gemmi.Position(*sample_grid_centroid)
+
+    # Get centre grid transform
+    centre_grid_transform = gemmi.Transform()
+    centre_grid_transform.vec.fromlist([
+        -sample_grid_centroid[0],
+        -sample_grid_centroid[1],
+        -sample_grid_centroid[2],
+    ])
+
+    # Generate rotation matrix
+    rotation_matrix = sample_specification['orientation']
+    rotation_transform = gemmi.Transform()
+    rotation_transform.mat.fromlist(rotation_matrix.tolist())
+
+    # Apply random rotation transform to centroid
+    transformed_centroid = rotation_transform.apply(sample_grid_centroid_pos)
+    transformed_centroid_array = np.array([transformed_centroid.x, transformed_centroid.y, transformed_centroid.z])
+
+    # Recentre transform
+    rotation_recentre_transform = gemmi.Transform()
+    rotation_recentre_transform.vec.fromlist((sample_grid_centroid - transformed_centroid_array).tolist())
+
+    # Event centre transform
+    event_centre_transform = gemmi.Transform()
+    event_centre_transform.vec.fromlist(sample_specification['centroid'])
+
+    # Generate random translation transform
+    # rng = default_rng()
+    # random_translation = (rng.random(3) - 0.5) * 2 #* translation
+    # random_translation = np.array([0.0,0.0,0.0])
+    # logger.debug(f"Random translation: {random_translation}")
+    # random_translation_transform = gemmi.Transform()
+    # random_translation_transform.vec.fromlist(random_translation.tolist())
+
+    # Apply random translation
+    # transform = #random_translation_transform.combine(
+    transform = event_centre_transform.combine(
+        rotation_transform.combine(
+            centre_grid_transform.combine(
+                initial_transform
+            )
+        )
+    )
+    # )
+    corner_0_pos = transform.apply(gemmi.Position(0.0, 0.0, 0.0))
+    corner_n_pos = transform.apply(gemmi.Position(
+        float(n),
+        float(n),
+        float(n),
+    )
+    )
+    corner_0 = (corner_0_pos.x, corner_0_pos.y, corner_0_pos.z)
+    corner_n = (corner_n_pos.x, corner_n_pos.y, corner_n_pos.z)
+    average_pos = [c0 + (cn - c0) / 2 for c0, cn in zip(corner_0, corner_n)]
+    event_centroid = (event.x, event.y, event.z)
+    # logger.debug(f"Centroid: {event_centroid}")
+    # logger.debug(f"Corners: {corner_0} : {corner_n} : average: {average_pos}")
+    # logger.debug(f"Distance from centroid to average: {gemmi.Position(*average_pos).dist(gemmi.Position(*event_centroid))}")
+
+    # return transform, np.zeros((n, n, n), dtype=np.float32)
+    sample_specification['transform'] = transform
+    sample_specification['n'] =n
+    sample_specification['step'] = sample_distance
+
+    sample_specification['sample_grid'] = np.zeros((n, n, n), dtype=np.float32)
+    return sample_specification
+
+
+def _make_event_map_layer(sample_specification):
+    try:
+        sample_array = sample_specification['sample_grid']
+        event_map_path = sample_specification['event_map_path']
+        sample_transform = sample_specification['transform']
+
+        sample_array_mean = np.copy(sample_array)
+        # mean_dmap = get_event_map_from_event(event)
+        mean_dmap = get_map_from_path(event_map_path)
+        image_mean_initial = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
+        std = np.std(image_mean_initial)
+        if np.abs(std) < 0.0000001:
+            image_event_map = np.copy(sample_array)
+        else:
+            image_event_map = (image_mean_initial - np.mean(image_mean_initial)) / std
+        # time_finish_get_mean = time.time()
+        # time_get_mean = round(time_finish_get_mean - time_begin_get_mean, 2)
+        sample_specification['event_map'] = mean_dmap
+        sample_specification['event_map_layer'] = image_event_map
+
+    except Exception as e:
+        print(e)
+        sample_specification['event_map'] = None
+        sample_specification['event_map_layer'] = None
+
+    return sample_specification
+
+def _make_structure_map_layer(sample_specification):
+    try:
+        sample_array = sample_specification['sample_grid']
+        structure_path = sample_specification['structure_path']
+        sample_transform = sample_specification['transform']
+        mean_dmap = sample_specification['event_map_layer']
+
+        # time_begin_get_model = time.time()
+        sample_array_model = np.copy(sample_array)
+        model_map = get_model_map_from_path(structure_path, mean_dmap, )
+        image_model = sample_xmap(model_map, sample_transform, sample_array_model)
+        # time_finish_get_model = time.time()
+        # time_get_model = round(time_finish_get_model - time_begin_get_model, 2)
+
+        sample_specification['structure_map_layer'] = image_model
+    except Exception as e:
+        print(e)
+        sample_specification['structure_map_layer'] = None
+    return sample_specification
+
+def _make_ligand_map_layer(sample_specification):
+    try:
+        # sample_array = sample_specification['sample_grid']
+        ligand_path = sample_specification['ligand_path']
+        # sample_transform = sample_specification['transform']
+        # mean_dmap = sample_specification['event_map_layer']
+        n = sample_specification['n']
+        step = sample_specification['step']
+        # ligand_map_array = np.copy(sample_array)
+        # time_begin_get_ligand = time.time()
+        ligand_map = get_ligand_map_from_path(ligand_path, n=n, step=step)
+        image_ligand = np.array(ligand_map)
+        # time_finish_get_ligand = time.time()
+        # time_get_ligand = round(time_finish_get_ligand - time_begin_get_ligand, 2)
+
+        sample_specification['ligand_map_layer'] = image_ligand
+    except Exception as e:
+        print(e)
+        sample_specification['ligand_map_layer'] = None
+
+    return sample_specification
+
+def _make_label_from_specification(sample_specification, layers):
+
+    for layer in layers:
+        if not sample_specification[layer]:
+            sample_specification['annotation'] = False
+
+    if sample_specification['annotation']:
+        label = np.array([0.0, 1.0], dtype=np.float32)
+
+    else:
+        label = np.array([1.0, 0.0], dtype=np.float32)
+
+    return label
 
 class PanDDADatasetTorchLigand(Dataset):
     def __init__(self,
                  pandda_event_dataset: PanDDAEventDataset,
-
-                 transform_image=lambda x: x,
-                 transform_annotation=lambda x: x
+                # transform_event=lambda x: x,
+                #  transform_image=lambda x: x,
+                #  transform_annotation=lambda x: x
+                 update_sample_specification,
+                 layers,
                  ):
         self.pandda_event_dataset = pandda_event_dataset
-
-        self.transform_image = transform_image
-        self.transform_annotation = transform_annotation
+        self.update_sample_specification = update_sample_specification
+        self.layers = layers
+        # self.transform_event = transform_event
+        # self.transform_image = transform_image
+        # self.transform_annotation = transform_annotation
 
     def __len__(self):
         return len(self.pandda_event_dataset.pandda_events)
@@ -994,15 +1355,33 @@ class PanDDADatasetTorchLigand(Dataset):
         time_begin_load_item = time.time()
         event = self.pandda_event_dataset.pandda_events[idx]
 
-        annotation = event.hit
+        # annotation = event.hit
 
-        image, loaded, transform, dmap = self.transform_image(event)
+        # image, loaded, transform, dmap = self.transform_image(event)
 
-        if loaded:
-            label = self.transform_annotation(annotation)
+        # if loaded:
+        #     label = self.transform_annotation(annotation)
+        #
+        # else:
+        #     label = np.array([1.0, 0.0], dtype=np.float32)
 
-        else:
-            label = np.array([1.0, 0.0], dtype=np.float32)
+
+        sample_specification = {}
+        for _update in self.update_sample_specification:
+            sample_specification = _update(event, sample_specification)
+
+        # augmented_event = self.augment_event
+        # centroid = self.get_centroid_from_event
+
+
+        # Make the image
+        image = np.stack(
+            [sample_specification[layer] for layer in self.layers],
+            axis=0,
+        )
+
+        # Make the annotation
+        label = _make_label_from_specification(sample_specification)
 
         time_finish_load_item = time.time()
         # print(f"Loaded item in: {round(time_finish_load_item-time_begin_load_item, 2)}")

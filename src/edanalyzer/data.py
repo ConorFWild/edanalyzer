@@ -42,8 +42,8 @@ class PanDDAEvent(BaseModel):
     y: float
     z: float
     hit: bool
-    ligand: Ligand | None
-
+    # ligand: Ligand | None
+    ligand: str
 
 class PanDDAEventAnnotation(BaseModel):
     annotation: bool

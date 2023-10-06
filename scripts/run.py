@@ -1092,6 +1092,28 @@ def _make_test_dataset_psuedo_pandda(
         site_table.to_csv(inspect_site_table_path, index=False)
 
 
+LIGAND_IGNORE_REGEXES = [
+    "merged",
+    "LIG-[a-zA-Z]+-",
+    "dimple",
+    "refine",
+    "init",
+    "pipedream",
+    "phenix",
+    "None",
+    "blank",
+    "control",
+    "DMSO",
+]
+
+def _get_ligand_pdb_path(pandda_dir, dtag):
+    dataset_dir = Path(pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / "ligand_files"
+    paths = [x for x in dataset_dir.glob("*.pdb")]
+    pdb_paths = [x for x in paths if (x.exists()) and (x.stem not in LIGAND_IGNORE_REGEXES)]
+    assert len(pdb_paths) > 0, f"No pdb paths that are not to be ignored in {dataset_dir}: {[x.stem for x in paths]}"
+    path = pdb_paths[0]
+    return path
+
 def _make_dataset_from_events(query):
     train_dataset_torch = PanDDADatasetTorchLigand(
         PanDDAEventDataset(
@@ -1108,7 +1130,7 @@ def _make_dataset_from_events(query):
                     y=res[0].y,
                     z=res[0].z,
                     hit=res[1].annotation,
-                    ligand=None
+                    ligand=_get_ligand_pdb_path(res[0].pandda.path, res[0].dtag)
                 )
                 for res
                 in query
@@ -1347,7 +1369,7 @@ def _make_dataset(
                         y=res[0].y,
                         z=res[0].z,
                         hit=res[1].annotation,
-                        ligand=None
+                        ligand=_get_ligand_pdb_path(res[0].pandda.path, res[0].dtag)
                     )
                     for res
                     in query
@@ -1456,6 +1478,37 @@ def _train_and_test(working_dir,
         db.generate_mapping()
     except Exception as e:
         print(e)
+
+    from edanalyzer.torch_dataset import (
+        _get_event_map_path,
+        _get_xmap_path,
+        _get_structure_path,
+        _get_bound_state_model_path,
+        _get_annotation_from_event,  # Updates annotation
+        _get_centroid_relative_to_ligand,  # updates centroid and annotation
+        _get_random_ligand_path,  # Updates ligand_path and annotation
+        _get_random_orientation,  # Updates orientation
+        _get_transform,  # Updates transform,
+        _make_event_map_layer,
+        _make_structure_map_layer,
+        _make_ligand_map_layer
+    )
+
+    make_sample_specification = [
+        _get_event_map_path,
+        _get_xmap_path,
+        _get_structure_path,
+        _get_bound_state_model_path,
+        _get_annotation_from_event,  # Updates annotation
+        _get_centroid_relative_to_ligand,  # updates centroid and annotation
+        _get_random_ligand_path,  # Updates ligand_path and annotation
+        _get_random_orientation,  # Updates orientation
+        _get_transform,  # Updates transform,
+        _make_event_map_layer,
+        _make_structure_map_layer,
+        _make_ligand_map_layer
+    ]
+    layers = ['event_map_layer', 'structure_map_layer', "ligand_map_layer"]
 
     with pony.orm.db_session:
         partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
@@ -1583,7 +1636,7 @@ def _train_and_test(working_dir,
                         y=res[0].y,
                         z=res[0].z,
                         hit=res[1].annotation,
-                        ligand=None
+                        ligand=_get_ligand_pdb_path(res[0].pandda.path, res[0].dtag)
                     )
                     for res
                     in query
