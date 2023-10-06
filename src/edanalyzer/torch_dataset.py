@@ -1153,8 +1153,9 @@ def _get_centroid_relative_to_ligand(event, sample_specification):  # updates ce
                     sample = _sample_point(lower, upper)
                     j+=1
                     if j > 200:
-                        print(f"Failed to get a sample point!")
+                        print(f"Failed to get a sample point for event map: {event.event_map}!")
                         sample = [event.x, event.y, event.z]
+                        break
 
             # Sample a non-ligand point
             else:
@@ -1164,8 +1165,9 @@ def _get_centroid_relative_to_ligand(event, sample_specification):  # updates ce
                     sample = _sample_point(lower, upper)
                     j += 1
                     if j > 200:
-                        print(f"Failed to get a sample point!")
+                        print(f"Failed to get a sample point for event map: {event.event_map}!")
                         sample = [event.x, event.y, event.z]
+                        break
 
             sample_specification['centroid'] = [sample[0], sample[1], sample[2]]
 
