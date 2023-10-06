@@ -1491,10 +1491,12 @@ def _train_and_test(working_dir,
         _get_transform,  # Updates transform,
         _make_event_map_layer,
         _make_structure_map_layer,
-        _make_ligand_map_layer
+        _make_ligand_map_layer,
+        _get_event_centroid,
+        _get_identity_orientation
     )
 
-    make_sample_specification = [
+    make_sample_specification_train = [
         _get_event_map_path,
         _get_xmap_path,
         _get_structure_path,
@@ -1503,6 +1505,22 @@ def _train_and_test(working_dir,
         _get_centroid_relative_to_ligand,  # updates centroid and annotation
         _get_random_ligand_path,  # Updates ligand_path and annotation
         _get_random_orientation,  # Updates orientation
+        _get_transform,  # Updates transform,
+        _make_event_map_layer,
+        _make_structure_map_layer,
+        _make_ligand_map_layer
+    ]
+    make_sample_specification_test = [
+        _get_event_map_path,
+        _get_xmap_path,
+        _get_structure_path,
+        _get_bound_state_model_path,
+        _get_annotation_from_event,  # Updates annotation
+        _get_event_centroid,
+        # _get_centroid_relative_to_ligand,  # updates centroid and annotation
+        _get_random_ligand_path,  # Updates ligand_path and annotation
+        # _get_random_orientation,  # Updates orientation
+        _get_identity_orientation,
         _get_transform,  # Updates transform,
         _make_event_map_layer,
         _make_structure_map_layer,
@@ -1601,11 +1619,13 @@ def _train_and_test(working_dir,
                 #     # if res[0].pandda.system.name not in test_partition_event_systems
                 #     if res[0].pandda.system.name not in test_systems
                 # ]
-                pandda_events = (hits * int(len(non_hits) / len(hits))) + non_hits
+                pandda_events = (hits * 2 * int(len(non_hits) / len(hits))) + non_hits
             ),
             # transform_image=get_image_xmap_ligand_augmented,
-            transform_image=get_image_event_map_ligand_augmented,
-            transform_annotation=get_annotation_from_event_hit
+            # transform_image=get_image_event_map_ligand_augmented,
+            # transform_annotation=get_annotation_from_event_hit
+            update_sample_specification=make_sample_specification_train,
+            layers=layers,
         )
         rprint(f"Got {len(train_dataset_torch)} train events!")
 
@@ -1644,8 +1664,10 @@ def _train_and_test(working_dir,
                     if res[0].pandda.system.name in test_systems
                 ]),
             # transform_image=get_image_xmap_ligand,
-            transform_image=get_image_event_map_ligand,
-            transform_annotation=get_annotation_from_event_hit
+            # transform_image=get_image_event_map_ligand,
+            # transform_annotation=get_annotation_from_event_hit
+            update_sample_specification=make_sample_specification_test,
+            layers=layers,
         )
         rprint(f"Got {len(test_dataset_torch)} test events!")
 

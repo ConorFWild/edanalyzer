@@ -1332,6 +1332,16 @@ def _make_label_from_specification(sample_specification, layers):
 
     return label
 
+def _get_event_centroid(event, sample_specification):
+    sample_specification['centroid'] = [event.x, event.y, event.z]
+    return sample_specification
+
+def _get_identity_orientation(event, sample_specification):
+    rotation_matrix = np.eye(3)
+
+    sample_specification['orientation'] = rotation_matrix
+    return sample_specification
+
 class PanDDADatasetTorchLigand(Dataset):
     def __init__(self,
                  pandda_event_dataset: PanDDAEventDataset,
