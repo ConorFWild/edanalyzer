@@ -1079,10 +1079,15 @@ def _get_event_map_path(event, sample_specification):
     return sample_specification
 
 def _get_xmap_path(event, sample_specification):
-    sample_specification['xmap_path'] = event.initial_reflections
+
+    sample_specification['xmap_path'] = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(
+        dtag=event.dtag)
     return sample_specification
 def _get_structure_path(event, sample_specification):
-    sample_specification['structure_path'] = event.initial_structure
+    sample_specification['structure_path'] = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
+        dtag=event.dtag)
     return sample_specification
 
 def _get_bound_state_model_path(event, sample_specification):
