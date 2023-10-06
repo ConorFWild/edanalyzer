@@ -1119,7 +1119,7 @@ def _sample_to_ligand_distance(point, ligand_array):
 def _get_centroid_relative_to_ligand(event, sample_specification):  # updates centroid and annotation
     rng = default_rng()
     val = rng.random()
-    if sample_specification['bound_state_structure_path'] & sample_specification['annotation']:
+    if (sample_specification['bound_state_structure_path'] is not None) & sample_specification['annotation']:
         st = gemmi.read_structure(str(sample_specification['model_path']))
         original_centroid = [event.x, event.y, event.z]
         original_centroid_pos = gemmi.Position(*original_centroid)
