@@ -1110,9 +1110,12 @@ def _get_ligand_pdb_path(pandda_dir, dtag):
     dataset_dir = Path(pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / "ligand_files"
     paths = [x for x in dataset_dir.glob("*.pdb")]
     pdb_paths = [x for x in paths if (x.exists()) and (x.stem not in LIGAND_IGNORE_REGEXES)]
-    assert len(pdb_paths) > 0, f"No pdb paths that are not to be ignored in {dataset_dir}: {[x.stem for x in paths]}"
-    path = pdb_paths[0]
-    return path
+    # assert len(pdb_paths) > 0, f"No pdb paths that are not to be ignored in {dataset_dir}: {[x.stem for x in paths]}"
+    if len(pdb_paths) == 0:
+        return None
+    else:
+        path = pdb_paths[0]
+        return str(path)
 
 def _make_dataset_from_events(query):
     train_dataset_torch = PanDDADatasetTorchLigand(

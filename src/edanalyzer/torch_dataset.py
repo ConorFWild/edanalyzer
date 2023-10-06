@@ -1129,28 +1129,33 @@ def _get_centroid_relative_to_ligand(event, sample_specification):  # updates ce
                                 lig_atom_poss.append(
                                     [pos.x, pos.y, pos.z]
                                 )
-        ligand_array = np.array(lig_atom_poss)
-        lower = np.min(ligand_array, axis=0).flatten() - 4.0
-        upper = np.max(ligand_array, axis=0).flatten() + 4.0
 
+        if len(lig_atom_poss) < 2:
+            sample_specification['centroid'] = [event.x, event.y, event.z]
 
-
-        # Sample a ligand point
-        if val < 0.5:
-            sample_specification['annotation'] = sample_specification['annotation']
-            sample = _sample_point(lower, upper)
-            while _sample_to_ligand_distance(sample, ligand_array) > 2.0:
-                sample = _sample_point(lower, upper)
-
-
-        # Sample a non-ligand point
         else:
-            sample_specification['annotation'] = False
-            sample = _sample_point(lower, upper)
-            while _sample_to_ligand_distance(sample, ligand_array) < 2.0:
-                sample = _sample_point(lower, upper)
+            ligand_array = np.array(lig_atom_poss)
+            lower = np.min(ligand_array, axis=0).flatten() - 4.0
+            upper = np.max(ligand_array, axis=0).flatten() + 4.0
 
-        sample_specification['centroid'] = [sample[0], sample[1], sample[2]]
+
+
+            # Sample a ligand point
+            if val < 0.5:
+                sample_specification['annotation'] = sample_specification['annotation']
+                sample = _sample_point(lower, upper)
+                while _sample_to_ligand_distance(sample, ligand_array) > 2.0:
+                    sample = _sample_point(lower, upper)
+
+
+            # Sample a non-ligand point
+            else:
+                sample_specification['annotation'] = False
+                sample = _sample_point(lower, upper)
+                while _sample_to_ligand_distance(sample, ligand_array) < 2.0:
+                    sample = _sample_point(lower, upper)
+
+            sample_specification['centroid'] = [sample[0], sample[1], sample[2]]
 
 
     else:
