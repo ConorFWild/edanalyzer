@@ -1331,7 +1331,7 @@ def _make_ligand_map_layer(event, sample_specification):
 def _make_label_from_specification(sample_specification, layers):
 
     for layer in layers:
-        if sample_specification[layer] is not None:
+        if sample_specification[layer] is None:
             print(f"Missing layer: {layer}")
             sample_specification['annotation'] = False
 
