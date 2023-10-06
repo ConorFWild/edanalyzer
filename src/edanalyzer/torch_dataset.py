@@ -1113,7 +1113,8 @@ def _sample_point(lower, upper):
     return point
 
 def _sample_to_ligand_distance(point, ligand_array):
-    closest_distance = np.min(np.linalg.norm(ligand_array-point.reshape((1,3)), axis=0))
+    distances = np.linalg.norm(ligand_array-point.reshape((1,3)), axis=1)
+    closest_distance = np.min()
     return closest_distance
 
 def _get_centroid_relative_to_ligand(event, sample_specification):  # updates centroid and annotation
@@ -1149,7 +1150,7 @@ def _get_centroid_relative_to_ligand(event, sample_specification):  # updates ce
             if val < 0.5:
                 sample_specification['annotation'] = sample_specification['annotation']
                 sample = _sample_point(lower, upper)
-                while _sample_to_ligand_distance(sample, ligand_array) > 2.0:
+                while _sample_to_ligand_distance(sample, ligand_array) > 1.5:
                     sample = _sample_point(lower, upper)
                     j+=1
                     if j > 200:
@@ -1161,7 +1162,7 @@ def _get_centroid_relative_to_ligand(event, sample_specification):  # updates ce
             else:
                 sample_specification['annotation'] = False
                 sample = _sample_point(lower, upper)
-                while _sample_to_ligand_distance(sample, ligand_array) < 2.0:
+                while _sample_to_ligand_distance(sample, ligand_array) < 1.5:
                     sample = _sample_point(lower, upper)
                     j += 1
                     if j > 200:
