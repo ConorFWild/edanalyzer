@@ -1334,7 +1334,9 @@ def _make_ligand_map_layer(event, sample_specification):
         sample_specification['ligand_map_layer'] = image_ligand
     except Exception as e:
         print(f"Error loading ligand map: {e}")
-        sample_specification['ligand_map_layer'] = None
+        sample_array = sample_specification['sample_grid']
+        sample_specification['ligand_map_layer'] = np.copy(sample_array)
+        sample_specification['annotation'] = False
 
     return sample_specification
 
