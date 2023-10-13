@@ -224,8 +224,13 @@ pandda_2_high_confidence_ligands:
     - [JMJD2DA-x391, A, 306]  # PanDDA 2
     - [JMJD2DA-x405, A, 81]  # PanDDA 2
     - [JMJD2DA-x408, A, 231]  # PanDDA 2
+    - [ JMJD2DA-x427, A, 181 ]  # PanDDA 2
     - [JMJD2DA-x438, A, 325]  # PanDDA 2 - massive rearangement based
     - [JMJD2DA-x448, A, 222]  # PanDDA 2
+    - [JMJD2DA-x453, A, 232]  # PanDDA 2
+    - [JMJD2DA-x463, A, 102]  # PanDDA 2, beautiful, possible exemplar
+    - [ JMJD2DA-x533, A, 298 ]  # PanDDA 2
+
     - [JMJD2DA-x567, A, 230]  # PanDDA 2
     - [JMJD2DA-x573, A, 306]  # PanDDA 2
     - [JMJD2DA-x576, A, 175]  # PanDDA 2
