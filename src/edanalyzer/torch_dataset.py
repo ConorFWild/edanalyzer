@@ -1057,7 +1057,10 @@ def get_ligand_map_from_path(
 
     # Get the ligand array
     # ligand_array = parse_pdb_file_for_ligand_array(path)
-    ligand_array = parse_cif_file_for_ligand_array(path)
+    try:
+        ligand_array = parse_cif_file_for_ligand_array(path)
+    except:
+        ligand_array = parse_pdb_file_for_ligand_array(path.parent / f"{path.stem}.pdb")
     assert ligand_array.size > 0, f"Ligand array empty: {path}"
     rotation_matrix = R.random().as_matrix()
     rng = default_rng()
