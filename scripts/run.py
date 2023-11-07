@@ -1117,6 +1117,17 @@ def _get_ligand_pdb_path(pandda_dir, dtag):
         path = pdb_paths[0]
         return str(path)
 
+def _get_ligand_cif_path(pandda_dir, dtag):
+    dataset_dir = Path(pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / "ligand_files"
+    paths = [x for x in dataset_dir.glob("*.cif")]
+    pdb_paths = [x for x in paths if (x.exists()) and (x.stem not in LIGAND_IGNORE_REGEXES)]
+    # assert len(pdb_paths) > 0, f"No pdb paths that are not to be ignored in {dataset_dir}: {[x.stem for x in paths]}"
+    if len(pdb_paths) == 0:
+        return None
+    else:
+        path = pdb_paths[0]
+        return str(path)
+
 def _make_dataset_from_events(query):
     train_dataset_torch = PanDDADatasetTorchLigand(
         PanDDAEventDataset(
@@ -1575,7 +1586,8 @@ def _train_and_test(working_dir,
                         y=res[0].y,
                         z=res[0].z,
                         hit=res[1].annotation,
-                        ligand=_get_ligand_pdb_path(res[0].pandda.path, res[0].dtag)
+                        # ligand=_get_ligand_pdb_path(res[0].pandda.path, res[0].dtag)
+                        ligand=_get_ligand_cif_path(res[0].pandda.path, res[0].dtag)
                     )
                     for res
                     in query
@@ -1597,7 +1609,8 @@ def _train_and_test(working_dir,
                         y=res[0].y,
                         z=res[0].z,
                         hit=res[1].annotation,
-                        ligand=_get_ligand_pdb_path(res[0].pandda.path, res[0].dtag)
+                        # ligand=_get_ligand_pdb_path(res[0].pandda.path, res[0].dtag)
+                        ligand=_get_ligand_cif_path(res[0].pandda.path, res[0].dtag)
                     )
                     for res
                     in query
@@ -1665,7 +1678,8 @@ def _train_and_test(working_dir,
                         y=res[0].y,
                         z=res[0].z,
                         hit=res[1].annotation,
-                        ligand=_get_ligand_pdb_path(res[0].pandda.path, res[0].dtag)
+                        # ligand=_get_ligand_pdb_path(res[0].pandda.path, res[0].dtag)
+                        ligand=_get_ligand_cif_path(res[0].pandda.path, res[0].dtag)
                     )
                     for res
                     in query
