@@ -1073,6 +1073,11 @@ def get_image_event_map_ligand_augmented(event: PanDDAEvent, ):
 #     else:
 #         return event
 
+def _get_event_mtz_path(event, sample_specification):
+    sample_specification['event_mtz_path'] = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(
+        dtag=event.dtag)
+    return sample_specification
 
 def _get_event_map_path(event, sample_specification):
     sample_specification['event_map_path'] = event.event_map
@@ -1268,6 +1273,33 @@ def _get_transform(event, sample_specification):
     sample_specification['sample_grid'] = np.zeros((n, n, n), dtype=np.float32)
     return sample_specification
 
+
+def _make_xmap_layer(event, sample_specification):
+    try:
+        sample_array = sample_specification['sample_grid']
+        event_mtz_path = sample_specification['event_mtz_path']
+        sample_transform = sample_specification['transform']
+
+        sample_array_mean = np.copy(sample_array)
+        # mean_dmap = get_event_map_from_event(event)
+        mean_dmap = load_xmap_from_mtz(event_mtz_path)
+        image_mean_initial = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
+        std = np.std(image_mean_initial)
+        if np.abs(std) < 0.0000001:
+            image_event_map = np.copy(sample_array)
+        else:
+            image_event_map = (image_mean_initial - np.mean(image_mean_initial)) / std
+        # time_finish_get_mean = time.time()
+        # time_get_mean = round(time_finish_get_mean - time_begin_get_mean, 2)
+        sample_specification['xmap'] = mean_dmap
+        sample_specification['xmap_layer'] = image_event_map
+
+    except Exception as e:
+        print(f"Error loading event map: {e}")
+        sample_specification['xmap'] = None
+        sample_specification['xmap_layer'] = None
+
+    return sample_specification
 
 def _make_event_map_layer(event, sample_specification):
     try:
