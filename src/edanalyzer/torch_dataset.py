@@ -1,3 +1,4 @@
+import random
 import itertools
 import time
 
@@ -947,7 +948,6 @@ def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
 
     return fragment_structures
 
-import random
 
 def parse_cif_file_for_ligand_array(path):
     mol = get_fragment_mol_from_dataset_cif_path(path)
