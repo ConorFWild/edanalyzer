@@ -108,5 +108,6 @@ LIGAND_IGNORE_REGEXES = [
     "blank",
     "control",
     "DMSO",
+    'new'
 ]
 

@@ -1042,6 +1042,7 @@ def get_ligand_map(
 
     return dummy_grid
 
+
 def get_ligand_map_from_path(
         path,
         n=30,
