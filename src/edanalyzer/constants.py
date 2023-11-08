@@ -108,6 +108,10 @@ LIGAND_IGNORE_REGEXES = [
     "blank",
     "control",
     "DMSO",
-    'new'
+    'new',
+    'acedrg_link_link',
+    'AAA',
+    'BBB',
+    'LIG-CYS'
 ]
 
