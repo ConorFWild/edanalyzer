@@ -957,7 +957,8 @@ def parse_cif_file_for_ligand_array(path):
     cids = AllChem.EmbedMultipleConfs(
         mol,
         numConfs=1000,
-        pruneRmsThresh=1.5)
+        pruneRmsThresh=1.5,
+    )
 
     # Translate to structures
     fragment_structures = get_structures_from_mol(
