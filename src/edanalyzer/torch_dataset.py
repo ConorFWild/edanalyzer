@@ -1579,7 +1579,7 @@ def _make_zmap_layer(event, sample_specification):
 
         sample_array_mean = np.copy(sample_array)
         # mean_dmap = get_event_map_from_event(event)
-        mean_dmap = get_map_from_path(event_map_path)
+        mean_dmap = get_map_from_path(str(event_map_path))
         image_mean_initial = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
         std = np.std(image_mean_initial)
         if np.abs(std) < 0.0000001:
