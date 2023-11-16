@@ -1494,6 +1494,7 @@ def _train_and_test(working_dir,
         print(e)
 
     from edanalyzer.torch_dataset import (
+        _get_zmap_path,
         _get_event_mtz_path,
         _get_event_map_path,
         _get_xmap_path,
@@ -1504,6 +1505,7 @@ def _train_and_test(working_dir,
         _get_random_ligand_path,  # Updates ligand_path and annotation
         _get_random_orientation,  # Updates orientation
         _get_transform,  # Updates transform,
+        _make_zmap_layer,
         _make_xmap_layer,
         _make_event_map_layer,
         _make_structure_map_layer,
