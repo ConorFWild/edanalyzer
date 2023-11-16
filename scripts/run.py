@@ -1513,6 +1513,7 @@ def _train_and_test(working_dir,
     )
 
     make_sample_specification_train = [
+        _get_zmap_path,
         _get_event_mtz_path,
         _get_event_map_path,
         _get_xmap_path,
@@ -1523,12 +1524,14 @@ def _train_and_test(working_dir,
         _get_random_ligand_path,  # Updates ligand_path and annotation
         _get_random_orientation,  # Updates orientation
         _get_transform,  # Updates transform,
-        _make_xmap_layer,
-        _make_event_map_layer,
-        _make_structure_map_layer,
+        _make_zmap_layer,
+        # _make_xmap_layer,
+        # _make_event_map_layer,
+        # _make_structure_map_layer,
         _make_ligand_map_layer
     ]
     make_sample_specification_test = [
+        _get_zmap_path,
         _get_event_mtz_path,
         _get_event_map_path,
         _get_xmap_path,
@@ -1541,12 +1544,15 @@ def _train_and_test(working_dir,
         # _get_random_orientation,  # Updates orientation
         _get_identity_orientation,
         _get_transform,  # Updates transform,
-        _make_xmap_layer,
-        _make_event_map_layer,
-        _make_structure_map_layer,
+        _make_zmap_layer,
+        # _make_xmap_layer,
+        # _make_event_map_layer,
+        # _make_structure_map_layer,
         _make_ligand_map_layer
     ]
-    layers = ['xmap_layer', 'event_map_layer', 'structure_map_layer', "ligand_map_layer"]
+    # layers = ['xmap_layer', 'event_map_layer', 'structure_map_layer', "ligand_map_layer"]
+    layers = ['zmap_layer', "ligand_map_layer"]
+    num_layers = 2
 
     with pony.orm.db_session:
         partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
@@ -1703,7 +1709,7 @@ def _train_and_test(working_dir,
         dev = "cpu"
 
     # if model_type == "resnet+ligand":
-    model = resnet18(num_classes=2, num_input=4)
+    model = resnet18(num_classes=2, num_input=num_layers)
     # model = resnet18(num_classes=2, num_input=3)
     model.to(dev)
 

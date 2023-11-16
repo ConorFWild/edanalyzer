@@ -1351,6 +1351,14 @@ def _get_xmap_path(event, sample_specification):
         event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(
         dtag=event.dtag)
     return sample_specification
+
+def _get_zmap_path(event, sample_specification):
+
+    sample_specification['zmap_path'] = Path(
+        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_ZMAP_TEMPLATE.format(
+        dtag=event.dtag)
+    return sample_specification
+
 def _get_structure_path(event, sample_specification):
     sample_specification['structure_path'] = Path(
         event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
@@ -1560,6 +1568,33 @@ def _make_xmap_layer(event, sample_specification):
         print(f"Error loading event map: {e}")
         sample_specification['xmap'] = None
         sample_specification['xmap_layer'] = None
+
+    return sample_specification
+
+def _make_zmap_layer(event, sample_specification):
+    try:
+        sample_array = sample_specification['sample_grid']
+        event_map_path = sample_specification['zmap_path']
+        sample_transform = sample_specification['transform']
+
+        sample_array_mean = np.copy(sample_array)
+        # mean_dmap = get_event_map_from_event(event)
+        mean_dmap = get_map_from_path(event_map_path)
+        image_mean_initial = sample_xmap(mean_dmap, sample_transform, sample_array_mean)
+        std = np.std(image_mean_initial)
+        if np.abs(std) < 0.0000001:
+            image_event_map = np.copy(sample_array)
+        else:
+            image_event_map = (image_mean_initial - np.mean(image_mean_initial)) / std
+        # time_finish_get_mean = time.time()
+        # time_get_mean = round(time_finish_get_mean - time_begin_get_mean, 2)
+        sample_specification['zmap'] = mean_dmap
+        sample_specification['zmap_layer'] = image_event_map
+
+    except Exception as e:
+        print(f"Error loading event map: {e}")
+        sample_specification['zmap'] = None
+        sample_specification['zmap_layer'] = None
 
     return sample_specification
 
