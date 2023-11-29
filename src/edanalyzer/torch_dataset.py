@@ -1380,7 +1380,7 @@ def _get_annotation_from_event(event, sample_specification):  # Updates annotati
     sample_specification['annotation'] = event.hit
     return sample_specification
 
-def decide_annotation(event, sample_specification):  # Updates annotation
+def _decide_annotation(event, sample_specification):  # Updates annotation
     rng = default_rng()
     val = rng.random()
     if val > 0.5:
