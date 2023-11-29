@@ -1576,7 +1576,6 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
             rmsd = min([x for x in new_rmsds if x is not None])
             j+= 1
             if j > 200:
-                print()
                 print(f"Failed to sample a low RMSD pose! {new_rmsds}")
                 posed_ligand_res = None
                 sample_specification['annotation'] = False
