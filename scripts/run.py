@@ -2030,6 +2030,12 @@ def _summarize(working_dir, test_systems, model_key):
                 else:
                     rprint(f"\t\t95% Prec never achieved")
 
+                max_prec_cutoff = max(precision_recall,
+                                        key=lambda x: precision_recall[x]['precision'])
+                rprint(
+                    f"\t\tRecall: {precision_recall[max_prec_cutoff]['recall']} : Precision: {precision_recall[max_prec_cutoff]['precision']} : Cutoff: {max_prec_cutoff}")
+
+
             if pandda_type == "pandda_2":
                 if len(system_precisions) > 0:
                     pandda_2_epoch_prec[epoch] = {
