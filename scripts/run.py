@@ -2640,6 +2640,15 @@ def __main__(config_yaml="config.yaml"):
             config.train.model_file,
             config.name
         )
+    if 'TrainTestLigand' in config.steps:
+        _train_and_test_ligand_score(
+            config.working_directory,
+            config.test.test_systems,
+            config.test.initial_epoch,
+            config.test.test_interval,
+            config.name
+        )
+
     # Summarize train/test results
     if 'Summarize' in config.steps:
         _summarize(config.working_directory, config.test.test_systems)
