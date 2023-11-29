@@ -1377,15 +1377,17 @@ def _get_bound_state_model_path(event, sample_specification):
         dtag=event.dtag)
     model_path_3 = Path(event.pandda_dir).parent / "initial_model" / event.dtag / constants.PANDDA_MODEL_FILE.format(
         dtag=event.dtag)
-
+    model_path_4 = Path("/dls/science/groups/i04-1/conor_dev/experiments/data") / "data" / event.system_name / f"{event.dtag}.pdb"
     if model_path_1.exists():
         sample_specification['bound_state_structure_path'] = str(model_path_1)
     elif model_path_2.exists():
         sample_specification['bound_state_structure_path'] = str(model_path_2)
     elif model_path_3.exists():
         sample_specification['bound_state_structure_path'] = str(model_path_3)
+    elif model_path_4.exists():
+        sample_specification['bound_state_structure_path'] = str(model_path_4)
     else:
-        print(f"No bound state structure at: {model_path_1} or {model_path_2} or {model_path_3}")
+        print(f"No bound state structure at: {model_path_1} or {model_path_2} or {model_path_3} or {model_path_4}")
         sample_specification['bound_state_structure_path'] = None
     return sample_specification
 
