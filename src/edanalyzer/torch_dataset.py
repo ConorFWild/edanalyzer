@@ -1377,7 +1377,7 @@ def _get_bound_state_model_path(event, sample_specification):
         dtag=event.dtag)
     model_path_3 = Path(event.pandda_dir).parent / "initial_model" / event.dtag / constants.PANDDA_MODEL_FILE.format(
         dtag=event.dtag)
-    model_path_4 = Path("/dls/science/groups/i04-1/conor_dev/experiments/data") / "data" / event.system_name / f"{event.dtag}.pdb"
+    model_path_4 = Path("/dls/science/groups/i04-1/conor_dev/experiments/data") / event.system_name / f"{event.dtag}.pdb"
     if model_path_1.exists():
         sample_specification['bound_state_structure_path'] = str(model_path_1)
     elif model_path_2.exists():
