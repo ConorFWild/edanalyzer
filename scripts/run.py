@@ -2021,6 +2021,7 @@ def _summarize(working_dir, test_systems, model_key):
 
                 precision_greater_than_95 = {cutoff: pr for cutoff, pr in precision_recall.items() if
                                              pr['precision'] > 0.9}
+
                 if len(precision_greater_than_95) > 0:
                     max_recall_cutoff = max(precision_greater_than_95,
                                             key=lambda x: precision_greater_than_95[x]['recall'])
