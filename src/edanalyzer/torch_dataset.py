@@ -1404,17 +1404,17 @@ def get_ligand_cif_graph_matches(cif_path):
     except Exception as e:
         print(e)
         key = "data_comp_XXX"
-    try:
-        cif[key]
-    except Exception as e:
-        print(e)
-        key = "data_comp_LIG"
-    try:
-        cif[key]
-    except Exception as e:
-        print(e)
-        raise Exception([x for x in cif])
-        return []
+        try:
+            cif[key]
+        except Exception as e:
+            print(e)
+            key = "data_comp_LIG"
+            try:
+                cif[key]
+            except Exception as e:
+                print(e)
+                raise Exception([x for x in cif])
+                # return []
 
     # Find the relevant atoms loop
     atom_id_loop = list(cif[key].find_loop('_chem_comp_atom.atom_id'))
