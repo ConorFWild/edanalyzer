@@ -2036,6 +2036,7 @@ def _make_ligand_masked_event_map_layer(event, sample_specification):
         std = np.std(image_initial)
         if np.abs(std) < 0.0000001:
             image_dmap = np.copy(sample_array)
+            sample_specification['annotation'] = False
         else:
             image_dmap = (image_initial - np.mean(image_initial)) / std
         # sample_specification['event_map'] = dmap
