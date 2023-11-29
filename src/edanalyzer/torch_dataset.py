@@ -1507,7 +1507,8 @@ def generate_ligand_pose(closest_ligand_res, min_transform=0.0, max_transform=2.
 
     # Transform the atoms
     for atom in posed_res:
-        atom.pos = transform.apply(atom.pos)
+        transformed_pos = transform.apply(atom.pos)
+        atom.pos = gemmi.Position(transformed_pos.x, transformed_pos.y, transformed_pos.z)
 
     return posed_res
 
