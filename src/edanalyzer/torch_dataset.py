@@ -1402,6 +1402,10 @@ def get_ligand_cif_graph_matches(cif_path):
         cif['comp_LIG']
     except:
         key = "data_comp_XXX"
+    try:
+        cif['key']
+    except:
+        return None
 
     # Find the relevant atoms loop
     atom_id_loop = list(cif[key].find_loop('_chem_comp_atom.atom_id'))
@@ -1542,6 +1546,9 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
 
     # Get isomorphisms
     isomorphisms = get_ligand_cif_graph_matches(ligand_cif_path)
+    if not isomorphisms:
+        sample_specification['ligand_res'] = None
+        return sample_specification
 
     # Load the ligand bound structure
     if sample_specification['bound_state_structure_path'] is not None:
