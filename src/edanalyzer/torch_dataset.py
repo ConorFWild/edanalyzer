@@ -14,6 +14,9 @@ from pathlib import Path
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
+import networkx as nx
+import networkx.algorithms.isomorphism as iso
+
 from edanalyzer import constants
 
 
@@ -1390,7 +1393,7 @@ def _decide_annotation(event, sample_specification):  # Updates annotation
 
     return sample_specification
 
-def get_ligand_cif_graph_matches(cif_path):
+def _get_ligand_cif_graph_matches(cif_path):
     # Open the cif document with gemmi
     cif = gemmi.cif.read(str(cif_path))
 
