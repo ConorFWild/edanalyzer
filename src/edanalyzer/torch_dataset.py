@@ -1570,7 +1570,7 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
                 get_rmsd(
                     posed_ligand_res,
                     closest_ligand_res,
-                    iso
+                    isomorphisms
                 )
                 )
             rmsd = min([x for x in rmsds if x is not None])
