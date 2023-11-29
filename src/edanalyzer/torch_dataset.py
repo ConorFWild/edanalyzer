@@ -1423,7 +1423,12 @@ def get_ligand_cif_graph_matches(cif_path):
                         cif[key]
                     except Exception as e:
                         print(e)
-                        raise Exception([x for x in cif])
+                        key = "comp_XXX"
+                        try:
+                            cif[key]
+                        except Exception as e:
+                            print(e)
+                            raise Exception([x for x in cif])
                 # return []
 
     # Find the relevant atoms loop
