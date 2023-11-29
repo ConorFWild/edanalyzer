@@ -1410,7 +1410,7 @@ def get_ligand_cif_graph_matches(cif_path):
     try:
         cif['key']
     except:
-        return None
+        return []
 
     # Find the relevant atoms loop
     atom_id_loop = list(cif[key].find_loop('_chem_comp_atom.atom_id'))
@@ -1551,7 +1551,7 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
 
     # Get isomorphisms
     isomorphisms = get_ligand_cif_graph_matches(ligand_cif_path)
-    if not isomorphisms:
+    if len(isomorphisms) == 0:
         print(f"No isomorphisms for: {ligand_cif_path}")
         sample_specification['ligand_res'] = None
         return sample_specification
