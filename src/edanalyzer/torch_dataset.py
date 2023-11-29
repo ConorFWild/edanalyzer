@@ -1412,6 +1412,7 @@ def get_ligand_cif_graph_matches(cif_path):
         try:
             cif[_key]
             key = _key
+            break
         except Exception as e:
             print(e)
     if key is None:
