@@ -1376,6 +1376,7 @@ def _get_bound_state_model_path(event, sample_specification):
     if model_path.exists():
         sample_specification['bound_state_structure_path'] = str(model_path)
     else:
+        print(f"No bound state structure at: {model_path}")
         sample_specification['bound_state_structure_path'] = None
     return sample_specification
 
@@ -1547,6 +1548,7 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
     # Get isomorphisms
     isomorphisms = get_ligand_cif_graph_matches(ligand_cif_path)
     if not isomorphisms:
+        print(f"No isomorphisms for: {ligand_cif_path}")
         sample_specification['ligand_res'] = None
         return sample_specification
 
