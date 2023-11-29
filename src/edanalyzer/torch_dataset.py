@@ -1398,37 +1398,56 @@ def get_ligand_cif_graph_matches(cif_path):
     # Open the cif document with gemmi
     cif = gemmi.cif.read(str(cif_path))
 
-    key = "comp_LIG"
-    try:
-        cif[key]
-    except Exception as e:
-        print(e)
-        key = "data_comp_XXX"
+    keys = [
+        "comp_LIG",
+        "data_comp_XXX",
+        "comp_DRG",
+        "comp_UNL",
+        "comp_F10",
+        "comp_F18",
+        "comp_XXX"
+    ]
+    key = None
+    for _key in keys:
         try:
-            cif[key]
+            cif[_key]
+            key = _key
         except Exception as e:
-            print(e)
-            key = "comp_DRG"
-            try:
-                cif[key]
-            except Exception as e:
-                print(e)
-                key = "comp_UNL"
-                try:
-                    cif[key]
-                except Exception as e:
-                    print(e)
-                    key = "comp_F10"
-                    try:
-                        cif[key]
-                    except Exception as e:
-                        print(e)
-                        key = "comp_XXX"
-                        try:
-                            cif[key]
-                        except Exception as e:
-                            print(e)
-                            raise Exception([x for x in cif])
+            key = None
+    if key is None:
+        raise Exception([x for x in cif])
+
+    # key = "comp_LIG"
+    # try:
+    #     cif[key]
+    # except Exception as e:
+    #     print(e)
+    #     key = "data_comp_XXX"
+    #     try:
+    #         cif[key]
+    #     except Exception as e:
+    #         print(e)
+    #         key = "comp_DRG"
+    #         try:
+    #             cif[key]
+    #         except Exception as e:
+    #             print(e)
+    #             key = "comp_UNL"
+    #             try:
+    #                 cif[key]
+    #             except Exception as e:
+    #                 print(e)
+    #                 key = "comp_F10"
+    #                 try:
+    #                     cif[key]
+    #                 except Exception as e:
+    #                     print(e)
+    #                     key = "comp_XXX"
+    #                     try:
+    #                         cif[key]
+    #                     except Exception as e:
+    #                         print(e)
+    #                         raise Exception([x for x in cif])
                 # return []
 
     # Find the relevant atoms loop
