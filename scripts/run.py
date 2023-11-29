@@ -2641,6 +2641,7 @@ def __main__(config_yaml="config.yaml"):
             config.name
         )
     if 'TrainTestLigand' in config.steps:
+        print('Training and testing on ligand model scoring against event maps')
         _train_and_test_ligand_score(
             config.working_directory,
             config.test.test_systems,
