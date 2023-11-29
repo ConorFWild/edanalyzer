@@ -1393,7 +1393,7 @@ def _decide_annotation(event, sample_specification):  # Updates annotation
 
     return sample_specification
 
-def _get_ligand_cif_graph_matches(cif_path):
+def get_ligand_cif_graph_matches(cif_path):
     # Open the cif document with gemmi
     cif = gemmi.cif.read(str(cif_path))
 
@@ -1537,7 +1537,7 @@ def get_closest_ligand_res(st, event_centroid_pos):
 def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
 
     # Load the ligand cif
-    ligand_cif_path = sample_specification['cif_path']
+    ligand_cif_path = sample_specification['ligand_path']
 
     # Get isomorphisms
     isomorphisms = get_ligand_cif_graph_matches(ligand_cif_path)
