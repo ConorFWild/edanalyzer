@@ -1575,14 +1575,14 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
             )
             rmsd = min([x for x in new_rmsds if x is not None])
             j += 1
-            if j > 500:
+            if j > 1000:
                 print(f"Failed to sample a low RMSD pose! {new_rmsds}")
                 posed_ligand_res = None
                 sample_specification['annotation'] = False
                 break
 
-        if posed_ligand_res is not None:
-            print(f"Sucessfully generated low RMSD pose")
+        # if posed_ligand_res is not None:
+        #     print(f"Sucessfully generated low RMSD pose")
 
     # If not a hit, generate a high rmsd pose
     else:
@@ -1940,6 +1940,8 @@ def _make_ligand_map_layer(event, sample_specification):
         sample_specification['annotation'] = False
 
     return sample_specification
+
+
 def get_masked_dmap(dmap, res):
     mask = gemmi.Int8Grid(dmap.nu, dmap.nv, dmap.nw)
     mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
