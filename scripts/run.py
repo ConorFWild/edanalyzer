@@ -1930,7 +1930,7 @@ def _get_precision_recall(epoch_results):
     return pr
 
 
-def _summarize(working_dir, test_systems):
+def _summarize(working_dir, test_systems, model_key):
     database_path = working_dir / "database.db"
     try:
         db.bind(provider='sqlite', filename=f"{database_path}")
@@ -1955,7 +1955,7 @@ def _summarize(working_dir, test_systems):
         }
 
 
-    with open(Path(working_dir) / "annotations.pickle", 'rb') as f:
+    with open(Path(working_dir) / f"annotations_{model_key}.pickle", 'rb') as f:
         test_results = pickle.load(f)
 
     # rprint(test_results)
@@ -2652,7 +2652,7 @@ def __main__(config_yaml="config.yaml"):
 
     # Summarize train/test results
     if 'Summarize' in config.steps:
-        _summarize(config.working_directory, config.test.test_systems)
+        _summarize(config.working_directory, config.test.test_systems, config.name)
 
     # Run PanDDAs
     if "RunPanDDAs" in config.steps:
