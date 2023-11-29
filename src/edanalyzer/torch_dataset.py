@@ -1971,6 +1971,8 @@ def _make_ligand_masked_event_map_layer(event, sample_specification):
         event_map_path = sample_specification['event_map_path']
         sample_transform = sample_specification['transform']
         res = sample_specification['ligand_res']
+        if not res:
+            raise Exception(f"No ligand res!")
 
         sample_array= np.copy(sample_array)
         dmap = get_map_from_path(event_map_path)
