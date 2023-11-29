@@ -1410,6 +1410,7 @@ def get_ligand_cif_graph_matches(cif_path):
     try:
         cif['key']
     except:
+        raise Exception([x for x in cif])
         return []
 
     # Find the relevant atoms loop
