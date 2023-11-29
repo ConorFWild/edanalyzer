@@ -1615,7 +1615,7 @@ def _get_non_transformed_ligand(event, sample_specification):
     else:
         print(f"No closest ligand res! Cannot generate ligand_res!")
         sample_specification['ligand_res'] = None
-
+    return sample_specification
 
 def _sample_point(lower, upper):
     rng = default_rng()
