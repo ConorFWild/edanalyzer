@@ -1400,7 +1400,7 @@ def get_ligand_cif_graph_matches(cif_path):
 
     keys = [
         "comp_LIG",
-        "comp_XXX"
+        "comp_XXX",
         "data_comp_XXX",
         "comp_DRG",
         "comp_UNL",
