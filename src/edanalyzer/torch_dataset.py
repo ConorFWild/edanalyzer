@@ -1564,7 +1564,7 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
         rmsd = 10.0
         j = 0
         while rmsd > 2.0:
-            posed_ligand_res = generate_ligand_pose(closest_ligand_res, 0.0, 2.0)
+            posed_ligand_res = generate_ligand_pose(closest_ligand_res, 0.0, 1.5)
             new_rmsds = [rmsd,]
             new_rmsds.append(
                 get_rmsd(
@@ -1586,7 +1586,7 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
 
     # If not a hit, generate a high rmsd pose
     else:
-        posed_ligand_res = generate_ligand_pose(closest_ligand_res, 2.0, 12.0)
+        posed_ligand_res = generate_ligand_pose(closest_ligand_res, 1.5, 12.0)
 
     sample_specification['ligand_res'] = posed_ligand_res
 
