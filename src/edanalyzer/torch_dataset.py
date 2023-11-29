@@ -1385,7 +1385,7 @@ def _get_bound_state_model_path(event, sample_specification):
     elif model_path_3.exists():
         sample_specification['bound_state_structure_path'] = str(model_path_3)
     else:
-        print(f"No bound state structure at: {model_path_1}")
+        print(f"No bound state structure at: {model_path_1} or {model_path_2} or {model_path_3}")
         sample_specification['bound_state_structure_path'] = None
     return sample_specification
 
