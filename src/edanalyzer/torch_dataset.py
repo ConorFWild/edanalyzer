@@ -1400,7 +1400,7 @@ def get_ligand_cif_graph_matches(cif_path):
 
     key = "comp_LIG"
     try:
-        cif['comp_LIG']
+        cif[key]
     except Exception as e:
         print(e)
         key = "data_comp_XXX"
