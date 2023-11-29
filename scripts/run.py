@@ -1989,11 +1989,7 @@ def _summarize(working_dir, test_systems, model_key):
             if len(recall_greater_than_95) > 0:
                 max_prec_cutoff = max(recall_greater_than_95, key=lambda x: recall_greater_than_95[x]['precision'])
                 rprint(f"\t\tRecall: {overall_precision_recall[max_prec_cutoff]['recall']} : Precision: {overall_precision_recall[max_prec_cutoff]['precision']} : Cutoff: {max_prec_cutoff}")
-            precision_greater_than_95 = {cutoff: pr for cutoff, pr in overall_precision_recall.items() if
-                                      pr['precision'] > 0.95}
-            if len(precision_greater_than_95) > 0:
-                max_recall_cutoff = max(precision_greater_than_95, key=lambda x: precision_greater_than_95[x]['recall'])
-                rprint(f"\t\tRecall: {overall_precision_recall[max_recall_cutoff]['recall']} : Precision: {overall_precision_recall[max_recall_cutoff]['precision']} : Cutoff: {max_recall_cutoff}")
+
 
 
             system_precisions = []
@@ -2022,6 +2018,15 @@ def _summarize(working_dir, test_systems, model_key):
                     system_recalls.append(precision_recall[max_prec_cutoff]['recall'])
                     system_fps.append(precision_recall[max_prec_cutoff]['fp'])
                     system_fns.append(precision_recall[max_prec_cutoff]['fn'])
+
+                precision_greater_than_95 = {cutoff: pr for cutoff, pr in precision_recall.items() if
+                                             pr['precision'] > 0.95}
+                if len(precision_greater_than_95) > 0:
+                    max_recall_cutoff = max(precision_greater_than_95,
+                                            key=lambda x: precision_greater_than_95[x]['recall'])
+                    rprint(
+                        f"\t\tRecall: {precision_recall[max_recall_cutoff]['recall']} : Precision: {precision_recall[max_recall_cutoff]['precision']} : Cutoff: {max_recall_cutoff}")
+
             if pandda_type == "pandda_2":
                 if len(system_precisions) > 0:
                     pandda_2_epoch_prec[epoch] = {
