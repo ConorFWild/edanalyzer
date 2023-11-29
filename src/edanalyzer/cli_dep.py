@@ -1064,7 +1064,7 @@ def train(
                 )
             # print(annotations[i])
 
-            with open( Path(working_dir)/ "annotations.pickle", 'wb') as f:
+            with open( Path(working_dir)/ f"annotations_{model_key}.pickle", 'wb') as f:
                 pickle.dump(annotations, f)
 
         logger.info(f"Saving state dict for model at epoch: {epoch}")
