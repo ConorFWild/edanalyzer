@@ -1405,12 +1405,12 @@ def get_ligand_cif_graph_matches(cif_path):
         print(e)
         key = "data_comp_XXX"
     try:
-        cif['key']
+        cif[key]
     except Exception as e:
         print(e)
         key = "data_comp_LIG"
     try:
-        cif['key']
+        cif[key]
     except Exception as e:
         print(e)
         raise Exception([x for x in cif])
