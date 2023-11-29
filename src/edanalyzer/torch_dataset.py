@@ -1406,6 +1406,10 @@ def get_ligand_cif_graph_matches(cif_path):
     try:
         cif['key']
     except:
+        key = "data_comp_LIG"
+    try:
+        cif['key']
+    except:
         return None
 
     # Find the relevant atoms loop
