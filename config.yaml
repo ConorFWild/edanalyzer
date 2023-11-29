@@ -21,9 +21,9 @@ datasets:
   - /dls/labxchem/data/lb32633/lb32633-1/processing/analysis/pandda_2_2023_08_22/pandda
   - /dls/labxchem/data/lb32627/lb32627-22/processing/analysis/pandda_2_2023_08_17/pandda
   - /dls/science/groups/i04-1/conor_dev/baz2b_test/BAZ2BA_6
-  - /dls/science/groups/i04-1/Downloads/pandda_PTP1B
-  - /dls/science/groups/i04-1/Downloads/pandda_BRD1A
-  - /dls/science/groups/i04-1/Downloads/pandda_JMJD2DA
+  - /dls/science/groups/i04-1/Downloads/pandda_PTP1B_all
+  - /dls/science/groups/i04-1/Downloads/pandda_BRD1A_all
+  - /dls/science/groups/i04-1/Downloads/pandda_JMJD2DA_all
   - /dls/labxchem/data/*/*/processing/analysis/20230928/pandda
 exclude:
   - /dls/labxchem/data/*/i*/processing/analysis/*
