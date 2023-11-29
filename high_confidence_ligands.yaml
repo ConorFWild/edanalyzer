@@ -207,7 +207,9 @@ high_confidence_ligands:
     - [PTP1B-y1957, A, 201]
 pandda_2_high_confidence_ligands:
   BAZ2BA:
+    - [ BAZ2BA-x451, A, 1901 ] # NEW
     - [BAZ2BA-x446, A, 1888]
+    - [ BAZ2BA-x556, A, 1941 ] # NEW
     - [BAZ2BA-x557, A, 1888]
   BRD1A:
     - [BRD1A-x049, A, 59]  # PanDDA 2

@@ -569,6 +569,7 @@ def get_annotation_from_event_annotation(annotation: PanDDAEventAnnotation):
         return np.array([1.0, 0.0], dtype=np.float32)
 
 
+
 class PanDDAEventDatasetTorch(Dataset):
     def __init__(self,
                  pandda_event_dataset: PanDDAEventDataset,
@@ -1379,6 +1380,230 @@ def _get_annotation_from_event(event, sample_specification):  # Updates annotati
     sample_specification['annotation'] = event.hit
     return sample_specification
 
+def decide_annotation(event, sample_specification):  # Updates annotation
+    rng = default_rng()
+    val = rng.random()
+    if val > 0.5:
+        sample_specification['annotation'] = True
+    else:
+        sample_specification['annotation'] = False
+
+    return sample_specification
+
+def get_ligand_cif_graph_matches(cif_path):
+    # Open the cif document with gemmi
+    cif = gemmi.cif.read(str(cif_path))
+
+    key = "comp_LIG"
+    try:
+        cif['comp_LIG']
+    except:
+        key = "data_comp_XXX"
+
+    # Find the relevant atoms loop
+    atom_id_loop = list(cif[key].find_loop('_chem_comp_atom.atom_id'))
+    atom_type_loop = list(cif[key].find_loop('_chem_comp_atom.type_symbol'))
+
+    # Find the bonds loop
+    bond_1_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_1'))
+    bond_2_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_2'))
+
+    # Construct the graph nodes
+    G = nx.Graph()
+
+    for atom_id, atom_type in zip(atom_id_loop, atom_type_loop):
+        if atom_type == "H":
+            continue
+        G.add_node(atom_id, Z=atom_type)
+
+    # Construct the graph edges
+    for atom_id_1, atom_id_2 in zip(bond_1_id_loop, bond_2_id_loop):
+        if atom_id_1 not in G:
+            continue
+        if atom_id_2 not in G:
+            continue
+        G.add_edge(atom_id_1, atom_id_2)
+
+    # Get the isomorphisms
+    GM = iso.GraphMatcher(G, G, node_match=iso.categorical_node_match('Z', 0))
+
+    return [x for x in GM.isomorphisms_iter()]
+
+def get_rmsd(
+        pose_res,
+        ref_res,
+        ligand_graph
+):
+    # Iterate over each isorhpism, then get symmetric distance to the relevant atom
+    iso_distances = []
+    for isomorphism in ligand_graph:
+        print(isomorphism)
+        distances = []
+        for atom in ref_res:
+            if atom.element.name == "H":
+                continue
+            try:
+                pose_atom = pose_res[isomorphism[atom.name]][0]
+            except:
+                return None
+            dist = atom.pos.dist(pose_atom.pos)
+            distances.append(dist)
+        print(distances)
+        rmsd = np.sqrt(np.mean(np.square(distances)))
+        iso_distances.append(rmsd)
+    return min(iso_distances)
+
+def generate_ligand_pose(closest_ligand_res, min_transform=0.0, max_transform=2.0):
+    # Get the ligand centroid
+    poss = []
+    for atom in closest_ligand_res:
+        pos = atom.pos
+        poss.append([pos.x, pos.y, pos.z])
+
+    initial_ligand_centroid = np.mean(poss, axis=0)
+
+    # Get the translation
+    rng = default_rng()
+    val = rng.random(3)
+
+    point = min_transform + (val*(max_transform-min_transform))
+
+    val_2 = rng.random(3)
+    if val_2[0] < 0.5:
+        point[0] = -point[0]
+    if val_2[1] < 0.5:
+        point[1] = -point[1]
+    if val_2[2] < 0.5:
+        point[2] = -point[2]
+
+    # Get the rotation
+    rotation_matrix = R.random().as_matrix()
+
+    # Create the res clone
+    posed_res = closest_ligand_res.clone()
+
+    # Generate rotation matrix
+    rotation_transform = gemmi.Transform()
+    rotation_transform.mat.fromlist(rotation_matrix.tolist())
+
+    # Get the centering transform
+    ligand_centre_transform = gemmi.Transform()
+    ligand_centre_transform.vec.fromlist([-x for x in initial_ligand_centroid])
+
+    # Event centre transform
+    event_centre_transform = gemmi.Transform()
+    event_centre_transform.vec.fromlist([(x+point[j]) for j, x in enumerate(ligand_centre_transform)])
+
+    # Apply random translation
+    # transform = #random_translation_transform.combine(
+    transform = event_centre_transform.combine(
+        rotation_transform.combine(
+                ligand_centre_transform
+        )
+    )
+
+    # Transform the atoms
+    for atom in posed_res:
+        atom.pos = transform.apply(atom.pos)
+
+    return posed_res
+
+
+def get_closest_ligand_res(st, event_centroid_pos):
+    centroids = {}
+    for model in st:
+        for chain in model:
+            for res in chain:
+                if res.name in ["LIG", "XXX"]:
+                    poss = []
+                    for atom in res:
+                        pos = atom.pos
+                        poss.append([pos.x, pos.y, pos.z])
+                    centroid = np.mean(poss, axis=0)
+                    centroids[f"{chain.name}_{res.seqid.num}"] = {
+                        "Distance": gemmi.Position(centroid[0], centroid[1], centroid[2]).dist(event_centroid_pos),
+                    "Residue": res
+                    }
+    if len(centroids) == 0:
+        return None
+
+    closest_res = min(centroids, key=lambda _key: centroids[_key]['Distance'])
+
+    return centroids[closest_res]['Residue']
+
+def get_transformed_ligand(event, sample_specification):  # Updates ligand_res
+
+    # Load the ligand cif
+    ligand_cif_path = sample_specification['cif_path']
+
+    # Get isomorphisms
+    isomorphisms = get_ligand_cif_graph_matches(ligand_cif_path)
+
+    # Load the ligand bound structure
+    if sample_specification['bound_state_structure_path'] is not None:
+        st = gemmi.read_structure(str(sample_specification['bound_state_structure_path']))
+    else:
+        sample_specification['ligand_res'] = None
+        return sample_specification
+
+    # Get the closest ligand in structure to the event
+    closest_ligand_res = get_closest_ligand_res(st, gemmi.Position(event.x, event.y, event.z))
+    if not closest_ligand_res:
+        sample_specification['ligand_res'] = None
+        return sample_specification
+
+    # Get the annotation
+    annotation = sample_specification['annotation']
+
+    # If a hit, try to generate a low RMSD pose
+    if annotation:
+        rmsd = 10.0
+        j = 0
+        while rmsd > 2.0:
+            posed_ligand_res = generate_ligand_pose(closest_ligand_res, 0.0, 2.0)
+            rmsds = []
+            for iso in isomorphisms:
+                rmsds.append(
+                    get_rmsd(
+                        posed_ligand_res,
+                        closest_ligand_res,
+                        iso
+                    )
+                )
+            rmsd = min(rmsds)
+
+            if j > 200:
+                print(f"Failed to sample a low RMSD pose!")
+                posed_ligand_res = None
+                sample_specification['annotation'] = False
+                break
+
+
+    # If not a hit, generate a high rmsd pose
+    else:
+        posed_ligand_res = generate_ligand_pose(closest_ligand_res, 2.0, 12.0)
+
+    sample_specification['ligand_res'] = posed_ligand_res
+
+    return sample_specification
+
+def _get_non_transformed_ligand(event, sample_specification):
+    # Load the ligand bound structure
+    if sample_specification['bound_state_structure_path'] is not None:
+        st = gemmi.read_structure(str(sample_specification['bound_state_structure_path']))
+    else:
+        print(f"No bound state structure! Cannot generate ligand_res!")
+        sample_specification['ligand_res'] = None
+        return sample_specification
+
+    closest_ligand_res = get_closest_ligand_res(st, gemmi.Position(event.x, event.y, event.z))
+
+    if closest_ligand_res:
+        sample_specification['ligand_res'] = closest_ligand_res
+    else:
+        print(f"No closest ligand res! Cannot generate ligand_res!")
+        sample_specification['ligand_res'] = None
+
 
 def _sample_point(lower, upper):
     rng = default_rng()
@@ -1447,6 +1672,48 @@ def _get_centroid_relative_to_ligand(event, sample_specification):  # updates ce
 
             sample_specification['centroid'] = [sample[0], sample[1], sample[2]]
 
+
+    else:
+        sample_specification['centroid'] = [event.x, event.y, event.z]
+
+    return sample_specification
+
+def _get_centroid_relative_to_transformed_ligand(event, sample_specification):  # updates centroid and annotation
+
+    ligand_res = sample_specification['ligand_res']
+    if ligand_res is not None:
+        original_centroid = [event.x, event.y, event.z]
+        original_centroid_pos = gemmi.Position(*original_centroid)
+        lig_atom_poss = [[event.x, event.y, event.z]]
+        for atom in ligand_res:
+            pos = atom.pos
+            if pos.dist(original_centroid_pos) < 10.0:
+                lig_atom_poss.append(
+                    [pos.x, pos.y, pos.z]
+                )
+
+        if len(lig_atom_poss) < 3:
+            sample_specification['centroid'] = [event.x, event.y, event.z]
+
+        else:
+            ligand_array = np.array(lig_atom_poss)
+            lower = np.min(ligand_array, axis=0).flatten() - 4.0
+            upper = np.max(ligand_array, axis=0).flatten() + 4.0
+
+
+            j = 0
+            # Sample a ligand point
+            sample_specification['annotation'] = sample_specification['annotation']
+            sample = _sample_point(lower, upper)
+            while _sample_to_ligand_distance(sample, ligand_array) > 1.5:
+                sample = _sample_point(lower, upper)
+                j+=1
+                if j > 200:
+                    print(f"Failed to get a sample point for event map: {event.event_map}!")
+                    sample = [event.x, event.y, event.z]
+                    break
+
+            sample_specification['centroid'] = [sample[0], sample[1], sample[2]]
 
     else:
         sample_specification['centroid'] = [event.x, event.y, event.z]
@@ -1668,6 +1935,58 @@ def _make_ligand_map_layer(event, sample_specification):
         sample_specification['annotation'] = False
 
     return sample_specification
+def get_masked_dmap(dmap, res):
+    mask = gemmi.Int8Grid(dmap.nu, dmap.nv, dmap.nw)
+    mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
+    mask.set_unit_cell(dmap.unit_cell)
+
+    # Get the mask
+    for atom in res:
+        pos = atom.pos
+        mask.set_points_around(
+            pos,
+            radius=2.5,
+            value=1,
+        )
+
+    # Get the mask array
+    mask_array = np.array(mask, copy=False)
+
+    # Get the dmap array
+    dmap_array = np.array(dmap, copy=False)
+
+    # Mask the dmap array
+    dmap_array[mask_array == 0] = 0.0
+
+    return dmap
+
+
+def _make_ligand_masked_event_map_layer(event, sample_specification):
+    try:
+        sample_array = sample_specification['sample_grid']
+        event_map_path = sample_specification['event_map_path']
+        sample_transform = sample_specification['transform']
+        res = sample_specification['ligand_res']
+
+        sample_array= np.copy(sample_array)
+        dmap = get_map_from_path(event_map_path)
+        masked_dmap = get_masked_dmap(dmap, res)
+        image_initial = sample_xmap(masked_dmap, sample_transform, sample_array)
+        std = np.std(image_initial)
+        if np.abs(std) < 0.0000001:
+            image_dmap = np.copy(sample_array)
+        else:
+            image_dmap = (image_initial - np.mean(image_initial)) / std
+        # sample_specification['event_map'] = dmap
+        sample_specification['ligand_masked_event_map_layer'] = image_dmap
+
+    except Exception as e:
+        print(f"Error making masked event map: {e}")
+        # sample_specification['event_map'] = None
+        sample_specification['ligand_masked_event_map_layer'] = None
+
+    return sample_specification
+
 
 def _make_label_from_specification(sample_specification, layers):
 

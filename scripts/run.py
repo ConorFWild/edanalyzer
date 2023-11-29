@@ -1735,6 +1735,159 @@ def _train_and_test(working_dir,
 
     db.disconnect()
 
+def _train_and_test_ligand_score(
+        working_dir,
+        test_systems,
+        initial_epoch,
+        test_interval,
+        model_key,
+):
+    database_path = working_dir / "database.db"
+    try:
+        db.bind(provider='sqlite', filename=f"{database_path}")
+        db.generate_mapping()
+    except Exception as e:
+        print(e)
+
+    from edanalyzer.torch_dataset import (
+        _get_zmap_path,
+        _get_event_mtz_path,
+        _get_event_map_path,
+        _get_xmap_path,
+        _get_structure_path,
+        _get_bound_state_model_path,
+        _get_annotation_from_event,  # Updates annotation
+        _get_centroid_relative_to_ligand,  # updates centroid and annotation
+        _get_random_ligand_path,  # Updates ligand_path and annotation
+        _get_random_orientation,  # Updates orientation
+        _get_transform,  # Updates transform,
+        _make_zmap_layer,
+        _make_xmap_layer,
+        _make_event_map_layer,
+        _make_structure_map_layer,
+        _make_ligand_map_layer,
+        _get_event_centroid,
+        _get_identity_orientation,
+        _decide_annotation,  # Updates annotation
+        _get_transformed_ligand,  # Updates ligand_res
+        _get_non_transformed_ligand,
+        _get_centroid_relative_to_transformed_ligand,  # updates centroid and annotation
+        _make_ligand_masked_event_map_layer,  # Updates ligand_masked_event_map_layer
+    )
+
+    make_sample_specification_train = [
+        _get_event_map_path,  # Updates event_map_path
+        _get_bound_state_model_path,  # Updates bound_state_structure_path
+        _get_random_ligand_path,  # Updates ligand_path and annotation
+        _get_random_orientation,  # Updates orientation
+        _decide_annotation,  # Updates annotation
+        _get_transformed_ligand,  # Updates ligand_res
+        _get_centroid_relative_to_transformed_ligand,  # updates centroid and annotation
+        _get_transform,  # Updates transform,
+        _make_ligand_masked_event_map_layer,  # Updates ligand_masked_event_map_layer
+    ]
+    make_sample_specification_test = [
+        _get_event_map_path,  # Updates event_map_path
+        _get_bound_state_model_path,  # Updates bound_state_structure_path
+        _get_random_ligand_path,  # Updates ligand_path and annotation
+        _get_random_orientation,  # Updates orientation
+        _get_annotation_from_event,  # Updates annotation
+        _get_non_transformed_ligand,  # Updates ligand_res
+        _get_centroid_relative_to_transformed_ligand,  # updates centroid and annotation
+        _get_transform,  # Updates transform,
+        _make_ligand_masked_event_map_layer,  # Updates ligand_masked_event_map_layer
+    ]
+    layers = ['ligand_masked_event_map_layer', ]
+    num_layers = 1
+
+    with pony.orm.db_session:
+        query = pony.orm.select(
+            (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
+            event in EventORM)
+
+        hits = [
+                    PanDDAEvent(
+                        id=res[0].id,
+                        pandda_dir=res[0].pandda.path,
+                        model_building_dir=res[0].pandda.experiment.model_dir,
+                        system_name=res[0].pandda.system.name,
+                        dtag=res[0].dtag,
+                        event_idx=res[0].event_idx,
+                        event_map=res[0].event_map,
+                        x=res[0].x,
+                        y=res[0].y,
+                        z=res[0].z,
+                        hit=res[1].annotation,
+                        ligand=_get_ligand_cif_path(res[0].pandda.path, res[0].dtag)
+                    )
+                    for res
+                    in query
+                    if (res[0].pandda.system.name not in test_systems) & res[1].annotation
+        ]
+        rprint(f"Got {len(hits)} hit train events!")
+
+        train_dataset_torch = PanDDADatasetTorchLigand(
+            PanDDAEventDataset(
+
+                pandda_events =hits
+            ),
+            update_sample_specification=make_sample_specification_train,
+            layers=layers,
+        )
+        rprint(f"Got {len(train_dataset_torch)} train events!")
+
+        test_dataset_torch = PanDDADatasetTorchLigand(
+            PanDDAEventDataset(
+                pandda_events=[
+                    PanDDAEvent(
+                        id=res[0].id,
+                        pandda_dir=res[0].pandda.path,
+                        model_building_dir=res[0].pandda.experiment.model_dir,
+                        system_name=res[0].pandda.system.name,
+                        dtag=res[0].dtag,
+                        event_idx=res[0].event_idx,
+                        event_map=res[0].event_map,
+                        x=res[0].x,
+                        y=res[0].y,
+                        z=res[0].z,
+                        hit=res[1].annotation,
+                        ligand=_get_ligand_cif_path(res[0].pandda.path, res[0].dtag)
+                    )
+                    for res
+                    in query
+                    if res[0].pandda.system.name in test_systems
+                ]),
+            update_sample_specification=make_sample_specification_test,
+            layers=layers,
+        )
+        rprint(f"Got {len(test_dataset_torch)} test events!")
+
+    # Get the device
+    if torch.cuda.is_available():
+        dev = "cuda:0"
+    else:
+        dev = "cpu"
+
+    # if model_type == "resnet+ligand":
+    model = resnet18(num_classes=2, num_input=num_layers)
+    model.to(dev)
+
+    train(
+        working_dir,
+        train_dataset_torch,
+        test_dataset_torch,
+        model,
+        initial_epoch,
+        model_key,
+        dev,
+        test_interval,
+        batch_size=12,
+        num_workers=20,
+        num_epochs=1000,
+    )
+
+    db.disconnect()
+
 
 def _get_precision_recall(epoch_results):
     pr = {}
