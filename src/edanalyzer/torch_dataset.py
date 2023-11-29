@@ -2045,6 +2045,7 @@ def _make_ligand_masked_event_map_layer(event, sample_specification):
         print(f"Error making masked event map: {e}")
         # sample_specification['event_map'] = None
         sample_array = sample_specification['sample_grid']
+        sample_specification['annotation'] = False
         sample_specification['ligand_masked_event_map_layer'] = np.copy(sample_array)
 
     return sample_specification
