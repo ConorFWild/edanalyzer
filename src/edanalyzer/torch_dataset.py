@@ -1990,7 +1990,8 @@ def _make_ligand_masked_event_map_layer(event, sample_specification):
     except Exception as e:
         print(f"Error making masked event map: {e}")
         # sample_specification['event_map'] = None
-        sample_specification['ligand_masked_event_map_layer'] = None
+        sample_array = sample_specification['sample_grid']
+        sample_specification['ligand_masked_event_map_layer'] = np.copy(sample_array)
 
     return sample_specification
 
