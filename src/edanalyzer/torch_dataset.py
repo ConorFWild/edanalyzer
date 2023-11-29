@@ -1495,7 +1495,7 @@ def generate_ligand_pose(closest_ligand_res, min_transform=0.0, max_transform=2.
 
     # Event centre transform
     event_centre_transform = gemmi.Transform()
-    event_centre_transform.vec.fromlist([(x+point[j]) for j, x in enumerate(ligand_centre_transform)])
+    event_centre_transform.vec.fromlist([(x+point[j]) for j, x in enumerate([k for k in initial_ligand_centroid])])
 
     # Apply random translation
     # transform = #random_translation_transform.combine(
