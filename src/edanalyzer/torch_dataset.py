@@ -1565,7 +1565,7 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
         j = 0
         while rmsd > 2.0:
             posed_ligand_res = generate_ligand_pose(closest_ligand_res, 0.0, 2.0)
-            rmsds = []
+            rmsds = [10.0,]
             for iso in isomorphisms:
                 rmsds.append(
                     get_rmsd(
@@ -1574,7 +1574,7 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
                         iso
                     )
                 )
-            rmsd = min(rmsds)
+            rmsd = min([x for x in rmsds if x is not None])
 
             if j > 200:
                 print(f"Failed to sample a low RMSD pose!")
