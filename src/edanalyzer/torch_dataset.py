@@ -1565,18 +1565,19 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
         j = 0
         while rmsd > 2.0:
             posed_ligand_res = generate_ligand_pose(closest_ligand_res, 0.0, 2.0)
-            rmsds = [10.0,]
-            rmsds.append(
+            new_rmsds = [10.0,]
+            new_rmsds.append(
                 get_rmsd(
                     posed_ligand_res,
                     closest_ligand_res,
                     isomorphisms
                 )
                 )
-            rmsd = min([x for x in rmsds if x is not None])
+            rmsd = min([x for x in new_rmsds if x is not None])
             j+= 1
             if j > 200:
-                print(f"Failed to sample a low RMSD pose!")
+                print()
+                print(f"Failed to sample a low RMSD pose! {new_rmsds}")
                 posed_ligand_res = None
                 sample_specification['annotation'] = False
                 break
