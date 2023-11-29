@@ -1581,6 +1581,9 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
                 sample_specification['annotation'] = False
                 break
 
+        if posed_ligand_res is not None:
+            print(f"Sucessfully generated low RMSD pose")
+
     # If not a hit, generate a high rmsd pose
     else:
         posed_ligand_res = generate_ligand_pose(closest_ligand_res, 2.0, 12.0)
