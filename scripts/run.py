@@ -2026,6 +2026,8 @@ def _summarize(working_dir, test_systems, model_key):
                                             key=lambda x: precision_greater_than_95[x]['recall'])
                     rprint(
                         f"\t\tRecall: {precision_recall[max_recall_cutoff]['recall']} : Precision: {precision_recall[max_recall_cutoff]['precision']} : Cutoff: {max_recall_cutoff}")
+                else:
+                    rprint(f"\t\t95% Prec never achieved")
 
             if pandda_type == "pandda_2":
                 if len(system_precisions) > 0:
