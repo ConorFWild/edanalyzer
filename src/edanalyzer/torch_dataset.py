@@ -1407,6 +1407,8 @@ def _decide_annotation(event, sample_specification):  # Updates annotation
 
 def get_ligand_cif_graph_matches(cif_path):
     # Open the cif document with gemmi
+    if not Path(cif_path).exists():
+        return []
     cif = gemmi.cif.read(str(cif_path))
 
     keys = [
