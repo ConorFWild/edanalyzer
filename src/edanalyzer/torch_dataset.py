@@ -1370,13 +1370,22 @@ def _get_structure_path(event, sample_specification):
     return sample_specification
 
 def _get_bound_state_model_path(event, sample_specification):
-    model_path = Path(
+    model_path_1 = Path(
         event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INSPECT_MODEL_DIR / constants.PANDDA_MODEL_FILE.format(
         dtag=event.dtag)
-    if model_path.exists():
-        sample_specification['bound_state_structure_path'] = str(model_path)
+    model_path_2 = Path(event.pandda_dir).parent / "model_building" / event.dtag / constants.PANDDA_MODEL_FILE.format(
+        dtag=event.dtag)
+    model_path_3 = Path(event.pandda_dir).parent / "initial_model" / event.dtag / constants.PANDDA_MODEL_FILE.format(
+        dtag=event.dtag)
+
+    if model_path_1.exists():
+        sample_specification['bound_state_structure_path'] = str(model_path_1)
+    elif model_path_2.exists():
+        sample_specification['bound_state_structure_path'] = str(model_path_2)
+    elif model_path_3.exists():
+        sample_specification['bound_state_structure_path'] = str(model_path_3)
     else:
-        print(f"No bound state structure at: {model_path}")
+        print(f"No bound state structure at: {model_path_1}")
         sample_specification['bound_state_structure_path'] = None
     return sample_specification
 
