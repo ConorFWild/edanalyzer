@@ -1600,6 +1600,10 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
 
     # Load the ligand cif
     ligand_cif_path = sample_specification['ligand_path']
+    if not ligand_cif_path:
+        print(f"No ligand for dataset with event map: {event.event_map}")
+        sample_specification['ligand_res'] = None
+        return sample_specification
 
     # Get isomorphisms
     isomorphisms = get_ligand_cif_graph_matches(ligand_cif_path)
