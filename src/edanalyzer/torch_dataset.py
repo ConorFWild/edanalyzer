@@ -1552,7 +1552,7 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
     # Get isomorphisms
     isomorphisms = get_ligand_cif_graph_matches(ligand_cif_path)
     if len(isomorphisms) == 0:
-        print(f"No isomorphisms for: {ligand_cif_path}")
+        print(f"No isomorphisms for: {ligand_cif_path}: Length: {len(isomorphisms)}")
         sample_specification['ligand_res'] = None
         return sample_specification
 
