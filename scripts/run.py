@@ -1975,7 +1975,7 @@ def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
     j = 0
     for dtag in hit_events:
         for event_idx, event_info in hit_events[dtag].items():
-            row = event_info['Row']
+            row = event_info[1]
             # row.loc[0, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
             rows.append(row)
             # j = j + 1
