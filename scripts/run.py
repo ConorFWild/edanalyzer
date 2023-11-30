@@ -1958,17 +1958,17 @@ def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
         modelled_structures_dir = dtag_dir / "modelled_structures"
         try_make(modelled_structures_dir)
 
-        for chain_res, event_info in hit_ligands.items():
-            event, annotation = event_info['event'], event_info['annotation']
-            initial_structure_path = ...
-            reflections_path = ...
-            event_map_path = ...
-            modelled_structure_path = ...
-            try_link(initial_structure_path, dtag_dir / Path(event.initial_structure_path).name)
-            try_link(reflections_path, dtag_dir / Path(reflections_path).name)
-            try_link(event_map_path, dtag_dir / Path(event_map_path).name)
+        for model_path_chain_res, event_info in hit_ligands.items():
+            # event, annotation = event_info['event'], event_info['annotation']
+            event_map_path = event_info[0]
+            initial_structure_path = event_map_path.parent / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)
+            reflections_path = event_map_path.parent / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dtag)
+            modelled_structure_path = model_path_chain_res[0]
+            try_link(initial_structure_path, dtag_dir / initial_structure_path.name)
+            try_link(reflections_path, dtag_dir / reflections_path.name)
+            try_link(event_map_path, dtag_dir / event_map_path.name)
             if modelled_structure_path:
-                try_link(modelled_structure_path, modelled_structures_dir / Path(event.structure).name)
+                try_link(modelled_structure_path, modelled_structures_dir / modelled_structure_path.name)
 
     # Spoof the event table
     rows = []
@@ -2121,7 +2121,7 @@ def _make_hit_pandda(working_dir, ):
 
                                 closest_event_key = min(dists, key=lambda _key: dists[_key]['Distance'])
 
-                                ligands_to_event_maps[(chain.name, str(res.seqid.num))] = (closest_event_key, dists[closest_event_key]['Row'])
+                                ligands_to_event_maps[(model_path, chain.name, str(res.seqid.num))] = (closest_event_key, dists[closest_event_key]['Row'])
 
                 # print(ligands_to_event_maps)
 
@@ -2137,7 +2137,7 @@ def _make_hit_pandda(working_dir, ):
     rprint(hit_events)
     print(f"Got {len(hit_events)} hit events!")
 
-    _make_psuedo_pandda_from_event_rows('./hits_for_annotation', hit_events)
+    _make_psuedo_pandda_from_event_rows(Path('./hits_for_annotation'), hit_events)
 
 
     # with pony.orm.db_session:
