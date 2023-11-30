@@ -1951,7 +1951,7 @@ def _make_hit_pandda(working_dir, ):
         #     (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
         #     event in EventORM)
         query = pony.orm.select(
-            (dataset, dataset.experiment, ) for
+            (dataset, dataset.experiment, dataset.panddas) for
             dataset in DatasetORM)
 
         for result in query:
@@ -1969,17 +1969,31 @@ def _make_hit_pandda(working_dir, ):
                 continue
 
             # Get event maps
-            event_map_paths = {
-                get_chain_res(x.name): x
-                for x
-                in (Path(dataset.experiment.model_dir) / dtag).glob(f'{dtag}-*naitve_LIG*.ccp4')
+            # event_map_paths = {
+            #     get_chain_res(x.name): x
+            #     for x
+            #     in (Path(dataset.experiment.model_dir) / dtag).glob(f'{dtag}-*naitve_LIG*.ccp4')
+            # }
+            # print(f"Got {len(event_map_paths)} event maps!")
+
+            # Get the inspect tables
+            inspect_tables = {
+                Path(pandda.path) / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
+                for pandda
+                in result[2]
             }
-            print(f"Got {len(event_map_paths)} event maps!")
+            print(f'For {len(inspect_tables)} inspect tables')
 
             # Skip if no event maps
-            if len(event_map_paths) == 0:
+            if len(inspect_tables) == 0:
                 print(f"No event maps for {Path(dataset.experiment.model_dir) / dtag }! Skipping!")
                 continue
+
+
+            # Skip if no event maps
+            # if len(event_map_paths) == 0:
+            #     print(f"No event maps for {Path(dataset.experiment.model_dir) / dtag }! Skipping!")
+            #     continue
 
             # Load structure
             st = gemmi.read_structure(str(model_path))
