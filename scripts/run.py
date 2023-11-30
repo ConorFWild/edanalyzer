@@ -1930,6 +1930,71 @@ def _get_precision_recall(epoch_results):
     return pr
 
 
+def get_chain_res(string):
+    match = re.search('naitve_LIG-([^-]+)-([^-]+)', string)
+    return match[0], match[1]
+
+
+
+def _make_hit_pandda(working_dir, test_systems, model_key):
+    database_path = working_dir / "database.db"
+    try:
+        db.bind(provider='sqlite', filename=f"{database_path}")
+        db.generate_mapping()
+    except Exception as e:
+        print(e)
+
+    with pony.orm.db_session:
+        partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
+        # query = pony.orm.select(
+        #     (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
+        #     event in EventORM)
+        query = pony.orm.select(
+            (dataset, dataset.experiment, ) for
+            dataset in DatasetORM)
+
+        for result in query:
+            dataset = result[0]
+
+            # Get dtag
+            dtag = dataset.dtag
+
+            # Get model path
+            model_path = Path(dataset.experiment.model_dir) / dtag / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
+
+            # Skip if no such model
+            if not model_path.exists():
+                print(f"No PanDDA Model for {Path(dataset.experiment.model_dir) / dtag }! Skipping!")
+                continue
+
+            # Get event maps
+            event_map_paths = {
+                get_chain_res(x): x
+                for x
+                in (Path(dataset.experiment.model_dir) / dtag).glob(f'{dtag}-*.ccp4')
+            }
+
+            # Skip if no event maps
+            if len(event_map_paths) == 0:
+                print(f"No event maps for {Path(dataset.experiment.model_dir) / dtag }! Skipping!")
+                continue
+
+            # Load structure
+            st = gemmi.read_structure(str(model_path))
+
+            # Get res
+
+            for (chain, res), event_map_path in event_map_paths.items():
+                ligand_res = st[0][chain][str(res)][0]
+                print(ligand_res)
+
+
+        # pandda_1_events = [event for event in query if event.source == "pandda_1"]
+
+
+
+
+
 def _summarize(working_dir, test_systems, model_key):
     database_path = working_dir / "database.db"
     try:
@@ -2667,6 +2732,11 @@ def __main__(config_yaml="config.yaml"):
             config.test.initial_epoch,
             config.test.test_interval,
             config.name
+        )
+
+    if 'MakeHitPanDDA' in config.steps:
+        _make_hit_pandda(
+            config.working_directory,
         )
 
     # Summarize train/test results
