@@ -2028,7 +2028,7 @@ def _summarize(working_dir, test_systems, model_key):
                     rprint(
                         f"\t\tRecall: {precision_recall[max_recall_cutoff]['recall']} : Precision: {precision_recall[max_recall_cutoff]['precision']} : Cutoff: {max_recall_cutoff}")
                 else:
-                    rprint(f"\t\t95% Prec never achieved")
+                    rprint(f"\t\t90% Prec never achieved")
 
                 max_prec_cutoff = max(precision_recall,
                                         key=lambda x: precision_recall[x]['precision'])
