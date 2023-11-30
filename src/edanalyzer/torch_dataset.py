@@ -1604,6 +1604,8 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
     if not ligand_cif_path:
         print(f"No ligand for dataset with event map: {event.event_map}")
         sample_specification['ligand_res'] = None
+        sample_specification['annotation'] = False
+
         return sample_specification
 
     # Get isomorphisms
@@ -1611,6 +1613,8 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
     if len(isomorphisms) == 0:
         print(f"No isomorphisms for: {ligand_cif_path}: Length: {len(isomorphisms)}")
         sample_specification['ligand_res'] = None
+        sample_specification['annotation'] = False
+
         return sample_specification
 
     # Load the ligand bound structure
@@ -1618,12 +1622,16 @@ def _get_transformed_ligand(event, sample_specification):  # Updates ligand_res
         st = gemmi.read_structure(str(sample_specification['bound_state_structure_path']))
     else:
         sample_specification['ligand_res'] = None
+        sample_specification['annotation'] = False
+
         return sample_specification
 
     # Get the closest ligand in structure to the event
     closest_ligand_res = get_closest_ligand_res(st, gemmi.Position(event.x, event.y, event.z))
     if not closest_ligand_res:
         sample_specification['ligand_res'] = None
+        sample_specification['annotation'] = False
+
         return sample_specification
 
     # Get the annotation
