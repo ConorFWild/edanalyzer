@@ -2059,6 +2059,7 @@ def _make_hit_pandda(working_dir, ):
                 hit_events[dtag][lig_id] = event_map_path
 
         rprint(hit_events)
+        print(f"Got {len(hit_events)} hit events!")
 
         # pandda_1_events = [event for event in query if event.source == "pandda_1"]
 
