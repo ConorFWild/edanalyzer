@@ -1967,6 +1967,7 @@ def _make_hit_pandda(working_dir, ):
 
             for dataset_dir in data_dir.glob('*'):
                 dtag = dataset_dir.name
+                print(f"{dtag}")
 
 
     with pony.orm.db_session:
