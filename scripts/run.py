@@ -1974,6 +1974,7 @@ def _make_hit_pandda(working_dir, ):
                 for x
                 in (Path(dataset.experiment.model_dir) / dtag).glob(f'{dtag}-*naitve_LIG*.ccp4')
             }
+            print(f"Got {len(event_map_paths)} event maps!")
 
             # Skip if no event maps
             if len(event_map_paths) == 0:
