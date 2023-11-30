@@ -1954,6 +1954,7 @@ def _make_hit_pandda(working_dir, ):
             (dataset, dataset.experiment, dataset.panddas) for
             dataset in DatasetORM)
 
+        hit_events = {}
         for result in query:
             dataset = result[0]
 
@@ -2037,11 +2038,14 @@ def _make_hit_pandda(working_dir, ):
                                     event_pos = gemmi.Position(x,y,z)
                                     dist = centroid_pos.dist(event_pos)
                                     if dist < 6:
-                                        dists[event_path] = dist
+                                        dists[event_path] = {
+                                            "Distance": dist,
+                                        "Row": row,
+                                        }
                             if len(dists) == 0:
                                 print(f"Could not match lig: {chain.name, res.seqid.num}")
                                 continue
-                            ligands_to_event_maps[(chain.name, str(res.seqid.num))] = min(dists, key=lambda _key: dists[_key])
+                            ligands_to_event_maps[(chain.name, str(res.seqid.num))] = min(dists, key=lambda _key: dists[_key]['Distance'])
 
             # print(ligands_to_event_maps)
 
@@ -2050,10 +2054,10 @@ def _make_hit_pandda(working_dir, ):
                 continue
 
 
-            for (chain, res), event_map_path in ligands_to_event_maps.items():
-                ligand_res = st[0][chain][str(res)][0]
-                print(ligand_res)
+            for lig_id, event_map_path in ligands_to_event_maps.items():
+                hit_events[dtag][lig_id] = event_map_path
 
+            rprint(hit_events)
 
         # pandda_1_events = [event for event in query if event.source == "pandda_1"]
 
