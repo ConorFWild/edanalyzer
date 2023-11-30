@@ -2139,7 +2139,7 @@ def _make_hit_pandda(working_dir, ):
     rprint(hit_events)
     print(f"Got {len(hit_events)} hit events!")
 
-    _make_psuedo_pandda_from_event_rows(Path('./hits_for_annotation'), hit_events)
+    _make_psuedo_pandda_from_event_rows(Path('.'), hit_events)
 
 
     # with pony.orm.db_session:
