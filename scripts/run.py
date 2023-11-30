@@ -1995,6 +1995,11 @@ def _make_hit_pandda(working_dir, ):
                 print(f"No event tables for {Path(dataset.experiment.model_dir) / dtag }! Skipping!")
                 continue
 
+            inspect_tables = {
+                inspect_table_path: pd.read_csv(inspect_table_path)
+                for inspect_table_path
+                in inspect_table_paths
+            }
 
             # Skip if no event maps
             # if len(event_map_paths) == 0:
@@ -2004,7 +2009,41 @@ def _make_hit_pandda(working_dir, ):
             # Load structure
             st = gemmi.read_structure(str(model_path))
 
-            # Get res
+            # Match the structure ligands to events, and hence event maps
+            ligands_to_event_maps = {}
+            for model in st:
+                for chain in model:
+                    for res in chain:
+                        if res.name in ['LIG', 'XXX']:
+                            poss = []
+                            for atom in res:
+                                pos = atom.pos
+                                poss.append([pos.x, pos.y, pos.z])
+                            centroid= np.mean(poss, axis=0)
+                            centroid_pos = gemmi.Position(centroid[0], centroid[1], centroid[2])
+                            dists = {}
+                            for table_path, table in inspect_tables.items():
+                                for idx, row in table[table['dtag'] == dtag].iterrows():
+                                    x, y, z = row['x'], row['y'], row['z']
+                                    event_idx = row['event_idx']
+                                    bdc = row['1-BDC']
+                                    event_path = table_path / '..' / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+                                        dtag=dtag,
+                                        event_idx=event_idx,
+                                        bdc=bdc,
+
+                                    )
+                                    event_pos = gemmi.Position(x,y,z)
+                                    dist = centroid_pos.dist(event_pos)
+                                    if dist < 6:
+                                        dists[event_path] = dist
+                            if len(dists) == 0:
+                                print(f"Could not match lig: {chain.name, res.seqid.num}")
+                                continue
+                            ligands_to_event_maps[(chain.name, str(res.seqid.num))] = min(dists, key=lambda _key: dists[_key])
+
+
+            print(ligands_to_event_maps)
 
             for (chain, res), event_map_path in event_map_paths.items():
                 ligand_res = st[0][chain][str(res)][0]
