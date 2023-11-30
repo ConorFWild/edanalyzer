@@ -1969,7 +1969,7 @@ def _make_hit_pandda(working_dir, ):
 
             # Get event maps
             event_map_paths = {
-                get_chain_res(x): x
+                get_chain_res(x.name): x
                 for x
                 in (Path(dataset.experiment.model_dir) / dtag).glob(f'{dtag}-*.ccp4')
             }
