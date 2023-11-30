@@ -2056,127 +2056,127 @@ def _make_hit_pandda(working_dir, ):
                 for lig_id, event_map_path in ligands_to_event_maps.items():
                     hit_events[dtag][lig_id] = event_map_path
 
-            rprint(hit_events)
-            print(f"Got {len(hit_events)} hit events!")
+    rprint(hit_events)
+    print(f"Got {len(hit_events)} hit events!")
 
 
-    with pony.orm.db_session:
-        partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
-        # query = pony.orm.select(
-        #     (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
-        #     event in EventORM)
-        query = pony.orm.select(
-            (dataset, dataset.experiment, dataset.panddas) for
-            dataset in DatasetORM)
-
-        print(f"Got {len(query)} datasets!")
-
-        hit_events = {}
-        for result in query:
-            dataset = result[0]
-
-            # Get dtag
-            dtag = dataset.dtag
-            print(f"# {dtag}")
-
-            # Get model path
-            model_path = Path(dataset.experiment.model_dir) / dtag / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
-
-            # Skip if no such model
-            if not model_path.exists():
-                print(f"No PanDDA Model for {Path(dataset.experiment.model_dir) / dtag }! Skipping!")
-                continue
-
-            # Get event maps
-            # event_map_paths = {
-            #     get_chain_res(x.name): x
-            #     for x
-            #     in (Path(dataset.experiment.model_dir) / dtag).glob(f'{dtag}-*naitve_LIG*.ccp4')
-            # }
-            # print(f"Got {len(event_map_paths)} event maps!")
-
-            # Get the inspect tables
-            initial_inspect_tables = [
-                Path(pandda.path) / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
-                for pandda
-                in dataset.panddas
-            ]
-            inspect_table_paths = [
-                inspect_table_path
-                for inspect_table_path
-                in initial_inspect_tables
-                if inspect_table_path.exists()
-            ]
-            print(f'Got {len(inspect_table_paths)} inspect tables')
-
-            # Skip if no event maps
-            if len(inspect_table_paths) == 0:
-                print(f"No event tables for {Path(dataset.experiment.model_dir) / dtag }! Skipping!")
-                continue
-
-            inspect_tables = {
-                inspect_table_path: pd.read_csv(inspect_table_path)
-                for inspect_table_path
-                in inspect_table_paths
-            }
-
-            # Skip if no event maps
-            # if len(event_map_paths) == 0:
-            #     print(f"No event maps for {Path(dataset.experiment.model_dir) / dtag }! Skipping!")
-            #     continue
-
-            # Load structure
-            st = gemmi.read_structure(str(model_path))
-
-            # Match the structure ligands to events, and hence event maps
-            ligands_to_event_maps = {}
-            for model in st:
-                for chain in model:
-                    for res in chain:
-                        if res.name in ['LIG', 'XXX']:
-                            poss = []
-                            for atom in res:
-                                pos = atom.pos
-                                poss.append([pos.x, pos.y, pos.z])
-                            centroid= np.mean(poss, axis=0)
-                            centroid_pos = gemmi.Position(centroid[0], centroid[1], centroid[2])
-                            dists = {}
-                            for table_path, table in inspect_tables.items():
-                                for idx, row in table[table['dtag'] == dtag].iterrows():
-                                    x, y, z = row['x'], row['y'], row['z']
-                                    event_idx = row['event_idx']
-                                    bdc = row['1-BDC']
-                                    event_path = table_path / '..' / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
-                                        dtag=dtag,
-                                        event_idx=event_idx,
-                                        bdc=bdc,
-
-                                    )
-                                    event_pos = gemmi.Position(x,y,z)
-                                    dist = centroid_pos.dist(event_pos)
-                                    if dist < 6:
-                                        dists[event_path] = {
-                                            "Distance": dist,
-                                        "Row": row,
-                                        }
-                            if len(dists) == 0:
-                                print(f"Could not match lig: {chain.name, res.seqid.num}")
-                                continue
-                            ligands_to_event_maps[(chain.name, str(res.seqid.num))] = min(dists, key=lambda _key: dists[_key]['Distance'])
-
-            # print(ligands_to_event_maps)
-
-            if len(ligands_to_event_maps) == 0:
-                print(f"Could not match ligands to event maps!")
-                continue
-
-            hit_events[dtag] = {}
-
-            for lig_id, event_map_path in ligands_to_event_maps.items():
-                hit_events[dtag][lig_id] = event_map_path
-
-        rprint(hit_events)
-        print(f"Got {len(hit_events)} hit events!")
+    # with pony.orm.db_session:
+    #     partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
+    #     # query = pony.orm.select(
+    #     #     (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
+    #     #     event in EventORM)
+    #     query = pony.orm.select(
+    #         (dataset, dataset.experiment, dataset.panddas) for
+    #         dataset in DatasetORM)
+    #
+    #     print(f"Got {len(query)} datasets!")
+    #
+    #     hit_events = {}
+    #     for result in query:
+    #         dataset = result[0]
+    #
+    #         # Get dtag
+    #         dtag = dataset.dtag
+    #         print(f"# {dtag}")
+    #
+    #         # Get model path
+    #         model_path = Path(dataset.experiment.model_dir) / dtag / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
+    #
+    #         # Skip if no such model
+    #         if not model_path.exists():
+    #             print(f"No PanDDA Model for {Path(dataset.experiment.model_dir) / dtag }! Skipping!")
+    #             continue
+    #
+    #         # Get event maps
+    #         # event_map_paths = {
+    #         #     get_chain_res(x.name): x
+    #         #     for x
+    #         #     in (Path(dataset.experiment.model_dir) / dtag).glob(f'{dtag}-*naitve_LIG*.ccp4')
+    #         # }
+    #         # print(f"Got {len(event_map_paths)} event maps!")
+    #
+    #         # Get the inspect tables
+    #         initial_inspect_tables = [
+    #             Path(pandda.path) / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
+    #             for pandda
+    #             in dataset.panddas
+    #         ]
+    #         inspect_table_paths = [
+    #             inspect_table_path
+    #             for inspect_table_path
+    #             in initial_inspect_tables
+    #             if inspect_table_path.exists()
+    #         ]
+    #         print(f'Got {len(inspect_table_paths)} inspect tables')
+    #
+    #         # Skip if no event maps
+    #         if len(inspect_table_paths) == 0:
+    #             print(f"No event tables for {Path(dataset.experiment.model_dir) / dtag }! Skipping!")
+    #             continue
+    #
+    #         inspect_tables = {
+    #             inspect_table_path: pd.read_csv(inspect_table_path)
+    #             for inspect_table_path
+    #             in inspect_table_paths
+    #         }
+    #
+    #         # Skip if no event maps
+    #         # if len(event_map_paths) == 0:
+    #         #     print(f"No event maps for {Path(dataset.experiment.model_dir) / dtag }! Skipping!")
+    #         #     continue
+    #
+    #         # Load structure
+    #         st = gemmi.read_structure(str(model_path))
+    #
+    #         # Match the structure ligands to events, and hence event maps
+    #         ligands_to_event_maps = {}
+    #         for model in st:
+    #             for chain in model:
+    #                 for res in chain:
+    #                     if res.name in ['LIG', 'XXX']:
+    #                         poss = []
+    #                         for atom in res:
+    #                             pos = atom.pos
+    #                             poss.append([pos.x, pos.y, pos.z])
+    #                         centroid= np.mean(poss, axis=0)
+    #                         centroid_pos = gemmi.Position(centroid[0], centroid[1], centroid[2])
+    #                         dists = {}
+    #                         for table_path, table in inspect_tables.items():
+    #                             for idx, row in table[table['dtag'] == dtag].iterrows():
+    #                                 x, y, z = row['x'], row['y'], row['z']
+    #                                 event_idx = row['event_idx']
+    #                                 bdc = row['1-BDC']
+    #                                 event_path = table_path / '..' / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+    #                                     dtag=dtag,
+    #                                     event_idx=event_idx,
+    #                                     bdc=bdc,
+    #
+    #                                 )
+    #                                 event_pos = gemmi.Position(x,y,z)
+    #                                 dist = centroid_pos.dist(event_pos)
+    #                                 if dist < 6:
+    #                                     dists[event_path] = {
+    #                                         "Distance": dist,
+    #                                     "Row": row,
+    #                                     }
+    #                         if len(dists) == 0:
+    #                             print(f"Could not match lig: {chain.name, res.seqid.num}")
+    #                             continue
+    #                         ligands_to_event_maps[(chain.name, str(res.seqid.num))] = min(dists, key=lambda _key: dists[_key]['Distance'])
+    #
+    #         # print(ligands_to_event_maps)
+    #
+    #         if len(ligands_to_event_maps) == 0:
+    #             print(f"Could not match ligands to event maps!")
+    #             continue
+    #
+    #         hit_events[dtag] = {}
+    #
+    #         for lig_id, event_map_path in ligands_to_event_maps.items():
+    #             hit_events[dtag][lig_id] = event_map_path
+    #
+    #     rprint(hit_events)
+    #     print(f"Got {len(hit_events)} hit events!")
 
         # pandda_1_events = [event for event in query if event.source == "pandda_1"]
 
