@@ -1954,6 +1954,8 @@ def _make_hit_pandda(working_dir, ):
             (dataset, dataset.experiment, dataset.panddas) for
             dataset in DatasetORM)
 
+        print(f"Got {len(query)} datasets!")
+
         hit_events = {}
         for result in query:
             dataset = result[0]
