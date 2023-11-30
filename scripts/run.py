@@ -1967,7 +1967,7 @@ def _make_hit_pandda(working_dir, ):
                 continue
 
             # Get the inspect tables
-            pandda_dirs = [x for x in visit.glob('*')]
+            pandda_dirs = [x for x in visit_analysis_dir.glob('*')]
             initial_inspect_tables = [
                 pandda_dir / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
                 for pandda_dir
