@@ -1980,7 +1980,7 @@ def _make_hit_pandda(working_dir, ):
             initial_inspect_tables = [
                 Path(pandda.path) / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
                 for pandda
-                in result[2]
+                in dataset.panddas
             ]
             inspect_table_paths = [
                 inspect_table_path
