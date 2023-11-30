@@ -1938,13 +1938,14 @@ def get_chain_res(string):
 
 
 def _make_hit_pandda(working_dir, ):
-    database_path = working_dir / "database.db"
-    try:
-        db.bind(provider='sqlite', filename=f"{database_path}")
-        db.generate_mapping()
-    except Exception as e:
-        print(e)
+    # database_path = working_dir / "database.db"
+    # try:
+    #     db.bind(provider='sqlite', filename=f"{database_path}")
+    #     db.generate_mapping()
+    # except Exception as e:
+    #     print(e)
 
+    hit_events = {}
     for visits in Path('/dls/labxchem/data').glob('*'):
         for visit in visits.glob('*'):
             if visit.name[0] == 'i':
@@ -1965,9 +1966,98 @@ def _make_hit_pandda(working_dir, ):
                 print(f'No data dir! Skipping!')
                 continue
 
+            # Get the inspect tables
+            pandda_dirs = [x for x in visit.glob('*')]
+            initial_inspect_tables = [
+                pandda_dir / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
+                for pandda_dir
+                in pandda_dirs
+            ]
+            inspect_table_paths = [
+                inspect_table_path
+                for inspect_table_path
+                in initial_inspect_tables
+                if inspect_table_path.exists()
+            ]
+            print(f'Got {len(inspect_table_paths)} inspect tables')
+
+            # Skip if no event maps
+            if len(inspect_table_paths) == 0:
+                print(f"No event tables for {visit}! Skipping!")
+                continue
+
+            inspect_tables = {
+                inspect_table_path: pd.read_csv(inspect_table_path)
+                for inspect_table_path
+                in inspect_table_paths
+            }
+
             for dataset_dir in data_dir.glob('*'):
                 dtag = dataset_dir.name
                 print(f"{dtag}")
+
+                # Get model path
+                model_path = dataset_dir / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
+
+                # Skip if no such model
+                if not model_path.exists():
+                    print(f"No PanDDA Model for {data_dir}! Skipping!")
+                    continue
+
+
+                # Load structure
+                st = gemmi.read_structure(str(model_path))
+
+                # Match the structure ligands to events, and hence event maps
+                ligands_to_event_maps = {}
+                for model in st:
+                    for chain in model:
+                        for res in chain:
+                            if res.name in ['LIG', 'XXX']:
+                                poss = []
+                                for atom in res:
+                                    pos = atom.pos
+                                    poss.append([pos.x, pos.y, pos.z])
+                                centroid = np.mean(poss, axis=0)
+                                centroid_pos = gemmi.Position(centroid[0], centroid[1], centroid[2])
+                                dists = {}
+                                for table_path, table in inspect_tables.items():
+                                    for idx, row in table[table['dtag'] == dtag].iterrows():
+                                        x, y, z = row['x'], row['y'], row['z']
+                                        event_idx = row['event_idx']
+                                        bdc = row['1-BDC']
+                                        event_path = table_path / '..' / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+                                            dtag=dtag,
+                                            event_idx=event_idx,
+                                            bdc=bdc,
+
+                                        )
+                                        event_pos = gemmi.Position(x, y, z)
+                                        dist = centroid_pos.dist(event_pos)
+                                        if dist < 6:
+                                            dists[event_path] = {
+                                                "Distance": dist,
+                                                "Row": row,
+                                            }
+                                if len(dists) == 0:
+                                    print(f"Could not match lig: {chain.name, res.seqid.num}")
+                                    continue
+                                ligands_to_event_maps[(chain.name, str(res.seqid.num))] = min(dists, key=lambda _key:
+                                dists[_key]['Distance'])
+
+                # print(ligands_to_event_maps)
+
+                if len(ligands_to_event_maps) == 0:
+                    print(f"Could not match ligands to event maps!")
+                    continue
+
+                hit_events[dtag] = {}
+
+                for lig_id, event_map_path in ligands_to_event_maps.items():
+                    hit_events[dtag][lig_id] = event_map_path
+
+            rprint(hit_events)
+            print(f"Got {len(hit_events)} hit events!")
 
 
     with pony.orm.db_session:
