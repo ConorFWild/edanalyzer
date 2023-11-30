@@ -1593,7 +1593,7 @@ def get_closest_ligand_res(st, event_centroid_pos):
         return None
 
     closest_res = min(centroids, key=lambda _key: centroids[_key]['Distance'])
-    if centroids[_key]['Distance'] > 6.0:
+    if centroids[closest_res]['Distance'] > 6.0:
         return None
     return centroids[closest_res]['Residue']
 
