@@ -2044,6 +2044,9 @@ def _make_hit_pandda(working_dir, ):
 
 
             print(ligands_to_event_maps)
+            if len(ligands_to_event_maps) == 0:
+                print(f"Could not match ligands to event maps!")
+                continue
 
             for (chain, res), event_map_path in event_map_paths.items():
                 ligand_res = st[0][chain][str(res)][0]
