@@ -1983,6 +1983,8 @@ def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
     event_table = pd.concat(rows).reset_index()
     for j in range(len(event_table)):
         event_table.loc[j, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
+        # event_table.loc[j, constants.PANDDA_INSPECT_EVENT_IDX] = (j // 100) + 1
+
 
     event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
     event_table.to_csv(analyse_table_path, index=False)
