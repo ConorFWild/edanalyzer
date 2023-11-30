@@ -2053,6 +2053,7 @@ def _make_hit_pandda(working_dir, ):
                 print(f"Could not match ligands to event maps!")
                 continue
 
+            hit_events[dtag] = {}
 
             for lig_id, event_map_path in ligands_to_event_maps.items():
                 hit_events[dtag][lig_id] = event_map_path
