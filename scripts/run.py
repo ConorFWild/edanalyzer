@@ -1945,6 +1945,30 @@ def _make_hit_pandda(working_dir, ):
     except Exception as e:
         print(e)
 
+    for visits in Path('/dls/labxchem/data').glob('*'):
+        for visit in visits.glob('*'):
+            if visit.name[0] == 'i':
+                continue
+            if visit.name[0] == 's':
+                continue
+            print(visit)
+            visit_analysis_dir = visit / 'processing' / 'analysis'
+            data_dir = None
+            initial_model_dir = visit_analysis_dir / 'initial_model'
+            model_building_dir = visit_analysis_dir / 'model_building'
+            if initial_model_dir.exists():
+                data_dir = initial_model_dir
+            if model_building_dir.exists():
+                data_dir = model_building_dir
+
+            if not data_dir:
+                print(f'No data dir! Skipping!')
+                continue
+
+            for dataset_dir in data_dir.glob('*'):
+                dtag = dataset_dir.name
+
+
     with pony.orm.db_session:
         partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
         # query = pony.orm.select(
