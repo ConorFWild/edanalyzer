@@ -56,6 +56,9 @@ test:
     - MRE11AA
     - Zika_NS3A
     - DCLRE1CA
+    - GluN1N2A
+    - Tif6
+    - AURA
 custom_annotations:
   databases:
   - /dls/science/groups/i04-1/conor_dev/edanalyzer/test/database.db
