@@ -1989,7 +1989,7 @@ def _make_hit_pandda(working_dir, ):
             inspect_tables = {}
             for inspect_table_path in inspect_table_paths:
                 try:
-                    inspect_table_path: pd.read_csv(inspect_table_path)
+                    inspect_tables[inspect_table_path]= pd.read_csv(inspect_table_path)
                 except:
                     continue
             if len(inspect_tables) == 0:
