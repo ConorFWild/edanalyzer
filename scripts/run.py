@@ -1935,6 +1935,78 @@ def get_chain_res(string):
     match = re.search('naitve_LIG-([^-]+)-([^-]+)', string)
     return match[0], match[1]
 
+def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
+
+
+    psuedo_pandda_dir = output_dir / "test_datasets_pandda"
+    analyses_dir = psuedo_pandda_dir / "analyses"
+    processed_datasets_dir = psuedo_pandda_dir / "processed_datasets"
+    analyse_table_path = analyses_dir / "pandda_analyse_events.csv"
+    inspect_table_path = analyses_dir / "pandda_inspect_events.csv"
+    analyse_site_table_path = analyses_dir / "pandda_analyse_sites.csv"
+    inspect_site_table_path = analyses_dir / "pandda_inspect_sites.csv"
+
+    # Spoof the main directories
+    try_make(psuedo_pandda_dir)
+    try_make(analyses_dir)
+    try_make(processed_datasets_dir)
+
+    # Spoof the dataset directories
+    for dtag, hit_ligands in hit_events.items():
+        dtag_dir = processed_datasets_dir / dtag
+        try_make(dtag_dir)
+        modelled_structures_dir = dtag_dir / "modelled_structures"
+        try_make(modelled_structures_dir)
+
+        for chain_res, event_info in hit_ligands.items():
+            event, annotation = event_info['event'], event_info['annotation']
+            initial_structure_path = ...
+            reflections_path = ...
+            event_map_path = ...
+            modelled_structure_path = ...
+            try_link(initial_structure_path, dtag_dir / Path(event.initial_structure_path).name)
+            try_link(reflections_path, dtag_dir / Path(reflections_path).name)
+            try_link(event_map_path, dtag_dir / Path(event_map_path).name)
+            if modelled_structure_path:
+                try_link(modelled_structure_path, modelled_structures_dir / Path(event.structure).name)
+
+    # Spoof the event table
+    rows = []
+    j = 0
+    for dtag in hit_events:
+        for event_idx, event_info in hit_events[dtag].items():
+            row = event_info['Row']
+            # row.loc[0, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
+            rows.append(row)
+            # j = j + 1
+
+    event_table = pd.concat(rows).reset_index()
+    for j in range(len(event_table)):
+        event_table.loc[j, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
+
+    event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
+    event_table.to_csv(analyse_table_path, index=False)
+    event_table.to_csv(inspect_table_path, index=False)
+
+    # Spoof the site table
+    site_records = []
+    num_sites = ((j) // 100) + 1
+    print(f"Num sites is: {num_sites}")
+    for site_id in np.arange(0, num_sites + 1):
+        site_records.append(
+            {
+                "site_idx": int(site_id) + 1,
+                "centroid": (0.0, 0.0, 0.0),
+                "Name": None,
+                "Comment": None
+            }
+        )
+    print(len(site_records))
+    site_table = pd.DataFrame(site_records)
+    site_table.to_csv(analyse_site_table_path, index=False)
+    site_table.to_csv(inspect_site_table_path, index=False)
+
+
 
 
 def _make_hit_pandda(working_dir, ):
@@ -2046,8 +2118,10 @@ def _make_hit_pandda(working_dir, ):
                                 if len(dists) == 0:
                                     print(f"Could not match lig: {chain.name, res.seqid.num}")
                                     continue
-                                ligands_to_event_maps[(chain.name, str(res.seqid.num))] = min(dists, key=lambda _key:
-                                dists[_key]['Distance'])
+
+                                closest_event_key = min(dists, key=lambda _key: dists[_key]['Distance'])
+
+                                ligands_to_event_maps[(chain.name, str(res.seqid.num))] = (closest_event_key, dists[closest_event_key]['Row'])
 
                 # print(ligands_to_event_maps)
 
@@ -2062,6 +2136,8 @@ def _make_hit_pandda(working_dir, ):
 
     rprint(hit_events)
     print(f"Got {len(hit_events)} hit events!")
+
+    _make_psuedo_pandda_from_event_rows('./hits_for_annotation', hit_events)
 
 
     # with pony.orm.db_session:
