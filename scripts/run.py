@@ -1977,11 +1977,11 @@ def _make_hit_pandda(working_dir, ):
             # print(f"Got {len(event_map_paths)} event maps!")
 
             # Get the inspect tables
-            inspect_tables = {
+            inspect_tables = [
                 Path(pandda.path) / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
                 for pandda
                 in result[2]
-            }
+            ]
             print(f'For {len(inspect_tables)} inspect tables')
 
             # Skip if no event maps
