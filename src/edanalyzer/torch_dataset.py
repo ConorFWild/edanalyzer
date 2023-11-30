@@ -1370,24 +1370,26 @@ def _get_structure_path(event, sample_specification):
     return sample_specification
 
 def _get_bound_state_model_path(event, sample_specification):
-    model_path_1 = Path(
-        event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INSPECT_MODEL_DIR / constants.PANDDA_MODEL_FILE.format(
+    # model_path_4 = Path(
+    #     event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INSPECT_MODEL_DIR / constants.PANDDA_MODEL_FILE.format(
+    #     dtag=event.dtag)
+    model_path_1 = Path(event.pandda_dir).parent / "model_building" / event.dtag / constants.PANDDA_MODEL_FILE.format(
         dtag=event.dtag)
-    model_path_2 = Path(event.pandda_dir).parent / "model_building" / event.dtag / constants.PANDDA_MODEL_FILE.format(
+    model_path_2 = Path(event.pandda_dir).parent / "initial_model" / event.dtag / constants.PANDDA_MODEL_FILE.format(
         dtag=event.dtag)
-    model_path_3 = Path(event.pandda_dir).parent / "initial_model" / event.dtag / constants.PANDDA_MODEL_FILE.format(
-        dtag=event.dtag)
-    model_path_4 = Path("/dls/science/groups/i04-1/conor_dev/experiments/data") / event.system_name / f"{event.dtag}.pdb"
+    model_path_3 = Path("/dls/science/groups/i04-1/conor_dev/experiments/data") / event.system_name / f"{event.dtag}.pdb"
     if model_path_1.exists():
         sample_specification['bound_state_structure_path'] = str(model_path_1)
     elif model_path_2.exists():
         sample_specification['bound_state_structure_path'] = str(model_path_2)
     elif model_path_3.exists():
         sample_specification['bound_state_structure_path'] = str(model_path_3)
-    elif model_path_4.exists():
-        sample_specification['bound_state_structure_path'] = str(model_path_4)
+    # elif model_path_4.exists():
+    #     sample_specification['bound_state_structure_path'] = str(model_path_4)
     else:
-        print(f"No bound state structure at: {model_path_1} or {model_path_2} or {model_path_3} or {model_path_4}")
+        # print(f"No bound state structure at: {model_path_1} or {model_path_2} or {model_path_3} or {model_path_4}")
+        print(f"No bound state structure at: {model_path_1} or {model_path_2} or {model_path_3}")
+
         sample_specification['bound_state_structure_path'] = None
     return sample_specification
 
