@@ -1959,6 +1959,7 @@ def _make_hit_pandda(working_dir, ):
 
             # Get dtag
             dtag = dataset.dtag
+            print(f"# {dtag}")
 
             # Get model path
             model_path = Path(dataset.experiment.model_dir) / dtag / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
@@ -1988,7 +1989,7 @@ def _make_hit_pandda(working_dir, ):
                 in initial_inspect_tables
                 if inspect_table_path.exists()
             ]
-            print(f'For {len(inspect_table_paths)} inspect tables')
+            print(f'Got {len(inspect_table_paths)} inspect tables')
 
             # Skip if no event maps
             if len(inspect_table_paths) == 0:
