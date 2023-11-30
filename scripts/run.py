@@ -1931,6 +1931,7 @@ def _get_precision_recall(epoch_results):
 
 
 def get_chain_res(string):
+    print(string)
     match = re.search('naitve_LIG-([^-]+)-([^-]+)', string)
     return match[0], match[1]
 
