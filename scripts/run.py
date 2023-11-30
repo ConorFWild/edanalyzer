@@ -1977,16 +1977,22 @@ def _make_hit_pandda(working_dir, ):
             # print(f"Got {len(event_map_paths)} event maps!")
 
             # Get the inspect tables
-            inspect_tables = [
+            initial_inspect_tables = [
                 Path(pandda.path) / constants.PANDDA_ANALYSIS_DIR / constants.PANDDA_INSPECT_TABLE_FILE
                 for pandda
                 in result[2]
             ]
-            print(f'For {len(inspect_tables)} inspect tables')
+            inspect_table_paths = [
+                inspect_table_path
+                for inspect_table_path
+                in initial_inspect_tables
+                if inspect_table_path.exists()
+            ]
+            print(f'For {len(inspect_table_paths)} inspect tables')
 
             # Skip if no event maps
-            if len(inspect_tables) == 0:
-                print(f"No event maps for {Path(dataset.experiment.model_dir) / dtag }! Skipping!")
+            if len(inspect_table_paths) == 0:
+                print(f"No event tables for {Path(dataset.experiment.model_dir) / dtag }! Skipping!")
                 continue
 
 
