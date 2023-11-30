@@ -2058,7 +2058,7 @@ def _make_hit_pandda(working_dir, ):
             for lig_id, event_map_path in ligands_to_event_maps.items():
                 hit_events[dtag][lig_id] = event_map_path
 
-            rprint(hit_events)
+        rprint(hit_events)
 
         # pandda_1_events = [event for event in query if event.source == "pandda_1"]
 
