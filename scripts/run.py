@@ -1986,11 +1986,15 @@ def _make_hit_pandda(working_dir, ):
                 print(f"No event tables for {visit}! Skipping!")
                 continue
 
-            inspect_tables = {
-                inspect_table_path: pd.read_csv(inspect_table_path)
-                for inspect_table_path
-                in inspect_table_paths
-            }
+            inspect_tables = {}
+            for inspect_table_path in inspect_table_paths:
+                try:
+                    inspect_table_path: pd.read_csv(inspect_table_path)
+                except:
+                    continue
+            if len(inspect_tables) == 0:
+                print(f"No event tables for {visit}! Skipping!")
+                continue
 
             for dataset_dir in data_dir.glob('*'):
                 dtag = dataset_dir.name
