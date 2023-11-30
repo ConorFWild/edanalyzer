@@ -2004,9 +2004,9 @@ def _make_hit_pandda(working_dir, ):
                 model_path = dataset_dir / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
 
                 # Skip if no such model
-                # if not model_path.exists():
-                #     print(f"No PanDDA Model for {data_dir}! Skipping!")
-                #     continue
+                if not model_path.exists():
+                    # print(f"No PanDDA Model for {data_dir}! Skipping!")
+                    continue
 
 
                 # Load structure
