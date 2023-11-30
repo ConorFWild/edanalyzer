@@ -1936,7 +1936,7 @@ def get_chain_res(string):
 
 
 
-def _make_hit_pandda(working_dir, test_systems, model_key):
+def _make_hit_pandda(working_dir, ):
     database_path = working_dir / "database.db"
     try:
         db.bind(provider='sqlite', filename=f"{database_path}")
