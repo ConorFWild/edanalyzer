@@ -2008,7 +2008,7 @@ def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
                 "Comment": None
             }
         )
-    print(len(site_records))
+    # print(len(site_records))
     site_table = pd.DataFrame(site_records)
     site_table.to_csv(analyse_site_table_path, index=False)
     site_table.to_csv(inspect_site_table_path, index=False)
@@ -2109,7 +2109,7 @@ def _make_hit_pandda(working_dir, ):
                                         x, y, z = row['x'], row['y'], row['z']
                                         event_idx = row['event_idx']
                                         bdc = row['1-BDC']
-                                        event_path = table_path.parent.parent.parent / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+                                        event_path = table_path.parent.parent / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
                                             dtag=dtag,
                                             event_idx=event_idx,
                                             bdc=bdc,
@@ -2142,7 +2142,6 @@ def _make_hit_pandda(working_dir, ):
 
     rprint(hit_events)
     print(f"Got {len(hit_events)} hit events!")
-    exit()
     _make_psuedo_pandda_from_event_rows(Path('.'), hit_events)
 
 
