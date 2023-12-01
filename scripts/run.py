@@ -2114,6 +2114,9 @@ def _make_hit_pandda(working_dir, ):
                                         x, y, z = row['x'], row['y'], row['z']
                                         event_idx = row['event_idx']
                                         bdc = row['1-BDC']
+                                        confidence = row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
+                                        if confidence in ['Low', 'low']:
+                                            continue
                                         event_path = table_path.parent.parent / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
                                             dtag=dtag,
                                             event_idx=event_idx,
