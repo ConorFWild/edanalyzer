@@ -1971,7 +1971,7 @@ def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
             if modelled_structure_path:
                 try_link(modelled_structure_path,
                          # modelled_structures_dir / modelled_structure_path.name
-                            modelled_structures_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)
+                            modelled_structures_dir / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
                          )
     # exit()
 
