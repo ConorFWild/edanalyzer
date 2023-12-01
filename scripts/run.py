@@ -2102,7 +2102,7 @@ def _make_hit_pandda(working_dir, ):
                                 centroid_pos = gemmi.Position(centroid[0], centroid[1], centroid[2])
                                 dists = {}
                                 for table_path, table in inspect_tables.items():
-                                    for idx, row in table[table['dtag'] == dtag].iterrows():
+                                    for idx, row in table[table['dtag'] == dtag].itertuples():
                                         x, y, z = row['x'], row['y'], row['z']
                                         event_idx = row['event_idx']
                                         bdc = row['1-BDC']
