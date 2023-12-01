@@ -1970,6 +1970,7 @@ def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
             try_link(event_map_path, dtag_dir / event_map_path.name)
             if modelled_structure_path:
                 try_link(modelled_structure_path, modelled_structures_dir / modelled_structure_path.name)
+    exit()
 
     # Spoof the event table
     rows = []
@@ -1998,7 +1999,7 @@ def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
     # Spoof the site table
     site_records = []
     num_sites = ((j) // 100) + 1
-    print(f"Num sites is: {num_sites}")
+    # print(f"Num sites is: {num_sites}")
     for site_id in np.arange(0, num_sites + 1):
         site_records.append(
             {
