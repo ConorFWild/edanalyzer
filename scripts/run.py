@@ -1969,7 +1969,10 @@ def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
             try_link(reflections_path, dtag_dir / reflections_path.name)
             try_link(event_map_path, dtag_dir / event_map_path.name)
             if modelled_structure_path:
-                try_link(modelled_structure_path, modelled_structures_dir / modelled_structure_path.name)
+                try_link(modelled_structure_path,
+                         # modelled_structures_dir / modelled_structure_path.name
+                            modelled_structures_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)
+                         )
     # exit()
 
     # Spoof the event table
