@@ -1980,7 +1980,9 @@ def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
             rows.append(row)
             # j = j + 1
 
+    rprint(rows)
     event_table = pd.concat(rows).reset_index()
+
     for j in range(len(event_table)):
         event_table.loc[j, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
         # event_table.loc[j, constants.PANDDA_INSPECT_EVENT_IDX] = (j // 100) + 1
