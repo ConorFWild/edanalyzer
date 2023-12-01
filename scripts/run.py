@@ -2081,7 +2081,8 @@ def _make_hit_pandda(working_dir, ):
                 print(f"{dtag}")
 
                 # Get model path
-                model_path = dataset_dir / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
+                # model_path = dataset_dir / constants.PANDDA_MODEL_FILE.format(dtag=dtag)
+                model_path = dataset_dir / 'refine.pdb'
 
                 # Skip if no such model
                 if not model_path.exists():
