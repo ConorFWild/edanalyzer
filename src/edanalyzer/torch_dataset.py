@@ -1373,10 +1373,12 @@ def _get_bound_state_model_path(event, sample_specification):
     # model_path_4 = Path(
     #     event.pandda_dir) / constants.PANDDA_PROCESSED_DATASETS_DIR / event.dtag / constants.PANDDA_INSPECT_MODEL_DIR / constants.PANDDA_MODEL_FILE.format(
     #     dtag=event.dtag)
-    model_path_1 = Path(event.pandda_dir).parent / "model_building" / event.dtag / constants.PANDDA_MODEL_FILE.format(
-        dtag=event.dtag)
-    model_path_2 = Path(event.pandda_dir).parent / "initial_model" / event.dtag / constants.PANDDA_MODEL_FILE.format(
-        dtag=event.dtag)
+    # model_path_1 = Path(event.pandda_dir).parent / "model_building" / event.dtag / constants.PANDDA_MODEL_FILE.format(
+    #     dtag=event.dtag)
+    # model_path_2 = Path(event.pandda_dir).parent / "initial_model" / event.dtag / constants.PANDDA_MODEL_FILE.format(
+    #     dtag=event.dtag)
+    model_path_1 = (Path(event.pandda_dir).parent / "model_building" / event.dtag / 'refine.pdb').resolve()
+    model_path_2 = (Path(event.pandda_dir).parent / "initial_model" / event.dtag / 'refine.pdb').resolve()
     model_path_3 = Path("/dls/science/groups/i04-1/conor_dev/experiments/data") / event.system_name / f"{event.dtag}.pdb"
     if model_path_1.exists():
         sample_specification['bound_state_structure_path'] = str(model_path_1)

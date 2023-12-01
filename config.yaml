@@ -9,8 +9,8 @@ steps:
 #  - KnownHitAlternateModel
 #  - MakeDataset
 #  - Train+Test
-#  - TrainTestLigand
-  - MakeHitPanDDA
+  - TrainTestLigand
+#  - MakeHitPanDDA
 #  - Summarize
 #  - RunPanDDAs
 #  - PanDDAStatus
