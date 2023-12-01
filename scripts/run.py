@@ -1986,7 +1986,7 @@ def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
     for j in range(len(event_table)):
         event_table.loc[j, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
         # event_table.loc[j, constants.PANDDA_INSPECT_EVENT_IDX] = (j // 100) + 1
-
+    event_table.rename({'_3': '1-BDC'}, inplace=True)
 
     # event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
     event_table.to_csv(analyse_table_path, index=False)
@@ -2105,8 +2105,8 @@ def _make_hit_pandda(working_dir, ):
                                     for row in table[table['dtag'] == dtag].itertuples(index=False):
                                         print(row)
                                         x, y, z = row.x, row.y, row.z
-                                        event_idx = row['event_idx']
-                                        bdc = row['1-BDC']
+                                        event_idx = row.event_idx
+                                        bdc = row._3
                                         event_path = table_path / '..' / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
                                             dtag=dtag,
                                             event_idx=event_idx,
