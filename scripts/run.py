@@ -1981,12 +1981,14 @@ def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
             # j = j + 1
 
     rprint(rows)
-    event_table = pd.concat(rows).reset_index()
+    # event_table = pd.concat(rows).reset_index()
+    event_table = pd.DataFrame(rows, columns=[x for x in rows[-1].keys()]).reset_index()
+
 
     for j in range(len(event_table)):
         event_table.loc[j, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
         # event_table.loc[j, constants.PANDDA_INSPECT_EVENT_IDX] = (j // 100) + 1
-    event_table.rename({'_3': '1-BDC'}, inplace=True)
+
 
     # event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
     event_table.to_csv(analyse_table_path, index=False)
@@ -2102,11 +2104,10 @@ def _make_hit_pandda(working_dir, ):
                                 centroid_pos = gemmi.Position(centroid[0], centroid[1], centroid[2])
                                 dists = {}
                                 for table_path, table in inspect_tables.items():
-                                    for row in table[table['dtag'] == dtag].itertuples(index=False):
-                                        # print(row)
-                                        x, y, z = row.x, row.y, row.z
-                                        event_idx = row.event_idx
-                                        bdc = row._3
+                                    for idx, row in table[table['dtag'] == dtag].iterrows():
+                                        x, y, z = row['x'], row['y'], row['z']
+                                        event_idx = row['event_idx']
+                                        bdc = row['1-BDC']
                                         event_path = table_path / '..' / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
                                             dtag=dtag,
                                             event_idx=event_idx,
