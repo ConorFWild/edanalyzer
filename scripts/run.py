@@ -2149,7 +2149,10 @@ def _make_hit_pandda(working_dir, ):
     try_make(Path(f'./panddas'))
     print(f"Got {len(hit_events)} hit events!")
     j = 0
-    for chunk in np.array_split(hit_events, int(len(hit_events) / 200)):
+    for chunk in np.array_split(
+            [dtag for dtag in hit_events],
+            int(len(hit_events) / 200)
+    ):
         chunk_hit_events = {
             key: hit_events[key]
             for key
