@@ -2103,7 +2103,7 @@ def _make_hit_pandda(working_dir, ):
                                 dists = {}
                                 for table_path, table in inspect_tables.items():
                                     for row in table[table['dtag'] == dtag].itertuples(index=False):
-                                        print(row)
+                                        # print(row)
                                         x, y, z = row.x, row.y, row.z
                                         event_idx = row.event_idx
                                         bdc = row._3
