@@ -1938,7 +1938,7 @@ def get_chain_res(string):
 def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
 
 
-    psuedo_pandda_dir = output_dir / "test_datasets_pandda"
+    psuedo_pandda_dir = output_dir
     analyses_dir = psuedo_pandda_dir / "analyses"
     processed_datasets_dir = psuedo_pandda_dir / "processed_datasets"
     analyse_table_path = analyses_dir / "pandda_analyse_events.csv"
@@ -2146,8 +2146,17 @@ def _make_hit_pandda(working_dir, ):
                     hit_events[dtag][lig_id] = event_map_path
 
     rprint(hit_events)
+    try_make(Path(f'./panddas'))
     print(f"Got {len(hit_events)} hit events!")
-    _make_psuedo_pandda_from_event_rows(Path('.'), hit_events)
+    j = 0
+    for chunk in np.array_split(hit_events, int(len(hit_events) / 200)):
+        chunk_hit_events = {
+            key: hit_events[key]
+            for key
+            in chunk
+        }
+        _make_psuedo_pandda_from_event_rows(Path(f'./panddas/{j}'), chunk_hit_events)
+        j = j+1
 
 
     # with pony.orm.db_session:
