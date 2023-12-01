@@ -1961,6 +1961,7 @@ def _make_psuedo_pandda_from_event_rows(output_dir, hit_events):
         for model_path_chain_res, event_info in hit_ligands.items():
             # event, annotation = event_info['event'], event_info['annotation']
             event_map_path = event_info[0]
+            print(event_map_path)
             initial_structure_path = event_map_path.parent / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag)
             reflections_path = event_map_path.parent / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dtag)
             modelled_structure_path = model_path_chain_res[0]
