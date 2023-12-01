@@ -2142,7 +2142,7 @@ def _make_hit_pandda(working_dir, ):
 
     rprint(hit_events)
     print(f"Got {len(hit_events)} hit events!")
-
+    exit()
     _make_psuedo_pandda_from_event_rows(Path('.'), hit_events)
 
 
