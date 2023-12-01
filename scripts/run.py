@@ -2104,7 +2104,7 @@ def _make_hit_pandda(working_dir, ):
                                 for table_path, table in inspect_tables.items():
                                     for row in table[table['dtag'] == dtag].itertuples(index=False):
                                         print(row)
-                                        x, y, z = row['x'], row['y'], row['z']
+                                        x, y, z = row.x, row.y, row.z
                                         event_idx = row['event_idx']
                                         bdc = row['1-BDC']
                                         event_path = table_path / '..' / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
