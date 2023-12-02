@@ -2418,7 +2418,8 @@ JOB_SCRIPT = (
     'python -u /dls/science/groups/i04-1/conor_dev/pandda_2_gemmi/scripts/pandda.py '
     '--local_cpus={num_cpus} ' 
     '--data_dirs={data_dirs} ' 
-    '--out_dir={out_dir}'
+    '--out_dir={out_dir} '
+    '--only_datasets="{only_datasets}"'
 )
 
 SUBMIT_COMMAND = 'module load global/cluster; qsub -pe smp {num_cpus} -l m_mem_free={m_mem_free}G -o {out_path} -e {err_path} {script_path}'
