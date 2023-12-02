@@ -10,9 +10,9 @@ steps:
 #  - MakeDataset
 #  - Train+Test
 #  - TrainTestLigand
-  - MakeHitPanDDA
+#  - MakeHitPanDDA
 #  - Summarize
-#  - RunPanDDAs
+  - RunPanDDAs
 #  - PanDDAStatus
 #  - EvaluatePanDDAs
 datasets:
