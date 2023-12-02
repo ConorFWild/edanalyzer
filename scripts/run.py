@@ -2446,9 +2446,9 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
 
     with pony.orm.db_session:
         # partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
-        # query = pony.orm.select(
-        #     (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
-        #     event in EventORM)
+        query_events = pony.orm.select(
+            (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
+            event in EventORM)
         query = pony.orm.select(
             experiment for experiment in ExperimentORM
         )
@@ -2465,6 +2465,11 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
             # print(num_cores_used()*num_cpus)
             # while (num_cores_used()*num_cpus) > (max_cores-num_cpus):
             #     time.sleep(1)
+            experiment_hit_results = [res for res in query_events if (res[1].annotation) & (experiment.path == res[4].path)]
+            experiment_hit_datasets = set([experiment_hit_result[0].dtag for experiment_hit_result in experiment_hit_results])
+            if len(experiment_hit_results) == 0:
+                print(f"No experiment hit results for {experiment.path}. Skipping!")
+                continue
 
             rprint(f"{experiment.system.name} : {experiment.path} : {experiment_num_datasets[experiment.path]}")
             # continue
@@ -2490,10 +2495,11 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
                 num_cpus=num_cpus,
                 data_dirs=model_building_dir,
                 out_dir=pandda_dir,
+                only_datasets=",".join(experiment_hit_datasets)
             )
             rprint(indent_text(f"Job Script"))
             rprint(indent_text(job_script))
-
+            exit()
             with open(job_script_path, 'w') as f:
                 f.write(job_script)
 
