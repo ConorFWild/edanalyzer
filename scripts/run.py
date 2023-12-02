@@ -2478,7 +2478,7 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
             )
 
 
-            if len(experiment_hit_results) == 0:
+            if len(experiment_hit_datasets) == 0:
                 print(f"No experiment hit results for {experiment.path}. Skipping!")
                 continue
 
