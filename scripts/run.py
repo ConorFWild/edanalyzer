@@ -2437,6 +2437,7 @@ def num_cores_used():
     stdout, stderr = p.communicate()
     return int(stdout.decode(encoding='utf-8', errors='strict'))
 
+
 def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
     database_path = working_directory / "database.db"
     try:
@@ -2467,7 +2468,16 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
             # while (num_cores_used()*num_cpus) > (max_cores-num_cpus):
             #     time.sleep(1)
             experiment_hit_results = [res for res in query_events if (res[1].annotation) & (experiment.path == res[4].path)]
-            experiment_hit_datasets = set([experiment_hit_result[0].dtag for experiment_hit_result in experiment_hit_results])
+            experiment_hit_datasets = set(
+                [
+                    experiment_hit_result[0].dtag
+                    for experiment_hit_result
+                    in experiment_hit_results
+                    if (Path(experiment_hit_result[4].model_dir) / experiment_hit_result[0].dtag / 'refine.pdb').exists()
+                ]
+            )
+
+
             if len(experiment_hit_results) == 0:
                 print(f"No experiment hit results for {experiment.path}. Skipping!")
                 continue
