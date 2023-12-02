@@ -2500,7 +2500,7 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
             )
             rprint(indent_text(f"Job Script"))
             rprint(indent_text(job_script))
-            exit()
+            # exit()
             with open(job_script_path, 'w') as f:
                 f.write(job_script)
 
