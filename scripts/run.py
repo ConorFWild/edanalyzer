@@ -2588,6 +2588,7 @@ def _make_train_test_ligand_db(
             # Get the table of rmsds
             df = pd.DataFrame(records)
             print(df)
+            print(df[df['RMSD'] < 2.5])
 
 
     ...
