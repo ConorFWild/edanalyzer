@@ -2457,7 +2457,7 @@ def get_known_hit_structures(
     known_hit_structures = {}
     for hit_dtag in experiment_hit_datasets:
         hit_structure = Path(model_dir) / hit_dtag / 'refine.pdb'
-        known_hit_structures[hit_dtag] = gemmi.read_structure(hit_structure)
+        known_hit_structures[hit_dtag] = gemmi.read_structure(str(hit_structure))
 
     return known_hit_structures
 
