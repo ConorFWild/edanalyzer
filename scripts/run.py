@@ -2541,11 +2541,11 @@ def _make_train_test_ligand_db(
             for dtag, dtag_known_hits in known_hits.items():
                 print(dtag)
                 ligand_graphs = ligand_graph_matches[dtag]
-                print(f'\tGot {len(dtag_known_hits)} known hits for dtag')
+                # print(f'\tGot {len(dtag_known_hits)} known hits for dtag')
                 dtag_autobuilt_structures = autobuilt_structures[dtag]
-                print(f"\tGot {len(dtag_autobuilt_structures)} autobuilt structures for dtag ligand")
+                # print(f"\tGot {len(dtag_autobuilt_structures)} autobuilt structures for dtag ligand")
                 dtag_autobuilds = autobuilds[dtag]
-                print(f"\tGot {len(dtag_autobuilds)} autobuilds for dtag ligand")
+                # print(f"\tGot {len(dtag_autobuilds)} autobuilds for dtag ligand")
 
                 for known_hit_key, known_hit in dtag_known_hits.items():
                     # # Get the autobuilds for the dataset
@@ -2583,7 +2583,7 @@ def _make_train_test_ligand_db(
                                     'Z': autobuild['Z']
                                 }
                             )
-            print(f"Got {len(records)} rmsds")
+            # print(f"Got {len(records)} rmsds")
 
             # Get the table of rmsds
             df = pd.DataFrame(records)
