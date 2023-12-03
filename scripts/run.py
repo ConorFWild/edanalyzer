@@ -2285,8 +2285,312 @@ def _make_hit_pandda(working_dir, ):
 
         # pandda_1_events = [event for event in query if event.source == "pandda_1"]
 
+import networkx as nx
+import networkx.algorithms.isomorphism as iso
+
+def get_known_hits(known_hit_structures):
+    centroids = {}
+    for structure_key, structure in known_hit_structures.items():
+        centroids[structure_key] = {}
+        for model in structure:
+            for chain in model:
+                for res in chain:
+                    if res.name in ["LIG", "XXX"]:
+                        centroids[structure_key][f"{chain.name}_{res.seqid.num}"] = res
+
+    return centroids
 
 
+def get_autobuilds(pandda_2_dir):
+    processed_datasets_dir = pandda_2_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
+    autobuild_dir = pandda_2_dir / "autobuild"
+    autobuilds = {}
+    for processed_dataset_dir in processed_datasets_dir.glob("*"):
+        dtag = processed_dataset_dir.name
+        autobuilds[dtag] = {}
+        processed_dataset_yaml = processed_dataset_dir / "processed_dataset.yaml"
+
+        if not processed_dataset_yaml.exists():
+            continue
+
+        with open(processed_dataset_yaml, 'r') as f:
+            data = yaml.safe_load(f)
+
+        selected_model = data['Summary']['Selected Model']
+        # selected_model_events = data['Summary']['Selected Model Events']
+
+        for model, model_info in data['Models'].items():
+            if model == selected_model:
+                selected = True
+            else:
+                selected = False
+            for event_idx, event_info in model_info['Events'].items():
+                # if event_idx not in selected_model_events:
+                #     continue
+
+                autobuild_file = event_info['Build Path']
+                autobuilds[dtag][(model, event_idx,)] = {
+                    "build_path": autobuild_file,
+                    "build_key": event_info['Ligand Key'],
+                    'Score': event_info['Score'],
+                    'Size': event_info['Size'],
+                    'Local Strength': event_info['Local Strength'],
+                    'RSCC': event_info['RSCC'],
+                    'Signal': event_info['Signal'],
+                    'Noise': event_info['Noise'],
+                    'Signal/Noise': event_info['Signal'] / event_info['Noise'],
+                    'X_ligand': event_info['Ligand Centroid'][0],
+                    'Y_ligand': event_info['Ligand Centroid'][1],
+                    'Z_ligand': event_info['Ligand Centroid'][2],
+                    'X': event_info['Centroid'][0],
+                    'Y': event_info['Centroid'][1],
+                    'Z': event_info['Centroid'][2],
+                    'Selected': selected,
+                    "BDC": event_info['BDC']
+                }
+
+    return autobuilds
+
+
+def get_pandda_2_autobuilt_structures(autobuilds):
+    autobuilt_structures = {}
+    for dtag, dtag_builds in autobuilds.items():
+        autobuilt_structures[dtag] = {}
+        for build_key, build_info in dtag_builds.items():
+            autobuilt_structures[dtag][build_key] = gemmi.read_structure(build_info["build_path"])
+
+    return autobuilt_structures
+
+
+def get_ligand_cif_graph_matches(cif_path):
+    # Open the cif document with gemmi
+    cif = gemmi.cif.read(str(cif_path))
+
+    key = "comp_LIG"
+    try:
+        cif['comp_LIG']
+    except:
+        key = "data_comp_XXX"
+
+    # Find the relevant atoms loop
+    atom_id_loop = list(cif[key].find_loop('_chem_comp_atom.atom_id'))
+    atom_type_loop = list(cif[key].find_loop('_chem_comp_atom.type_symbol'))
+    # atom_charge_loop = list(cif[key].find_loop('_chem_comp_atom.charge'))
+
+    # Find the bonds loop
+    bond_1_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_1'))
+    bond_2_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_2'))
+    bond_type_loop = list(cif[key].find_loop('_chem_comp_bond.type'))
+    aromatic_bond_loop = list(cif[key].find_loop('_chem_comp_bond.aromatic'))
+
+    # Construct the graph nodes
+    G = nx.Graph()
+
+    for atom_id, atom_type in zip(atom_id_loop, atom_type_loop):
+        if atom_type == "H":
+            continue
+        G.add_node(atom_id, Z=atom_type)
+
+    # Construct the graph edges
+    for atom_id_1, atom_id_2 in zip(bond_1_id_loop, bond_2_id_loop):
+        if atom_id_1 not in G:
+            continue
+        if atom_id_2 not in G:
+            continue
+        G.add_edge(atom_id_1, atom_id_2)
+
+    # Get the isomorphisms
+    GM = iso.GraphMatcher(G, G, node_match=iso.categorical_node_match('Z', 0))
+
+    return [x for x in GM.isomorphisms_iter()]
+
+
+def get_ligand_graphs(autobuilds, pandda_2_dir):
+    ligand_graphs = {}
+    for dtag, dtag_builds in autobuilds.items():
+        ligand_graphs[dtag] = {}
+        for build_key, build_info in dtag_builds.items():
+            ligand_key = build_info["build_key"]
+            if ligand_key not in ligand_graphs[dtag]:
+                ligand_graphs[dtag][ligand_key] = get_ligand_cif_graph_matches(
+                    pandda_2_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_LIGAND_FILES_DIR / f"{ligand_key}.cif"
+                )
+
+    return ligand_graphs
+
+
+def get_rmsd(
+        known_hit,
+        autobuilt_structure,
+        known_hit_structure,
+        ligand_graph
+):
+    # Iterate over each isorhpism, then get symmetric distance to the relevant atom
+    iso_distances = []
+    for isomorphism in ligand_graph:
+        # print(isomorphism)
+        distances = []
+        for atom in known_hit:
+            if atom.element.name == "H":
+                continue
+            model = autobuilt_structure[0]
+            chain = model[0]
+            res = chain[0]
+            try:
+                autobuilt_atom = res[isomorphism[atom.name]][0]
+            except:
+                return None
+            sym_clostst_dist = known_hit_structure.cell.find_nearest_image(
+                atom.pos,
+                autobuilt_atom.pos,
+            ).dist()
+            distances.append(sym_clostst_dist)
+        # print(distances)
+        rmsd = np.sqrt(np.mean(np.square(distances)))
+        iso_distances.append(rmsd)
+    return min(iso_distances)
+
+def get_known_hit_structures(
+                model_dir,
+                experiment_hit_datasets
+            ):
+    known_hit_structures = {}
+    for hit_dtag in experiment_hit_datasets:
+        hit_structure = Path(model_dir) / hit_dtag / 'refine.pdb'
+        known_hit_structures[hit_dtag] = gemmi.read_structure(hit_structure)
+
+    return known_hit_structures
+
+def _make_train_test_ligand_db(
+            working_directory,
+            name,
+            pandda_key,
+        ):
+
+    database_path = working_directory / "database.db"
+    try:
+        db.bind(provider='sqlite', filename=f"{database_path}")
+        db.generate_mapping()
+    except Exception as e:
+        print(e)
+
+    with pony.orm.db_session:
+        # partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
+        query_events = pony.orm.select(
+            (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
+            event in EventORM)
+        query = pony.orm.select(
+            experiment for experiment in ExperimentORM
+        )
+
+        # Order experiments from least datasets to most for fast results
+        experiment_num_datasets = {
+            _experiment.path: len([x for x in Path(_experiment.model_dir).glob("*")])
+            for _experiment
+            in query
+        }
+        sorted_experiments = sorted(query, key=lambda _experiment: experiment_num_datasets[_experiment.path])
+
+        for experiment in sorted_experiments:
+            experiment_hit_results = [res for res in query_events if
+                                      (res[1].annotation) & (experiment.path == res[4].path)]
+            experiment_hit_datasets = set(
+                [
+                    experiment_hit_result[0].dtag
+                    for experiment_hit_result
+                    in experiment_hit_results
+                    if
+                    (Path(experiment_hit_result[4].model_dir) / experiment_hit_result[0].dtag / 'refine.pdb').exists()
+                ]
+            )
+
+            if len(experiment_hit_datasets) == 0:
+                print(f"No experiment hit results for {experiment.path}. Skipping!")
+                continue
+
+            rprint(f"{experiment.system.name} : {experiment.path} : {experiment_num_datasets[experiment.path]}")
+            # continue
+
+            model_building_dir = Path(experiment.model_dir)
+            result_dir = model_building_dir / f"../{pandda_key}"
+            pandda_dir = result_dir / "pandda"
+
+            # Get the known hits structures
+            known_hit_structures = get_known_hit_structures(
+                experiment.model_dir,
+                experiment_hit_datasets
+            )
+            print(f"Got {len(known_hit_structures)} known hit structures")
+
+            # Get the known hits
+            known_hits = get_known_hits(known_hit_structures)
+            print(f"Got {len(known_hits)} known hits")
+
+            # Get the autobuild structures and their corresponding event info
+            autobuilds = get_autobuilds(pandda_dir)
+            print(f"Got {len(autobuilds)} autobuilds")
+            autobuilt_structures = get_pandda_2_autobuilt_structures(autobuilds)
+            print(f"Got {len(autobuilt_structures)} autobuilt structures")
+
+            # Get the corresponding cif files
+            ligand_graph_matches = get_ligand_graphs(autobuilds, pandda_dir)
+            print(f"Got {len(ligand_graph_matches)} ligand graph matches")
+
+            # For each known hit, for each selected autobuild, graph match and symmtery match and get RMSDs
+            records = []
+            for dtag, dtag_known_hits in known_hits.items():
+                print(dtag)
+                ligand_graphs = ligand_graph_matches[dtag]
+                print(f'\tGot {len(dtag_known_hits)} known hits for dtag')
+                dtag_autobuilt_structures = autobuilt_structures[dtag]
+                print(f"\tGot {len(dtag_autobuilt_structures)} autobuilt structures for dtag ligand")
+                dtag_autobuilds = autobuilds[dtag]
+                print(f"\tGot {len(dtag_autobuilds)} autobuilds for dtag ligand")
+
+                for known_hit_key, known_hit in dtag_known_hits.items():
+                    # # Get the autobuilds for the dataset
+                    for autobuild_key, autobuilt_structure in dtag_autobuilt_structures.items():
+                        autobuild = dtag_autobuilds[autobuild_key]
+                        for ligand_key, ligand_graph_automorphisms in ligand_graphs.items():
+                            # # Get the RMSD
+                            rmsd = get_rmsd(
+                                known_hit,
+                                autobuilt_structure,
+                                known_hit_structures[dtag],
+                                ligand_graph_automorphisms
+                            )
+                            records.append(
+                                {
+                                    "Dtag": dtag,
+                                    "Model IDX": autobuild_key[0],
+                                    "Event IDX": autobuild_key[1],
+                                    "Known Hit Key": known_hit_key,
+                                    # "Autobuild Key": autobuild_key[1],
+                                    "Ligand Key": ligand_key,
+                                    "RMSD": rmsd,
+                                    'Score': autobuild['Score'],
+                                    'Size': autobuild['Size'],
+                                    'Local Strength': autobuild['Local Strength'],
+                                    'RSCC': autobuild['RSCC'],
+                                    'Signal': autobuild['Signal'],
+                                    'Noise': autobuild['Noise'],
+                                    'Signal/Noise': autobuild['Signal/Noise'],
+                                    'X_ligand': autobuild['X_ligand'],
+                                    'Y_ligand': autobuild['Y_ligand'],
+                                    'Z_ligand': autobuild['Z_ligand'],
+                                    'X': autobuild['X'],
+                                    'Y': autobuild['Y'],
+                                    'Z': autobuild['Z']
+                                }
+                            )
+            print(f"Got {len(records)} rmsds")
+
+            # Get the table of rmsds
+            df = pd.DataFrame(records)
+            print(df)
+
+
+    ...
 
 
 def _summarize(working_dir, test_systems, model_key):
@@ -3035,6 +3339,14 @@ def __main__(config_yaml="config.yaml"):
             config.train.model_file,
             config.name
         )
+
+    if "MakeTrainTestLigandDB" in config.steps:
+        _make_train_test_ligand_db(
+            config.working_directory,
+            config.name,
+            config.panddas.pandda_key,
+        )
+
     if 'TrainTestLigand' in config.steps:
         print('Training and testing on ligand model scoring against event maps')
         _train_and_test_ligand_score(
