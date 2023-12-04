@@ -2723,7 +2723,7 @@ def _make_train_test_ligand_db(
                                     "RMSD": rmsd,
                                     'Score': autobuild['Score'],
                                     'Size': autobuild['Size'],
-                                    'Local_Strength': autobuild['Local Strength'],
+                                    'Local_Strength': autobuild['Local_Strength'],
                                     'RSCC': autobuild['RSCC'],
                                     'Signal': autobuild['Signal'],
                                     'Noise': autobuild['Noise'],

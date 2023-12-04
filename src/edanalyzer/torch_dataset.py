@@ -2064,9 +2064,18 @@ def get_masked_dmap(dmap, res):
 
 def _make_ligand_masked_event_map_layer_from_ntuple(event, sample_specification):
     try:
-        autobuild_structure = event.build_path
+        sample_array = sample_specification['sample_grid']
+        sample_transform = sample_specification['transform']
+
+        autobuild_structure_path = event.build_path
+        autobuild_structure = gemmi.read_structure(autobuild_structure_path)
+        res = autobuild_structure[0][0][0]
+
         sample_array= np.copy(sample_array)
-        dmap = get_map_from_path(event_map_path)
+        mean_map = get_map_from_path(event.Mean_Map_Path)
+        xmap = get_map_from_path(event.Xmap_Path)
+        bdc = event.BDC
+        event_map =
         masked_dmap = get_masked_dmap(dmap, res)
         image_initial = sample_xmap(masked_dmap, sample_transform, sample_array)
         std = np.std(image_initial)
