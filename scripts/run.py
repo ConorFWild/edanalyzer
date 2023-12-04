@@ -1973,10 +1973,11 @@ def _train_and_test_ligand_score(
     rprint(f"Got {len(train_dataset_torch)} train events!")
 
     # Create the test dataset
-    test_non_hits = [ntuple for ntuple in df[(df['RMSD'] > 2.5) & (df['Train_Test'] == 'Test')].itertuples()]
-    test_hits = [ntuple for ntuple in df[(df['RMSD'] < 2.5) & (df['Train_Test'] == 'Test')].itertuples()]
+    # test_non_hits = [ntuple for ntuple in df[(df['RMSD'] > 2.5) & (df['Train_Test'] == 'Test')].itertuples()]
+    # test_hits = [ntuple for ntuple in df[(df['RMSD'] < 2.5) & (df['Train_Test'] == 'Test')].itertuples()]
     test_dataset_torch = PanDDADatasetTorchLigand(
-        (test_hits*int(len(test_non_hits) / len(test_hits))) + test_non_hits,
+        # (test_hits*int(len(test_non_hits) / len(test_hits))) + test_non_hits,
+        [ntuple for ntuple in df[(df['RMSD'] > 0.0) & (df['Train_Test'] == 'Test')].itertuples()],
         update_sample_specification=make_sample_specification_test,
         layers=layers,
     )
