@@ -2412,9 +2412,12 @@ def get_ligand_graphs(autobuilds, pandda_2_dir):
         for build_key, build_info in dtag_builds.items():
             ligand_key = build_info["build_key"]
             if ligand_key not in ligand_graphs[dtag]:
-                ligand_graphs[dtag][ligand_key] = get_ligand_cif_graph_matches(
+                try:
+                    ligand_graphs[dtag][ligand_key] = get_ligand_cif_graph_matches(
                     pandda_2_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_LIGAND_FILES_DIR / f"{ligand_key}.cif"
                 )
+                except:
+                    continue
 
     return ligand_graphs
 
@@ -2467,6 +2470,7 @@ def _make_train_test_ligand_db(
             pandda_key,
         ):
 
+    # Get the PanDDA derived data
     database_path = working_directory / "database.db"
     try:
         db.bind(provider='sqlite', filename=f"{database_path}")
@@ -2584,7 +2588,10 @@ def _make_train_test_ligand_db(
                                     'Z_ligand': autobuild['Z_ligand'],
                                     'X': autobuild['X'],
                                     'Y': autobuild['Y'],
-                                    'Z': autobuild['Z']
+                                    'Z': autobuild['Z'],
+                                    "Build Path": ...,
+                                    'BDC': ...,
+                                    'Source': 'PanDDA'
                                 }
                             )
             # print(f"Got {len(records)} rmsds")
