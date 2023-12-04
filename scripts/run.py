@@ -2515,6 +2515,10 @@ def _make_train_test_ligand_db(
             result_dir = model_building_dir / f"../{pandda_key}"
             pandda_dir = result_dir / "pandda"
 
+            if not (pandda_dir / constants.PANDDA_ANALYSIS_DIR / 'pandda_analyse_events.csv').exists():
+                print(f"PanDDA either not finished or errored! Skipping!")
+                continue
+
             # Get the known hits structures
             known_hit_structures = get_known_hit_structures(
                 experiment.model_dir,
