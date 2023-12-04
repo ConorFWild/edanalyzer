@@ -2591,7 +2591,7 @@ def _make_train_test_ligand_db(
                                     'X': autobuild['X'],
                                     'Y': autobuild['Y'],
                                     'Z': autobuild['Z'],
-                                    "Build Path": str(autobuild[autobuild_key]['build_path']),
+                                    "Build Path": str(autobuild['build_path']),
                                     'BDC': autobuild['BDC'],
                                     'Xmap Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / 'xmap.ccp4'),
                                     'Mean Map Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_GROUND_STATE_MAP_TEMPLATE.format(dtag=dtag)),
