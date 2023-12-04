@@ -1058,7 +1058,11 @@ def train(
                 event = test_dataset_torch.pandda_event_dataset[idx]
                 # print(event)
                 # annotations[i][(event.pandda_dir, event.dtag, event.event_idx)] = (
-                annotations[epoch][(event.pandda_dir, event.dtag, event.event_idx)] = (
+                # annotations[epoch][(event.pandda_dir, event.dtag, event.event_idx)] = (
+                #     float(annotation.to(torch.device("cpu")).detach().numpy()[0][1]),
+                #     float(model_annotation.to(torch.device("cpu")).detach().numpy()[0][1]),
+                # )
+                annotations[epoch][(event.PanDDA_Path, event.Dtag, event.Event_IDX)] = (
                     float(annotation.to(torch.device("cpu")).detach().numpy()[0][1]),
                     float(model_annotation.to(torch.device("cpu")).detach().numpy()[0][1]),
                 )
