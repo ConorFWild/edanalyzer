@@ -1928,6 +1928,7 @@ def _train_and_test_ligand_score(
         _make_ligand_masked_event_map_layer,  # Updates ligand_masked_event_map_layer
         _get_annotation_from_ntuple,  # Updates annotation
         _get_centroid_from_ntuple,  # updates centroid and annotation
+        _get_transform_from_ntuple,
         _make_ligand_masked_event_map_layer_from_ntuple,  # Updates ligand_masked_event_map_layer
         _make_ligand_masked_z_map_layer_from_ntuple,  # Updates ligand_masked_z_map_layer
         _make_ligand_masked_raw_xmap_map_layer_from_ntuple  # Updates ligand_masked_raw_xmap_map_layer
@@ -1937,7 +1938,7 @@ def _train_and_test_ligand_score(
         _get_random_orientation,  # Updates orientation
         _get_annotation_from_ntuple,  # Updates annotation
         _get_centroid_from_ntuple,  # updates centroid and annotation
-        _get_transform,  # Updates transform,
+        _get_transform_from_ntuple,  # Updates transform,
         _make_ligand_masked_event_map_layer_from_ntuple,  # Updates ligand_masked_event_map_layer
         _make_ligand_masked_z_map_layer_from_ntuple,  # Updates ligand_masked_z_map_layer
         _make_ligand_masked_raw_xmap_map_layer_from_ntuple  # Updates ligand_masked_raw_xmap_map_layer
@@ -1946,7 +1947,7 @@ def _train_and_test_ligand_score(
         _get_random_orientation,  # Updates orientation
         _get_annotation_from_ntuple,  # Updates annotation
         _get_centroid_from_ntuple,  # updates centroid and annotation
-        _get_transform,  # Updates transform,
+        _get_transform_from_ntuple,  # Updates transform,
         _make_ligand_masked_event_map_layer_from_ntuple,  # Updates ligand_masked_event_map_layer
         _make_ligand_masked_z_map_layer_from_ntuple,  # Updates ligand_masked_z_map_layer
         _make_ligand_masked_raw_xmap_map_layer_from_ntuple  # Updates ligand_masked_raw_xmap_map_layer

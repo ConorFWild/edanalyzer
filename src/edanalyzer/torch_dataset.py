@@ -1830,6 +1830,87 @@ def _get_random_orientation(event, sample_specification):  # Updates orientation
     sample_specification['orientation'] = rotation_matrix
     return sample_specification
 
+def _get_transform_from_ntuple(event, sample_specification):
+    sample_distance: float = 0.5
+    n: int = 30
+    # translation: float):
+
+    # Get basic sample grid transform
+    initial_transform = gemmi.Transform()
+    scale_matrix = np.eye(3) * sample_distance
+    initial_transform.mat.fromlist(scale_matrix.tolist())
+
+    # Get sample grid centroid
+    sample_grid_centroid = (np.array([n, n, n]) * sample_distance) / 2
+    sample_grid_centroid_pos = gemmi.Position(*sample_grid_centroid)
+
+    # Get centre grid transform
+    centre_grid_transform = gemmi.Transform()
+    centre_grid_transform.vec.fromlist([
+        -sample_grid_centroid[0],
+        -sample_grid_centroid[1],
+        -sample_grid_centroid[2],
+    ])
+
+    # Generate rotation matrix
+    rotation_matrix = sample_specification['orientation']
+    rotation_transform = gemmi.Transform()
+    rotation_transform.mat.fromlist(rotation_matrix.tolist())
+
+    # Apply random rotation transform to centroid
+    transformed_centroid = rotation_transform.apply(sample_grid_centroid_pos)
+    transformed_centroid_array = np.array([transformed_centroid.x, transformed_centroid.y, transformed_centroid.z])
+
+    # Recentre transform
+    rotation_recentre_transform = gemmi.Transform()
+    rotation_recentre_transform.vec.fromlist((sample_grid_centroid - transformed_centroid_array).tolist())
+
+    # Event centre transform
+    event_centre_transform = gemmi.Transform()
+    event_centre_transform.vec.fromlist(sample_specification['centroid'])
+
+    # Generate random translation transform
+    # rng = default_rng()
+    # random_translation = (rng.random(3) - 0.5) * 2 #* translation
+    # random_translation = np.array([0.0,0.0,0.0])
+    # logger.debug(f"Random translation: {random_translation}")
+    # random_translation_transform = gemmi.Transform()
+    # random_translation_transform.vec.fromlist(random_translation.tolist())
+
+    # Apply random translation
+    # transform = #random_translation_transform.combine(
+    transform = event_centre_transform.combine(
+        rotation_transform.combine(
+            centre_grid_transform.combine(
+                initial_transform
+            )
+        )
+    )
+    # )
+    corner_0_pos = transform.apply(gemmi.Position(0.0, 0.0, 0.0))
+    corner_n_pos = transform.apply(gemmi.Position(
+        float(n),
+        float(n),
+        float(n),
+    )
+    )
+    corner_0 = (corner_0_pos.x, corner_0_pos.y, corner_0_pos.z)
+    corner_n = (corner_n_pos.x, corner_n_pos.y, corner_n_pos.z)
+    average_pos = [c0 + (cn - c0) / 2 for c0, cn in zip(corner_0, corner_n)]
+    event_centroid = (event.X_ligand, event.Y_ligand, event.Z_ligand)
+    # logger.debug(f"Centroid: {event_centroid}")
+    # logger.debug(f"Corners: {corner_0} : {corner_n} : average: {average_pos}")
+    # logger.debug(f"Distance from centroid to average: {gemmi.Position(*average_pos).dist(gemmi.Position(*event_centroid))}")
+
+    # return transform, np.zeros((n, n, n), dtype=np.float32)
+    sample_specification['transform'] = transform
+    sample_specification['n'] =n
+    sample_specification['step'] = sample_distance
+
+    sample_specification['sample_grid'] = np.zeros((n, n, n), dtype=np.float32)
+    return sample_specification
+
+
 def _get_transform(event, sample_specification):
     sample_distance: float = 0.5
     n: int = 30
