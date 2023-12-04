@@ -2473,7 +2473,7 @@ def _make_train_test_ligand_db(
         db.generate_mapping()
     except Exception as e:
         print(e)
-
+    dfs = {}
     with pony.orm.db_session:
         # partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
         query_events = pony.orm.select(
@@ -2595,6 +2595,8 @@ def _make_train_test_ligand_db(
             if len(df) != 0:
 
                 print(df[df['RMSD'] < 2.5])
+
+            dfs[experiment.path] = df
 
 
     ...
