@@ -2612,6 +2612,7 @@ def _make_train_test_ligand_db(
 
 
     table = pd.concat([x for x in dfs.values()], axis=0, ignore_index=True)
+    table.to_csv('train_test_ligand_score.csv')
 
     ...
 
