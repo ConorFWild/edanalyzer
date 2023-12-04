@@ -2143,12 +2143,31 @@ def get_masked_dmap(dmap, res):
 
     return dmap
 
+def get_event_map(
+            xmap,
+            mean_map,
+            bdc
+        ):
+    dataset_map_array = np.array(xmap, copy=False)
+
+    mean_map_array = np.array(mean_map, copy=False)
+
+    calc_event_map_array = (dataset_map_array - (bdc * mean_map_array)) / (1-bdc)
+
+    event_map = gemmi.FloatGrid(
+        xmap.nu, xmap.nv, xmap.nw
+    )
+    event_map_array = np.array(event_map, copy=False)
+    event_map_array[:, :, :] = calc_event_map_array[:, :, :]
+    event_map.set_unit_cell(xmap.unit_cell)
+    return event_map
+
 def _make_ligand_masked_event_map_layer_from_ntuple(event, sample_specification):
     try:
         sample_array = sample_specification['sample_grid']
         sample_transform = sample_specification['transform']
 
-        autobuild_structure_path = event.build_path
+        autobuild_structure_path = event.Build_Path
         autobuild_structure = gemmi.read_structure(autobuild_structure_path)
         res = autobuild_structure[0][0][0]
 
@@ -2186,7 +2205,7 @@ def _make_ligand_masked_z_map_layer_from_ntuple(event, sample_specification):
         sample_array = sample_specification['sample_grid']
         sample_transform = sample_specification['transform']
 
-        autobuild_structure_path = event.build_path
+        autobuild_structure_path = event.Build_Path
         autobuild_structure = gemmi.read_structure(autobuild_structure_path)
         res = autobuild_structure[0][0][0]
 
@@ -2219,7 +2238,7 @@ def _make_ligand_masked_raw_xmap_map_layer_from_ntuple(event, sample_specificati
         sample_array = sample_specification['sample_grid']
         sample_transform = sample_specification['transform']
 
-        autobuild_structure_path = event.build_path
+        autobuild_structure_path = event.Build_Path
         autobuild_structure = gemmi.read_structure(autobuild_structure_path)
         res = autobuild_structure[0][0][0]
 
