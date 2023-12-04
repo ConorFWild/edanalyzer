@@ -1929,17 +1929,13 @@ def _train_and_test_ligand_score(
     )
 
     make_sample_specification_train = [
-        _get_zmap_path_from_row,  # Updates z_map_path
-        _get_mean_map_path_from_row,  # Updates mean_map_path
-        _get_xmap_path_from_row,  # Updates xmap_path
-        _get_
         _get_random_orientation,  # Updates orientation
-        _get_annotation_from_row,  # Updates annotation
-        _get_centroid_relative_from_row,  # updates centroid and annotation
+        _get_annotation_from_ntuple,  # Updates annotation
+        _get_centroid_relative_from_ntuple,  # updates centroid and annotation
         _get_transform,  # Updates transform,
-        _make_ligand_masked_event_map_layer_from_row,  # Updates ligand_masked_event_map_layer
-        _make_ligand_masked_z_map_layer_from_row,
-        _make_ligand_masked_row_xmap_map_layer_from_row
+        _make_ligand_masked_event_map_layer_from_ntuple,  # Updates ligand_masked_event_map_layer
+        _make_ligand_masked_z_map_layer_from_ntuple,  # Updates ligand_masked_z_map_layer
+        _make_ligand_masked_row_xmap_map_layer_from_ntuple  # Updates ligand_masked_raw_xmap_map_layer
     ]
     make_sample_specification_test = [
         _get_event_map_path,  # Updates event_map_path
@@ -1963,9 +1959,7 @@ def _train_and_test_ligand_score(
 
     # Create the train dataset
     train_dataset_torch = PanDDADatasetTorchLigand(
-        PanDDAEventDataset(
-            pandda_events =hits
-        ),
+        [row for row in df.itertuples()],
         update_sample_specification=make_sample_specification_train,
         layers=layers,
     )
@@ -2474,7 +2468,7 @@ def get_autobuilds(pandda_2_dir):
                     'RSCC': event_info['RSCC'],
                     'Signal': event_info['Signal'],
                     'Noise': event_info['Noise'],
-                    'Signal/Noise': event_info['Signal'] / event_info['Noise'],
+                    'Signal_Noise': event_info['Signal'] / event_info['Noise'],
                     'X_ligand': event_info['Ligand Centroid'][0],
                     'Y_ligand': event_info['Ligand Centroid'][1],
                     'Z_ligand': event_info['Ligand Centroid'][2],

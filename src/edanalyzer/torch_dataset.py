@@ -1395,6 +1395,15 @@ def _get_bound_state_model_path(event, sample_specification):
         sample_specification['bound_state_structure_path'] = None
     return sample_specification
 
+def _get_annotation_from_ntuple(event, sample_specification):
+    if event.RMSD < 2.5:
+        sample_specification['annotation'] = True
+    else:
+        sample_specification['annotation'] = False
+    return sample_specification
+
+
+
 def _get_annotation_from_event(event, sample_specification):  # Updates annotation
     sample_specification['annotation'] = event.hit
     return sample_specification
@@ -1703,6 +1712,10 @@ def _sample_to_ligand_distance(point, ligand_array):
     distances = np.linalg.norm(ligand_array-point.reshape((1,3)), axis=1)
     closest_distance = np.min(distances)
     return closest_distance
+
+def _get_centroid_relative_from_ntuple(event, sample_specification):
+    sample_specification['centroid'] = [event.X_ligand, event.Y_ligand]
+    return sample_specification
 
 def _get_centroid_relative_to_ligand(event, sample_specification):  # updates centroid and annotation
     rng = default_rng()
