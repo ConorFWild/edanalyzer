@@ -2235,14 +2235,14 @@ def _make_ligand_masked_raw_xmap_map_layer_from_ntuple(event, sample_specificati
         else:
             image_dmap = (image_initial - np.mean(image_initial)) / std
         # sample_specification['event_map'] = dmap
-        sample_specification['ligand_masked_z_map_layer'] = image_dmap
+        sample_specification['ligand_masked_raw_xmap_map_layer'] = image_dmap
 
     except Exception as e:
         print(f"Error making masked event map: {e}")
         # sample_specification['event_map'] = None
         sample_array = sample_specification['sample_grid']
         sample_specification['annotation'] = False
-        sample_specification['ligand_masked_z_map_layer'] = np.copy(sample_array)
+        sample_specification['ligand_masked_raw_xmap_map_layer'] = np.copy(sample_array)
 
     return sample_specification
 
