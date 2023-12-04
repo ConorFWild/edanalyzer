@@ -1959,7 +1959,7 @@ def _train_and_test_ligand_score(
     num_layers = 3
 
     # Load the table of data
-    df = pd.read_csv('')
+    df = pd.read_csv(working_dir / 'train_test_ligand_score.csv')
 
     # Create the train dataset
     train_dataset_torch = PanDDADatasetTorchLigand(
