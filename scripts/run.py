@@ -2689,7 +2689,7 @@ def _make_train_test_ligand_db(
             records = []
             for dtag, dtag_known_hits in known_hits.items():
                 # print(dtag)
-                if dtag not in ligand_graphs:
+                if dtag not in ligand_graph_matches:
                     continue
                 ligand_graphs = ligand_graph_matches[dtag]
                 if len(ligand_graphs) == 0:
