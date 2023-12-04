@@ -1931,7 +1931,7 @@ def _train_and_test_ligand_score(
     make_sample_specification_train = [
         _get_random_orientation,  # Updates orientation
         _get_annotation_from_ntuple,  # Updates annotation
-        _get_centroid_relative_from_ntuple,  # updates centroid and annotation
+        _get_centroid_from_ntuple,  # updates centroid and annotation
         _get_transform,  # Updates transform,
         _make_ligand_masked_event_map_layer_from_ntuple,  # Updates ligand_masked_event_map_layer
         _make_ligand_masked_z_map_layer_from_ntuple,  # Updates ligand_masked_z_map_layer
@@ -2712,35 +2712,35 @@ def _make_train_test_ligand_db(
                             )
                             records.append(
                                 {
-                                    'Experiment Model Dir': str(experiment.model_dir),
-                                    'PanDDA Path': str(pandda_dir),
+                                    'Experiment_Model_Dir': str(experiment.model_dir),
+                                    'PanDDA_Path': str(pandda_dir),
                                     "Dtag": dtag,
-                                    "Model IDX": autobuild_key[0],
-                                    "Event IDX": autobuild_key[1],
-                                    "Known Hit Key": known_hit_key,
+                                    "Model_IDX": autobuild_key[0],
+                                    "Event_IDX": autobuild_key[1],
+                                    "Known_Hit_Key": known_hit_key,
                                     # "Autobuild Key": autobuild_key[1],
-                                    "Ligand Key": ligand_key,
+                                    "Ligand_Key": ligand_key,
                                     "RMSD": rmsd,
                                     'Score': autobuild['Score'],
                                     'Size': autobuild['Size'],
-                                    'Local Strength': autobuild['Local Strength'],
+                                    'Local_Strength': autobuild['Local Strength'],
                                     'RSCC': autobuild['RSCC'],
                                     'Signal': autobuild['Signal'],
                                     'Noise': autobuild['Noise'],
-                                    'Signal/Noise': autobuild['Signal/Noise'],
+                                    'Signal_Noise': autobuild['Signal/Noise'],
                                     'X_ligand': autobuild['X_ligand'],
                                     'Y_ligand': autobuild['Y_ligand'],
                                     'Z_ligand': autobuild['Z_ligand'],
                                     'X': autobuild['X'],
                                     'Y': autobuild['Y'],
                                     'Z': autobuild['Z'],
-                                    "Build Path": str(autobuild['build_path']),
+                                    "Build_Path": str(autobuild['build_path']),
                                     'BDC': autobuild['BDC'],
-                                    'Xmap Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / 'xmap.ccp4'),
-                                    'Mean Map Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_GROUND_STATE_MAP_TEMPLATE.format(dtag=dtag)),
-                                    'Mtz Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dtag)),
-                                    'Zmap Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=dtag)),
-                                    'Train/Test': train_test
+                                    'Xmap_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / 'xmap.ccp4'),
+                                    'Mean_Map_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_GROUND_STATE_MAP_TEMPLATE.format(dtag=dtag)),
+                                    'Mtz_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dtag)),
+                                    'Zmap_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=dtag)),
+                                    'Train_Test': train_test
                                 }
                             )
             # print(f"Got {len(records)} rmsds")

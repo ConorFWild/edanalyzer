@@ -1713,8 +1713,8 @@ def _sample_to_ligand_distance(point, ligand_array):
     closest_distance = np.min(distances)
     return closest_distance
 
-def _get_centroid_relative_from_ntuple(event, sample_specification):
-    sample_specification['centroid'] = [event.X_ligand, event.Y_ligand]
+def _get_centroid_from_ntuple(event, sample_specification):
+    sample_specification['centroid'] = [event.X_ligand, event.Y_ligand, event.Z_ligand]
     return sample_specification
 
 def _get_centroid_relative_to_ligand(event, sample_specification):  # updates centroid and annotation
@@ -2062,7 +2062,30 @@ def get_masked_dmap(dmap, res):
 
     return dmap
 
+def _make_ligand_masked_event_map_layer_from_ntuple(event, sample_specification):
+    try:
+        autobuild_structure = event.build_path
+        sample_array= np.copy(sample_array)
+        dmap = get_map_from_path(event_map_path)
+        masked_dmap = get_masked_dmap(dmap, res)
+        image_initial = sample_xmap(masked_dmap, sample_transform, sample_array)
+        std = np.std(image_initial)
+        if np.abs(std) < 0.0000001:
+            image_dmap = np.copy(sample_array)
+            sample_specification['annotation'] = False
+        else:
+            image_dmap = (image_initial - np.mean(image_initial)) / std
+        # sample_specification['event_map'] = dmap
+        sample_specification['ligand_masked_event_map_layer'] = image_dmap
 
+    except Exception as e:
+        print(f"Error making masked event map: {e}")
+        # sample_specification['event_map'] = None
+        sample_array = sample_specification['sample_grid']
+        sample_specification['annotation'] = False
+        sample_specification['ligand_masked_event_map_layer'] = np.copy(sample_array)
+
+    return sample_specification
 def _make_ligand_masked_event_map_layer(event, sample_specification):
     try:
         sample_array = sample_specification['sample_grid']
