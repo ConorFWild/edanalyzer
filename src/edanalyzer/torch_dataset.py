@@ -2162,6 +2162,7 @@ def get_event_map(
     event_map.set_unit_cell(xmap.unit_cell)
     return event_map
 
+
 def _make_ligand_masked_event_map_layer_from_ntuple(event, sample_specification):
     try:
         sample_array = sample_specification['sample_grid']

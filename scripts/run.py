@@ -1963,16 +1963,20 @@ def _train_and_test_ligand_score(
     df = pd.read_csv(working_dir / 'train_test_ligand_score.csv')
 
     # Create the train dataset
+    train_non_hits = [ntuple for ntuple in df[(df['RMSD'] > 2.5) & (df['Train_Test'] == 'Train')].itertuples()]
+    train_hits = [ntuple for ntuple in df[(df['RMSD'] < 2.5) & (df['Train_Test'] == 'Train')].itertuples()]
     train_dataset_torch = PanDDADatasetTorchLigand(
-        [ntuple for ntuple in df[(df['RMSD'] > 0.0) & (df['Train_Test'] == 'Train')].itertuples()],
+        (train_hits*int(len(train_non_hits) / len(train_hits))) + train_non_hits,
         update_sample_specification=make_sample_specification_train,
         layers=layers,
     )
     rprint(f"Got {len(train_dataset_torch)} train events!")
 
     # Create the test dataset
+    test_non_hits = [ntuple for ntuple in df[(df['RMSD'] > 2.5) & (df['Train_Test'] == 'Test')].itertuples()]
+    test_hits = [ntuple for ntuple in df[(df['RMSD'] < 2.5) & (df['Train_Test'] == 'Test')].itertuples()]
     test_dataset_torch = PanDDADatasetTorchLigand(
-        [ntuple for ntuple in df[(df['RMSD'] > 0.0) & (df['Train_Test'] == 'Test')].itertuples()],
+        (test_hits*int(len(test_non_hits) / len(test_hits))) + test_non_hits,
         update_sample_specification=make_sample_specification_test,
         layers=layers,
     )
