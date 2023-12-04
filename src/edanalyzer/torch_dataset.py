@@ -2075,7 +2075,7 @@ def _make_ligand_masked_event_map_layer_from_ntuple(event, sample_specification)
         mean_map = get_map_from_path(event.Mean_Map_Path)
         xmap = get_map_from_path(event.Xmap_Path)
         bdc = event.BDC
-        event_map =
+        event_map = ...
         masked_dmap = get_masked_dmap(dmap, res)
         image_initial = sample_xmap(masked_dmap, sample_transform, sample_array)
         std = np.std(image_initial)
