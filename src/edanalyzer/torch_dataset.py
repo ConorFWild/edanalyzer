@@ -2239,11 +2239,11 @@ class PanDDADatasetTorchLigand(Dataset):
         # self.transform_annotation = transform_annotation
 
     def __len__(self):
-        return len(self.pandda_event_dataset.pandda_events)
+        return len(self.pandda_event_dataset)
 
     def __getitem__(self, idx: int):
         time_begin_load_item = time.time()
-        event = self.pandda_event_dataset.pandda_events[idx]
+        event = self.pandda_event_dataset[idx]
 
         # annotation = event.hit
 
