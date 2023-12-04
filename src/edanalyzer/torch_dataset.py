@@ -2174,11 +2174,11 @@ def _get_autobuild_res_from_ntuple(event, sample_specification):
 def _make_ligand_masked_event_map_layer_from_ntuple(event, sample_specification):
     try:
         sample_array = sample_specification['sample_grid']
+        sample_array = np.copy(sample_array)
         sample_transform = sample_specification['transform']
-
         res = sample_specification['res']
 
-        sample_array= np.copy(sample_array)
+        # Get the masked dmap
         mean_map = get_map_from_path(event.Mean_Map_Path)
         xmap = get_map_from_path(event.Xmap_Path)
         bdc = event.BDC
@@ -2188,6 +2188,8 @@ def _make_ligand_masked_event_map_layer_from_ntuple(event, sample_specification)
             bdc
         )
         masked_dmap = get_masked_dmap(event_map, res)
+
+        # Get the image
         image_initial = sample_xmap(masked_dmap, sample_transform, sample_array)
         std = np.std(image_initial)
         if np.abs(std) < 0.0000001:
@@ -2214,10 +2216,12 @@ def _make_ligand_masked_z_map_layer_from_ntuple(event, sample_specification):
 
         res = sample_specification['res']
 
+        # Get the masked dmap
         sample_array= np.copy(sample_array)
         z_map = get_map_from_path(event.Zmap_Path)
-
         masked_dmap = get_masked_dmap(z_map, res)
+
+        # Get the image
         image_initial = sample_xmap(masked_dmap, sample_transform, sample_array)
         std = np.std(image_initial)
         if np.abs(std) < 0.0000001:
@@ -2245,10 +2249,12 @@ def _make_ligand_masked_raw_xmap_map_layer_from_ntuple(event, sample_specificati
 
         res = sample_specification['res']
 
+        # Get the masked dmap
         sample_array= np.copy(sample_array)
         x_map = load_xmap_from_mtz(event.Mtz_Path)
-
         masked_dmap = get_masked_dmap(x_map, res)
+
+        # Get the image
         image_initial = sample_xmap(masked_dmap, sample_transform, sample_array)
         std = np.std(image_initial)
         if np.abs(std) < 0.0000001:
