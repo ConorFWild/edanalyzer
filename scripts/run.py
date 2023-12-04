@@ -2689,14 +2689,20 @@ def _make_train_test_ligand_db(
             records = []
             for dtag, dtag_known_hits in known_hits.items():
                 # print(dtag)
+                if dtag not in ligand_graphs:
+                    continue
                 ligand_graphs = ligand_graph_matches[dtag]
                 if len(ligand_graphs) == 0:
                     continue
                 # print(f'\tGot {len(dtag_known_hits)} known hits for dtag')
+                if dtag not in autobuilt_structures:
+                    continue
                 dtag_autobuilt_structures = autobuilt_structures[dtag]
                 if len(dtag_autobuilt_structures) == 0:
                     continue
                 # print(f"\tGot {len(dtag_autobuilt_structures)} autobuilt structures for dtag ligand")
+                if dtag not in autobuilds:
+                    continue
                 dtag_autobuilds = autobuilds[dtag]
                 if len(dtag_autobuilds) == 0:
                     continue
