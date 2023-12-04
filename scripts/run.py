@@ -2464,7 +2464,7 @@ def get_autobuilds(pandda_2_dir):
                     "build_key": event_info['Ligand Key'],
                     'Score': event_info['Score'],
                     'Size': event_info['Size'],
-                    'Local Strength': event_info['Local Strength'],
+                    'Local_Strength': event_info['Local Strength'],
                     'RSCC': event_info['RSCC'],
                     'Signal': event_info['Signal'],
                     'Noise': event_info['Noise'],
