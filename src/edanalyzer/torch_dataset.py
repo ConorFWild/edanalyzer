@@ -2163,14 +2163,20 @@ def get_event_map(
     return event_map
 
 
+def _get_autobuild_res_from_ntuple(event, sample_specification):
+    autobuild_structure_path = event.Build_Path
+    autobuild_structure = gemmi.read_structure(autobuild_structure_path)
+    res = autobuild_structure[0][0][0]
+    sample_specification['res'] = res
+
+    return sample_specification
+
 def _make_ligand_masked_event_map_layer_from_ntuple(event, sample_specification):
     try:
         sample_array = sample_specification['sample_grid']
         sample_transform = sample_specification['transform']
 
-        autobuild_structure_path = event.Build_Path
-        autobuild_structure = gemmi.read_structure(autobuild_structure_path)
-        res = autobuild_structure[0][0][0]
+        res = sample_specification['res']
 
         sample_array= np.copy(sample_array)
         mean_map = get_map_from_path(event.Mean_Map_Path)
@@ -2206,9 +2212,7 @@ def _make_ligand_masked_z_map_layer_from_ntuple(event, sample_specification):
         sample_array = sample_specification['sample_grid']
         sample_transform = sample_specification['transform']
 
-        autobuild_structure_path = event.Build_Path
-        autobuild_structure = gemmi.read_structure(autobuild_structure_path)
-        res = autobuild_structure[0][0][0]
+        res = sample_specification['res']
 
         sample_array= np.copy(sample_array)
         z_map = get_map_from_path(event.Zmap_Path)
@@ -2239,9 +2243,7 @@ def _make_ligand_masked_raw_xmap_map_layer_from_ntuple(event, sample_specificati
         sample_array = sample_specification['sample_grid']
         sample_transform = sample_specification['transform']
 
-        autobuild_structure_path = event.Build_Path
-        autobuild_structure = gemmi.read_structure(autobuild_structure_path)
-        res = autobuild_structure[0][0][0]
+        res = sample_specification['res']
 
         sample_array= np.copy(sample_array)
         x_map = load_xmap_from_mtz(event.Mtz_Path)
