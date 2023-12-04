@@ -1935,7 +1935,7 @@ def _train_and_test_ligand_score(
         _get_transform,  # Updates transform,
         _make_ligand_masked_event_map_layer_from_ntuple,  # Updates ligand_masked_event_map_layer
         _make_ligand_masked_z_map_layer_from_ntuple,  # Updates ligand_masked_z_map_layer
-        _make_ligand_masked_row_xmap_map_layer_from_ntuple  # Updates ligand_masked_raw_xmap_map_layer
+        _make_ligand_masked_raw_xmap_map_layer_from_ntuple  # Updates ligand_masked_raw_xmap_map_layer
     ]
     make_sample_specification_test = [
         _get_event_map_path,  # Updates event_map_path
@@ -2727,7 +2727,7 @@ def _make_train_test_ligand_db(
                                     'RSCC': autobuild['RSCC'],
                                     'Signal': autobuild['Signal'],
                                     'Noise': autobuild['Noise'],
-                                    'Signal_Noise': autobuild['Signal/Noise'],
+                                    'Signal_Noise': autobuild['Signal_Noise'],
                                     'X_ligand': autobuild['X_ligand'],
                                     'Y_ligand': autobuild['Y_ligand'],
                                     'Z_ligand': autobuild['Z_ligand'],

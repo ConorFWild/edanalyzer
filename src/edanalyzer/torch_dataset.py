@@ -2075,8 +2075,12 @@ def _make_ligand_masked_event_map_layer_from_ntuple(event, sample_specification)
         mean_map = get_map_from_path(event.Mean_Map_Path)
         xmap = get_map_from_path(event.Xmap_Path)
         bdc = event.BDC
-        event_map = ...
-        masked_dmap = get_masked_dmap(dmap, res)
+        event_map = get_event_map(
+            xmap,
+            mean_map,
+            bdc
+        )
+        masked_dmap = get_masked_dmap(event_map, res)
         image_initial = sample_xmap(masked_dmap, sample_transform, sample_array)
         std = np.std(image_initial)
         if np.abs(std) < 0.0000001:
@@ -2095,6 +2099,72 @@ def _make_ligand_masked_event_map_layer_from_ntuple(event, sample_specification)
         sample_specification['ligand_masked_event_map_layer'] = np.copy(sample_array)
 
     return sample_specification
+
+def _make_ligand_masked_z_map_layer_from_ntuple(event, sample_specification):
+    try:
+        sample_array = sample_specification['sample_grid']
+        sample_transform = sample_specification['transform']
+
+        autobuild_structure_path = event.build_path
+        autobuild_structure = gemmi.read_structure(autobuild_structure_path)
+        res = autobuild_structure[0][0][0]
+
+        sample_array= np.copy(sample_array)
+        z_map = get_map_from_path(event.Zmap_Path)
+
+        masked_dmap = get_masked_dmap(z_map, res)
+        image_initial = sample_xmap(masked_dmap, sample_transform, sample_array)
+        std = np.std(image_initial)
+        if np.abs(std) < 0.0000001:
+            image_dmap = np.copy(sample_array)
+            sample_specification['annotation'] = False
+        else:
+            image_dmap = (image_initial - np.mean(image_initial)) / std
+        # sample_specification['event_map'] = dmap
+        sample_specification['ligand_masked_z_map_layer'] = image_dmap
+
+    except Exception as e:
+        print(f"Error making masked event map: {e}")
+        # sample_specification['event_map'] = None
+        sample_array = sample_specification['sample_grid']
+        sample_specification['annotation'] = False
+        sample_specification['ligand_masked_z_map_layer'] = np.copy(sample_array)
+
+    return sample_specification
+
+
+def _make_ligand_masked_raw_xmap_map_layer_from_ntuple(event, sample_specification):
+    try:
+        sample_array = sample_specification['sample_grid']
+        sample_transform = sample_specification['transform']
+
+        autobuild_structure_path = event.build_path
+        autobuild_structure = gemmi.read_structure(autobuild_structure_path)
+        res = autobuild_structure[0][0][0]
+
+        sample_array= np.copy(sample_array)
+        x_map = load_xmap_from_mtz(event.Mtz_Path)
+
+        masked_dmap = get_masked_dmap(x_map, res)
+        image_initial = sample_xmap(masked_dmap, sample_transform, sample_array)
+        std = np.std(image_initial)
+        if np.abs(std) < 0.0000001:
+            image_dmap = np.copy(sample_array)
+            sample_specification['annotation'] = False
+        else:
+            image_dmap = (image_initial - np.mean(image_initial)) / std
+        # sample_specification['event_map'] = dmap
+        sample_specification['ligand_masked_z_map_layer'] = image_dmap
+
+    except Exception as e:
+        print(f"Error making masked event map: {e}")
+        # sample_specification['event_map'] = None
+        sample_array = sample_specification['sample_grid']
+        sample_specification['annotation'] = False
+        sample_specification['ligand_masked_z_map_layer'] = np.copy(sample_array)
+
+    return sample_specification
+
 def _make_ligand_masked_event_map_layer(event, sample_specification):
     try:
         sample_array = sample_specification['sample_grid']
