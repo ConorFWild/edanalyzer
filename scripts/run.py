@@ -1926,6 +1926,11 @@ def _train_and_test_ligand_score(
         _get_non_transformed_ligand,
         _get_centroid_relative_to_transformed_ligand,  # updates centroid and annotation
         _make_ligand_masked_event_map_layer,  # Updates ligand_masked_event_map_layer
+        _get_annotation_from_ntuple,  # Updates annotation
+        _get_centroid_from_ntuple,  # updates centroid and annotation
+        _make_ligand_masked_event_map_layer_from_ntuple,  # Updates ligand_masked_event_map_layer
+        _make_ligand_masked_z_map_layer_from_ntuple,  # Updates ligand_masked_z_map_layer
+        _make_ligand_masked_raw_xmap_map_layer_from_ntuple  # Updates ligand_masked_raw_xmap_map_layer
     )
 
     make_sample_specification_train = [
