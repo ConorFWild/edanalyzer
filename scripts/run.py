@@ -1963,7 +1963,7 @@ def _train_and_test_ligand_score(
 
     # Create the train dataset
     train_dataset_torch = PanDDADatasetTorchLigand(
-        [ntuple for ntuple in df.itertuples()],
+        [ntuple for ntuple in df[(df['RMSD'] > 0.0) & (df['Train_Test'] == 'Train')].itertuples()],
         update_sample_specification=make_sample_specification_train,
         layers=layers,
     )
@@ -1971,26 +1971,7 @@ def _train_and_test_ligand_score(
 
     # Create the test dataset
     test_dataset_torch = PanDDADatasetTorchLigand(
-        PanDDAEventDataset(
-            pandda_events=[
-                PanDDAEvent(
-                    id=res[0].id,
-                    pandda_dir=res[0].pandda.path,
-                    model_building_dir=res[0].pandda.experiment.model_dir,
-                    system_name=res[0].pandda.system.name,
-                    dtag=res[0].dtag,
-                    event_idx=res[0].event_idx,
-                    event_map=res[0].event_map,
-                    x=res[0].x,
-                    y=res[0].y,
-                    z=res[0].z,
-                    hit=res[1].annotation,
-                    ligand=_get_ligand_cif_path(res[0].pandda.path, res[0].dtag)
-                )
-                for res
-                in query
-                if res[0].pandda.system.name in test_systems
-            ]),
+        [ntuple for ntuple in df[(df['RMSD'] > 0.0) & (df['Train_Test'] == 'Test')].itertuples()],
         update_sample_specification=make_sample_specification_test,
         layers=layers,
     )
