@@ -1959,10 +1959,11 @@ def _train_and_test_ligand_score(
     num_layers = 3
 
     # Load the table of data
+    df = pd.read_csv('')
 
     # Create the train dataset
     train_dataset_torch = PanDDADatasetTorchLigand(
-        [row for row in df.itertuples()],
+        [ntuple for ntuple in df.itertuples()],
         update_sample_specification=make_sample_specification_train,
         layers=layers,
     )
@@ -2759,7 +2760,7 @@ def _make_train_test_ligand_db(
 
 
     table = pd.concat([x for x in dfs.values()], axis=0, ignore_index=True)
-    table.to_csv('train_test_ligand_score.csv')
+    table.to_csv(working_directory / 'train_test_ligand_score.csv')
 
     ...
 
