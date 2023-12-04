@@ -1735,7 +1735,7 @@ def _train_and_test(working_dir,
 
     db.disconnect()
 
-def _train_and_test_ligand_score(
+def _dep_train_and_test_ligand_score(
         working_dir,
         test_systems,
         initial_epoch,
@@ -1861,6 +1861,142 @@ def _train_and_test_ligand_score(
             layers=layers,
         )
         rprint(f"Got {len(test_dataset_torch)} test events!")
+
+    # Get the device
+    if torch.cuda.is_available():
+        dev = "cuda:0"
+    else:
+        dev = "cpu"
+
+    # if model_type == "resnet+ligand":
+    model = resnet18(num_classes=2, num_input=num_layers)
+    model.to(dev)
+
+    train(
+        working_dir,
+        train_dataset_torch,
+        test_dataset_torch,
+        model,
+        initial_epoch,
+        model_key,
+        dev,
+        test_interval,
+        batch_size=12,
+        num_workers=20,
+        num_epochs=1000,
+    )
+
+    db.disconnect()
+
+def _train_and_test_ligand_score(
+        working_dir,
+        test_systems,
+        initial_epoch,
+        test_interval,
+        model_key,
+):
+    database_path = working_dir / "database.db"
+    try:
+        db.bind(provider='sqlite', filename=f"{database_path}")
+        db.generate_mapping()
+    except Exception as e:
+        print(e)
+
+    from edanalyzer.torch_dataset import (
+        _get_zmap_path,
+        _get_event_mtz_path,
+        _get_event_map_path,
+        _get_xmap_path,
+        _get_structure_path,
+        _get_bound_state_model_path,
+        _get_annotation_from_event,  # Updates annotation
+        _get_centroid_relative_to_ligand,  # updates centroid and annotation
+        _get_random_ligand_path,  # Updates ligand_path and annotation
+        _get_random_orientation,  # Updates orientation
+        _get_transform,  # Updates transform,
+        _make_zmap_layer,
+        _make_xmap_layer,
+        _make_event_map_layer,
+        _make_structure_map_layer,
+        _make_ligand_map_layer,
+        _get_event_centroid,
+        _get_identity_orientation,
+        _decide_annotation,  # Updates annotation
+        _get_transformed_ligand,  # Updates ligand_res
+        _get_non_transformed_ligand,
+        _get_centroid_relative_to_transformed_ligand,  # updates centroid and annotation
+        _make_ligand_masked_event_map_layer,  # Updates ligand_masked_event_map_layer
+    )
+
+    make_sample_specification_train = [
+        _get_zmap_path_from_row,  # Updates z_map_path
+        _get_mean_map_path_from_row,  # Updates mean_map_path
+        _get_xmap_path_from_row,  # Updates xmap_path
+        _get_
+        _get_random_orientation,  # Updates orientation
+        _get_annotation_from_row,  # Updates annotation
+        _get_centroid_relative_from_row,  # updates centroid and annotation
+        _get_transform,  # Updates transform,
+        _make_ligand_masked_event_map_layer_from_row,  # Updates ligand_masked_event_map_layer
+        _make_ligand_masked_z_map_layer_from_row,
+        _make_ligand_masked_row_xmap_map_layer_from_row
+    ]
+    make_sample_specification_test = [
+        _get_event_map_path,  # Updates event_map_path
+        _get_bound_state_model_path,  # Updates bound_state_structure_path
+        _get_random_ligand_path,  # Updates ligand_path and annotation
+        _get_random_orientation,  # Updates orientation
+        _get_annotation_from_event,  # Updates annotation
+        _get_non_transformed_ligand,  # Updates ligand_res
+        _get_centroid_relative_to_transformed_ligand,  # updates centroid and annotation
+        _get_transform,  # Updates transform,
+        _make_ligand_masked_event_map_layer,  # Updates ligand_masked_event_map_layer
+    ]
+    layers = [
+        'ligand_masked_event_map_layer',
+        'ligand_masked_z_map_layer',
+        'ligand_masked_raw_xmap_map_layer',
+    ]
+    num_layers = 3
+
+    # Load the table of data
+
+    # Create the train dataset
+    train_dataset_torch = PanDDADatasetTorchLigand(
+        PanDDAEventDataset(
+            pandda_events =hits
+        ),
+        update_sample_specification=make_sample_specification_train,
+        layers=layers,
+    )
+    rprint(f"Got {len(train_dataset_torch)} train events!")
+
+    # Create the test dataset
+    test_dataset_torch = PanDDADatasetTorchLigand(
+        PanDDAEventDataset(
+            pandda_events=[
+                PanDDAEvent(
+                    id=res[0].id,
+                    pandda_dir=res[0].pandda.path,
+                    model_building_dir=res[0].pandda.experiment.model_dir,
+                    system_name=res[0].pandda.system.name,
+                    dtag=res[0].dtag,
+                    event_idx=res[0].event_idx,
+                    event_map=res[0].event_map,
+                    x=res[0].x,
+                    y=res[0].y,
+                    z=res[0].z,
+                    hit=res[1].annotation,
+                    ligand=_get_ligand_cif_path(res[0].pandda.path, res[0].dtag)
+                )
+                for res
+                in query
+                if res[0].pandda.system.name in test_systems
+            ]),
+        update_sample_specification=make_sample_specification_test,
+        layers=layers,
+    )
+    rprint(f"Got {len(test_dataset_torch)} test events!")
 
     # Get the device
     if torch.cuda.is_available():
@@ -2468,6 +2604,7 @@ def _make_train_test_ligand_db(
             working_directory,
             name,
             pandda_key,
+        test_systems
         ):
 
     # Get the PanDDA derived data
@@ -2544,6 +2681,12 @@ def _make_train_test_ligand_db(
             ligand_graph_matches = get_ligand_graphs(autobuilds, pandda_dir)
             print(f"Got {len(ligand_graph_matches)} ligand graph matches")
 
+            # Get train/test
+            if experiment.system.name in test_systems:
+                train_test = 'Test'
+            else:
+                train_test = "Train"
+
             # For each known hit, for each selected autobuild, graph match and symmtery match and get RMSDs
             records = []
             for dtag, dtag_known_hits in known_hits.items():
@@ -2603,6 +2746,7 @@ def _make_train_test_ligand_db(
                                     'Mean Map Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_GROUND_STATE_MAP_TEMPLATE.format(dtag=dtag)),
                                     'Mtz Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dtag)),
                                     'Zmap Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=dtag)),
+                                    'Train/Test': train_test
                                 }
                             )
             # print(f"Got {len(records)} rmsds")
@@ -3375,6 +3519,8 @@ def __main__(config_yaml="config.yaml"):
             config.working_directory,
             config.name,
             config.panddas.pandda_key,
+            config.test.test_systems,
+
         )
 
     if 'TrainTestLigand' in config.steps:
