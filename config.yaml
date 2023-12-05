@@ -11,9 +11,9 @@ steps:
 #  - Train+Test
 #  - MakeTrainTestLigandDB
 #  - TrainTestLigand
-#  - MakeHitPanDDA
+  - MakeHitPanDDA
 #  - Summarize
-  - RunPanDDAs
+#  - RunPanDDAs
 #  - PanDDAStatus
 #  - EvaluatePanDDAs
 datasets:
