@@ -2949,7 +2949,7 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
         print(e)
 
     dfs = []
-    for psuedo_pandda_dir in Path(f'./panddas/{j}').glob('*'):
+    for psuedo_pandda_dir in Path(f'./panddas/').glob('*'):
         inspect_events_path = psuedo_pandda_dir / constants.PANDDA_ANALYSIS_DIR / 'pandda_inspect_events.csv'
         inspect_table = pd.read_csv(inspect_events_path)
         dfs.append(inspect_table)
