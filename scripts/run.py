@@ -2948,6 +2948,19 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
     except Exception as e:
         print(e)
 
+    dfs = []
+    for psuedo_pandda_dir in Path(f'./panddas/{j}').glob('*'):
+        inspect_events_path = psuedo_pandda_dir / constants.PANDDA_ANALYSIS_DIR / 'pandda_inspect_events.csv'
+        inspect_table = pd.read_csv(inspect_events_path)
+        dfs.append(inspect_table)
+
+    annotation_table = pd.concat(dfs, axis=0, ignore_index=True)
+    print(annotation_table)
+
+    print(annotation_table[annotation_table[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == 'High'])
+    high_conf_table = annotation_table[annotation_table[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == 'High']
+    high_conf_dtags = high_conf_table['Dtag'].unique()
+
     with pony.orm.db_session:
         # partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
         query_events = pony.orm.select(
@@ -2980,7 +2993,7 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
                     experiment_hit_result[0].dtag
                     for experiment_hit_result
                     in experiment_hit_results
-                    if (Path(experiment_hit_result[4].model_dir) / experiment_hit_result[0].dtag / 'refine.pdb').exists()
+                    if (Path(experiment_hit_result[4].model_dir) / experiment_hit_result[0].dtag / 'refine.pdb').exists() & (experiment_hit_result[0].dtag in high_conf_dtags)
                 ]
             )
 
@@ -3016,7 +3029,7 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
             )
             rprint(indent_text(f"Job Script"))
             rprint(indent_text(job_script))
-            # exit()
+            exit()
             with open(job_script_path, 'w') as f:
                 f.write(job_script)
 
