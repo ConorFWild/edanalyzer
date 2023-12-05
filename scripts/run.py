@@ -2260,6 +2260,8 @@ def _make_hit_pandda(working_dir, ):
                                         continue
 
                                     closest_event_key = min(dists, key=lambda _key: dists[_key]['Distance'])
+                                    if table_path not in matches_by_pandda:
+                                        matches_by_pandda[table_path] = {}
                                     matches_by_pandda[table_path][(chain.name, str(res.seqid.num))] = (
                                         closest_event_key,
                                         dists[closest_event_key]['Row'],
