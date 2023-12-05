@@ -79,7 +79,7 @@ custom_annotations:
   - /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_6/low_ranking_hits/low_ranking_hits_*
 cpus: 20
 panddas:
-  pandda_key: 20231202
+  pandda_key: 20231205
   cpus: 36
   mem: 180
   max_cores: 80
