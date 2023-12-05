@@ -2266,6 +2266,10 @@ def _make_hit_pandda(working_dir, ):
                                         dists[closest_event_key]['Distance'],
                                     )
 
+                if len(matches_by_pandda) == 0:
+                    print(f"Could not match ligands to event maps for any pandda!")
+                    continue
+
                 best_pandda_match = min(
                     matches_by_pandda,
                     key=lambda _table_path: sum(
