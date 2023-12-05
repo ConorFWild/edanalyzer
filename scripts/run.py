@@ -2577,6 +2577,7 @@ def get_rmsd(
         iso_distances.append(rmsd)
     return min(iso_distances)
 
+
 def get_known_hit_structures(
                 model_dir,
                 experiment_hit_datasets
