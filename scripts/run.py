@@ -2286,7 +2286,7 @@ def _make_hit_pandda(working_dir, ):
                 for lig_id, data in matches_by_pandda[best_pandda_match].items():
                     chain, resid = lig_id
                     if data[0] in [_x[0] for _x in ligands_to_event_maps]:
-                        print(f"MULTIPLE LIGANDS MAPPED TO SAME EVENT! SKIPPING ADDITIONAL LIGANDS!")
+                        print(f"MULTIPLE LIGANDS MAPPED TO SAME EVENT MAP! SKIPPING ADDITIONAL LIGANDS!")
                     ligands_to_event_maps[(model_path, chain, resid)] = data
 
 
