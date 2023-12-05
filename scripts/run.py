@@ -2222,6 +2222,7 @@ def _make_hit_pandda(working_dir, ):
 
                 # Match the structure ligands to events, and hence event maps
                 ligands_to_event_maps = {}
+                matches_by_pandda = {}
                 for model in st:
                     for chain in model:
                         for res in chain:
@@ -2232,8 +2233,8 @@ def _make_hit_pandda(working_dir, ):
                                     poss.append([pos.x, pos.y, pos.z])
                                 centroid = np.mean(poss, axis=0)
                                 centroid_pos = gemmi.Position(centroid[0], centroid[1], centroid[2])
-                                dists = {}
                                 for table_path, table in inspect_tables.items():
+                                    dists = {}
                                     for idx, row in table[table['dtag'] == dtag].iterrows():
                                         x, y, z = row['x'], row['y'], row['z']
                                         event_idx = row['event_idx']
@@ -2253,13 +2254,32 @@ def _make_hit_pandda(working_dir, ):
                                                 "Distance": dist,
                                                 "Row": row,
                                             }
-                                if len(dists) == 0:
-                                    print(f"Could not match lig: {chain.name, res.seqid.num}")
-                                    continue
 
-                                closest_event_key = min(dists, key=lambda _key: dists[_key]['Distance'])
+                                    if len(dists) == 0:
+                                        print(f"Could not match lig: {chain.name, res.seqid.num}")
+                                        continue
 
-                                ligands_to_event_maps[(model_path, chain.name, str(res.seqid.num))] = (closest_event_key, dists[closest_event_key]['Row'])
+                                    closest_event_key = min(dists, key=lambda _key: dists[_key]['Distance'])
+                                    matches_by_pandda[table_path][(chain.name, str(res.seqid.num))] = (
+                                        closest_event_key,
+                                        dists[closest_event_key]['Row'],
+                                        dists[closest_event_key]['Distance'],
+                                    )
+
+                best_pandda_match = min(
+                    matches_by_pandda,
+                    key=lambda _table_path: sum(
+                        [
+                            matches_by_pandda[_table_path][_x][2]
+                            for _x
+                            in matches_by_pandda[_table_path]
+                        ]
+                    ),
+                )
+                print(f"Selected panDDA for dataset: {best_pandda_match}")
+                for lig_id, data in matches_by_pandda[best_pandda_match].items():
+                    chain, resid = lig_id
+                    ligands_to_event_maps[(model_path, chain, resid)] = data
 
                 # print(ligands_to_event_maps)
 
@@ -2940,7 +2960,12 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
             # print(num_cores_used()*num_cpus)
             # while (num_cores_used()*num_cpus) > (max_cores-num_cpus):
             #     time.sleep(1)
-            experiment_hit_results = [res for res in query_events if (res[1].annotation) & (experiment.path == res[4].path)]
+            experiment_hit_results = [
+                res
+                for res
+                in query_events
+                if (res[1].annotation) & (experiment.path == res[4].path)
+            ]
             experiment_hit_datasets = set(
                 [
                     experiment_hit_result[0].dtag
@@ -2949,7 +2974,6 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
                     if (Path(experiment_hit_result[4].model_dir) / experiment_hit_result[0].dtag / 'refine.pdb').exists()
                 ]
             )
-
 
             if len(experiment_hit_datasets) == 0:
                 print(f"No experiment hit results for {experiment.path}. Skipping!")
