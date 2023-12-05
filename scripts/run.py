@@ -2959,7 +2959,7 @@ def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
 
     print(annotation_table[annotation_table[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == 'High'])
     high_conf_table = annotation_table[annotation_table[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == 'High']
-    high_conf_dtags = high_conf_table['Dtag'].unique()
+    high_conf_dtags = high_conf_table['dtag'].unique()
 
     with pony.orm.db_session:
         # partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
