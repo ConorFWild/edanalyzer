@@ -1396,7 +1396,7 @@ def _get_bound_state_model_path(event, sample_specification):
     return sample_specification
 
 def _get_annotation_from_ntuple(event, sample_specification):
-    if event.RMSD < 2.5:
+    if event.RMSD < 2.0:
         sample_specification['annotation'] = True
     else:
         sample_specification['annotation'] = False
