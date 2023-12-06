@@ -1966,8 +1966,8 @@ def _train_and_test_ligand_score(
     df = pd.read_csv(working_dir / 'train_test_ligand_score.csv')
 
     # Create the train dataset
-    train_non_hits = [ntuple for ntuple in df[(df['RMSD'] > 2.5) & (df['Train_Test'] == 'Train')].itertuples()]
-    train_hits = [ntuple for ntuple in df[(df['RMSD'] < 2.5) & (df['Train_Test'] == 'Train')].itertuples()]
+    train_non_hits = [ntuple for ntuple in df[(df['RMSD'] > 2.0) & (df['Train_Test'] == 'Train')].itertuples()]
+    train_hits = [ntuple for ntuple in df[(df['RMSD'] < 2.0) & (df['Train_Test'] == 'Train')].itertuples()]
     train_dataset_torch = PanDDADatasetTorchLigand(
         (train_hits*int(len(train_non_hits) / len(train_hits))) + train_non_hits,
         update_sample_specification=make_sample_specification_train,
