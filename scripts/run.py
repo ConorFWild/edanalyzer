@@ -2767,9 +2767,14 @@ def _make_train_test_ligand_db(
                                     "Build_Path": str(autobuild['build_path']),
                                     'BDC': autobuild['BDC'],
                                     'Xmap_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / 'xmap.ccp4'),
-                                    'Mean_Map_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_GROUND_STATE_MAP_TEMPLATE.format(dtag=dtag)),
+                                    # 'Mean_Map_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_GROUND_STATE_MAP_TEMPLATE.format(dtag=dtag)),
+                                    'Mean_Map_Path': str(
+                                        pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / 'model_maps' / f'{autobuild_key[0]}_mean.ccp4'),
                                     'Mtz_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dtag)),
-                                    'Zmap_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=dtag)),
+                                    # 'Zmap_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=dtag)),
+                                    'Zmap_Path': str(
+                                        pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / 'model_maps' / f'{autobuild_key[0]}_z.ccp4'
+                                    ),
                                     'Train_Test': train_test
                                 }
                             )
