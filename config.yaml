@@ -9,12 +9,12 @@ steps:
 #  - KnownHitAlternateModel
 #  - MakeDataset
 #  - Train+Test
-#  - MakeTrainTestLigandDB
+  - MakeTrainTestLigandDB
 #  - TrainTestLigand
 #  - MakeHitPanDDA
 #  - Summarize
 #  - RunPanDDAs
-  - PanDDAStatus
+#  - PanDDAStatus
 #  - EvaluatePanDDAs
 datasets:
   - /dls/labxchem/data/*/*/processing/analysis/*
