@@ -13,8 +13,8 @@ steps:
 #  - TrainTestLigand
 #  - MakeHitPanDDA
 #  - Summarize
-  - RunPanDDAs
-#  - PanDDAStatus
+#  - RunPanDDAs
+  - PanDDAStatus
 #  - EvaluatePanDDAs
 datasets:
   - /dls/labxchem/data/*/*/processing/analysis/*
