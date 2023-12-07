@@ -10,11 +10,11 @@ steps:
 #  - MakeDataset
 #  - Train+Test
 #  - MakeTrainTestLigandDB
-  - TrainTestLigand
+#  - TrainTestLigand
 #  - MakeHitPanDDA
 #  - Summarize
 #  - RunPanDDAs
-#  - PanDDAStatus
+  - PanDDAStatus
 #  - EvaluatePanDDAs
 datasets:
   - /dls/labxchem/data/*/*/processing/analysis/*
