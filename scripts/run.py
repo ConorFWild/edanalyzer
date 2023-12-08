@@ -2742,9 +2742,8 @@ def _make_train_test_ligand_db(
                                 known_hit_structures[dtag],
                                 ligand_graph_automorphisms
                             )
-                            rmsds[known_hit_key] = rmsds
+                            rmsds[known_hit_key] = rmsd
                     selected_known_hit_key = min(rmsds, key=lambda _key: rmsds[_key])
-
 
                     records.append(
                         {
