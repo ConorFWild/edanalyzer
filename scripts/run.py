@@ -3523,7 +3523,7 @@ def __main__(config_yaml="config.yaml"):
             config.working_directory
         )
 
-    _print_pandda_2_systems(config.working_directory)
+    # _print_pandda_2_systems(config.working_directory)
 
     if "MakeTestDatasetPsuedoPanDDA" in config.steps:
         rprint(f"Getting config...")
