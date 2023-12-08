@@ -2779,9 +2779,10 @@ def _make_train_test_ligand_db(
                                 'Train_Test': train_test
                             }
 
-                    if len([_key for _key in rmsds if rmsds[_key]['RMSD'] is not None]) == 0:
+                    non_none_rmsds = [_key for _key in rmsds if rmsds[_key]['RMSD'] is not None]
+                    if len(non_none_rmsds) == 0:
                         continue
-                    selected_known_hit_key = min(rmsds, key=lambda _key: rmsds[_key]['RMSD'])
+                    selected_known_hit_key = min(non_none_rmsds, key=lambda _key: rmsds[_key]['RMSD'])
 
                     records.append(
                         rmsds[selected_known_hit_key]
