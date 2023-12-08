@@ -2745,6 +2745,7 @@ def _make_train_test_ligand_db(
                             rmsds[known_hit_key] = rmsds
                     selected_known_hit_key = min(rmsds, key=lambda _key: rmsds[_key])
 
+
                     records.append(
                         {
                             'Experiment_Model_Dir': str(experiment.model_dir),
