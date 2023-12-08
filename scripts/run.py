@@ -2742,46 +2742,46 @@ def _make_train_test_ligand_db(
                                 known_hit_structures[dtag],
                                 ligand_graph_automorphisms
                             )
-                            rmsds[known_hit_key] = rmsd
-                    selected_known_hit_key = min(rmsds, key=lambda _key: rmsds[_key])
+                            rmsds[(ligand_key, known_hit_key)] = {
+                                'Experiment_Model_Dir': str(experiment.model_dir),
+                                'PanDDA_Path': str(pandda_dir),
+                                "Dtag": dtag,
+                                "Model_IDX": autobuild_key[0],
+                                "Event_IDX": autobuild_key[1],
+                                "Known_Hit_Key": selected_known_hit_key,
+                                # "Autobuild Key": autobuild_key[1],
+                                "Ligand_Key": ligand_key,
+                                "RMSD": rmsds[selected_known_hit_key],
+                                'Score': autobuild['Score'],
+                                'Size': autobuild['Size'],
+                                'Local_Strength': autobuild['Local_Strength'],
+                                'RSCC': autobuild['RSCC'],
+                                'Signal': autobuild['Signal'],
+                                'Noise': autobuild['Noise'],
+                                'Signal_Noise': autobuild['Signal_Noise'],
+                                'X_ligand': autobuild['X_ligand'],
+                                'Y_ligand': autobuild['Y_ligand'],
+                                'Z_ligand': autobuild['Z_ligand'],
+                                'X': autobuild['X'],
+                                'Y': autobuild['Y'],
+                                'Z': autobuild['Z'],
+                                "Build_Path": str(autobuild['build_path']),
+                                'BDC': autobuild['BDC'],
+                                'Xmap_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / 'xmap.ccp4'),
+                                # 'Mean_Map_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_GROUND_STATE_MAP_TEMPLATE.format(dtag=dtag)),
+                                'Mean_Map_Path': str(
+                                    pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / 'model_maps' / f'{autobuild_key[0]}_mean.ccp4'),
+                                'Mtz_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dtag)),
+                                # 'Zmap_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=dtag)),
+                                'Zmap_Path': str(
+                                    pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / 'model_maps' / f'{autobuild_key[0]}_z.ccp4'
+                                ),
+                                'Train_Test': train_test
+                            }
+                    selected_known_hit_key = min(rmsds, key=lambda _key: rmsds[_key]['RMSD'])
 
                     records.append(
-                        {
-                            'Experiment_Model_Dir': str(experiment.model_dir),
-                            'PanDDA_Path': str(pandda_dir),
-                            "Dtag": dtag,
-                            "Model_IDX": autobuild_key[0],
-                            "Event_IDX": autobuild_key[1],
-                            "Known_Hit_Key": selected_known_hit_key,
-                            # "Autobuild Key": autobuild_key[1],
-                            "Ligand_Key": ligand_key,
-                            "RMSD": rmsds[selected_known_hit_key],
-                            'Score': autobuild['Score'],
-                            'Size': autobuild['Size'],
-                            'Local_Strength': autobuild['Local_Strength'],
-                            'RSCC': autobuild['RSCC'],
-                            'Signal': autobuild['Signal'],
-                            'Noise': autobuild['Noise'],
-                            'Signal_Noise': autobuild['Signal_Noise'],
-                            'X_ligand': autobuild['X_ligand'],
-                            'Y_ligand': autobuild['Y_ligand'],
-                            'Z_ligand': autobuild['Z_ligand'],
-                            'X': autobuild['X'],
-                            'Y': autobuild['Y'],
-                            'Z': autobuild['Z'],
-                            "Build_Path": str(autobuild['build_path']),
-                            'BDC': autobuild['BDC'],
-                            'Xmap_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / 'xmap.ccp4'),
-                            # 'Mean_Map_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_GROUND_STATE_MAP_TEMPLATE.format(dtag=dtag)),
-                            'Mean_Map_Path': str(
-                                pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / 'model_maps' / f'{autobuild_key[0]}_mean.ccp4'),
-                            'Mtz_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dtag)),
-                            # 'Zmap_Path': str(pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=dtag)),
-                            'Zmap_Path': str(
-                                pandda_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / 'model_maps' / f'{autobuild_key[0]}_z.ccp4'
-                            ),
-                            'Train_Test': train_test
-                        }
+                        rmsds[selected_known_hit_key]
                     )
             # print(f"Got {len(records)} rmsds")
 
