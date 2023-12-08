@@ -1,20 +1,20 @@
 name: all_data_ligand
 working_directory: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_9
 steps:
-  - Annotations
-#  - Collate
-#  - Partition
+#  - Annotations
+  - Collate
+  - Partition
 #  - MakeTestDatasetPsuedoPanDDA
 #  - MakeReannotationPsuedoPanDDA
 #  - KnownHitAlternateModel
 #  - MakeDataset
 #  - Train+Test
-#  - MakeTrainTestLigandDB
-#  - TrainTestLigand
+  - MakeTrainTestLigandDB
+  - TrainTestLigand
 #  - MakeHitPanDDA
 #  - Summarize
 #  - RunPanDDAs
-  - PanDDAStatus
+#  - PanDDAStatus
 #  - EvaluatePanDDAs
 datasets:
   - /dls/labxchem/data/*/*/processing/analysis/*
