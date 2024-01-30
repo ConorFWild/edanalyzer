@@ -118,4 +118,4 @@ def _score_build(
 
 
 if __name__ == "__main__":
-    fire.Fire()
+    fire.Fire(_score_build)
