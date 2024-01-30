@@ -19,7 +19,6 @@ from edanalyzer.torch_dataset import (
     _get_centroid_relative_to_ligand,  # updates centroid and annotation
     _get_random_ligand_path,  # Updates ligand_path and annotation
     _get_random_orientation,  # Updates orientation
-    get_identity_matrix,
     _get_transform,  # Updates transform,
     _make_zmap_layer,
     _make_xmap_layer,
