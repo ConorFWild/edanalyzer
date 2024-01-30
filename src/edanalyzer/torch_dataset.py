@@ -1717,6 +1717,14 @@ def _get_centroid_from_ntuple(event, sample_specification):
     sample_specification['centroid'] = [event.X_ligand, event.Y_ligand, event.Z_ligand]
     return sample_specification
 
+def _get_centroid_from_res(res):
+    poss = []
+    for atom in res:
+        pos = atom.pos
+        poss.append([pos.x, pos.y, pos.z])
+
+    return np.mean(poss, axis=0)
+
 def _get_centroid_relative_to_ligand(event, sample_specification):  # updates centroid and annotation
     rng = default_rng()
     val = rng.random()
@@ -1824,11 +1832,75 @@ def _get_random_ligand_path(event, sample_specification):  # Updates ligand_path
     sample_specification['ligand_path'] = event.ligand
     return sample_specification
 
+def _get_rotation_matrix():
+    return R.random().as_matrix()
+
+def _get_identity_matrix():
+    return np.eye(3)
+
 def _get_random_orientation(event, sample_specification):  # Updates orientation
     rotation_matrix = R.random().as_matrix()
 
     sample_specification['orientation'] = rotation_matrix
     return sample_specification
+
+def _get_transform_from_orientation_centroid(orientation, centroid):
+    sample_distance: float = 0.5
+    n: int = 30
+    # translation: float):
+
+    # Get basic sample grid transform
+    initial_transform = gemmi.Transform()
+    scale_matrix = np.eye(3) * sample_distance
+    initial_transform.mat.fromlist(scale_matrix.tolist())
+
+    # Get sample grid centroid
+    sample_grid_centroid = (np.array([n, n, n]) * sample_distance) / 2
+    sample_grid_centroid_pos = gemmi.Position(*sample_grid_centroid)
+
+    # Get centre grid transform
+    centre_grid_transform = gemmi.Transform()
+    centre_grid_transform.vec.fromlist([
+        -sample_grid_centroid[0],
+        -sample_grid_centroid[1],
+        -sample_grid_centroid[2],
+    ])
+
+    # Generate rotation matrix
+    rotation_matrix = orientation
+    rotation_transform = gemmi.Transform()
+    rotation_transform.mat.fromlist(rotation_matrix.tolist())
+
+    # Apply random rotation transform to centroid
+    transformed_centroid = rotation_transform.apply(sample_grid_centroid_pos)
+    transformed_centroid_array = np.array([transformed_centroid.x, transformed_centroid.y, transformed_centroid.z])
+
+    # Recentre transform
+    rotation_recentre_transform = gemmi.Transform()
+    rotation_recentre_transform.vec.fromlist((sample_grid_centroid - transformed_centroid_array).tolist())
+
+    # Event centre transform
+    event_centre_transform = gemmi.Transform()
+    event_centre_transform.vec.fromlist(centroid)
+
+    # Generate random translation transform
+    # rng = default_rng()
+    # random_translation = (rng.random(3) - 0.5) * 2 #* translation
+    # random_translation = np.array([0.0,0.0,0.0])
+    # logger.debug(f"Random translation: {random_translation}")
+    # random_translation_transform = gemmi.Transform()
+    # random_translation_transform.vec.fromlist(random_translation.tolist())
+
+    # Apply random translation
+    # transform = #random_translation_transform.combine(
+    transform = event_centre_transform.combine(
+        rotation_transform.combine(
+            centre_grid_transform.combine(
+                initial_transform
+            )
+        )
+    )
+    return transform
 
 def _get_transform_from_ntuple(event, sample_specification):
     sample_distance: float = 0.5
@@ -2162,14 +2234,39 @@ def get_event_map(
     event_map.set_unit_cell(xmap.unit_cell)
     return event_map
 
+def _get_res_from_autobuild_structure_path(path):
+    autobuild_structure = gemmi.read_structure(path)
+    res = autobuild_structure[0][0][0]
+    return res
 
 def _get_autobuild_res_from_ntuple(event, sample_specification):
     autobuild_structure_path = event.Build_Path
-    autobuild_structure = gemmi.read_structure(autobuild_structure_path)
-    res = autobuild_structure[0][0][0]
-    sample_specification['res'] = res
+
+    sample_specification['res'] = _get_res_from_autobuild_structure_path(autobuild_structure_path)
 
     return sample_specification
+
+def _make_ligand_masked_event_map_layer(
+    event_map_path,
+        res,
+        sample_transform,
+        sample_array
+):
+    # Get the masked dmap
+    event_map = get_map_from_path(event_map_path)
+
+    masked_dmap = get_masked_dmap(event_map, res)
+
+    # Get the image
+    image_initial = sample_xmap(masked_dmap, sample_transform, sample_array)
+    std = np.std(image_initial)
+    if np.abs(std) < 0.0000001:
+        image_dmap = np.copy(sample_array)
+
+    else:
+        image_dmap = (image_initial - np.mean(image_initial)) / std
+
+    return image_dmap
 
 def _make_ligand_masked_event_map_layer_from_ntuple(event, sample_specification):
     try:
@@ -2208,6 +2305,28 @@ def _make_ligand_masked_event_map_layer_from_ntuple(event, sample_specification)
         sample_specification['ligand_masked_event_map_layer'] = np.copy(sample_array)
 
     return sample_specification
+
+
+def _make_ligand_masked_dmap_layer(
+        dmap,
+        res,
+        sample_transform,
+        sample_array
+):
+    # Get the masked dmap
+
+    masked_dmap = get_masked_dmap(dmap, res)
+
+    # Get the image
+    image_initial = sample_xmap(masked_dmap, sample_transform, sample_array)
+    std = np.std(image_initial)
+    if np.abs(std) < 0.0000001:
+        image_dmap = np.copy(sample_array)
+
+    else:
+        image_dmap = (image_initial - np.mean(image_initial)) / std
+
+    return image_dmap
 
 def _make_ligand_masked_z_map_layer_from_ntuple(event, sample_specification):
     try:
