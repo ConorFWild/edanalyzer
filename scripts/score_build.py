@@ -92,10 +92,12 @@ def _score_build(
         transform,
         sample_array
     )
-    image = np.stack(
-        [image_event_map, image_z_map, image_raw_xmap],
-        axis=0
-    )[np.newaxis,:]
+    image = torch.tensor(
+            np.stack(
+            [image_event_map, image_z_map, image_raw_xmap],
+            axis=0
+        )[np.newaxis,:]
+    )
     rprint(f"Image shape is: {image.shape}")
 
     # Get the device
