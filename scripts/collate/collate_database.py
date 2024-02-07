@@ -22,7 +22,7 @@ def main(config_path):
 
     #
     custom_annotations_path = Path(config['working_directory']) / "custom_annotations.pickle"
-    with open(custom_annotations_path, 'r') as f:
+    with open(custom_annotations_path, 'rb') as f:
         custom_annotations = pickle.load(f)
 
     #
