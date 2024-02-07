@@ -23,7 +23,7 @@ def main(config_path):
     rprint(f"Getting custom annotations...")
 
     # Parse old databases
-    for database_path_pattern in config['custom_annotations.databases']:
+    for database_path_pattern in config['custom_annotations']['databases']:
 
         for path in Path('/').glob(database_path_pattern[1:]):
             rprint(f"Getting annotations from: {path}")
