@@ -92,6 +92,7 @@ TABLE_ANNOTATION = "annotation"
 TABLE_PARTITION = "partition"
 TABLE_SYSTEM = "system"
 TABLE_EXPERIMENT = "experiment"
+TABLE_AUTOBUILD = "autobuild"
 
 INITIAL_TRAIN_PARTITION = "train"
 INITIAL_TEST_PARTITION = "test"
