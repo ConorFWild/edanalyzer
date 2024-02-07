@@ -44,5 +44,5 @@ def main(config_path):
     rprint(f"\tGot {len(custom_annotations)} custom annotations!")
 
 
-if __name__ == "__name__":
+if __name__ == "__main__":
     fire.Fire(main)
