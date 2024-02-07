@@ -1,15 +1,32 @@
 from pathlib import Path
 
 import fire
-
+import yaml
 from rich import print as rprint
+import pandas as pd
+import pony
+import joblib
+import pickle
 
-from edanalyzer.data.database import _parse_inspect_table_row
+from edanalyzer import constants
+from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_system_from_dtag
 from edanalyzer.data.daabase_pony import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM
 
-def main():
-    database_path = working_directory / "database.db"
+
+def main(config_path):
+    rprint(f'Running collate_database from config file: {config_path}')
+    # Load config
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
+
+    #
+    custom_annotations_path = Path(config['working_directory']) / "custom_annotations.pickle"
+    with open(custom_annotations_path, 'r') as f:
+        custom_annotations = pickle.load(f)
+
+    #
+    database_path = Path(config['working_directory']) / "database.db"
     try:
         db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
         db.generate_mapping(create_tables=True)
@@ -20,10 +37,10 @@ def main():
     possible_pandda_paths = [
         path
         for dataset_pattern
-        in datasets
+        in config['datasets']
         for path
         in Path('/').glob(dataset_pattern[1:])
-        if not any([path.match(exclude_pattern) for exclude_pattern in exclude])
+        if not any([path.match(exclude_pattern) for exclude_pattern in config['exclude']])
 
     ]
     rprint(f"Got {len(possible_pandda_paths)} pandda paths!")

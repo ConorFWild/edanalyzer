@@ -1,3 +1,180 @@
+import dataclasses
+
+import numpy as np
+from rich import print as rprint
+import gemmi
+
+from edanalzer import constants
+
+
+@dataclasses.dataclass
+class Ligand:
+    path: str
+    smiles: str
+    chain: str
+    residue: int
+    num_atoms: int
+    x: float
+    y: float
+    z: float
+
+
+@dataclasses.dataclass
+class Event:
+    dtag: str
+    event_idx: int
+    x: float
+    y: float
+    z: float
+    bdc: float
+    initial_structure: str
+    initial_reflections: str
+    structure: str
+    event_map: str
+    z_map: str
+    ligand: None
+    viewed: None
+    hit_confidence: str
+    annotation: bool
+
+
+def _get_system_from_dtag(dtag):
+    hyphens = [pos for pos, char in enumerate(dtag) if char == "-"]
+    if len(hyphens) == 0:
+        return None
+    else:
+        last_hypen_pos = hyphens[-1]
+        system_name = dtag[:last_hypen_pos]
+
+        return system_name
+
+def try_open_map(path):
+    try:
+        m = gemmi.read_ccp4_map(str(path))
+        return True
+    except:
+        return False
+
+
+def try_open_structure(path):
+    try:
+        st = gemmi.read_structure(str(path))
+        return True
+    except:
+        return False
+
+
+def try_open_reflections(path):
+    try:
+        mtz = gemmi.read_mtz_file(str(path))
+        return True
+    except:
+        return False
+
+
+def _has_parsable_pdb(compound_dir):
+    event_added = False
+    # ligand_files_dir = processed_dataset_dir / "ligand_files"
+    if compound_dir.exists():
+        ligand_pdbs = []
+        for ligand_pdb in compound_dir.glob("*.pdb"):
+            if ligand_pdb.exists():
+                if ligand_pdb.stem not in constants.LIGAND_IGNORE_REGEXES:
+                    try:
+                        st = gemmi.read_structure(str(ligand_pdb))
+                    except:
+                        return False
+                    num_atoms = 0
+                    for model in st:
+                        for chain in model:
+                            for residue in chain:
+                                for atom in residue:
+                                    num_atoms += 1
+
+                    if num_atoms > 3:
+                        return True
+        # ]
+        # if len(ligand_pdbs) > 0:
+        #     return True
+
+    return False
+
+def get_ligand_num_atoms(ligand):
+    num_atoms = 0
+    for atom in ligand:
+        num_atoms += 1
+
+    return num_atoms
+
+
+def get_ligand_centroid(ligand):
+    poss = []
+    for atom in ligand:
+        pos = atom.pos
+        poss.append([pos.x, pos.y, pos.z])
+
+    pos_array = np.array(poss)
+
+    return np.mean(pos_array, axis=0)
+
+
+def get_structure_ligands(pdb_path):
+    # logger.info(f"")
+    structure = gemmi.read_structure(pdb_path)
+    structure_ligands = []
+    for model in structure:
+        for chain in model:
+            ligands = chain.get_ligands()
+            for res in chain:
+                if res.name == "LIG":
+                    num_atoms = get_ligand_num_atoms(res)
+
+                    ligand_centroid = get_ligand_centroid(res)
+
+                    # smiles = parse_ligand(
+                    #     structure,
+                    #     chain,
+                    #     ligand,
+                    # )
+                    smiles = "~"
+
+                    lig = Ligand(
+                        path=str(pdb_path),
+                        smiles=str(smiles),
+                        chain=str(chain.name),
+                        residue=int(res.seqid.num),
+                        num_atoms=int(num_atoms),
+                        x=float(ligand_centroid[0]),
+                        y=float(ligand_centroid[1]),
+                        z=float(ligand_centroid[2])
+                    )
+                    structure_ligands.append(lig)
+
+    return structure_ligands
+
+
+def get_event_ligand(inspect_model_path, x, y, z, cutoff=10.0):
+    structure_ligands = get_structure_ligands(str(inspect_model_path))
+
+    ligand_distances = {}
+    ligand_dict = {}
+    for lig in structure_ligands:
+        ligand_distances[(lig.chain, lig.residue)] = gemmi.Position(lig.x, lig.y, lig.z).dist(gemmi.Position(x, y, z))
+
+        ligand_dict[(lig.chain, lig.residue)] = lig
+
+    if len(ligand_dict) == 0:
+        # logger.warning(f"Modelled structure but no ligands: {inspect_model_path}!")
+        return None
+
+    min_dist_id = min(ligand_distances, key=lambda _id: ligand_distances[_id])
+
+    if ligand_distances[min_dist_id] < cutoff:
+        # logger.warning(f"Modelled structure has ligand")
+        return ligand_dict[min_dist_id]
+    else:
+        return None
+
 def _parse_inspect_table_row(
         row,
         pandda_dir,
