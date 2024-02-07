@@ -4,7 +4,7 @@ import numpy as np
 from rich import print as rprint
 import gemmi
 
-from edanalzer import constants
+from edanalyzer import constants
 
 
 @dataclasses.dataclass
