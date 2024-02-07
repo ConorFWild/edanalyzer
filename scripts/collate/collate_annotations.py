@@ -12,6 +12,7 @@ from edanalyzer.data.annotations import (
 
 
 def main(config_path):
+    rprint(f'Running collate_annotations from config file: {config_path}')
     # Load config
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
