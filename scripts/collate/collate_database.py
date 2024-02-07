@@ -10,7 +10,7 @@ import pickle
 
 from edanalyzer import constants
 from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_system_from_dtag
-from edanalyzer.data.daabase_pony import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
+from edanalyzer.data.database_pony import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM
 
 
