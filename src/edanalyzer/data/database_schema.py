@@ -124,3 +124,37 @@ class PartitionORM(db.Entity):
 
     name = Required(str, unique=True)
     events = Set("EventORM", table=constants.TABLE_EVENT_PARTITION, column="event_id")
+
+class AutobuildORM(db.Entity):
+    _table_ = constants.TABLE_AUTOBUILD
+
+    id = PrimaryKey(int, auto=True)
+
+    experiment_model_dir: Optional(str)
+    pandda_path: Optional(str)
+    dtag: Optional(str)
+    model_idx: Optional(int)
+    event_idx: Optional(int)
+    known_hit_key: Optional(str)
+    ligand_key: Optional(str)
+    rmsd: Optional(float)
+    score: Optional(float)
+    size: Optional(float)
+    local_strength: Optional(float)
+    rscc: Optional(float)
+    signal: Optional(float)
+    noise: Optional(float)
+    signal_noise: Optional(float)
+    x_ligand: Optional(float)
+    y_ligand: Optional(float)
+    z_ligand: Optional(float)
+    x: Optional(float)
+    y: Optional(float)
+    z: Optional(float)
+    build_path: Optional(str)
+    bdc: Optional(float)
+    xmap_path: Optional(str)
+    mean_map_path: Optional(str)
+    mtz_path: Optional(str)
+    zmap_path: Optional(str)
+    train_test: Optional(str)
