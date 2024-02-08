@@ -198,17 +198,20 @@ def _get_events(
     # for event_id, event in events.items():
     #     print(event)
 
+    return events
+
 
 def _get_known_hit_structures(
-                model_dir,
-                experiment_hit_datasets
-            ):
+        model_dir,
+        experiment_hit_datasets
+):
     known_hit_structures = {}
     for hit_dtag in experiment_hit_datasets:
         hit_structure = Path(model_dir) / hit_dtag / 'refine.pdb'
         known_hit_structures[hit_dtag] = gemmi.read_structure(str(hit_structure))
 
     return known_hit_structures
+
 
 def _get_known_hits(known_hit_structures):
     centroids = {}
@@ -221,6 +224,7 @@ def _get_known_hits(known_hit_structures):
                         centroids[structure_key][f"{chain.name}_{res.seqid.num}"] = res
 
     return centroids
+
 
 def _get_autobuilds(pandda_2_dir):
     processed_datasets_dir = pandda_2_dir / constants.PANDDA_PROCESSED_DATASETS_DIR
@@ -272,6 +276,7 @@ def _get_autobuilds(pandda_2_dir):
 
     return autobuilds
 
+
 def _get_pandda_2_autobuilt_structures(autobuilds):
     autobuilt_structures = {}
     for dtag, dtag_builds in autobuilds.items():
@@ -280,6 +285,7 @@ def _get_pandda_2_autobuilt_structures(autobuilds):
             autobuilt_structures[dtag][build_key] = gemmi.read_structure(build_info["build_path"])
 
     return autobuilt_structures
+
 
 def get_ligand_cif_graph_matches(cif_path):
     # Open the cif document with gemmi
@@ -333,12 +339,13 @@ def get_ligand_graphs(autobuilds, pandda_2_dir):
             if ligand_key not in ligand_graphs[dtag]:
                 try:
                     ligand_graphs[dtag][ligand_key] = get_ligand_cif_graph_matches(
-                    pandda_2_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_LIGAND_FILES_DIR / f"{ligand_key}.cif"
-                )
+                        pandda_2_dir / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_LIGAND_FILES_DIR / f"{ligand_key}.cif"
+                    )
                 except:
                     continue
 
     return ligand_graphs
+
 
 def get_rmsd(
         known_hit,
