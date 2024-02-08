@@ -388,7 +388,7 @@ def _get_builds(pandda_key, test_systems):
     with pony.orm.db_session:
         # partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
         query_events = pony.orm.select(
-            (event, event.annotations, event.partitions, event.pandda, event.pandda.experiment, event.pandda.system) for
+            (event, event.annotations, event.pandda, event.pandda.experiment, event.pandda.system) for
             event in EventORM)
         query = pony.orm.select(
             experiment for experiment in ExperimentORM
@@ -404,14 +404,14 @@ def _get_builds(pandda_key, test_systems):
 
         for experiment in sorted_experiments:
             experiment_hit_results = [res for res in query_events if
-                                      (res[1].annotation) & (experiment.path == res[4].path)]
+                                      (res[1].annotation) & (experiment.path == res[3].path)]
             experiment_hit_datasets = set(
                 [
                     experiment_hit_result[0].dtag
                     for experiment_hit_result
                     in experiment_hit_results
                     if
-                    (Path(experiment_hit_result[4].model_dir) / experiment_hit_result[0].dtag / 'refine.pdb').exists()
+                    (Path(experiment_hit_result[3].model_dir) / experiment_hit_result[0].dtag / 'refine.pdb').exists()
                 ]
             )
 
