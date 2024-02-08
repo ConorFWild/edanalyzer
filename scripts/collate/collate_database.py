@@ -186,11 +186,12 @@ def _get_events(
                             source = "pandda_1"
                         else:
                             source = "pandda_2"
-                        AnnotationORM(
+                        annotation = AnnotationORM(
                             annotation=_annotation,
                             source=source,
                             event=event
                         )
+                        annotations[(pandda_path, pandda_event.dtag, pandda_event.event_idx)] = annotation
 
                         events[(pandda_path, pandda_event.dtag, pandda_event.event_idx)] = event
 
