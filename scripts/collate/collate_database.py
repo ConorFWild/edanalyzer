@@ -533,10 +533,10 @@ def _get_builds(pandda_key, test_systems):
                                 'train_test': train_test
                             }
 
-                    non_none_rmsds = [_key for _key in rmsds if rmsds[_key]['RMSD'] is not None]
+                    non_none_rmsds = [_key for _key in rmsds if rmsds[_key]['rmsd'] is not None]
                     if len(non_none_rmsds) == 0:
                         continue
-                    selected_known_hit_key = min(non_none_rmsds, key=lambda _key: rmsds[_key]['RMSD'])
+                    selected_known_hit_key = min(non_none_rmsds, key=lambda _key: rmsds[_key]['rmsd'])
 
                     selected_match = rmsds[selected_known_hit_key]
                     builds.append(
