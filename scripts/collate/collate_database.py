@@ -598,7 +598,7 @@ def main(config_path):
         # Get the builds
         builds = _get_builds(
             config['panddas']['pandda_key'],
-            config['test_systems']
+            config['test']['test_systems']
         )
 
     db.disconnect()
