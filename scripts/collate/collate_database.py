@@ -603,12 +603,14 @@ def main(config_path):
         inspect_tables,
         custom_annotations
     )
+    rprint(f"Got events!")
 
     # Get the builds
     _get_builds(
         config['panddas']['pandda_key'],
         config['test']['test_systems']
     )
+    rprint("Got builds!")
 
     db.disconnect()
 
