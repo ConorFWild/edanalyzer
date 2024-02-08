@@ -41,164 +41,166 @@ def _get_events(
         inspect_tables,
         custom_annotations
 ):
-    systems = {}
-    experiments = {}
-    panddas = {}
-    annotations = {}
-    partitions = {}
-    datasets = {}
-    events = {}
-    # Multiprocess PanDDAs, returning valid events for addition to the
-    with joblib.Parallel(n_jobs=-1, verbose=50) as parallel:
-        # j = 0
-        for pandda_path, inspect_table in inspect_tables.items():
-            print(f"### {pandda_path} ")
+    with pony.orm.db_session:
 
-            # if j > 10:
-            #     continue
-            # j += 1
-            pandda_events: list[Event] = parallel(
-                joblib.delayed(_parse_inspect_table_row)(
-                    row,
-                    pandda_path
-                )
-                for idx, row
-                in inspect_table.iterrows()
-            )
-            rprint(
-                f"Got {len(pandda_events)} of which {len([x for x in pandda_events if x is not None])} are not None!")
+        systems = {}
+        experiments = {}
+        panddas = {}
+        annotations = {}
+        partitions = {}
+        datasets = {}
+        events = {}
+        # Multiprocess PanDDAs, returning valid events for addition to the
+        with joblib.Parallel(n_jobs=-1, verbose=50) as parallel:
+            # j = 0
+            for pandda_path, inspect_table in inspect_tables.items():
+                print(f"### {pandda_path} ")
 
-            for pandda_event in pandda_events:
-                if pandda_event:
-                    dtag, event_idx = pandda_event.dtag, pandda_event.event_idx
-                    system_name = _get_system_from_dtag(dtag)
-                    if not system_name:
-                        continue
-                    if system_name in systems:
-                        system = systems[system_name]
-                    else:
-                        system = SystemORM(
-                            name=system_name,
-                            experiments=[],
-                            panddas=[],
-                            datasets=[],
-                        )
-                        systems[system_name] = system
-
-                    structure_path = Path(pandda_event.initial_structure).absolute().resolve()
-                    dataset_dir_index = [j for j, part in enumerate(structure_path.parts) if part == dtag]
-                    dataset_path = Path(*structure_path.parts[:dataset_dir_index[0] + 1])
-                    experiment_path = dataset_path.parent
-                    if experiment_path in experiments:
-                        experiment = experiments[experiment_path]
-                    else:
-                        experiment = ExperimentORM(
-                            path=str(experiment_path),
-                            model_dir=str(experiment_path),
-                            panddas=[],
-                            system=system,
-                            datasets=[]
-                        )
-                        experiments[experiment_path] = experiment
-
-                    if dtag in datasets:
-                        dataset = datasets[dtag]
-                    else:
-                        dataset = DatasetORM(
-                            dtag=pandda_event.dtag,
-                            path=str(dataset_path),
-                            structure=str(Path(pandda_event.initial_structure).absolute().resolve()),
-                            reflections=str(Path(pandda_event.initial_reflections).absolute().resolve()),
-                            system=system,
-                            experiment=experiment,
-                            panddas=[]
-                        )
-                        datasets[dtag] = dataset
-
-                    if pandda_path in panddas:
-                        pandda = panddas[pandda_path]
-                    else:
-                        pandda = PanDDAORM(
-                            path=str(pandda_path),  # *
-                            events=[],
-                            datasets=[dataset, ],
-                            system=system,
-                            experiment=experiment,
-                        )
-                        panddas[pandda_path] = pandda
-
-                    if (str(pandda_path), dtag, event_idx) in custom_annotations:
-                        print(
-                            f"\tUpdating annotation of {(str(pandda_path), dtag, event_idx)} using custom annotation!")
-                        _annotation = custom_annotations[(str(pandda_path), dtag, event_idx)]
-                    else:
-                        _annotation = pandda_event.annotation
-
-                    event = EventORM(
-                        dtag=pandda_event.dtag,
-                        event_idx=pandda_event.event_idx,
-                        x=pandda_event.x,
-                        y=pandda_event.y,
-                        z=pandda_event.z,
-                        bdc=pandda_event.bdc,
-                        initial_structure=pandda_event.initial_structure,
-                        initial_reflections=pandda_event.initial_reflections,
-                        structure=pandda_event.structure,
-                        event_map=pandda_event.event_map,
-                        z_map=pandda_event.z_map,
-                        viewed=pandda_event.viewed,
-                        hit_confidence=pandda_event.hit_confidence,
-                        ligand=None,
-                        dataset=dataset,
-                        pandda=pandda,
-                        annotations=[],
-                        partitions=[]
+                # if j > 10:
+                #     continue
+                # j += 1
+                pandda_events: list[Event] = parallel(
+                    joblib.delayed(_parse_inspect_table_row)(
+                        row,
+                        pandda_path
                     )
+                    for idx, row
+                    in inspect_table.iterrows()
+                )
+                rprint(
+                    f"Got {len(pandda_events)} of which {len([x for x in pandda_events if x is not None])} are not None!")
 
-                    if pandda_event.ligand:
-                        ligand_orm = LigandORM(
-                            path=str(pandda_event.ligand.path),
-                            smiles=str(pandda_event.ligand.smiles),
-                            chain=str(pandda_event.ligand.chain),
-                            residue=int(pandda_event.ligand.residue),
-                            num_atoms=int(pandda_event.ligand.num_atoms),
-                            x=float(pandda_event.ligand.x),
-                            y=float(pandda_event.ligand.y),
-                            z=float(pandda_event.ligand.z),
+                for pandda_event in pandda_events:
+                    if pandda_event:
+                        dtag, event_idx = pandda_event.dtag, pandda_event.event_idx
+                        system_name = _get_system_from_dtag(dtag)
+                        if not system_name:
+                            continue
+                        if system_name in systems:
+                            system = systems[system_name]
+                        else:
+                            system = SystemORM(
+                                name=system_name,
+                                experiments=[],
+                                panddas=[],
+                                datasets=[],
+                            )
+                            systems[system_name] = system
+
+                        structure_path = Path(pandda_event.initial_structure).absolute().resolve()
+                        dataset_dir_index = [j for j, part in enumerate(structure_path.parts) if part == dtag]
+                        dataset_path = Path(*structure_path.parts[:dataset_dir_index[0] + 1])
+                        experiment_path = dataset_path.parent
+                        if experiment_path in experiments:
+                            experiment = experiments[experiment_path]
+                        else:
+                            experiment = ExperimentORM(
+                                path=str(experiment_path),
+                                model_dir=str(experiment_path),
+                                panddas=[],
+                                system=system,
+                                datasets=[]
+                            )
+                            experiments[experiment_path] = experiment
+
+                        if dtag in datasets:
+                            dataset = datasets[dtag]
+                        else:
+                            dataset = DatasetORM(
+                                dtag=pandda_event.dtag,
+                                path=str(dataset_path),
+                                structure=str(Path(pandda_event.initial_structure).absolute().resolve()),
+                                reflections=str(Path(pandda_event.initial_reflections).absolute().resolve()),
+                                system=system,
+                                experiment=experiment,
+                                panddas=[]
+                            )
+                            datasets[dtag] = dataset
+
+                        if pandda_path in panddas:
+                            pandda = panddas[pandda_path]
+                        else:
+                            pandda = PanDDAORM(
+                                path=str(pandda_path),  # *
+                                events=[],
+                                datasets=[dataset, ],
+                                system=system,
+                                experiment=experiment,
+                            )
+                            panddas[pandda_path] = pandda
+
+                        if (str(pandda_path), dtag, event_idx) in custom_annotations:
+                            print(
+                                f"\tUpdating annotation of {(str(pandda_path), dtag, event_idx)} using custom annotation!")
+                            _annotation = custom_annotations[(str(pandda_path), dtag, event_idx)]
+                        else:
+                            _annotation = pandda_event.annotation
+
+                        event = EventORM(
+                            dtag=pandda_event.dtag,
+                            event_idx=pandda_event.event_idx,
+                            x=pandda_event.x,
+                            y=pandda_event.y,
+                            z=pandda_event.z,
+                            bdc=pandda_event.bdc,
+                            initial_structure=pandda_event.initial_structure,
+                            initial_reflections=pandda_event.initial_reflections,
+                            structure=pandda_event.structure,
+                            event_map=pandda_event.event_map,
+                            z_map=pandda_event.z_map,
+                            viewed=pandda_event.viewed,
+                            hit_confidence=pandda_event.hit_confidence,
+                            ligand=None,
+                            dataset=dataset,
+                            pandda=pandda,
+                            annotations=[],
+                            partitions=[]
+                        )
+
+                        if pandda_event.ligand:
+                            ligand_orm = LigandORM(
+                                path=str(pandda_event.ligand.path),
+                                smiles=str(pandda_event.ligand.smiles),
+                                chain=str(pandda_event.ligand.chain),
+                                residue=int(pandda_event.ligand.residue),
+                                num_atoms=int(pandda_event.ligand.num_atoms),
+                                x=float(pandda_event.ligand.x),
+                                y=float(pandda_event.ligand.y),
+                                z=float(pandda_event.ligand.z),
+                                event=event
+                            )
+                        else:
+                            ligand_orm = None
+
+                        pickled_data_dir = pandda_path / "pickled_data"
+                        pandda_done = pandda_path / "pandda.done"
+                        statistical_maps = pandda_path / "statistical_maps"
+                        pickled_panddas_dir = pandda_path / "pickled_panddas"
+                        if pickled_data_dir.exists():
+                            source = "pandda_1"
+                        elif pandda_done.exists():
+                            source = "pandda_1"
+                        elif statistical_maps.exists():
+                            source = "pandda_1"
+                        elif pickled_panddas_dir.exists():
+                            source = "pandda_1"
+                        else:
+                            source = "pandda_2"
+                        AnnotationORM(
+                            annotation=_annotation,
+                            source=source,
                             event=event
                         )
-                    else:
-                        ligand_orm = None
 
-                    pickled_data_dir = pandda_path / "pickled_data"
-                    pandda_done = pandda_path / "pandda.done"
-                    statistical_maps = pandda_path / "statistical_maps"
-                    pickled_panddas_dir = pandda_path / "pickled_panddas"
-                    if pickled_data_dir.exists():
-                        source = "pandda_1"
-                    elif pandda_done.exists():
-                        source = "pandda_1"
-                    elif statistical_maps.exists():
-                        source = "pandda_1"
-                    elif pickled_panddas_dir.exists():
-                        source = "pandda_1"
-                    else:
-                        source = "pandda_2"
-                    AnnotationORM(
-                        annotation=_annotation,
-                        source=source,
-                        event=event
-                    )
+                        events[(pandda_path, pandda_event.dtag, pandda_event.event_idx)] = event
 
-                    events[(pandda_path, pandda_event.dtag, pandda_event.event_idx)] = event
+        rprint(
+            f"Got {len(events)} of which {len([x for x in events.values() if x.hit_confidence == 'High'])} are high confidence!")
+        rprint(systems)
+        # for event_id, event in events.items():
+        #     print(event)
 
-    rprint(
-        f"Got {len(events)} of which {len([x for x in events.values() if x.hit_confidence == 'High'])} are high confidence!")
-    rprint(systems)
-    # for event_id, event in events.items():
-    #     print(event)
-
-    return events
+    # return events
 
 
 def _get_known_hit_structures(
@@ -553,7 +555,7 @@ def _get_builds(pandda_key, test_systems):
     #
     # table = pd.concat([x for x in dfs.values()], axis=0, ignore_index=True)
 
-    return builds
+    # return builds
 
 
 def main(config_path):
@@ -595,18 +597,17 @@ def main(config_path):
     #
 
     # Get the database
-    with pony.orm.db_session:
-        # Get the events
-        events = _get_events(
-            inspect_tables,
-            custom_annotations
-        )
+    # Get the events
+    _get_events(
+        inspect_tables,
+        custom_annotations
+    )
 
-        # Get the builds
-        builds = _get_builds(
-            config['panddas']['pandda_key'],
-            config['test']['test_systems']
-        )
+    # Get the builds
+    _get_builds(
+        config['panddas']['pandda_key'],
+        config['test']['test_systems']
+    )
 
     db.disconnect()
 
