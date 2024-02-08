@@ -50,19 +50,30 @@ class PanDDADatasetTorchLigand(Dataset):
             dtype=np.float32,
         )
 
-        event_map = _load_xmap_from_path(sample.event_map_path)
-        event_map_sample = _sample_xmap_and_scale(
-            event_map, transform, np.copy(sample_array)
+        # event_map = _load_xmap_from_path(sample.event_map_path)
+        # event_map_sample = _sample_xmap_and_scale(
+        #     event_map, transform, np.copy(sample_array)
+        # )
+
+        xmap = _load_xmap_from_path(sample.xap_path)
+        xmap_sample = _sample_xmap_and_scale(
+            xmap, transform, np.copy(sample_array)
         )
+
+        mean_map = _load_xmap_from_path(sample.mean_map_path)
+        mean_map_sample = _sample_xmap_and_scale(
+            mean_map, transform, np.copy(sample_array)
+        )
+
 
         z_map = _load_xmap_from_path(sample.z_map_path)
         z_map_sample = _sample_xmap_and_scale(
             z_map, transform, np.copy(sample_array)
         )
 
-        xmap = _load_xmap_from_mtz_path(sample.mtz_path)
-        xmap_sample = _sample_xmap_and_scale(
-            xmap, transform, np.copy(sample_array)
+        raw_xmap = _load_xmap_from_mtz_path(sample.mtz_path)
+        raw_xmap_sample = _sample_xmap_and_scale(
+            raw_xmap, transform, np.copy(sample_array)
         )
 
         ligand_mask_grid = _get_ligand_mask_float(xmap, residue)
@@ -77,9 +88,10 @@ class PanDDADatasetTorchLigand(Dataset):
         # Make the image
         image = np.stack(
             [
-                event_map_sample * image_ligand_mask,
-                z_map_sample * image_ligand_mask,
                 xmap_sample * image_ligand_mask,
+                mean_map_sample * image_ligand_mask,
+                z_map_sample * image_ligand_mask,
+                raw_xmap_sample * image_ligand_mask,
             ],
             axis=0,
         )[np.newaxis, :]

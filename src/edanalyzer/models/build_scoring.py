@@ -1,4 +1,5 @@
 import torch
+from torch import functional as F
 import lightning as lt
 
 from .resnet import resnet18
@@ -7,7 +8,7 @@ from .resnet import resnet18
 class LitBuildScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
-        self.resnet = resnet18(num_classes=1, num_input=3)
+        self.resnet = resnet18(num_classes=1, num_input=4)
 
     def forward(self, x):
         return torch.exp(self.resnet(x))
