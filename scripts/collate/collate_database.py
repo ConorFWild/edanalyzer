@@ -541,7 +541,34 @@ def _get_builds(pandda_key, test_systems):
                     selected_match = rmsds[selected_known_hit_key]
                     builds.append(
                         AutobuildORM(
-                            **selected_match
+                            experiment_model_dir=selected_match['experiment_model_dir'],
+                            pandda_path=selected_match['pandda_path'],
+                            dtag=selected_match['dtag'],
+                            model_idx=selected_match['model_idx'],
+                            event_idx=selected_match['event_idx'],
+                            known_hit_key=selected_match['known_hit_key'],
+                            ligand_key=selected_match['ligand_key'],
+                            rmsd=selected_match['rmsd'],
+                            score=selected_match['score'],
+                            size=selected_match['size'],
+                            local_strength=selected_match['local_strength'],
+                            rscc=selected_match['rscc'],
+                            signal=selected_match['signal'],
+                            noise=selected_match['noise'],
+                            signal_noise=selected_match['signal_noise'],
+                            x_ligand=selected_match['x_ligand'],
+                            y_ligand=selected_match['y_ligand'],
+                            z_ligand=selected_match['z_ligand'],
+                            x=selected_match['x'],
+                            y=selected_match['y'],
+                            z=selected_match['z'],
+                            build_path=selected_match['build_path'],
+                            bdc=selected_match['bdc'],
+                            xmap_path=selected_match['xmap_path'],
+                            mean_map_path=selected_match['mean_map_path'],
+                            mtz_path=selected_match['mtz_path'],
+                            zmap_path=selected_match['zmap_path'],
+                            train_test=selected_match['train_test'],
                         )
                     )
             # print(f"Got {len(records)} rmsds")
