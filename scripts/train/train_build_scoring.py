@@ -12,7 +12,7 @@ from edanalyzer.models.build_scoring import LitBuildScoring
 from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 
 from lightning.pytorch.loggers import CSVLogger
-from pytorch_lightning.callbacks import ModelCheckpoint
+from lightning.pytorch.callbacks import ModelCheckpoint
 
 
 
