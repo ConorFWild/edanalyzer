@@ -89,7 +89,7 @@ class BuildScoringDataset(Dataset):
         #     event_map, transform, np.copy(sample_array)
         # )
 
-        xmap = _load_xmap_from_path(sample.xap_path)
+        xmap = _load_xmap_from_path(sample.xmap_path)
         xmap_sample = _sample_xmap_and_scale(
             xmap, transform, np.copy(sample_array)
         )
@@ -100,7 +100,7 @@ class BuildScoringDataset(Dataset):
         )
 
 
-        z_map = _load_xmap_from_path(sample.z_map_path)
+        z_map = _load_xmap_from_path(sample.zmap_path)
         z_map_sample = _sample_xmap_and_scale(
             z_map, transform, np.copy(sample_array)
         )
