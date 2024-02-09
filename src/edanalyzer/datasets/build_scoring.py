@@ -128,7 +128,7 @@ class BuildScoringDataset(Dataset):
                 raw_xmap_sample * image_ligand_mask,
             ],
             axis=0,
-        )[np.newaxis, :]
+        )
         image_float = image.astype(np.float32)
 
         # Make the annotation
