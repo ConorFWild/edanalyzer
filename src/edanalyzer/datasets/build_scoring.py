@@ -135,7 +135,7 @@ class BuildScoringDataset(Dataset):
         if sample.rmsd > 3.0:
             rmsd = 3.0
         else:
-            rmsd = 3.0
+            rmsd = rmsd
         label = np.array(rmsd)
         label_float = label.astype(np.float32)
 
