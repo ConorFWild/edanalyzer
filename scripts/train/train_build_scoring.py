@@ -52,7 +52,7 @@ def main(config_path, batch_size=12, num_workers=20):
                 ]
             ),
             batch_size=batch_size,
-            shuffle=True,
+            # shuffle=True,
             num_workers=num_workers,
         )
 
