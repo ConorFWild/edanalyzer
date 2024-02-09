@@ -52,3 +52,4 @@ class LitBuildScoring(lt.LightningModule):
         predictions = self.training_step_outputs
         rprint(predictions)
         rprint(self.trainer.train_dataloader)
+        self.annotations.clear()
