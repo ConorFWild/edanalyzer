@@ -33,7 +33,7 @@ def main(config_path):
                 BuildScoringDatasetItem(**_event.to_dict(exclude='id'))
                 for _event
                 in query
-                if _event['test_train'] == "Train"
+                if _event.test_train == "Train"
             ]
         )
         dataset_test = BuildScoringDataset(
@@ -41,7 +41,7 @@ def main(config_path):
                 BuildScoringDatasetItem(**_event.to_dict(exclude='id'))
                 for _event
                 in query
-                if _event['test_train'] == "Test"
+                if _event.test_train == "Test"
             ]
         )
 
