@@ -63,11 +63,11 @@ class BuildScoringDataset(Dataset):
     def __getitem__(self, idx: int):
         sample = self.data[idx]
 
-        structure = _get_structure_from_path(sample.bound_state_structure)
+        structure = _get_structure_from_path(sample.build_path)
         residue = _get_res_from_structure_chain_res(
             structure,
-            sample.chain,
-            sample.res
+            0,
+            0
         )
 
         # Get sampling transform
