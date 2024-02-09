@@ -8,7 +8,7 @@ from .resnet import resnet18
 class LitBuildScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
-        self.resnet = resnet18(num_classes=1, num_input=4)
+        self.resnet = resnet18(num_classes=1, num_input=4).float()
 
     def forward(self, x):
 
@@ -28,6 +28,7 @@ class LitBuildScoring(lt.LightningModule):
 
     def validation_step(self, test_batch, batch_idx):
         x, y = test_batch
+        y = y.view(y.size(0), -1)
         score = torch.exp(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('test_loss', loss)
