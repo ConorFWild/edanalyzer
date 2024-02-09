@@ -1,6 +1,7 @@
 import dataclasses
 
 import numpy as np
+import torch
 
 from torch.utils.data import Dataset
 
@@ -133,4 +134,4 @@ class BuildScoringDataset(Dataset):
         # Make the annotation
         label = sample.rmsd
 
-        return image_float, label
+        return torch.from_numpy(image_float), torch.from_numpy(label)
