@@ -1,3 +1,5 @@
+import dataclasses
+
 import numpy as np
 
 from torch.utils.data import Dataset
@@ -15,8 +17,39 @@ from .base import (
     _get_structure_from_path
 )
 
+@dataclasses.dataclass
+class BuildScoringDatasetItem:
+    experiment_model_dir: str
+    pandda_path: str
+    dtag: str
+    model_idx : int
+    event_idx : int
+    known_hit_key: str
+    ligand_key: str
+    rmsd : float
+    score: float
+    size : float
+    local_strength : float
+    rscc : float
+    signal : float
+    noise : float
+    signal_noise : float
+    x_ligand : float
+    y_ligand : float
+    z_ligand : float
+    x : float
+    y : float
+    z: float
+    build_path: str
+    bdc : float
+    xmap_path : str
+    mean_map_path: str
+    mtz_path : str
+    zmap_path : str
+    train_test : str
 
-class PanDDADatasetTorchLigand(Dataset):
+
+class BuildScoringDataset(Dataset):
     def __init__(
             self,
             data
