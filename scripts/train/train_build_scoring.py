@@ -66,7 +66,7 @@ def main(config_path, batch_size=12, num_workers=20):
     # Train
     checkpoint_callback = ModelCheckpoint(dirpath='output/build_scoring')
     logger = CSVLogger("output/build_scoring/logs")
-    trainer = lt.Trainer(accelerator='gpu', logger=logger, callbacks=[checkpoint_callback], progress_bar_refresh_rate=0)
+    trainer = lt.Trainer(accelerator='gpu', logger=logger, callbacks=[checkpoint_callback], enable_progress_bar=False)
     trainer.fit(model, dataset_train, dataset_test)
 
 
