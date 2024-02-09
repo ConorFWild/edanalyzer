@@ -25,8 +25,7 @@ def main(config_path):
     except Exception as e:
         print(f"Exception setting up database: {e}")
 
-    # Train
-    trainer = lt.Trainer(accelerator='gpu')
+    # Get the dataset
     with pony.orm.db_session:
         query = [_x for _x in pony.orm.select(_y for _y in AutobuildORM)]
         dataset_train = BuildScoringDataset(
@@ -37,8 +36,20 @@ def main(config_path):
                 if _event['test_train'] == "Train"
             ]
         )
-        dataset_test = BuildScoringDataset()
+        dataset_test = BuildScoringDataset(
+            [
+                BuildScoringDatasetItem(**_event.to_dict(exclude='id'))
+                for _event
+                in query
+                if _event['test_train'] == "Test"
+            ]
+        )
+
+    # Get the model
     model = LitBuildScoring()
+
+    # Train
+    trainer = lt.Trainer(accelerator='gpu')
     trainer.fit(model, dataset_train, dataset_test)
 
 
