@@ -1,5 +1,5 @@
 import torch
-from torch import functional as F
+from torch.nn import functional as F
 import lightning as lt
 
 from .resnet import resnet18
