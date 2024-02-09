@@ -1,7 +1,9 @@
 import numpy as np
 import gemmi
 
-from ..interfaces import *
+# from ..interfaces import *
+
+from edanalyzer import constants
 
 def _load_xmap_from_mtz_path(path):
     mtz = gemmi.read_mtz_file(str(path))
