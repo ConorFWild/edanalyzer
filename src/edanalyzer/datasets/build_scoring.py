@@ -132,7 +132,11 @@ class BuildScoringDataset(Dataset):
         image_float = image.astype(np.float32)
 
         # Make the annotation
-        label = np.array(sample.rmsd)
+        if sample.rmsd > 3.0:
+            rmsd = 3.0
+        else:
+            rmsd = 3.0
+        label = np.array(rmsd)
         label_float = label.astype(np.float32)
 
         return idx, torch.from_numpy(image_float), torch.from_numpy(label_float)
