@@ -34,7 +34,7 @@ class LitBuildScoring(lt.LightningModule):
                 "y": y[j],
                 "y_hat": score[j]
             }
-                for j in idx.size(0)
+                for j in range(idx.size(0))
             ]
         )
         # self.annotations[]
