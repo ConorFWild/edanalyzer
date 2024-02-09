@@ -11,7 +11,6 @@ class LitBuildScoring(lt.LightningModule):
         self.resnet = resnet18(num_classes=1, num_input=4)
 
     def forward(self, x):
-        print(x)
 
         return torch.exp(self.resnet(x))
 
