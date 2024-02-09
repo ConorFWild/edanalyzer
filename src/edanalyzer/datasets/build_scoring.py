@@ -132,7 +132,7 @@ class BuildScoringDataset(Dataset):
         image_float = image.astype(np.float32)
 
         # Make the annotation
-        label = sample.rmsd
+        label = np.array(sample.rmsd)
         label_float = label.astype(np.float32)
 
-        return torch.from_numpy(image_float), torch.from_numpy(np.array(label_float))
+        return torch.from_numpy(image_float), torch.from_numpy(label_float)
