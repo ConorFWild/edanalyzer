@@ -11,6 +11,8 @@ class LitBuildScoring(lt.LightningModule):
         self.resnet = resnet18(num_classes=1, num_input=4)
 
     def forward(self, x):
+        print(x)
+
         return torch.exp(self.resnet(x))
 
     def configure_optimizers(self):
@@ -19,7 +21,6 @@ class LitBuildScoring(lt.LightningModule):
 
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
-        print(x)
         score = torch.exp(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('train_loss', loss)
