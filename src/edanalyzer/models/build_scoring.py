@@ -10,7 +10,7 @@ class LitBuildScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
         self.resnet = resnet18(num_classes=1, num_input=4).float()
-        # self.annotations = {}
+        self.annotations = []
 
     def forward(self, x):
 
@@ -27,7 +27,7 @@ class LitBuildScoring(lt.LightningModule):
         loss = F.mse_loss(score, y)
         self.log('train_loss', loss)
 
-        self.training_step_outputs.append(
+        self.annotations.append(
             [
                 {
                 "idx": idx[j],
