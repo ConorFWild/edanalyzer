@@ -49,7 +49,8 @@ class LitBuildScoring(lt.LightningModule):
 
     def on_train_epoch_end(self):
         # Log the predictions
-        predictions = self.training_step_outputs
+        # predictions = self.training_step_outputs
+        predictions = self.annotations
         rprint(predictions)
         rprint(self.trainer.train_dataloader)
         self.annotations.clear()
