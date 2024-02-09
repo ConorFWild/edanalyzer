@@ -4,18 +4,19 @@ import fire
 import yaml
 from rich import print as rprint
 import lightning as lt
+from torch.utils.data import DataLoader
 import pony
 
 from edanalyzer.datasets.build_scoring import BuildScoringDataset, BuildScoringDatasetItem
 from edanalyzer.models.build_scoring import LitBuildScoring
 from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 
-def main(config_path):
+
+def main(config_path, batch_size=12, num_workers=20):
     rprint(f'Running collate_database from config file: {config_path}')
     # Load config
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
-
 
     # Get the Database
     database_path = Path(config['working_directory']) / "database.db"
@@ -28,21 +29,31 @@ def main(config_path):
     # Get the dataset
     with pony.orm.db_session:
         query = [_x for _x in pony.orm.select(_y for _y in AutobuildORM)]
-        dataset_train = BuildScoringDataset(
-            [
-                BuildScoringDatasetItem(**_event.to_dict(exclude='id'))
-                for _event
-                in query
-                if _event.train_test == "Train"
-            ]
+        dataset_train = DataLoader(
+            BuildScoringDataset(
+                [
+                    BuildScoringDatasetItem(**_event.to_dict(exclude='id'))
+                    for _event
+                    in query
+                    if _event.train_test == "Train"
+                ]
+            ),
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=num_workers,
         )
-        dataset_test = BuildScoringDataset(
-            [
-                BuildScoringDatasetItem(**_event.to_dict(exclude='id'))
-                for _event
-                in query
-                if _event.train_test == "Test"
-            ]
+        dataset_test = DataLoader(
+            BuildScoringDataset(
+                [
+                    BuildScoringDatasetItem(**_event.to_dict(exclude='id'))
+                    for _event
+                    in query
+                    if _event.train_test == "Test"
+                ]
+            ),
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=num_workers,
         )
 
     # Get the model
