@@ -19,6 +19,7 @@ class LitBuildScoring(lt.LightningModule):
 
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
+        print(x)
         score = torch.exp(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('train_loss', loss)

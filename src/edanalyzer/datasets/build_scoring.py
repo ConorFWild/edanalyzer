@@ -99,7 +99,6 @@ class BuildScoringDataset(Dataset):
             mean_map, transform, np.copy(sample_array)
         )
 
-
         z_map = _load_xmap_from_path(sample.zmap_path)
         z_map_sample = _sample_xmap_and_scale(
             z_map, transform, np.copy(sample_array)
