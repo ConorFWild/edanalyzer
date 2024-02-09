@@ -30,9 +30,9 @@ class LitBuildScoring(lt.LightningModule):
         self.annotations.append(
             [
                 {
-                "idx": idx[j],
-                "y": y[j],
-                "y_hat": score[j]
+                "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
+                "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
+                "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy())
             }
                 for j in range(idx.size(0))
             ]
