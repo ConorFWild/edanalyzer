@@ -11,6 +11,10 @@ from edanalyzer.datasets.build_scoring import BuildScoringDataset, BuildScoringD
 from edanalyzer.models.build_scoring import LitBuildScoring
 from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 
+from lightning.pytorch.loggers import CSVLogger
+from pytorch_lightning.callbacks import ModelCheckpoint
+
+
 
 def main(config_path, batch_size=12, num_workers=20):
     rprint(f'Running collate_database from config file: {config_path}')
@@ -60,7 +64,9 @@ def main(config_path, batch_size=12, num_workers=20):
     model = LitBuildScoring()
 
     # Train
-    trainer = lt.Trainer(accelerator='gpu')
+    checkpoint_callback = ModelCheckpoint(dirpath='output/build_scoring')
+    logger = CSVLogger("logs")
+    trainer = lt.Trainer(accelerator='gpu', logger=logger)
     trainer.fit(model, dataset_train, dataset_test)
 
 
