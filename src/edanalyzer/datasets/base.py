@@ -28,7 +28,7 @@ def _get_structure_from_path(path):
 
 
 def _get_res_from_structure_chain_res(structure, chain, res):
-    return structure[0][str(chain)][str(res)]
+    return structure[0][chain][res]
 
 
 def _get_identity_matrix():
