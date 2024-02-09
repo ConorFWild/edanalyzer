@@ -135,4 +135,4 @@ class BuildScoringDataset(Dataset):
         label = np.array(sample.rmsd)
         label_float = label.astype(np.float32)
 
-        return torch.from_numpy(image_float), torch.from_numpy(label_float)
+        return idx, torch.from_numpy(image_float), torch.from_numpy(label_float)
