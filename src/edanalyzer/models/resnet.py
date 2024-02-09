@@ -288,7 +288,7 @@ class ResNet(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         print(f"Tesnor input shape: {x.shape}. Type: {x.dtype}")
 
-        return self._forward_impl()
+        return self._forward_impl(x)
 
 
 def _resnet(
