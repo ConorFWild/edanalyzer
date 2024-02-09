@@ -17,7 +17,7 @@ class LitBuildScoring(lt.LightningModule):
         return torch.exp(self.resnet(x))
 
     def configure_optimizers(self):
-        optimizer= torch.optim.Adam(self.parameters(), lr=1e-3)
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
 
     def training_step(self, train_batch, batch_idx):
@@ -41,12 +41,14 @@ class LitBuildScoring(lt.LightningModule):
         return loss
 
     def validation_step(self, test_batch, batch_idx):
-        x, y = test_batch
+        idx, x, y = test_batch
         y = y.view(y.size(0), -1)
         score = torch.exp(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('test_loss', loss)
 
     def on_train_epoch_end(self):
+        # Log the predictions
         predictions = self.training_step_outputs
         rprint(predictions)
+        rprint(self.trainer.train_dataloader)
