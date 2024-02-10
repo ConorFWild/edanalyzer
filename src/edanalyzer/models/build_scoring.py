@@ -59,10 +59,14 @@ class LitBuildScoring(lt.LightningModule):
         rprint(predictions)
         rprint(self.trainer.train_dataloader)
 
-        with open(self.output / 'annotations_train.yaml', 'r') as f:
-            annotations = yaml.safe_load(f)
+        if not (self.output / 'annotations_train.yaml').exists():
+            annotations = {}
 
-        annotations += self.annotations
+        else:
+            with open(self.output / 'annotations_train.yaml', 'r') as f:
+                annotations = yaml.safe_load(f)
+
+        annotations[self.trainer.current_epoch] = self.annotations
 
         with open(self.output / 'annotations_train.yaml', 'w') as f:
             yaml.dump(annotations, f)
