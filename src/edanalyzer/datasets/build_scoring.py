@@ -131,6 +131,7 @@ class BuildScoringDataset(Dataset):
         )
         image_float = image.astype(np.float32)
 
+
         # Make the annotation
         if sample.rmsd > 3.0:
             rmsd = 3.0
