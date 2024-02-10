@@ -55,6 +55,7 @@ class LitBuildScoring(lt.LightningModule):
         # Log the predictions
         # predictions = self.training_step_outputs
         predictions = self.annotations
+        rprint(f"Epoch: {self.trainer.current_epoch}")
         rprint(predictions)
         rprint(self.trainer.train_dataloader)
 
