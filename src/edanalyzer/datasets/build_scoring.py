@@ -90,7 +90,7 @@ class BuildScoringDataset(Dataset):
 
             label = np.array(3.0)
             label_float = label.astype(np.float32)
-            return idx, image_float, label_float
+            return idx, torch.from_numpy(image_float), torch.from_numpy(label_float)
 
 
         residue = _get_res_from_structure_chain_res(
