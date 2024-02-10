@@ -64,7 +64,35 @@ class BuildScoringDataset(Dataset):
     def __getitem__(self, idx: int):
         sample = self.data[idx]
 
-        structure = _get_structure_from_path(sample.build_path)
+        sample_array = np.zeros(
+            (30, 30, 30),
+            dtype=np.float32,
+        )
+
+        try:
+            structure = _get_structure_from_path(sample.build_path)
+            xmap = _load_xmap_from_path(sample.xmap_path)
+            mean_map = _load_xmap_from_path(sample.mean_map_path)
+            z_map = _load_xmap_from_path(sample.zmap_path)
+            raw_xmap = _load_xmap_from_mtz_path(sample.mtz_path)
+        except Exception as e:
+            print(e)
+            image = np.stack(
+                [
+                    sample_array,
+                    sample_array,
+                    sample_array,
+                    sample_array,
+                ],
+                axis=0,
+            )
+            image_float = image.astype(np.float32)
+
+            label = np.array(3.0)
+            label_float = label.astype(np.float32)
+            return idx,π
+
+
         residue = _get_res_from_structure_chain_res(
             structure,
             0,
@@ -80,32 +108,25 @@ class BuildScoringDataset(Dataset):
         )
 
         # Get sample image
-        sample_array = np.zeros(
-            (30, 30, 30),
-            dtype=np.float32,
-        )
+
 
         # event_map = _load_xmap_from_path(sample.event_map_path)
         # event_map_sample = _sample_xmap_and_scale(
         #     event_map, transform, np.copy(sample_array)
         # )
 
-        xmap = _load_xmap_from_path(sample.xmap_path)
         xmap_sample = _sample_xmap_and_scale(
             xmap, transform, np.copy(sample_array)
         )
 
-        mean_map = _load_xmap_from_path(sample.mean_map_path)
         mean_map_sample = _sample_xmap_and_scale(
             mean_map, transform, np.copy(sample_array)
         )
 
-        z_map = _load_xmap_from_path(sample.zmap_path)
         z_map_sample = _sample_xmap_and_scale(
             z_map, transform, np.copy(sample_array)
         )
 
-        raw_xmap = _load_xmap_from_mtz_path(sample.mtz_path)
         raw_xmap_sample = _sample_xmap_and_scale(
             raw_xmap, transform, np.copy(sample_array)
         )
