@@ -1,7 +1,10 @@
+from pathlib import Path
+
 from rich import print as rprint
 import torch
 from torch.nn import functional as F
 import lightning as lt
+import yaml
 
 from .resnet import resnet18
 
@@ -11,6 +14,7 @@ class LitBuildScoring(lt.LightningModule):
         super().__init__()
         self.resnet = resnet18(num_classes=1, num_input=4).float()
         self.annotations = []
+        self.output = Path('./output/build_scoring')
 
     def forward(self, x):
 
@@ -53,4 +57,13 @@ class LitBuildScoring(lt.LightningModule):
         predictions = self.annotations
         rprint(predictions)
         rprint(self.trainer.train_dataloader)
+
+        with open(self.output / 'annotations_train.yaml', 'r') as f:
+            annotations = yaml.safe_load(f)
+
+        annotations += self.annotations
+
+        with open(self.output / 'annotations_train.yaml', 'w') as f:
+            yaml.dump(annotations, f)
+
         self.annotations.clear()
