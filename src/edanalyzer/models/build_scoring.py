@@ -2,6 +2,7 @@ from pathlib import Path
 
 from rich import print as rprint
 import torch
+from torch import nn
 from torch.nn import functional as F
 import lightning as lt
 import yaml
@@ -27,7 +28,7 @@ class LitBuildScoring(lt.LightningModule):
     def training_step(self, train_batch, batch_idx):
         idx, x, y = train_batch
         y = y.view(y.size(0), -1)
-        score = torch.exp(self.resnet(x))
+        score = 3*nn.sigmoid(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('train_loss', loss)
 
@@ -47,7 +48,7 @@ class LitBuildScoring(lt.LightningModule):
     def validation_step(self, test_batch, batch_idx):
         idx, x, y = test_batch
         y = y.view(y.size(0), -1)
-        score = torch.exp(self.resnet(x))
+        score = 3*nn.sigmoid(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('test_loss', loss)
 
@@ -60,7 +61,10 @@ class LitBuildScoring(lt.LightningModule):
         rprint(self.trainer.train_dataloader)
 
         if not (self.output / 'annotations_train.yaml').exists():
-            annotations = {}
+            annotations = {
+                "train": {},
+                "test": {}
+            }
 
         else:
             with open(self.output / 'annotations_train.yaml', 'r') as f:
@@ -68,11 +72,42 @@ class LitBuildScoring(lt.LightningModule):
 
         # if self.trainer.current_epoch not in annotations:
         #     self.annotations[self.trainer.current_epoch] = []
-        if self.trainer.current_epoch not in annotations:
-            annotations[self.trainer.current_epoch] = []
+        if self.trainer.current_epoch not in annotations['train']:
+            annotations['train'][self.trainer.current_epoch] = []
 
         # self.annotations[self.trainer.current_epoch] += self.annotations
-        annotations[self.trainer.current_epoch] += self.annotations
+        annotations['train'][self.trainer.current_epoch] += self.annotations
+
+        with open(self.output / 'annotations_train.yaml', 'w') as f:
+            yaml.dump(annotations, f)
+
+        self.annotations.clear()
+
+    def on_validation_epoch_end(self):
+        # Log the predictions
+        # predictions = self.training_step_outputs
+        predictions = self.annotations
+        rprint(f"Epoch: {self.trainer.current_epoch}")
+        rprint(predictions)
+        rprint(self.trainer.train_dataloader)
+
+        if not (self.output / 'annotations_train.yaml').exists():
+            annotations = {
+                "train": {},
+                "test": {}
+            }
+
+        else:
+            with open(self.output / 'annotations_train.yaml', 'r') as f:
+                annotations = yaml.safe_load(f)
+
+        # if self.trainer.current_epoch not in annotations:
+        #     self.annotations[self.trainer.current_epoch] = []
+        if self.trainer.current_epoch not in annotations['test']:
+            annotations['test'][self.trainer.current_epoch] = []
+
+        # self.annotations[self.trainer.current_epoch] += self.annotations
+        annotations['test'][self.trainer.current_epoch] += self.annotations
 
         with open(self.output / 'annotations_train.yaml', 'w') as f:
             yaml.dump(annotations, f)
