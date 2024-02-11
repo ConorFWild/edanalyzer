@@ -52,6 +52,17 @@ class LitBuildScoring(lt.LightningModule):
         loss = F.mse_loss(score, y)
         self.log('test_loss', loss)
 
+        self.annotations.append(
+            [
+                {
+                    "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
+                    "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
+                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy())
+                }
+                for j in range(idx.size(0))
+            ]
+        )
+
     def on_train_epoch_end(self):
         # Log the predictions
         # predictions = self.training_step_outputs
