@@ -228,36 +228,35 @@ def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
 
     return fragment_structures
 
-def _parse_cif_file_for_ligand_array(ligand_path):
-    def parse_cif_file_for_ligand_array(path):
-        mol = get_fragment_mol_from_dataset_cif_path(path)
-        mol.calcImplicitValence()
+def _parse_cif_file_for_ligand_array(path):
+    mol = get_fragment_mol_from_dataset_cif_path(path)
+    mol.calcImplicitValence()
 
-        # Generate conformers
-        cids = AllChem.EmbedMultipleConfs(
-            mol,
-            numConfs=1000,
-            pruneRmsThresh=1.5,
-        )
+    # Generate conformers
+    cids = AllChem.EmbedMultipleConfs(
+        mol,
+        numConfs=1000,
+        pruneRmsThresh=1.5,
+    )
 
-        # Translate to structures
-        fragment_structures = get_structures_from_mol(
-            mol,
-            path,
-            10,
-        )
+    # Translate to structures
+    fragment_structures = get_structures_from_mol(
+        mol,
+        path,
+        10,
+    )
 
-        st = random.choice(fragment_structures)
+    st = random.choice(fragment_structures)
 
-        poss = []
-        for model in st:
-            for chain in model:
-                for res in chain:
-                    for atom in res:
-                        pos = atom.pos
-                        poss.append([pos.x, pos.y, pos.z])
+    poss = []
+    for model in st:
+        for chain in model:
+            for res in chain:
+                for atom in res:
+                    pos = atom.pos
+                    poss.append([pos.x, pos.y, pos.z])
 
-        return np.array(poss).T
+    return np.array(poss).T
 
 def _get_ligand_from_dir(path):
     ligand_path = _get_ligand_path_from_dir(path)
