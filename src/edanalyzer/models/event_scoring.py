@@ -10,6 +10,7 @@ import tables
 
 from .resnet import resnet18
 
+
 class Annotation(tables.IsDescription):
     epoch = tables.Int32Col()
     idx = tables.Int32Col()
@@ -39,9 +40,8 @@ class LitEventScoring(lt.LightningModule):
         self.log('train_loss', loss)
 
         for j in range(idx.size(0)):
-
             self.annotations.append(
-                    {
+                {
                     "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[1]),
                     "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()[1])
@@ -58,15 +58,13 @@ class LitEventScoring(lt.LightningModule):
         self.log('test_loss', loss)
 
         for j in range(idx.size(0)):
-
             self.annotations.append(
-                    {
-                        "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
-                        "y": float(y[j].to(torch.device("cpu")).detach().numpy()[1]),
-                        "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()[1])
-                    }
+                {
+                    "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
+                    "y": float(y[j].to(torch.device("cpu")).detach().numpy()[1]),
+                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()[1])
+                }
             )
-
 
     def on_train_epoch_end(self):
         # Log the predictions

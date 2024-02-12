@@ -32,6 +32,7 @@ def main(config_path, batch_size=12, num_workers=20):
     # Get the dataset
     with pony.orm.db_session:
         query = [(_x, _x.pandda, _x.pandda.system) for _x in pony.orm.select(_y for _y in EventORM)]
+        rprint(f"Got {len(query)} events to train and test with.")
         dataset_train = DataLoader(
             EventScoringDataset(
                 [
