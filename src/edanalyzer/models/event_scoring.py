@@ -20,7 +20,7 @@ class Annotation(tables.IsDescription):
 class LitEventScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
-        self.resnet = resnet18(num_classes=1, num_input=2).float()
+        self.resnet = resnet18(num_classes=2, num_input=2).float()
         self.annotations = []
         self.output = Path('./output/event_scoring')
 
