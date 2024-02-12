@@ -31,7 +31,7 @@ def main(config_path, batch_size=12, num_workers=20):
 
     # Get the dataset
     with pony.orm.db_session:
-        query = [(_x, _x.system) for _x in pony.orm.select(_y for _y in EventORM)]
+        query = [(_x, _x.pandda, _x.pandda.system) for _x in pony.orm.select(_y for _y in EventORM)]
         dataset_train = DataLoader(
             EventScoringDataset(
                 [
@@ -41,7 +41,7 @@ def main(config_path, batch_size=12, num_workers=20):
                     ))
                     for _event
                     in query
-                    if _event[1].name not in config['test']['test_systems']
+                    if _event[2].name not in config['test']['test_systems']
                 ]
             ),
             batch_size=batch_size,
@@ -52,10 +52,11 @@ def main(config_path, batch_size=12, num_workers=20):
         dataset_test = DataLoader(
             EventScoringDataset(
                 [
-                    EventScoringDatasetItem(**_event[0].to_dict(exclude=['id']))
+                    EventScoringDatasetItem(**_event[0].to_dict(
+                        exclude=['id''ligand', 'dataset', 'pandda', 'annotations', 'partitions'], ))
                     for _event
                     in query
-                    if _event[1].name in config['test']['test_systems']
+                    if _event[2].name in config['test']['test_systems']
                 ]
             ),
             batch_size=batch_size,
