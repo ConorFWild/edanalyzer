@@ -15,7 +15,6 @@ from lightning.pytorch.loggers import CSVLogger
 from lightning.pytorch.callbacks import ModelCheckpoint
 
 
-
 def main(config_path, batch_size=12, num_workers=20):
     rprint(f'Running collate_database from config file: {config_path}')
     # Load config
