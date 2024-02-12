@@ -21,8 +21,9 @@ def _get_ligand_path_from_dir(path):
         if (x.exists()) and (x.stem not in constants.LIGAND_IGNORE_REGEXES)
     ]
     if len(ligand_pdbs) != 1:
-        raise Exception(f'Have {len(ligand_pdbs)} valid pdbs in directory: {path /"ligand_files"}')
+        raise Exception(f'Have {len(ligand_pdbs)} valid pdbs in directory: {path / "ligand_files"}')
     return ligand_pdbs[0]
+
 
 def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     # Open the cif document with gemmi
@@ -45,11 +46,11 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     if not atom_charge_loop:
         atom_charge_loop = list(cif[key].find_loop('_chem_comp_atom.partial_charge'))
         if not atom_charge_loop:
-            atom_charge_loop = [0]*len(atom_id_loop)
+            atom_charge_loop = [0] * len(atom_id_loop)
 
     aromatic_atom_loop = list(cif[key].find_loop('_chem_comp_atom.aromatic'))
     if not aromatic_atom_loop:
-        aromatic_atom_loop = [None]*len(atom_id_loop)
+        aromatic_atom_loop = [None] * len(atom_id_loop)
 
     # Get the mapping
     id_to_idx = {}
@@ -70,11 +71,12 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     bond_type_loop = list(cif[key].find_loop('_chem_comp_bond.type'))
     aromatic_bond_loop = list(cif[key].find_loop('_chem_comp_bond.aromatic'))
     if not aromatic_bond_loop:
-        aromatic_bond_loop = [None]*len(bond_1_id_loop)
+        aromatic_bond_loop = [None] * len(bond_1_id_loop)
 
     try:
         # Iteratively add the relevant bonds
-        for bond_atom_1, bond_atom_2, bond_type, aromatic in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop, aromatic_bond_loop):
+        for bond_atom_1, bond_atom_2, bond_type, aromatic in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop,
+                                                                 aromatic_bond_loop):
             bond_type = constants.bond_type_cif_to_rdkit[bond_type]
             if aromatic:
                 if aromatic == "y":
@@ -94,8 +96,6 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
         raise Exception
 
     edited_mol = editable_mol.GetMol()
-
-
 
     # HANDLE SULFONATES
 
@@ -131,11 +131,11 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     #     sulfonate["O3"] for sulfonate in sulfonates.values()
     # ]
     # print(f"Atom idxs to charge: {atoms_to_charge}")
-    bonds_to_double =[
-        (sulfonate["S"], sulfonate["O1"]) for sulfonate in sulfonates.values()
-    ] + [
-        (sulfonate["S"], sulfonate["O2"]) for sulfonate in sulfonates.values()
-    ]
+    bonds_to_double = [
+                          (sulfonate["S"], sulfonate["O1"]) for sulfonate in sulfonates.values()
+                      ] + [
+                          (sulfonate["S"], sulfonate["O2"]) for sulfonate in sulfonates.values()
+                      ]
     # print(f"Bonds to double: {bonds_to_double}")
 
     # Replace the bonds and update O3's charge
@@ -174,6 +174,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
 
     return new_mol
 
+
 def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
     # Open the cif document with gemmi
     cif = gemmi.cif.read(str(dataset_cif_path))
@@ -181,7 +182,6 @@ def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
     # Find the relevant atoms loop
     atom_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.atom_id'))
     # print(f"Atom ID loop: {atom_id_loop}")
-
 
     fragment_structures = {}
     for i, conformer in enumerate(mol.GetConformers()):
@@ -230,9 +230,9 @@ def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
 
     return fragment_structures
 
+
 def _parse_cif_file_for_ligand_array(path):
     mol = get_fragment_mol_from_dataset_cif_path(path)
-    # mol.calcImplicitValence()
 
     # Generate conformers
     cids = AllChem.EmbedMultipleConfs(
@@ -260,6 +260,7 @@ def _parse_cif_file_for_ligand_array(path):
 
     return np.array(poss).T
 
+
 def _get_ligand_from_dir(path):
     ligand_path = _get_ligand_path_from_dir(path)
 
@@ -267,7 +268,7 @@ def _get_ligand_from_dir(path):
     return ligand_array
 
 
-def _get_ligand_map(ligand_array, n=30,step=0.5, translation=2.5):
+def _get_ligand_map(ligand_array, n=30, step=0.5, translation=2.5):
     rotation_matrix = R.random().as_matrix()
     rng = default_rng()
     random_translation = ((rng.random(3) - 0.5) * 2 * translation).reshape((3, 1))
@@ -305,6 +306,7 @@ def _load_xmap_from_mtz_path(path):
         except Exception as e:
             continue
     raise Exception()
+
 
 def _load_xmap_from_path(path):
     ccp4 = gemmi.read_ccp4_map(str(path))
@@ -397,7 +399,7 @@ def _get_transform_from_orientation_centroid(orientation, centroid):
             rotation_transform,
             _combine_transforms(
                 centre_grid_transform,
-                    initial_transform)))
+                initial_transform)))
     return transform
 
 
@@ -417,6 +419,7 @@ def _get_ligand_mask(dmap, res):
 
     return mask
 
+
 def _get_ligand_mask_float(dmap, res):
     mask = gemmi.FloatGrid(dmap.nu, dmap.nv, dmap.nw)
     mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
@@ -432,6 +435,7 @@ def _get_ligand_mask_float(dmap, res):
         )
 
     return mask
+
 
 def _get_masked_dmap(dmap, res):
     mask = _get_ligand_mask(dmap, res)
@@ -464,6 +468,7 @@ def _sample_xmap_and_scale(masked_dmap, sample_transform, sample_array):
 
     return image_dmap
 
+
 def _make_ligand_masked_dmap_layer(
         dmap,
         res,
@@ -477,4 +482,3 @@ def _make_ligand_masked_dmap_layer(
     image_dmap = _sample_xmap_and_scale(masked_dmap, sample_transform, sample_array)
 
     return image_dmap
-
