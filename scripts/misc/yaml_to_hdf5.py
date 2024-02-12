@@ -26,10 +26,10 @@ if __name__ == "__main__":
 
     for _epoch, _records in annotations['test'].items():
         for _annotation in _records:
-            annotation['epoch'] = _epoch
-            annotation['idx'] = _annotation['idx']
-            annotation['y'] = _annotation['y']
-            annotation['y_hat'] = _annotation['y_hat']
+            annotation['epoch'] = int(_epoch)
+            annotation['idx'] = int(_annotation['idx'])
+            annotation['y'] = float(_annotation['y'])
+            annotation['y_hat'] = float(_annotation['y_hat'])
             annotation.append()
     table1.flush()
     fileh.close()
