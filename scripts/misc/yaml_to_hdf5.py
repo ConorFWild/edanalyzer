@@ -1,4 +1,4 @@
-import pytables
+import tables
 import yaml
 
 class Annotation(pytables.IsDescription):
