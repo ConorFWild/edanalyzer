@@ -30,7 +30,7 @@ if __name__ == "__main__":
     annotation = table1.row
 
     for _epoch, _records in annotations['test'].items():
-        rprint(f"Adding annotations for epoch: {_epoch}")
+        rprint(f"Adding {len(_records)} annotations for epoch: {_epoch}")
         for _annotation in _records:
             annotation['epoch'] = int(_epoch)
             annotation['idx'] = int(_annotation['idx'])
