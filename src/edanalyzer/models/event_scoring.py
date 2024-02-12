@@ -33,7 +33,7 @@ class LitEventScoring(lt.LightningModule):
 
     def training_step(self, train_batch, batch_idx):
         idx, x, y = train_batch
-        y = y.view(y.size(0), -1)
+        # y = y.view(y.size(0),  -1)
         score = F.softmax(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('train_loss', loss)
@@ -52,7 +52,7 @@ class LitEventScoring(lt.LightningModule):
 
     def validation_step(self, test_batch, batch_idx):
         idx, x, y = test_batch
-        y = y.view(y.size(0), -1)
+        # y = y.view(y.size(0), -1)
         score = F.softmax(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('test_loss', loss)

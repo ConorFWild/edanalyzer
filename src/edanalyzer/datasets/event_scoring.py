@@ -59,7 +59,7 @@ class EventScoringDataset(Dataset):
         )
 
         try:
-            z_map = _load_xmap_from_path(sample.zmap_path)
+            z_map = _load_xmap_from_path(sample.z_map)
             ligand_array = _get_ligand_from_dir((Path(sample.event_map) / '..').resolve())
             assert ligand_array.size > 0, f"Ligand array empty!"
         except Exception as e:
