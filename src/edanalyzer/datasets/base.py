@@ -21,7 +21,7 @@ def _get_ligand_path_from_dir(path):
         if (x.exists()) and (x.stem not in constants.LIGAND_IGNORE_REGEXES)
     ]
     if len(ligand_pdbs) != 1:
-        raise Exception(f'Have {len(ligand_pdbs)} valid pdbs in directory: {path}')
+        raise Exception(f'Have {len(ligand_pdbs)} valid pdbs in directory: {path /"compound"}')
     return ligand_pdbs[0]
 
 def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
@@ -262,8 +262,8 @@ def _parse_cif_file_for_ligand_array(ligand_path):
 def _get_ligand_from_dir(path):
     ligand_path = _get_ligand_path_from_dir(path)
 
-
     ligand_array = _parse_cif_file_for_ligand_array(ligand_path)
+    return ligand_array
 
 
 def _get_ligand_map(ligand_array, n=30,step=0.5, translation=2.5):
