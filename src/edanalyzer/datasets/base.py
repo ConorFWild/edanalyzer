@@ -17,11 +17,11 @@ def _get_ligand_path_from_dir(path):
     ligand_pdbs = [
         x
         for x
-        in (path / 'compound').glob("*.pdb")
+        in (path / 'ligand_files').glob("*.pdb")
         if (x.exists()) and (x.stem not in constants.LIGAND_IGNORE_REGEXES)
     ]
     if len(ligand_pdbs) != 1:
-        raise Exception(f'Have {len(ligand_pdbs)} valid pdbs in directory: {path /"compound"}')
+        raise Exception(f'Have {len(ligand_pdbs)} valid pdbs in directory: {path /"ligand_files"}')
     return ligand_pdbs[0]
 
 def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
