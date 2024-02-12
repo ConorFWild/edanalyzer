@@ -104,7 +104,7 @@ class LitEventScoring(lt.LightningModule):
         predictions = self.annotations
         rprint(f"Epoch: {self.trainer.current_epoch}")
         rprint(predictions)
-        rprint(self.trainer.train_dataloader)
+        rprint(self.trainer.test_dataloader)
 
         # Load the table
         table_file = self.output / 'annotations.h5'
