@@ -67,6 +67,7 @@ class LitEventScoring(lt.LightningModule):
                     }
             )
 
+
     def on_train_epoch_end(self):
         # Log the predictions
         predictions = self.annotations
