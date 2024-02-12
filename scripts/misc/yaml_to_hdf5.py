@@ -31,12 +31,13 @@ if __name__ == "__main__":
 
     for _epoch, _records in annotations['test'].items():
         rprint(f"Adding {len(_records)} annotations for epoch: {_epoch}")
-        for _annotation in _records:
-            annotation['epoch'] = int(_epoch)
-            annotation['idx'] = int(_annotation['idx'])
-            annotation['y'] = float(_annotation['y'])
-            annotation['y_hat'] = float(_annotation['y_hat'])
-            annotation.append()
+        for _annotation_set in _records:
+            for _annotation in _annotation_set:
+                annotation['epoch'] = int(_epoch)
+                annotation['idx'] = int(_annotation['idx'])
+                annotation['y'] = float(_annotation['y'])
+                annotation['y_hat'] = float(_annotation['y_hat'])
+                annotation.append()
     table1.flush()
     rprint(f"Table flushed")
     fileh.close()
