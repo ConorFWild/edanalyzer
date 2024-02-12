@@ -33,12 +33,6 @@ class EventScoringDatasetItem:
     viewed: bool
     hit_confidence: str
 
-    # ligand = Optional("LigandORM", cascade_delete=True)
-    # dataset = Optional("DatasetORM", column="dataset_id")
-    # pandda = Required("PanDDAORM", column="pandda_id")
-    # annotations = Set("AnnotationORM")
-    # partitions = Set("PartitionORM", table=constants.TABLE_EVENT_PARTITION, column="partition_id")
-
 
 class EventScoringDataset(Dataset):
     def __init__(
