@@ -43,7 +43,7 @@ class LitEventScoring(lt.LightningModule):
             self.annotations.append(
                     {
                     "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
-                    "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
+                    "y": float(y[j].to(torch.device("cpu")).detach().numpy()[1]),
                     "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()[1])
                 }
             )
@@ -62,8 +62,8 @@ class LitEventScoring(lt.LightningModule):
             self.annotations.append(
                     {
                         "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
-                        "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
-                        "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy())
+                        "y": float(y[j].to(torch.device("cpu")).detach().numpy()[1]),
+                        "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()[1])
                     }
             )
 
