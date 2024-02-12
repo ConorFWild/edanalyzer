@@ -25,7 +25,7 @@ class LitEventScoring(lt.LightningModule):
         self.output = Path('./output/event_scoring')
 
     def forward(self, x):
-        return torch.nn.softmax(self.resnet(x))
+        return F.softmax(self.resnet(x))
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
@@ -34,7 +34,7 @@ class LitEventScoring(lt.LightningModule):
     def training_step(self, train_batch, batch_idx):
         idx, x, y = train_batch
         y = y.view(y.size(0), -1)
-        score = torch.nn.softmax(self.resnet(x))
+        score = F.softmax(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('train_loss', loss)
 
@@ -53,7 +53,7 @@ class LitEventScoring(lt.LightningModule):
     def validation_step(self, test_batch, batch_idx):
         idx, x, y = test_batch
         y = y.view(y.size(0), -1)
-        score = torch.nn.softmax(self.resnet(x))
+        score = F.softmax(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('test_loss', loss)
 
