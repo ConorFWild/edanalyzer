@@ -35,7 +35,10 @@ def main(config_path, batch_size=12, num_workers=20):
         dataset_train = DataLoader(
             EventScoringDataset(
                 [
-                    EventScoringDatasetItem(**_event[0].to_dict(exclude=['id'], ))
+                    EventScoringDatasetItem(**_event[0].to_dict(
+                        exclude=[
+                            'id', 'ligand', 'dataset', 'pandda', 'annotations', 'partitions'],
+                    ))
                     for _event
                     in query
                     if _event[1].name not in config['test']['test_systems']
@@ -45,6 +48,7 @@ def main(config_path, batch_size=12, num_workers=20):
             shuffle=True,
             num_workers=num_workers,
         )
+        rprint(f"Got {len(dataset_train)} training datasets")
         dataset_test = DataLoader(
             EventScoringDataset(
                 [
@@ -57,6 +61,7 @@ def main(config_path, batch_size=12, num_workers=20):
             batch_size=batch_size,
             num_workers=num_workers,
         )
+        rprint(f"Got {len(dataset_test)} test datasets")
 
     # Get the model
     model = LitEventScoring()
