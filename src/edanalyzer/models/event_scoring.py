@@ -17,17 +17,15 @@ class Annotation(tables.IsDescription):
     y_hat = tables.Float32Col()
 
 
-
 class LitEventScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
-        self.resnet = resnet18(num_classes=1, num_input=4).float()
+        self.resnet = resnet18(num_classes=1, num_input=2).float()
         self.annotations = []
-        self.output = Path('./output/build_scoring')
+        self.output = Path('./output/event_scoring')
 
     def forward(self, x):
-
-        return torch.exp(self.resnet(x))
+        return torch.nn.softmax(self.resnet(x))
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
@@ -36,7 +34,7 @@ class LitEventScoring(lt.LightningModule):
     def training_step(self, train_batch, batch_idx):
         idx, x, y = train_batch
         y = y.view(y.size(0), -1)
-        score = 3*F.sigmoid(self.resnet(x))
+        score = torch.nn.softmax(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('train_loss', loss)
 
@@ -55,7 +53,7 @@ class LitEventScoring(lt.LightningModule):
     def validation_step(self, test_batch, batch_idx):
         idx, x, y = test_batch
         y = y.view(y.size(0), -1)
-        score = 3*F.sigmoid(self.resnet(x))
+        score = torch.nn.softmax(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('test_loss', loss)
 
