@@ -95,7 +95,7 @@ class BuildScoringDataset(Dataset):
 
         # Get sampling transform
         orientation = _get_identity_matrix()
-        centroid = _get_centroid_from_res(residue)
+        centroid = np.array([sample.x, sample.y, sample.z])
         transform = _get_transform_from_orientation_centroid(
             orientation,
             centroid
@@ -111,7 +111,6 @@ class BuildScoringDataset(Dataset):
         # Make the image
         image = np.stack(
             [
-
                 z_map_sample,
                 ligand_map_sample
             ],
