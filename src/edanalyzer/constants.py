@@ -1,3 +1,5 @@
+from rdkit import Chem
+
 DATA_DIR = "data"
 OPTIONS_FILE = "options.json"
 DATASET_FILE = "dataset.json"
@@ -119,3 +121,15 @@ LIGAND_IGNORE_REGEXES = [
     'LIG-CYS'
 ]
 
+bond_type_cif_to_rdkit = {
+    'single': Chem.rdchem.BondType.SINGLE,
+    'double': Chem.rdchem.BondType.DOUBLE,
+    'triple': Chem.rdchem.BondType.TRIPLE,
+    'SINGLE': Chem.rdchem.BondType.SINGLE,
+    'DOUBLE': Chem.rdchem.BondType.DOUBLE,
+    'TRIPLE': Chem.rdchem.BondType.TRIPLE,
+    'aromatic': Chem.rdchem.BondType.AROMATIC,
+    # 'deloc': Chem.rdchem.BondType.OTHER
+    'deloc': Chem.rdchem.BondType.SINGLE
+
+}
