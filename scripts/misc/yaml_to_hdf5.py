@@ -2,10 +2,10 @@ import tables
 import yaml
 
 class Annotation(pytables.IsDescription):
-    epoch = pytables.Int32Col()
-    idx = pytables.Int32Col()
-    y = pytables.Float32Col()
-    y_hat = pytables.Float32Col()
+    epoch = tables.Int32Col()
+    idx = tables.Int32Col()
+    y = tables.Float32Col()
+    y_hat = tables.Float32Col()
 
 
 if __name__ == "__main__":
@@ -13,7 +13,7 @@ if __name__ == "__main__":
         annotations = yaml.safe_load(f)
 
     # Open a file in "w"rite mode
-    fileh = pytables.open_file("objecttree.h5", mode="w")
+    fileh = tables.open_file("objecttree.h5", mode="w")
 
     # Get the HDF5 root group
     root = fileh.root
