@@ -1,7 +1,7 @@
 import tables
 import yaml
 
-class Annotation(pytables.IsDescription):
+class Annotation(tables.IsDescription):
     epoch = tables.Int32Col()
     idx = tables.Int32Col()
     y = tables.Float32Col()
