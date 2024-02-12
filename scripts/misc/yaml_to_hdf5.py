@@ -9,7 +9,7 @@ class Annotation(pytables.IsDescription):
 
 
 if __name__ == "__main__":
-    with open('../output/build_scoring/annotations_train.yaml', 'r') as f:
+    with open('./output/build_scoring/annotations_train.yaml', 'r') as f:
         annotations = yaml.safe_load(f)
 
     # Open a file in "w"rite mode
