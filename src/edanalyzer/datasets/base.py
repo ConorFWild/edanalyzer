@@ -17,7 +17,7 @@ def _get_ligand_path_from_dir(path):
     ligand_pdbs = [
         x
         for x
-        in (path / 'ligand_files').glob("*.pdb")
+        in (path / 'ligand_files').glob("*.cif")
         if (x.exists()) and (x.stem not in constants.LIGAND_IGNORE_REGEXES)
     ]
     if len(ligand_pdbs) != 1:
