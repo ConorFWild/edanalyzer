@@ -53,7 +53,7 @@ def main(config_path, batch_size=12, num_workers=20):
             EventScoringDataset(
                 [
                     EventScoringDatasetItem(**_event[0].to_dict(
-                        exclude=['id''ligand', 'dataset', 'pandda', 'annotations', 'partitions'], ))
+                        exclude=['id', 'ligand', 'dataset', 'pandda', 'annotations', 'partitions'], ))
                     for _event
                     in query
                     if _event[2].name in config['test']['test_systems']
