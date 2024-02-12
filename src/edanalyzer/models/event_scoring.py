@@ -44,7 +44,7 @@ class LitEventScoring(lt.LightningModule):
                     {
                     "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
-                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy())
+                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()[1])
                 }
             )
         # self.annotations[]
