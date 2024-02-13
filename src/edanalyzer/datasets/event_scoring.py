@@ -1,3 +1,4 @@
+import time
 import random
 from pathlib import Path
 import dataclasses
@@ -45,13 +46,14 @@ class EventScoringDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx: int):
+        time_begin_load = time.time()
         sample = self.data[idx]
 
         sample_array = np.zeros(
             (30, 30, 30),
             dtype=np.float32,
         )
-
+        time_begin_data = time.time()
         try:
             z_map = _load_xmap_from_path(sample.z_map)
             ligand_array = _get_ligand_from_dir(Path(sample.event_map).parent.resolve())
@@ -70,6 +72,7 @@ class EventScoringDataset(Dataset):
             label = np.array([1.0, 0.0])
             label_float = label.astype(np.float32)
             return idx, torch.from_numpy(image_float), torch.from_numpy(label_float)
+        time_finish_data = time.time()
 
         # Get sampling transform
         orientation = _get_identity_matrix()
@@ -80,11 +83,13 @@ class EventScoringDataset(Dataset):
         )
 
         # Get sample image
+        time_begin_sample = time.time()
         z_map_sample = _sample_xmap_and_scale(
             z_map, transform, np.copy(sample_array)
         )
         ligand_map = _get_ligand_map(ligand_array)
         ligand_map_sample = np.array(ligand_map, copy=True)
+        time_finish_sample=time.time()
 
         # Make the image
         image = np.stack(
@@ -103,5 +108,9 @@ class EventScoringDataset(Dataset):
             label = np.array([1.0, 0.0])
         label = np.array(label)
         label_float = label.astype(np.float32)
+
+        time_finish_load = time.time()
+
+        # rprint(f"Loaded in: TOT: {}; DATA: {}; SAMP: {}")
 
         return idx, torch.from_numpy(image_float), torch.from_numpy(label_float)
