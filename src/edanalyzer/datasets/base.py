@@ -25,9 +25,7 @@ def _get_ligand_path_from_dir(path):
     return ligand_pdbs[0]
 
 
-def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
-    # Open the cif document with gemmi
-    cif = gemmi.cif.read(str(dataset_cif_path))
+def get_fragment_mol_from_dataset_cif(cif: Path):
 
     # Create a blank rdkit mol
     mol = Chem.Mol()
@@ -175,55 +173,64 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     return new_mol
 
 
-def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
+def get_structure_from_mol(mol: Chem.Mol, conformer, cif, ):
     # Open the cif document with gemmi
-    cif = gemmi.cif.read(str(dataset_cif_path))
+    # cif = gemmi.cif.read(str(dataset_cif_path))
 
     # Find the relevant atoms loop
     atom_id_loop = list(cif['comp_LIG'].find_loop('_chem_comp_atom.atom_id'))
     # print(f"Atom ID loop: {atom_id_loop}")
 
+
+    positions: np.ndarray = conformer.GetPositions()
+
+    structure: gemmi.Structure = gemmi.Structure()
+    model: gemmi.Model = gemmi.Model(f"0")
+    chain: gemmi.Chain = gemmi.Chain(f"0")
+    residue: gemmi.Residue = gemmi.Residue()
+    residue.name = "LIG"
+    residue.seqid = gemmi.SeqId(1, ' ')
+
+    # Loop over atoms, adding them to a gemmi residue
+    for j, atom in enumerate(mol.GetAtoms()):
+        # Get the atomic symbol
+        atom_symbol: str = atom.GetSymbol()
+        # print(f"{j} : {atom_symbol}")
+
+        # if atom_symbol == "H":
+        #     continue
+        gemmi_element: gemmi.Element = gemmi.Element(atom_symbol)
+
+        # Get the position as a gemmi type
+        pos: np.ndarray = positions[j, :]
+        gemmi_pos: gemmi.Position = gemmi.Position(pos[0], pos[1], pos[2])
+
+        # Get the
+        gemmi_atom: gemmi.Atom = gemmi.Atom()
+        # gemmi_atom.name = atom_symbol
+        gemmi_atom.name = atom_id_loop[j]
+        gemmi_atom.pos = gemmi_pos
+        gemmi_atom.element = gemmi_element
+
+        # Add atom to residue
+        residue.add_atom(gemmi_atom)
+
+    chain.add_residue(residue)
+    model.add_chain(chain)
+    structure.add_model(model)
+
+
+    return structure
+
+def get_structures_from_mol(mol: Chem.Mol, cif, max_conformers):
+    # Open the cif document with gemmi
+    # cif = gemmi.cif.read(str(dataset_cif_path))
+
+    # Find the relevant atoms loop
     fragment_structures = {}
     for i, conformer in enumerate(mol.GetConformers()):
 
-        positions: np.ndarray = conformer.GetPositions()
-
-        structure: gemmi.Structure = gemmi.Structure()
-        model: gemmi.Model = gemmi.Model(f"{i}")
-        chain: gemmi.Chain = gemmi.Chain(f"{i}")
-        residue: gemmi.Residue = gemmi.Residue()
-        residue.name = "LIG"
-        residue.seqid = gemmi.SeqId(1, ' ')
-
-        # Loop over atoms, adding them to a gemmi residue
-        for j, atom in enumerate(mol.GetAtoms()):
-            # Get the atomic symbol
-            atom_symbol: str = atom.GetSymbol()
-            # print(f"{j} : {atom_symbol}")
-
-            # if atom_symbol == "H":
-            #     continue
-            gemmi_element: gemmi.Element = gemmi.Element(atom_symbol)
-
-            # Get the position as a gemmi type
-            pos: np.ndarray = positions[j, :]
-            gemmi_pos: gemmi.Position = gemmi.Position(pos[0], pos[1], pos[2])
-
-            # Get the
-            gemmi_atom: gemmi.Atom = gemmi.Atom()
-            # gemmi_atom.name = atom_symbol
-            gemmi_atom.name = atom_id_loop[j]
-            gemmi_atom.pos = gemmi_pos
-            gemmi_atom.element = gemmi_element
-
-            # Add atom to residue
-            residue.add_atom(gemmi_atom)
-
-        chain.add_residue(residue)
-        model.add_chain(chain)
-        structure.add_model(model)
-
-        fragment_structures[i] = structure
+        fragment_structures[i] = get_structure_from_mol(mol, conformer, cif)
 
         if len(fragment_structures) > max_conformers:
             return fragment_structures
@@ -232,19 +239,22 @@ def get_structures_from_mol(mol: Chem.Mol, dataset_cif_path, max_conformers):
 
 
 def _parse_cif_file_for_ligand_array(path):
-    mol = get_fragment_mol_from_dataset_cif_path(path)
+    # Open the cif document with gemmi
+    cif = gemmi.cif.read(str(path))
+
+    mol = get_fragment_mol_from_dataset_cif(cif)
 
     # Generate conformers
     cids = AllChem.EmbedMultipleConfs(
         mol,
-        numConfs=1000,
+        numConfs=100,
         pruneRmsThresh=1.5,
     )
 
     # Translate to structures
     fragment_structures = get_structures_from_mol(
         mol,
-        path,
+        cif,
         10,
     )
 
