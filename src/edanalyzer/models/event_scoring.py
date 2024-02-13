@@ -23,7 +23,7 @@ class LitEventScoring(lt.LightningModule):
         super().__init__()
         self.resnet = resnet18(num_classes=2, num_input=2).float()
         self.annotations = []
-        self.output = Path('./output/event_scoring')
+        self.output = Path('./output/event_scoring_2')
 
     def forward(self, x):
         return F.softmax(self.resnet(x))
@@ -104,7 +104,7 @@ class LitEventScoring(lt.LightningModule):
         predictions = self.annotations
         rprint(f"Epoch: {self.trainer.current_epoch}")
         rprint(predictions)
-        rprint(self.trainer.test_dataloader)
+        # rprint(self.trainer.test_dataloader)
 
         # Load the table
         table_file = self.output / 'annotations.h5'
