@@ -23,7 +23,7 @@ class LitEventScoring(lt.LightningModule):
         super().__init__()
         self.resnet = resnet18(num_classes=2, num_input=2).float()
         self.annotations = []
-        self.output = Path('./output/event_scoring_2')
+        self.output = Path('./output/event_scoring_3')
 
     def forward(self, x):
         return F.softmax(self.resnet(x))
