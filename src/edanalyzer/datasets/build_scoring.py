@@ -12,6 +12,7 @@ from .base import (
     _get_ligand_mask_float,
     _sample_xmap,
     _get_identity_matrix,
+    _get_random_orientation,
     _get_centroid_from_res,
     _get_transform_from_orientation_centroid,
     _get_res_from_structure_chain_res,

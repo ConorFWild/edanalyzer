@@ -12,6 +12,7 @@ from .base import (
     _load_xmap_from_path,
     _sample_xmap_and_scale,
     _get_identity_matrix,
+    _get_random_orientation,
     _get_transform_from_orientation_centroid,
     _get_ligand_from_dir,
     _get_ligand_map
