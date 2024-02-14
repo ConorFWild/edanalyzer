@@ -75,7 +75,8 @@ class EventScoringDataset(Dataset):
         time_finish_data = time.time()
 
         # Get sampling transform
-        orientation = _get_identity_matrix()
+        # orientation = _get_identity_matrix()
+        orientation = _get_random_orientation()
         centroid = np.array([sample.x, sample.y, sample.z])
         transform = _get_transform_from_orientation_centroid(
             orientation,

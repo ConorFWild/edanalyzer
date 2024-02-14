@@ -337,6 +337,8 @@ def _get_res_from_structure_chain_res(structure, chain, res):
 def _get_identity_matrix():
     return np.eye(3)
 
+def _get_random_orientation():
+    return R.random().as_matrix()
 
 def _get_centroid_from_res(res):
     poss = []

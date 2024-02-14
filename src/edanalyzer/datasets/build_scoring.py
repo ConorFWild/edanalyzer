@@ -100,7 +100,8 @@ class BuildScoringDataset(Dataset):
         )
 
         # Get sampling transform
-        orientation = _get_identity_matrix()
+        # orientation = _get_identity_matrix()
+        orientation = _get_random_orientation()
         centroid = _get_centroid_from_res(residue)
         transform = _get_transform_from_orientation_centroid(
             orientation,
