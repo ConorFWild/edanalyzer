@@ -16,6 +16,7 @@ class Annotation(tables.IsDescription):
     idx = tables.Int32Col()
     y = tables.Float32Col()
     y_hat = tables.Float32Col()
+    set = tables.Int32Col()
 
 
 class LitEventScoring(lt.LightningModule):
@@ -23,7 +24,7 @@ class LitEventScoring(lt.LightningModule):
         super().__init__()
         self.resnet = resnet18(num_classes=2, num_input=2).float()
         self.annotations = []
-        self.output = Path('./output/event_scoring_3')
+        self.output = Path('./output/event_scoring_4')
 
     def forward(self, x):
         return F.softmax(self.resnet(x))
@@ -44,7 +45,8 @@ class LitEventScoring(lt.LightningModule):
                 {
                     "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[1]),
-                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()[1])
+                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()[1]),
+                    'set': 0
                 }
             )
         # self.annotations[]
@@ -62,7 +64,8 @@ class LitEventScoring(lt.LightningModule):
                 {
                     "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[1]),
-                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()[1])
+                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()[1]),
+                    'set': 1
                 }
             )
 
@@ -93,6 +96,8 @@ class LitEventScoring(lt.LightningModule):
             annotation['idx'] = int(_annotation['idx'])
             annotation['y'] = float(_annotation['y'])
             annotation['y_hat'] = float(_annotation['y_hat'])
+            annotation['set'] = 0
+
             annotation.append()
         table.flush()
         fileh.close()
@@ -126,6 +131,7 @@ class LitEventScoring(lt.LightningModule):
             annotation['idx'] = int(_annotation['idx'])
             annotation['y'] = float(_annotation['y'])
             annotation['y_hat'] = float(_annotation['y_hat'])
+            annotation['set'] = 1
             annotation.append()
         table.flush()
         fileh.close()
