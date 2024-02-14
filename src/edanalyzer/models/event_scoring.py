@@ -23,7 +23,8 @@ class LitEventScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
         self.resnet = resnet18(num_classes=2, num_input=2).float()
-        self.annotations = []
+        self.train_annotations = []
+        self.test_annotations = []
         self.output = Path('./output/event_scoring_4')
 
     def forward(self, x):
