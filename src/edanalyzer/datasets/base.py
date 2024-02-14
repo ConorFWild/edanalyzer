@@ -247,7 +247,7 @@ def _parse_cif_file_for_ligand_array(path):
     # Generate conformers
     cids = AllChem.EmbedMultipleConfs(
         mol,
-        numConfs=100,
+        numConfs=50,
         pruneRmsThresh=1.5,
     )
 
