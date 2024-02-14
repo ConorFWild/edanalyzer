@@ -68,7 +68,7 @@ class LitBuildScoring(lt.LightningModule):
                     "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
                     "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
-                    'set': 0
+                    'set': 1
                 }
 
             )
