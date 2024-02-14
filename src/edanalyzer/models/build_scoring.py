@@ -63,14 +63,12 @@ class LitBuildScoring(lt.LightningModule):
 
         for j in range(idx.size(0)):
             self.test_annotations.append(
-
                 {
                     "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
                     "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
                     'set': 1
                 }
-
             )
 
     def on_train_epoch_end(self):
