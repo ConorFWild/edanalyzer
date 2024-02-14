@@ -60,6 +60,7 @@ class LitBuildScoring(lt.LightningModule):
         score = 3 * F.sigmoid(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('test_loss', loss)
+        # self.log('test_score', )
 
         for j in range(idx.size(0)):
             self.test_annotations.append(
