@@ -96,7 +96,7 @@ class LitEventScoring(lt.LightningModule):
             annotation['idx'] = int(_annotation['idx'])
             annotation['y'] = float(_annotation['y'])
             annotation['y_hat'] = float(_annotation['y_hat'])
-            annotation['set'] = 0
+            annotation['set'] = int(_annotation['set'])
 
             annotation.append()
         table.flush()
@@ -131,7 +131,7 @@ class LitEventScoring(lt.LightningModule):
             annotation['idx'] = int(_annotation['idx'])
             annotation['y'] = float(_annotation['y'])
             annotation['y_hat'] = float(_annotation['y_hat'])
-            annotation['set'] = 1
+            annotation['set'] = int(_annotation['set'])
             annotation.append()
         table.flush()
         fileh.close()
