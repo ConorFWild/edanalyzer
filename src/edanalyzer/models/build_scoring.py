@@ -25,7 +25,7 @@ class LitBuildScoring(lt.LightningModule):
         self.resnet = resnet18(num_classes=1, num_input=4).float()
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/build_scoring_2')
+        self.output = Path('./output/build_scoring_3')
 
     def forward(self, x):
 
