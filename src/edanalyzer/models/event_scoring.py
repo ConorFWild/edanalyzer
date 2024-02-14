@@ -9,6 +9,7 @@ import yaml
 import tables
 
 from .resnet import resnet18
+from edanalyzer.losses import categorical_loss
 
 
 class Annotation(tables.IsDescription):
@@ -38,7 +39,7 @@ class LitEventScoring(lt.LightningModule):
         idx, x, y = train_batch
         # y = y.view(y.size(0),  -1)
         score = F.softmax(self.resnet(x))
-        loss = F.mse_loss(score, y)
+        loss = categorical_loss(score, y)
         self.log('train_loss', loss)
 
         for j in range(idx.size(0)):
@@ -57,7 +58,7 @@ class LitEventScoring(lt.LightningModule):
         idx, x, y = test_batch
         # y = y.view(y.size(0), -1)
         score = F.softmax(self.resnet(x))
-        loss = F.mse_loss(score, y)
+        loss = categorical_loss(score, y)
         self.log('test_loss', loss)
 
         for j in range(idx.size(0)):
