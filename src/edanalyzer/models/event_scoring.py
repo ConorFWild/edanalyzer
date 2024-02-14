@@ -43,7 +43,7 @@ class LitEventScoring(lt.LightningModule):
         self.log('train_loss', loss)
 
         for j in range(idx.size(0)):
-            self.annotations.append(
+            self.train_annotations.append(
                 {
                     "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[1]),
@@ -62,7 +62,7 @@ class LitEventScoring(lt.LightningModule):
         self.log('test_loss', loss)
 
         for j in range(idx.size(0)):
-            self.annotations.append(
+            self.test_annotations.append(
                 {
                     "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[1]),
@@ -73,7 +73,7 @@ class LitEventScoring(lt.LightningModule):
 
     def on_train_epoch_end(self):
         # Log the predictions
-        predictions = self.annotations
+        predictions = self.train_annotations
         rprint(f"Epoch: {self.trainer.current_epoch}")
         rprint(predictions)
         rprint(self.trainer.train_dataloader)
@@ -93,7 +93,7 @@ class LitEventScoring(lt.LightningModule):
         table = root.train_annotations
 
         annotation = table.row
-        for _annotation in self.annotations:
+        for _annotation in self.train_annotations:
             annotation['epoch'] = int(self.trainer.current_epoch)
             annotation['idx'] = int(_annotation['idx'])
             annotation['y'] = float(_annotation['y'])
@@ -104,11 +104,11 @@ class LitEventScoring(lt.LightningModule):
         table.flush()
         fileh.close()
 
-        self.annotations.clear()
+        self.train_annotations.clear()
 
     def on_validation_epoch_end(self):
         # Log the predictions
-        predictions = self.annotations
+        predictions = self.test_annotations
         rprint(f"Epoch: {self.trainer.current_epoch}")
         rprint(predictions)
         # rprint(self.trainer.test_dataloader)
@@ -128,7 +128,7 @@ class LitEventScoring(lt.LightningModule):
         table = root.test_annotations
 
         annotation = table.row
-        for _annotation in self.annotations:
+        for _annotation in self.test_annotations:
             annotation['epoch'] = int(self.trainer.current_epoch)
             annotation['idx'] = int(_annotation['idx'])
             annotation['y'] = float(_annotation['y'])
@@ -138,4 +138,4 @@ class LitEventScoring(lt.LightningModule):
         table.flush()
         fileh.close()
 
-        self.annotations.clear()
+        self.test_annotations.clear()
