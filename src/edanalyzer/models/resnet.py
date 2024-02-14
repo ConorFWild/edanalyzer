@@ -1096,8 +1096,8 @@ class SqueezeNet(nn.Module):
 
         x = x.view(-1, x.shape[1] * x.shape[2] * x.shape[3] * x.shape[4])
 
-        return self.act(x)
-
+        # return self.act(x)
+        return x
 
 def _squeezenet(version, pretrained, progress, **kwargs):
     model = SqueezeNet(version, **kwargs)
@@ -1301,7 +1301,7 @@ class ResNet(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
-        self.act = nn.Softmax()
+        # self.act = nn.Softmax()
 
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
@@ -1365,7 +1365,8 @@ class ResNet(nn.Module):
         x = x.view(-1, x.shape[1]*x.shape[2]*x.shape[3]*x.shape[4])
         x = self.fc(x)
 
-        return self.act(x)
+        return x
+        # return self.act(x)
 
 
 def _resnet(arch, block, layers, pretrained, progress, **kwargs):
