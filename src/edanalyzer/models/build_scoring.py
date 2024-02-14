@@ -6,16 +6,26 @@ from torch import nn
 from torch.nn import functional as F
 import lightning as lt
 import yaml
+import tables
 
 from .resnet import resnet18
+
+
+class Annotation(tables.IsDescription):
+    epoch = tables.Int32Col()
+    idx = tables.Int32Col()
+    y = tables.Float32Col()
+    y_hat = tables.Float32Col()
+    set = tables.Int32Col()
 
 
 class LitBuildScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
         self.resnet = resnet18(num_classes=1, num_input=4).float()
-        self.annotations = []
-        self.output = Path('./output/build_scoring')
+        self.train_annotations = []
+        self.test_annotations = []
+        self.output = Path('./output/build_scoring_2')
 
     def forward(self, x):
 
@@ -28,17 +38,18 @@ class LitBuildScoring(lt.LightningModule):
     def training_step(self, train_batch, batch_idx):
         idx, x, y = train_batch
         y = y.view(y.size(0), -1)
-        score = 3*F.sigmoid(self.resnet(x))
+        score = 3 * F.sigmoid(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('train_loss', loss)
 
-        self.annotations.append(
+        self.train_annotations.append(
             [
                 {
-                "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
-                "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
-                "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy())
-            }
+                    "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
+                    "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
+                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
+                    'set': 0
+                }
                 for j in range(idx.size(0))
             ]
         )
@@ -48,16 +59,17 @@ class LitBuildScoring(lt.LightningModule):
     def validation_step(self, test_batch, batch_idx):
         idx, x, y = test_batch
         y = y.view(y.size(0), -1)
-        score = 3*F.sigmoid(self.resnet(x))
+        score = 3 * F.sigmoid(self.resnet(x))
         loss = F.mse_loss(score, y)
         self.log('test_loss', loss)
 
-        self.annotations.append(
+        self.test_annotations.append(
             [
                 {
                     "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
-                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy())
+                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
+                    'set': 0
                 }
                 for j in range(idx.size(0))
             ]
@@ -65,62 +77,69 @@ class LitBuildScoring(lt.LightningModule):
 
     def on_train_epoch_end(self):
         # Log the predictions
-        # predictions = self.training_step_outputs
-        predictions = self.annotations
+        predictions = self.train_annotations
         rprint(f"Epoch: {self.trainer.current_epoch}")
         rprint(predictions)
         rprint(self.trainer.train_dataloader)
 
-        if not (self.output / 'annotations_train.yaml').exists():
-            annotations = {
-                "train": {},
-                "test": {}
-            }
+        # Load the table
+        table_file = self.output / 'annotations.h5'
+        if not table_file.exists():
+            fileh = tables.open_file(table_file, mode="w")
+            root = fileh.root
+            fileh.create_table(root, "train_annotations", Annotation)
+            fileh.create_table(root, "test_annotations", Annotation)
 
         else:
-            with open(self.output / 'annotations_train.yaml', 'r') as f:
-                annotations = yaml.safe_load(f)
+            fileh = tables.open_file(table_file, mode="a")
+            root = fileh.root
 
-        # if self.trainer.current_epoch not in annotations:
-        #     self.annotations[self.trainer.current_epoch] = []
-        if self.trainer.current_epoch not in annotations['train']:
-            annotations['train'][self.trainer.current_epoch] = []
+        table = root.train_annotations
 
-        # self.annotations[self.trainer.current_epoch] += self.annotations
-        annotations['train'][self.trainer.current_epoch] += self.annotations
+        annotation = table.row
+        for _annotation in self.train_annotations:
+            annotation['epoch'] = int(self.trainer.current_epoch)
+            annotation['idx'] = int(_annotation['idx'])
+            annotation['y'] = float(_annotation['y'])
+            annotation['y_hat'] = float(_annotation['y_hat'])
+            annotation['set'] = int(_annotation['set'])
 
-        with open(self.output / 'annotations_train.yaml', 'w') as f:
-            yaml.dump(annotations, f)
+            annotation.append()
+        table.flush()
+        fileh.close()
 
-        self.annotations.clear()
+        self.train_annotations.clear()
 
     def on_validation_epoch_end(self):
         # Log the predictions
-        # predictions = self.training_step_outputs
-        predictions = self.annotations
+        predictions = self.test_annotations
         rprint(f"Epoch: {self.trainer.current_epoch}")
         rprint(predictions)
-        rprint(self.trainer.train_dataloader)
+        # rprint(self.trainer.test_dataloader)
 
-        if not (self.output / 'annotations_train.yaml').exists():
-            annotations = {
-                "train": {},
-                "test": {}
-            }
+        # Load the table
+        table_file = self.output / 'annotations.h5'
+        if not table_file.exists():
+            fileh = tables.open_file(table_file, mode="w")
+            root = fileh.root
+            fileh.create_table(root, "train_annotations", Annotation)
+            fileh.create_table(root, "test_annotations", Annotation)
 
         else:
-            with open(self.output / 'annotations_train.yaml', 'r') as f:
-                annotations = yaml.safe_load(f)
+            fileh = tables.open_file(table_file, mode="a")
+            root = fileh.root
 
-        # if self.trainer.current_epoch not in annotations:
-        #     self.annotations[self.trainer.current_epoch] = []
-        if self.trainer.current_epoch not in annotations['test']:
-            annotations['test'][self.trainer.current_epoch] = []
+        table = root.test_annotations
 
-        # self.annotations[self.trainer.current_epoch] += self.annotations
-        annotations['test'][self.trainer.current_epoch] += self.annotations
+        annotation = table.row
+        for _annotation in self.test_annotations:
+            annotation['epoch'] = int(self.trainer.current_epoch)
+            annotation['idx'] = int(_annotation['idx'])
+            annotation['y'] = float(_annotation['y'])
+            annotation['y_hat'] = float(_annotation['y_hat'])
+            annotation['set'] = int(_annotation['set'])
+            annotation.append()
+        table.flush()
+        fileh.close()
 
-        with open(self.output / 'annotations_train.yaml', 'w') as f:
-            yaml.dump(annotations, f)
-
-        self.annotations.clear()
+        self.test_annotations.clear()
