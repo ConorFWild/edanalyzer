@@ -36,7 +36,7 @@ def main(config_path, batch_size=12, num_workers=20):
         dataset_train = DataLoader(
             EventScoringDataset(
                 [
-                    EventScoringDatasetItem(annotation=_event[3].annotation, **_event[0].to_dict(
+                    EventScoringDatasetItem(annotation=[x for x in _event[0].annotations][0].annotation, **_event[0].to_dict(
                         exclude=[
                             'id', 'ligand', 'dataset', 'pandda', 'annotations', 'partitions'],
                     ))
@@ -53,7 +53,7 @@ def main(config_path, batch_size=12, num_workers=20):
         dataset_test = DataLoader(
             EventScoringDataset(
                 [
-                    EventScoringDatasetItem(annotation=_event[3].annotation, **_event[0].to_dict(
+                    EventScoringDatasetItem(annotation=[x for x in _event[0].annotations][0].annotation, **_event[0].to_dict(
                         exclude=['id', 'ligand', 'dataset', 'pandda', 'annotations', 'partitions'], ))
                     for _event
                     in query
