@@ -21,6 +21,7 @@ from .base import (
 
 @dataclasses.dataclass
 class EventScoringDatasetItem:
+    annotation: bool
     dtag: str
     event_idx: int
     x: float
@@ -104,7 +105,7 @@ class EventScoringDataset(Dataset):
         image_float = image.astype(np.float32)
 
         # Make the annotation
-        if sample.hit_confidence not in ['low', 'Low']:
+        if sample.annotation:
             label = np.array([0.0, 1.0])
         else:
             label = np.array([1.0, 0.0])
