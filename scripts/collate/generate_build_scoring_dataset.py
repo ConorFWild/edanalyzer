@@ -45,7 +45,7 @@ def _get_known_hit_poses(
         com = np.mean(_poss, axis=0).reshape((1, 3))
         _poss_centered = _poss - com
         _rotated_poss = R.random().apply(_poss_centered)
-        new_com = rng.uniform(-translation, translation).reshape((1, 3)) + centroid
+        new_com = rng.uniform(-translation, translation, 3).reshape((1, 3)) + centroid
         _new_poss = _rotated_poss + new_com
 
         # Get RMSD to original
