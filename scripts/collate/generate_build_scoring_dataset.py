@@ -27,7 +27,7 @@ rng = np.random.default_rng()
 
 def _get_known_hit_poses(
         res,
-        centroid=np.array([45.0,45.0,45.0]).reshape((1, 3)),
+        centroid=np.array([22.5,22.5,22.5]).reshape((1, 3)),
         translation=10,
         num_poses=50
 ):
