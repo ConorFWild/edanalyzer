@@ -191,26 +191,26 @@ def main(config_path):
                     )
 
                     # Get the sample transform
-                    centroid = np.array([closest_event.x, closest_event.y, closest_event.z])
+                    centroid = np.array([closest_event[0].x, closest_event[0].y, closest_event[0].z])
                     transform = gemmi.Transform()
                     transform.mat.fromlist((np.eye(3) * 0.5).tolist())
                     transform.vec.fromlist((centroid - [22.5, 22.5, 22.5]))
 
                     # Record the 2fofc map sample
-                    mtz_grid = _load_xmap_from_mtz_path(closest_event.initial_reflections)
+                    mtz_grid = _load_xmap_from_mtz_path(closest_event[0].initial_reflections)
                     mtz_sample_array = _sample_xmap_and_scale(mtz_grid, transform,
                                                               np.zeros((90, 90, 90), dtype=np.float32))
                     mtz_sample['idx'] = idx_event
-                    mtz_sample['event_idx'] = closest_event.idx
+                    mtz_sample['event_idx'] = closest_event[0].idx
                     mtz_sample['sample'] = mtz_sample_array
                     mtz_sample.append()
 
                     # Record the event map sample
-                    event_map_grid = _load_xmap_from_path(closest_event.event_map)
+                    event_map_grid = _load_xmap_from_path(closest_event[0].event_map)
                     event_map_sample_array = _sample_xmap_and_scale(event_map_grid, transform,
                                                                     np.zeros((90, 90, 90), dtype=np.float32))
                     event_map_sample['idx'] = idx_event
-                    event_map_sample['event_idx'] = closest_event.idx
+                    event_map_sample['event_idx'] = closest_event[0].idx
                     event_map_sample['sample'] = event_map_sample_array
                     event_map_sample.append()
 
@@ -224,7 +224,7 @@ def main(config_path):
                         known_hit_pos_sample['idx'] = idx_pose
 
                         # Record the event key
-                        known_hit_pos_sample['database_event_idx'] = closest_event.idx
+                        known_hit_pos_sample['database_event_idx'] = closest_event[0].idx
 
                         known_hit_pos_sample['event_map_sample_idx'] = idx_event
                         known_hit_pos_sample['mtz_sample_idx'] = idx_event
