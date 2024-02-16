@@ -241,7 +241,7 @@ def _make_test_dataset_psuedo_pandda(
         # for j in range(len(event_table)):
         #     event_table.loc[j, constants.PANDDA_INSPECT_SITE_IDX] = (j // 100) + 1
 
-        event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
+        # event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
         event_table.to_csv(analyse_table_path, index=False)
         event_table.to_csv(inspect_table_path, index=False)
 
