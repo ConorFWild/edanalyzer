@@ -160,7 +160,7 @@ def _make_test_dataset_psuedo_pandda(
                 "dtag": event_id,
                 "event_idx": 1,
                 "1-BDC": event.bdc,
-                "cluster_size": event.pos_array.shape[0],
+                "cluster_size": 1,
                 "global_correlation_to_average_map": 0,
                 "global_correlation_to_mean_map": 0,
                 "local_correlation_to_average_map": 0,
