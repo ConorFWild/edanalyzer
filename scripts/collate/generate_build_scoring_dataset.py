@@ -135,7 +135,7 @@ def main(config_path):
 
         for experiment in sorted_experiments:
             experiment_hit_results = [res for res in query_events if
-                                      ([x for x in res[0].annotations][0]) & (experiment.path == res[3].path)]
+                                      ([x for x in res[0].annotations].annotation[0]) & (experiment.path == res[3].path)]
             experiment_hit_datasets = set(
                 [
                     experiment_hit_result[0].dtag
