@@ -45,6 +45,16 @@ from edanalyzer.torch_dataset import (
     PanDDADatasetTorchLigandmap, get_image_event_map_ligand, get_image_event_map_ligand_augmented
 )
 
+
+def _get_model(closest_pose):
+    st = gemmi.Structure()
+    model = gemmi.Model('0')
+    chain = gemmi.Chain('A')
+    res = gemmi.Residue()
+
+    for pose_row, element in zip(closest_pose['positions'], closet_pose['elements']):
+
+
 def try_make(path):
     try:
         os.mkdir(path)
@@ -82,69 +92,81 @@ def _make_test_dataset_psuedo_pandda(
     table_known_hit_pos_sample = root.known_hit_pose
 
     # Load database
-    database_path = Path(config['working_directory']) / "database.db"
+    working_dir = Path(config['working_directory'])
+    database_path = working_dir / "database.db"
     db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
     db.generate_mapping(create_tables=True)
 
-    # for pose_sample in table_known_hit_pos_sample.iterrows():
+    # Make the directories
+    psuedo_pandda_dir = working_dir / "test_datasets_pandda"
+    analyses_dir = psuedo_pandda_dir / "analyses"
+    processed_datasets_dir = psuedo_pandda_dir / "processed_datasets"
+    analyse_table_path = analyses_dir / "pandda_analyse_events.csv"
+    inspect_table_path = analyses_dir / "pandda_inspect_events.csv"
+    analyse_site_table_path = analyses_dir / "pandda_analyse_sites.csv"
+    inspect_site_table_path = analyses_dir / "pandda_inspect_sites.csv"
 
-
+    # Spoof the main directories
+    try_make(psuedo_pandda_dir)
+    try_make(analyses_dir)
+    try_make(processed_datasets_dir)
 
     with pony.orm.db_session:
         # partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
-        query = pony.orm.select(
-            (event, event.annotations, event.pandda, event.pandda.experiment, event.pandda.system) for
-            event in EventORM)
+        query = [_x for _x in pony.orm.select(_event for _event in EventORM)]
 
-        # Get the test partition pandda's and their inspect tables
-        inspect_tables = {}
-        for res in query:
-            if res[2].name == test_partition:
-                pandda = res[3]
-                if pandda.path in inspect_tables:
-                    continue
-                else:
-                    inspect_tables[pandda.path] = pd.read_csv(
-                        Path(pandda.path) / "analyses" / "pandda_inspect_events.csv")
-        rprint(f"Got {len(inspect_tables)} inspect tables.")
-        # rprint(inspect_tables)
+        # Iterate over the event maps
+        for event_map_sample in table_event_map_sample.iterrows():
+            # Get the corresponding poses
+            event_map_sample_idx = event_map_sample['idx']
+            poses = [x for x in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}')]
 
-        # Select events and Organise by dtag
-        events = {}
-        for res in query:
-            if res[2].name == test_partition:
-                event = res[0]
-                annotation = res[1]
-                dtag = event.dtag
-                event_idx = event.event_idx
-                if dtag not in events:
-                    events[dtag] = {}
+            # Get the closest pose
+            closest_pose = min(poses, key=lambda _x: _x['rmsd'])
 
-                table = inspect_tables[event.pandda.path]
-                row = table[
-                    (table[constants.PANDDA_INSPECT_DTAG] == dtag)
-                    & (table[constants.PANDDA_INSPECT_EVENT_IDX] == event_idx)
-                    ]
+            # Get the corresponding event
+            event = query[closest_pose['database_event_idx']]
+            event_id = event.id
 
-                events[dtag][event_idx] = {
-                    'event': event,
-                    'annotation': annotation,
-                    'row': row
-                }
-        rprint(f"Got {len(events)} events!")
+            # Make the dataset dir
+            try_make(processed_datasets_dir / f'{event_id}')
 
-        psuedo_pandda_dir = working_dir / "test_datasets_pandda"
-        analyses_dir = psuedo_pandda_dir / "analyses"
-        processed_datasets_dir = psuedo_pandda_dir / "processed_datasets"
-        analyse_table_path = analyses_dir / "pandda_analyse_events.csv"
-        inspect_table_path = analyses_dir / "pandda_inspect_events.csv"
-        analyse_site_table_path = analyses_dir / "pandda_analyse_sites.csv"
-        inspect_site_table_path = analyses_dir / "pandda_inspect_sites.csv"
+            # Get the model
+            model = _get_model(closest_pose)
 
-        # Spoof the main directories
-        try_make(psuedo_pandda_dir)
-        try_make(analyses_dir)
-        try_make(processed_datasets_dir)
+            # Write the model
+
+            # Get the event map
+
+            # Write the event map
+
+
+
+        # # Select events and Organise by dtag
+        # events = {}
+        # for res in query:
+        #     if res[2].name == test_partition:
+        #         event = res[0]
+        #         annotation = res[1]
+        #         dtag = event.dtag
+        #         event_idx = event.event_idx
+        #         if dtag not in events:
+        #             events[dtag] = {}
+        #
+        #         table = inspect_tables[event.pandda.path]
+        #         row = table[
+        #             (table[constants.PANDDA_INSPECT_DTAG] == dtag)
+        #             & (table[constants.PANDDA_INSPECT_EVENT_IDX] == event_idx)
+        #             ]
+        #
+        #         events[dtag][event_idx] = {
+        #             'event': event,
+        #             'annotation': annotation,
+        #             'row': row
+        #         }
+        # rprint(f"Got {len(events)} events!")
+
+
 
         # Spoof the dataset directories
         for dtag in events:
