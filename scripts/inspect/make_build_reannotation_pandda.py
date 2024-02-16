@@ -150,7 +150,7 @@ def _make_test_dataset_psuedo_pandda(
             st = _get_model(closest_pose)
 
             # Write the model
-            st.write_minimal_pdb(str(dataset_dir / f'{event_id}.pdb'))
+            st.write_minimal_pdb(str(dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(f'{event_id}')))
 
             # Get the event map
             event_map = _get_event_map(event_map_sample)
