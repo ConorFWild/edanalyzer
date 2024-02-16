@@ -46,7 +46,7 @@ def _get_model(closest_pose):
 
         element = gemmi.Element(_element)
         atom = gemmi.Atom()
-        atom.name = element.name
+        atom.name = "CA"
         atom.pos = pos
         atom.element = element
         res.add_atom(atom)
