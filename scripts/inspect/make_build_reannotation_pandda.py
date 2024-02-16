@@ -128,6 +128,7 @@ def _make_test_dataset_psuedo_pandda(
 
             # Get the corresponding event
             event = query[closest_pose['database_event_idx']]
+            rprint(f'Closest event id: {closest_pose["database_event_idx"]}')
             event_id = event.id
 
             # Make the dataset dir
