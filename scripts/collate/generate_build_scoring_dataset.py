@@ -42,58 +42,52 @@ def _get_known_hit_poses(
     # Iterate over poses
     poses = []
     rmsds = []
-    num_close = 0
-    num_far = 0
-    while True:
-        # Copy the pos array
-        _poss = np.copy(poss)
+    num_1 = 0
+    num_2 = 0
+    num_3 = 0
+    num_4 = 0
+    for cutoff in [1.0, 2.0, 3.0, 10.0]:
+        num_sampled = 0
+        translation = cutoff
+        while True:
+            # Copy the pos array
+            _poss = np.copy(poss)
 
-        # Get rotation and translation
-        rot = R.random()
-        if num_far >= num_poses:
-            _translation = rng.uniform(-translation, translation, size=3).reshape((1, 3)) / 5
-        else:
+            # Get rotation and translation
+            rot = R.random()
+
             _translation = rng.uniform(-translation, translation, size=3).reshape((1, 3))
 
-        # Cetner
-        com = np.mean(_poss, axis=0).reshape((1, 3))
-        _poss_centered = _poss - com
+            # Cetner
+            com = np.mean(_poss, axis=0).reshape((1, 3))
+            _poss_centered = _poss - com
 
-        # Get target
-        _rmsd_target = np.copy(_poss_centered) + centroid
+            # Get target
+            _rmsd_target = np.copy(_poss_centered) + centroid
 
-        # Randomly perturb and reorient
+            # Randomly perturb and reorient
 
-        _rotated_poss = rot.apply(_poss_centered)
-        new_com = _translation + centroid
-        _new_poss = _rotated_poss + new_com
+            _rotated_poss = rot.apply(_poss_centered)
+            new_com = _translation + centroid
+            _new_poss = _rotated_poss + new_com
 
-        # Get RMSD to original
-        rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(_rmsd_target - _new_poss, axis=1))) / _new_poss.shape[0])
+            # Get RMSD to original
+            rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(_rmsd_target - _new_poss, axis=1))) / _new_poss.shape[0])
 
-        skip = True
-        if rmsd < 3.0:
-            if num_close < num_poses:
-                skip = False
-                num_close += 1
-        if rmsd > 3.0:
-            if num_far < num_poses:
-                skip = False
-                num_far += 1
+            if rmsd < cutoff:
+                num_sampled += 1
+            else:
+                continue
 
-        if skip:
-            continue
+            rmsds.append(rmsd)
 
-        rmsds.append(rmsd)
+            # Pad the poss to a uniform size
+            pose_array = np.zeros((60,3))
+            pose_array[:size, :] = _new_poss[:size, :]
+            poses.append(pose_array)
 
-        # Pad the poss to a uniform size
-        pose_array = np.zeros((60,3))
-        pose_array[:size, :] = _new_poss[:size, :]
-        poses.append(pose_array)
-
-        if num_far >= num_poses:
-            if num_close >= num_poses:
-                break
+            if num_sampled >= num_poses:
+                continue
 
     return poses, [elements_array] * 2 * num_poses, rmsds
 
