@@ -87,7 +87,7 @@ def _get_known_hit_poses(
             poses.append(pose_array)
 
             if num_sampled >= num_poses:
-                continue
+                break
 
     return poses, [elements_array] * 2 * num_poses, rmsds
 
