@@ -95,7 +95,7 @@ def _get_known_hit_poses(
             if num_close >= num_poses:
                 break
 
-    return poses, [elements_array] * num_poses, rmsds
+    return poses, [elements_array] * 2 * num_poses, rmsds
 
 
 def _get_closest_event(

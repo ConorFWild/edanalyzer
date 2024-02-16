@@ -44,16 +44,36 @@ from edanalyzer.torch_dataset import (
     get_image_xmap_ligand_augmented, PanDDADatasetTorchLigand, get_image_xmap_ligand, get_image_ligandmap_augmented,
     PanDDADatasetTorchLigandmap, get_image_event_map_ligand, get_image_event_map_ligand_augmented
 )
+def _get_event_map(event_map_sample):
+    grid = gemmi.FloarGrid(90,90,90)
+    uc = gemmi.UnitCell(45.0,45.0,45.0, 90.0,90.0,90.0)
+    grid.set_unit_cell(uc)
 
+    grid_array = np.array(grid, copy=False)
+    grid_array[:,:,:] = event_map_sample['sample'][:,:,:]
+
+    return grid
 
 def _get_model(closest_pose):
     st = gemmi.Structure()
     model = gemmi.Model('0')
     chain = gemmi.Chain('A')
-    res = gemmi.Residue()
+    res = gemmi.Residue('LIG')
 
-    for pose_row, element in zip(closest_pose['positions'], closet_pose['elements']):
+    for _pose_row, _element in zip(closest_pose['positions'], closest_pose['elements']):
+        pos = gemmi.Position(pose_row[0], pose_row[1], pose_row[2])
 
+        element = gemmi.Element(_element)
+        atom = gemmi.Atom()
+        atom.name = element.name
+        atom.pos = pos
+        atom.element = element
+        res.add_atom(atom)
+
+    chain.add_residue(res)
+    model.add_chain(chain)
+    st.add_model(model)
+    return st
 
 def try_make(path):
     try:
@@ -129,16 +149,35 @@ def _make_test_dataset_psuedo_pandda(
             event_id = event.id
 
             # Make the dataset dir
-            try_make(processed_datasets_dir / f'{event_id}')
+            dataset_dir = processed_datasets_dir / f'{event_id}'
+            try_make(dataset_dir)
+            modelled_structures_dir = dataset_dir / "modelled_structures"
+            try_make(modelled_structures_dir)
 
             # Get the model
-            model = _get_model(closest_pose)
+            st = _get_model(closest_pose)
 
             # Write the model
+            st.write_minimal_pdb(str(dataset_dir / f'{event_id}.pdb'))
 
             # Get the event map
+            event_map = _get_event_map(event_map_sample)
 
             # Write the event map
+            ccp4 = gemmi.Ccp4Map()
+            ccp4.grid = event_map
+            ccp4.update_ccp4_header()
+            event_map_path = dataset_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+                dtag=f"{event_id}",
+                event_idx="1",
+                bdc=f"{event.bdc}"
+            )
+            ccp4.write_ccp4_map(str(event_map_path))
+
+            # Create the event row
+            ...
+
+
 
 
 
@@ -172,8 +211,7 @@ def _make_test_dataset_psuedo_pandda(
         for dtag in events:
             dtag_dir = processed_datasets_dir / dtag
             try_make(dtag_dir)
-            modelled_structures_dir = dtag_dir / "modelled_structures"
-            try_make(modelled_structures_dir)
+
 
             for event_idx, event_info in events[dtag].items():
                 event, annotation = event_info['event'], event_info['annotation']
