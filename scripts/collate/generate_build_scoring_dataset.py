@@ -42,13 +42,18 @@ def _get_known_hit_poses(
     # Iterate over poses
     poses = []
     rmsds = []
-    for _j in range(num_poses):
+    num_close = 0
+    num_far = 0
+    while (num_far < num_poses) & (num_close < num_poses):
         # Copy the pos array
         _poss = np.copy(poss)
 
         # Get rotation and translation
         rot = R.random()
-        translation = rng.uniform(-translation, translation, 3).reshape((1, 3))
+        if num_far >= num_poses:
+            translation = rng.uniform(-translation, translation, 3).reshape((1, 3)) / 5
+        else:
+            translation = rng.uniform(-translation, translation, 3).reshape((1, 3))
 
         # Cetner
         com = np.mean(_poss, axis=0).reshape((1, 3))
@@ -65,6 +70,18 @@ def _get_known_hit_poses(
 
         # Get RMSD to original
         rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(_rmsd_target - _new_poss, axis=1))) / _new_poss.shape[0])
+
+        skip = True
+        if rmsd < 3.0:
+            if num_close < num_poses:
+                skip = False
+        if rmsd > 3.0:
+            if num_far < num_poses:
+                skip = False
+
+        if skip:
+            continue
+
         rmsds.append(rmsd)
 
         # Pad the poss to a uniform size
