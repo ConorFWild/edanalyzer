@@ -187,7 +187,7 @@ def main(config_path):
                     # Get the associated event
                     closest_event = _get_closest_event(
                         known_hit_centroids[known_hit_dataset][known_hit_residue],
-                        [x for x in experiment_hit_results if x.dtag == known_hit_dataset]
+                        [x for x in experiment_hit_results if x[0].dtag == known_hit_dataset]
                     )
 
                     # Get the sample transform
