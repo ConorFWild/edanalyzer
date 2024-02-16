@@ -51,7 +51,7 @@ def _get_known_hit_poses(
         # Get rotation and translation
         rot = R.random()
         if num_far >= num_poses:
-            _translation = rng.uniform(-translation, translation, size=3).reshape((1, 3)) / 5
+            _translation = rng.uniform(-translation, translation, size=3).reshape((1, 3)) / 10
         else:
             _translation = rng.uniform(-translation, translation, size=3).reshape((1, 3))
 
