@@ -157,8 +157,8 @@ def _make_test_dataset_psuedo_pandda(
 
             # Create the event row
             event_row = {
-                "dtag": event_id[0],
-                "event_idx": event_id[1],
+                "dtag": event_id,
+                "event_idx": 1,
                 "1-BDC": event.bdc,
                 "cluster_size": event.pos_array.shape[0],
                 "global_correlation_to_average_map": 0,
