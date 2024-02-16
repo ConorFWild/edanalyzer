@@ -44,7 +44,7 @@ def _get_known_hit_poses(
     rmsds = []
     num_close = 0
     num_far = 0
-    while (num_far < num_poses) & (num_close < num_poses):
+    while (num_far < num_poses) | (num_close < num_poses):
         # Copy the pos array
         _poss = np.copy(poss)
 
@@ -271,7 +271,6 @@ def main(config_path):
                         idx_pose += 1
 
                     idx_event += 1
-
 
     fileh.close()
 
