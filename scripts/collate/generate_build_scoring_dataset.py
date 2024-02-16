@@ -51,9 +51,9 @@ def _get_known_hit_poses(
         # Get rotation and translation
         rot = R.random()
         if num_far >= num_poses:
-            translation = rng.uniform(-translation, translation, 3).reshape((1, 3)) / 5
+            translation = rng.uniform(-translation, translation, size=3).reshape((1, 3)) / 5
         else:
-            translation = rng.uniform(-translation, translation, 3).reshape((1, 3))
+            translation = rng.uniform(-translation, translation, size=3).reshape((1, 3))
 
         # Cetner
         com = np.mean(_poss, axis=0).reshape((1, 3))
