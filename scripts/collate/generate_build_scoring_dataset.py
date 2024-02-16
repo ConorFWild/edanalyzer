@@ -46,15 +46,25 @@ def _get_known_hit_poses(
         # Copy the pos array
         _poss = np.copy(poss)
 
-        # Randomly perturb and reorient
+        # Get rotation and translation
+        rot = R.random()
+        translation = rng.uniform(-translation, translation, 3).reshape((1, 3))
+
+        # Cetner
         com = np.mean(_poss, axis=0).reshape((1, 3))
         _poss_centered = _poss - com
-        _rotated_poss = R.random().apply(_poss_centered)
-        new_com = rng.uniform(-translation, translation, 3).reshape((1, 3)) + centroid
+
+        # Get target
+        _rmsd_target = np.copy(_poss_centered) + centroid
+
+        # Randomly perturb and reorient
+
+        _rotated_poss = rot.apply(_poss_centered)
+        new_com = translation + centroid
         _new_poss = _rotated_poss + new_com
 
         # Get RMSD to original
-        rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(_poss - _new_poss, axis=1))) / _new_poss.shape[0])
+        rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(_rmsd_target - _new_poss, axis=1))) / _new_poss.shape[0])
         rmsds.append(rmsd)
 
         # Pad the poss to a uniform size
