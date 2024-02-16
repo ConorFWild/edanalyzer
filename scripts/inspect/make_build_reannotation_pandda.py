@@ -40,6 +40,7 @@ def _get_model(closest_pose):
     chain = gemmi.Chain('A')
     res = gemmi.Residue()
     res.name = 'LIG'
+    res.seqid = gemmi.SeqId(1, ' ')
 
     for _pose_row, _element in zip(closest_pose['positions'], closest_pose['elements']):
         pos = gemmi.Position(_pose_row[0], _pose_row[1], _pose_row[2])
