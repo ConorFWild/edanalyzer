@@ -20,7 +20,7 @@ from edanalyzer import constants
 
 
 def _get_event_map(event_map_sample):
-    grid = gemmi.FloarGrid(90, 90, 90)
+    grid = gemmi.FloatGrid(90, 90, 90)
     uc = gemmi.UnitCell(45.0, 45.0, 45.0, 90.0, 90.0, 90.0)
     grid.set_unit_cell(uc)
 
