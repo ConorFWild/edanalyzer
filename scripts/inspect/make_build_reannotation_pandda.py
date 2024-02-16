@@ -65,7 +65,7 @@ def _get_model(closest_pose):
     res = gemmi.Residue('LIG')
 
     for _pose_row, _element in zip(closest_pose['positions'], closest_pose['elements']):
-        pos = gemmi.Position(pose_row[0], pose_row[1], pose_row[2])
+        pos = gemmi.Position(_pose_row[0], _pose_row[1], _pose_row[2])
 
         element = gemmi.Element(_element)
         atom = gemmi.Atom()
