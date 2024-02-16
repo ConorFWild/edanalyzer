@@ -204,7 +204,7 @@ def _make_test_dataset_psuedo_pandda(
             }
             event_rows.append(event_row)
 
-            if event_map_sample_idx >5:
+            if event_map_sample_idx >20:
                 break
 
         # # Select events and Organise by dtag
