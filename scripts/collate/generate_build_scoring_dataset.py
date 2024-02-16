@@ -239,3 +239,6 @@ def main(config_path):
                     idx_event += 1
 
     fileh.close()
+
+if __name__ == "__main__":
+    fire.Fire(main)
