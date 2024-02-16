@@ -55,7 +55,7 @@ def _get_known_hit_poses(
         # Pad the poss to a uniform size
         pose_array = np.zeros((60,3))
         size = min(60, _poss.shape[0])
-        pose_array[size, :] = _new_poss[size, :]
+        pose_array[:size, :] = _new_poss[:size, :]
 
     return poses, [elements] * num_poses, rmsds
 
