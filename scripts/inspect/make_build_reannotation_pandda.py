@@ -34,7 +34,8 @@ def _get_model(closest_pose):
     st = gemmi.Structure()
     model = gemmi.Model('0')
     chain = gemmi.Chain('A')
-    res = gemmi.Residue('LIG')
+    res = gemmi.Residue()
+    res.name = 'LIG'
 
     for _pose_row, _element in zip(closest_pose['positions'], closest_pose['elements']):
         pos = gemmi.Position(_pose_row[0], _pose_row[1], _pose_row[2])
