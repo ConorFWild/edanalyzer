@@ -13,8 +13,8 @@ import numpy as np
 
 import tables
 
-from edanalyzer.database_pony import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
-    ExperimentORM, LigandORM  # import *
+from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
+    ExperimentORM, LigandORM, AutobuildORM
 from edanalyzer import constants
 
 
