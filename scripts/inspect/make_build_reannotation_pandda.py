@@ -1,50 +1,22 @@
-import dataclasses
 import os
 import pickle
-import pathlib
-import shutil
-import subprocess
-import time
 from pathlib import Path
-import re
 
 import yaml
 import fire
 import pony
-import rich
 from rich import print as rprint
-from rich.panel import Panel
-from rich.align import Align
-from rich.padding import Padding
+
 import pandas as pd
-import joblib
 import gemmi
 import numpy as np
-import scipy
-import torch
-from torch.utils.data import DataLoader
-import torch.nn as nn
-import torch.optim as optim
-import tables
 
-# from edanalyzer.torch_network import resnet18
-from edanalyzer.torch_network_resnet import resnet18
-from edanalyzer.torch_network_resnet_ligandmap import resnet18_ligandmap
-from edanalyzer.torch_network_squeezenet import squeezenet1_1, squeezenet1_0
-from edanalyzer.torch_network_mobilenet import mobilenet_v3_large_3d
+import tables
 
 from edanalyzer.database_pony import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM  # import *
 from edanalyzer import constants
-from edanalyzer.cli_dep import train
-from edanalyzer.data import PanDDAEvent, PanDDAEventDataset
-from edanalyzer.torch_dataset import (
-    PanDDAEventDatasetTorch, PanDDADatasetTorchXmapGroundState, get_annotation_from_event_annotation,
-    get_image_event_map_and_raw_from_event, get_image_event_map_and_raw_from_event_augmented,
-    get_annotation_from_event_hit, get_image_xmap_mean_map_augmented, get_image_xmap_mean_map,
-    get_image_xmap_ligand_augmented, PanDDADatasetTorchLigand, get_image_xmap_ligand, get_image_ligandmap_augmented,
-    PanDDADatasetTorchLigandmap, get_image_event_map_ligand, get_image_event_map_ligand_augmented
-)
+
 
 
 def _get_event_map(event_map_sample):
