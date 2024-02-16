@@ -122,7 +122,7 @@ def _make_test_dataset_psuedo_pandda(
             # Get the corresponding poses
             event_map_sample_idx = event_map_sample['idx']
             poses = [x for x in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}')]
-            for pose in poses:
+            for pose in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}'):
                 print(f"IDX: {pose['idx']} : {pose['database_event_idx']}")
             rprint(f"Got {len(poses)} poses")
 
