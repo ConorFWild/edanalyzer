@@ -201,7 +201,7 @@ def main(config_path):
                     mtz_sample_array = _sample_xmap_and_scale(mtz_grid, transform,
                                                               np.zeros((90, 90, 90), dtype=np.float32))
                     mtz_sample['idx'] = idx_event
-                    mtz_sample['event_idx'] = closest_event[0].idx
+                    mtz_sample['event_idx'] = closest_event[0].id
                     mtz_sample['sample'] = mtz_sample_array
                     mtz_sample.append()
 
@@ -210,7 +210,7 @@ def main(config_path):
                     event_map_sample_array = _sample_xmap_and_scale(event_map_grid, transform,
                                                                     np.zeros((90, 90, 90), dtype=np.float32))
                     event_map_sample['idx'] = idx_event
-                    event_map_sample['event_idx'] = closest_event[0].idx
+                    event_map_sample['event_idx'] = closest_event[0].id
                     event_map_sample['sample'] = event_map_sample_array
                     event_map_sample.append()
 
@@ -224,7 +224,7 @@ def main(config_path):
                         known_hit_pos_sample['idx'] = idx_pose
 
                         # Record the event key
-                        known_hit_pos_sample['database_event_idx'] = closest_event[0].idx
+                        known_hit_pos_sample['database_event_idx'] = closest_event[0].id
 
                         known_hit_pos_sample['event_map_sample_idx'] = idx_event
                         known_hit_pos_sample['mtz_sample_idx'] = idx_event
