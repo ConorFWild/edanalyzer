@@ -68,7 +68,7 @@ def _get_closest_event(
     for j, res in enumerate(experiment_hit_results):
         if not [x for x in res[0].annotations][0]:
             continue
-        centroid = np.array([res.x, res.y, res.z])
+        centroid = np.array([res[0].x, res[0].y, res[0].z])
 
         distance = np.linalg.norm(centroid - known_hit_centroid)
         distances[j] = distance
