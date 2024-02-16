@@ -25,7 +25,7 @@ def _get_event_map(event_map_sample):
     grid.set_unit_cell(uc)
 
     grid_array = np.array(grid, copy=False)
-    grid_array[:, :, :] = event_map_sample['sample'][:, :, :]
+    grid_array[:, :, :] = event_map_sample['sample'].T[:, :, :]
 
     return grid
 
