@@ -3,6 +3,7 @@ import dataclasses
 import numpy as np
 from rich import print as rprint
 import gemmi
+from pathlib import Path
 
 from edanalyzer import constants
 
@@ -314,3 +315,51 @@ def _parse_inspect_table_row(
     )
 
     return event
+
+
+def _get_known_hit_structures(
+        model_dir,
+        experiment_hit_datasets
+):
+    known_hit_structures = {}
+    for hit_dtag in experiment_hit_datasets:
+        hit_structure = Path(model_dir) / hit_dtag / 'refine.pdb'
+        known_hit_structures[hit_dtag] = gemmi.read_structure(str(hit_structure))
+
+    return known_hit_structures
+
+
+def _get_known_hits(known_hit_structures):
+    centroids = {}
+    for structure_key, structure in known_hit_structures.items():
+        centroids[structure_key] = {}
+        for model in structure:
+            for chain in model:
+                for res in chain:
+                    if res.name in ["LIG", "XXX"]:
+                        centroids[structure_key][f"{chain.name}_{res.seqid.num}"] = res
+
+    return centroids
+
+def _res_to_array(res):
+    poss = []
+    elements = []
+    for atom in res:
+        pos = atom.pos
+        element = atom.element.atomic_number
+        if element == 1:
+            continue
+        poss.append([pos.x, pos.y, pos.z])
+        elements.append(element)
+
+    return np.array(poss), np.array(elements)
+
+def _get_known_hit_centroids(known_hits):
+    centroids = {}
+    for dtag in known_hits:
+        centroids[dtag] = {}
+        for res_id in known_hits[dtag]:
+            poss, elements = _res_to_array(known_hits[dtag][res_id])
+            centroids[dtag][res_id] = np.mean(poss, axis=0)
+
+    return centroids

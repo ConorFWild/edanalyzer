@@ -204,29 +204,7 @@ def _get_events(
     # return events
 
 
-def _get_known_hit_structures(
-        model_dir,
-        experiment_hit_datasets
-):
-    known_hit_structures = {}
-    for hit_dtag in experiment_hit_datasets:
-        hit_structure = Path(model_dir) / hit_dtag / 'refine.pdb'
-        known_hit_structures[hit_dtag] = gemmi.read_structure(str(hit_structure))
 
-    return known_hit_structures
-
-
-def _get_known_hits(known_hit_structures):
-    centroids = {}
-    for structure_key, structure in known_hit_structures.items():
-        centroids[structure_key] = {}
-        for model in structure:
-            for chain in model:
-                for res in chain:
-                    if res.name in ["LIG", "XXX"]:
-                        centroids[structure_key][f"{chain.name}_{res.seqid.num}"] = res
-
-    return centroids
 
 
 def _get_autobuilds(pandda_2_dir):
