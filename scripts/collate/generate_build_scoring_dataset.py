@@ -49,6 +49,7 @@ def _get_known_hit_poses(
     for cutoff in [0.25, 0.5, 1.0, 2.0, 3.0, 10.0]:
         num_sampled = 0
         translation = cutoff
+        rprint(f"Cutoff: {cutoff}")
         while True:
             # Copy the pos array
             _poss = np.copy(poss)
