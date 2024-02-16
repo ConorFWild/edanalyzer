@@ -121,7 +121,7 @@ def _make_test_dataset_psuedo_pandda(
             rprint(event_map_sample['idx'])
             # Get the corresponding poses
             event_map_sample_idx = event_map_sample['idx']
-            poses = [x.fetch_all_fields for x in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}')]
+            poses = [x.fetch_all_fields() for x in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}')]
             # poses = []
             # for pose in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}'):
             #     poses.append(pose.copy())
