@@ -34,6 +34,11 @@ def _get_known_hit_poses(
     # Get pos array
     poss, elements = _res_to_array(res)
 
+    size = min(60, poss.shape[0])
+
+    elements_array = np.zeros(60, dtype=np.int32)
+    elements_array[:size] = elements[:size]
+
     # Iterate over poses
     poses = []
     rmsds = []
@@ -54,11 +59,10 @@ def _get_known_hit_poses(
 
         # Pad the poss to a uniform size
         pose_array = np.zeros((60,3))
-        size = min(60, _poss.shape[0])
         pose_array[:size, :] = _new_poss[:size, :]
         poses.append(pose_array)
 
-    return poses, [elements] * num_poses, rmsds
+    return poses, [elements_array] * num_poses, rmsds
 
 
 def _get_closest_event(
