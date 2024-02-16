@@ -243,7 +243,7 @@ def _make_test_dataset_psuedo_pandda(
 
         # event_table.drop(["index", "Unnamed: 0"], axis=1, inplace=True)
         event_table.to_csv(analyse_table_path, index=False)
-        event_table.to_csv(inspect_table_path, index=False)
+        # event_table.to_csv(inspect_table_path, index=False)
 
         # Spoof the site table
         site_records = []
@@ -262,7 +262,7 @@ def _make_test_dataset_psuedo_pandda(
         print(len(site_records))
         site_table = pd.DataFrame(site_records)
         site_table.to_csv(analyse_site_table_path, index=False)
-        site_table.to_csv(inspect_site_table_path, index=False)
+        # site_table.to_csv(inspect_site_table_path, index=False)
 
     fileh.close()
 
