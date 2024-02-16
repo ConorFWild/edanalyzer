@@ -75,9 +75,11 @@ def _get_known_hit_poses(
         if rmsd < 3.0:
             if num_close < num_poses:
                 skip = False
+                num_close += 1
         if rmsd > 3.0:
             if num_far < num_poses:
                 skip = False
+                num_far += 1
 
         if skip:
             continue
