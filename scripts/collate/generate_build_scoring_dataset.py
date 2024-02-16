@@ -44,7 +44,7 @@ def _get_known_hit_poses(
     rmsds = []
     num_close = 0
     num_far = 0
-    while (num_far < num_poses) | (num_close < num_poses):
+    while True:
         # Copy the pos array
         _poss = np.copy(poss)
 
@@ -90,6 +90,10 @@ def _get_known_hit_poses(
         pose_array = np.zeros((60,3))
         pose_array[:size, :] = _new_poss[:size, :]
         poses.append(pose_array)
+
+        if num_far >= num_poses:
+            if num_close >= num_poses:
+                break
 
     return poses, [elements_array] * num_poses, rmsds
 
