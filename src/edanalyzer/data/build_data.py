@@ -29,7 +29,7 @@ class PoseSample(tables.IsDescription):
      # = tables.StringCol(length=64)
     database_event_idx = tables.Int32Col()
 
-    positions = tables.Float32Col(shape=(60, 3, 3))
+    positions = tables.Float32Col(shape=(60, 3,))
     elements = tables.Int32Col(shape=(60, 1))
     rmsd = tables.Float32Col()
 
