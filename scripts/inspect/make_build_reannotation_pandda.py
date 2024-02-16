@@ -35,7 +35,7 @@ def _get_model(closest_pose):
 
     st = gemmi.Structure()
     st.cell = gemmi.UnitCell(45.0, 45.0, 45.0, 90.0, 90.0, 90.0)
-    st.spacegroup_hm = 'P1'
+    st.spacegroup_hm = gemmi.SpaceGroup('P1').xhm()
     model = gemmi.Model('0')
     chain = gemmi.Chain('A')
     res = gemmi.Residue()
