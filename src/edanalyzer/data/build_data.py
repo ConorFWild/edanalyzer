@@ -30,7 +30,7 @@ class PoseSample(tables.IsDescription):
     database_event_idx = tables.Int32Col()
 
     positions = tables.Float32Col(shape=(60, 3,))
-    elements = tables.Int32Col(shape=(60, 1))
+    elements = tables.Int32Col(shape=(60, ))
     rmsd = tables.Float32Col()
 
     event_map_sample_idx = tables.Int32Col()
