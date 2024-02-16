@@ -43,6 +43,8 @@ def _get_model(closest_pose):
 
     for _pose_row, _element in zip(closest_pose['positions'], closest_pose['elements']):
         pos = gemmi.Position(_pose_row[0], _pose_row[1], _pose_row[2])
+        if element == 0:
+            continue
 
         element = gemmi.Element(_element)
         atom = gemmi.Atom()
