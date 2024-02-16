@@ -130,7 +130,7 @@ def _make_test_dataset_psuedo_pandda(
 
             # Get the corresponding event
             rprint(f"Database event idx: {closest_pose['database_event_idx']}")
-            event = query[closest_pose['database_event_idx']]
+            event = query[event_map_sample['event_idx']]
             # rprint()
             rprint(f'Closest event id: {closest_pose["database_event_idx"]}')
             event_id = event.id
