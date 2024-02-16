@@ -12,7 +12,7 @@ import networkx as nx
 import networkx.algorithms.isomorphism as iso
 import numpy as np
 import tables
-from scipy.spatial import Rotation as R
+from scipy.spatial.transform import Rotation as R
 
 from edanalyzer import constants
 from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale
