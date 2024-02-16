@@ -46,7 +46,7 @@ def _get_known_hit_poses(
     num_2 = 0
     num_3 = 0
     num_4 = 0
-    for cutoff in [1.0, 2.0, 3.0, 10.0]:
+    for cutoff in [0.25, 0.5, 1.0, 2.0, 3.0, 10.0]:
         num_sampled = 0
         translation = cutoff
         while True:
