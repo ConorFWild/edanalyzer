@@ -226,7 +226,7 @@ def main(config_path):
                     centroid = np.array([closest_event[0].x, closest_event[0].y, closest_event[0].z])
                     transform = gemmi.Transform()
                     transform.mat.fromlist((np.eye(3) * 0.5).tolist())
-                    transform.vec.fromlist((centroid - [22.5, 22.5, 22.5]))
+                    transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
 
                     # Record the 2fofc map sample
                     mtz_grid = _load_xmap_from_mtz_path(closest_event[0].initial_reflections)
