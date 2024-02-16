@@ -31,7 +31,11 @@ def _get_event_map(event_map_sample):
 
 
 def _get_model(closest_pose):
+
+
     st = gemmi.Structure()
+    st.cell = gemmi.UnitCell(45.0, 45.0, 45.0, 90.0, 90.0, 90.0)
+    st.spacegroup_hm = 'P1'
     model = gemmi.Model('0')
     chain = gemmi.Chain('A')
     res = gemmi.Residue()
