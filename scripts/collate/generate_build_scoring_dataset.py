@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 
 import fire
@@ -39,6 +40,18 @@ def _get_known_hit_poses(
     elements_array = np.zeros(60, dtype=np.int32)
     elements_array[:size] = elements[:size]
 
+    rprint(f'Generating small rotations')
+    time_begin_gen = time.time()
+    small_rotations = []
+    while len(small_rotations) < 10000:
+        identity = np.eye(3)
+        while True:
+            rot = R.random()
+            if np.allclose(rot.as_matrix(), identity, atol=0.1, rtol=0.0):
+                break
+    time_finish_gen = time.time()
+    rprint(f"Generated small rotations in: {round(time_finish_gen-time_begin_gen, 2)}")
+
     # Iterate over poses
     poses = []
     rmsds = []
@@ -56,11 +69,7 @@ def _get_known_hit_poses(
 
             # Get rotation and translation
             if cutoff <= 0.5:
-                identity = np.eye(3)
-                while True:
-                    rot = R.random()
-                    if np.allclose(rot.as_matrix(), identity, atol=0.1, rtol=0.0):
-                        break
+                rot = small_rotations[rng.randint(0,len(small_rotations))]
             else:
                 rot = R.random()
 
