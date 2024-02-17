@@ -55,7 +55,14 @@ def _get_known_hit_poses(
             _poss = np.copy(poss)
 
             # Get rotation and translation
-            rot = R.random()
+            if cutoff <= 0.5:
+                identity = np.eye(3)
+                while True:
+                    rot = R.random()
+                    if np.allclose(rot.as_matrix(), identity, atol=0.1, rtol=0.0):
+                        break
+            else:
+                rot = R.random()
 
             _translation = rng.uniform(-translation/3, translation/3, size=3).reshape((1, 3))
 
