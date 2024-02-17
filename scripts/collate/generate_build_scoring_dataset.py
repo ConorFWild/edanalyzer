@@ -33,8 +33,10 @@ while len(small_rotations) < 10000:
     rot = R.random()
     if np.allclose(rot.as_matrix(), identity, atol=0.1, rtol=0.0):
         small_rotations.append(rot)
+        rprint(len(small_rotations))
 time_finish_gen = time.time()
 rprint(f"Generated small rotations in: {round(time_finish_gen - time_begin_gen, 2)}")
+
 
 def _get_known_hit_poses(
         res,
