@@ -141,7 +141,7 @@ def main(config_path):
 
     #
     # Open a file in "w"rite mode
-    fileh = tables.open_file("output/build_data.h5", mode="w")
+    fileh = tables.open_file("output/build_data_v2.h5", mode="w")
 
     # Get the HDF5 root group
     root = fileh.root
