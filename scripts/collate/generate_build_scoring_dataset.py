@@ -25,6 +25,16 @@ from edanalyzer.data.build_data import PoseSample, MTZSample, EventMapSample
 
 rng = np.random.default_rng()
 
+rprint(f'Generating small rotations')
+time_begin_gen = time.time()
+small_rotations = []
+identity = np.eye(3)
+while len(small_rotations) < 10000:
+    rot = R.random()
+    if np.allclose(rot.as_matrix(), identity, atol=0.1, rtol=0.0):
+        small_rotations.append(rot)
+time_finish_gen = time.time()
+rprint(f"Generated small rotations in: {round(time_finish_gen - time_begin_gen, 2)}")
 
 def _get_known_hit_poses(
         res,
@@ -40,16 +50,7 @@ def _get_known_hit_poses(
     elements_array = np.zeros(60, dtype=np.int32)
     elements_array[:size] = elements[:size]
 
-    rprint(f'Generating small rotations')
-    time_begin_gen = time.time()
-    small_rotations = []
-    identity = np.eye(3)
-    while len(small_rotations) < 10000:
-        rot = R.random()
-        if np.allclose(rot.as_matrix(), identity, atol=0.1, rtol=0.0):
-            small_rotations.append(rot)
-    time_finish_gen = time.time()
-    rprint(f"Generated small rotations in: {round(time_finish_gen-time_begin_gen, 2)}")
+
 
     # Iterate over poses
     poses = []
