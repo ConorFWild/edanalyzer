@@ -78,7 +78,7 @@ def _get_known_hit_poses(
 
             # Get rotation and translation
             if cutoff <= 0.5:
-                rot = small_rotations[rng.integers(0, len(small_rotations))]
+                rot = R.from_matrix(small_rotations[rng.integers(0, len(small_rotations))])
             else:
                 rot = R.random()
 
