@@ -256,6 +256,7 @@ def main(config_path):
 
             # Get the closest annotated event to the known hit
             for known_hit_dataset in known_hits:
+                rprint(f"Got {len(known_hits[known_hit_dataset])} hits in dataset!")
                 for known_hit_residue in known_hits[known_hit_dataset]:
 
                     # Get the associated event
