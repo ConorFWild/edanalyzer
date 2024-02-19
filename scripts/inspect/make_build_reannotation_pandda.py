@@ -131,7 +131,7 @@ def _make_test_dataset_psuedo_pandda(
             event_map_sample_idx = event_map_sample['idx']
             database_event_idx = event_map_sample['event_idx']
             poses = [x.fetch_all_fields() for x in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}')]
-            psuedo_dtag = f"{database_event_idx}_{event_map_sample['res_id']}"
+            psuedo_dtag = f"{database_event_idx}_{event_map_sample['res_id'].decode('utf-8')}"
             # poses = []
             # for pose in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}'):
             #     poses.append(pose.copy())
