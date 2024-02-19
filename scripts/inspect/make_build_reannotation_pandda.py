@@ -150,7 +150,7 @@ def _make_test_dataset_psuedo_pandda(
             # event_id = event.id
 
             # Make the dataset dir
-            dataset_dir = processed_datasets_dir / f'{database_event_idx}'
+            dataset_dir = processed_datasets_dir / f'{psuedo_dtag}'
             try_make(dataset_dir)
             modelled_structures_dir = dataset_dir / "modelled_structures"
             try_make(modelled_structures_dir)
