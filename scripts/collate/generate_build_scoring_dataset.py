@@ -29,18 +29,27 @@ rprint(f'Generating small rotations')
 time_begin_gen = time.time()
 small_rotations = []
 identity = np.eye(3)
-while len(small_rotations) < 10000:
-    rot = R.random()
-    if np.allclose(rot.as_matrix(), identity, atol=0.1, rtol=0.0):
-        small_rotations.append(rot)
-        rprint(len(small_rotations))
+for j in range(20):
+    rotations = R.random(100000)
+    rotmat = rotations.as_matrix()
+    mask = (rotmat > (0.9 * np.eye(3)))
+    diag = mask[:, np.array([0, 1, 2]), np.array([0, 1, 2])]
+    rot_mask = diag.sum(axis=1)
+    valid_rots = rotmat[rot_mask == 3, :, :]
+    rots = [x for x in valid_rots]
+    small_rotations += rots
+# while len(small_rotations) < 10000:
+#     rot = R.random()
+#     if np.allclose(rot.as_matrix(), identity, atol=0.1, rtol=0.0):
+#         small_rotations.append(rot)
+#         rprint(len(small_rotations))
 time_finish_gen = time.time()
 rprint(f"Generated small rotations in: {round(time_finish_gen - time_begin_gen, 2)}")
 
 
 def _get_known_hit_poses(
         res,
-        centroid=np.array([22.5,22.5,22.5]).reshape((1, 3)),
+        centroid=np.array([22.5, 22.5, 22.5]).reshape((1, 3)),
         translation=10,
         num_poses=50
 ):
@@ -51,8 +60,6 @@ def _get_known_hit_poses(
 
     elements_array = np.zeros(60, dtype=np.int32)
     elements_array[:size] = elements[:size]
-
-
 
     # Iterate over poses
     poses = []
@@ -71,11 +78,11 @@ def _get_known_hit_poses(
 
             # Get rotation and translation
             if cutoff <= 0.5:
-                rot = small_rotations[rng.randint(0,len(small_rotations))]
+                rot = small_rotations[rng.randint(0, len(small_rotations))]
             else:
                 rot = R.random()
 
-            _translation = rng.uniform(-translation/3, translation/3, size=3).reshape((1, 3))
+            _translation = rng.uniform(-translation / 3, translation / 3, size=3).reshape((1, 3))
 
             # Cetner
             com = np.mean(_poss, axis=0).reshape((1, 3))
@@ -101,7 +108,7 @@ def _get_known_hit_poses(
             rmsds.append(rmsd)
 
             # Pad the poss to a uniform size
-            pose_array = np.zeros((60,3))
+            pose_array = np.zeros((60, 3))
             pose_array[:size, :] = _new_poss[:size, :]
             poses.append(pose_array)
 
@@ -111,10 +118,8 @@ def _get_known_hit_poses(
     return poses, [elements_array] * 4 * num_poses, rmsds
 
 
-def _get_closest_event(
-        known_hit_centroid,
-        experiment_hit_results
-):
+def _get_close_distances(known_hit_centroid,
+                         experiment_hit_results):
     distances = {}
     for j, res in enumerate(experiment_hit_results):
         if not [x for x in res[0].annotations][0]:
@@ -123,6 +128,14 @@ def _get_closest_event(
 
         distance = np.linalg.norm(centroid - known_hit_centroid)
         distances[j] = distance
+    return distances
+
+
+def _get_closest_event(
+        known_hit_centroid,
+        experiment_hit_results
+):
+    distances = _get_close_distances(known_hit_centroid, experiment_hit_results)
 
     return experiment_hit_results[min(distances, key=lambda _j: distances[_j])]
 
@@ -186,7 +199,8 @@ def main(config_path):
 
         for experiment in sorted_experiments:
             experiment_hit_results = [res for res in query_events if
-                                      ([x for x in res[0].annotations][0].annotation) & (experiment.path == res[3].path)]
+                                      ([x for x in res[0].annotations][0].annotation) & (
+                                                  experiment.path == res[3].path)]
             experiment_hit_datasets = set(
                 [
                     experiment_hit_result[0].dtag
@@ -290,6 +304,7 @@ def main(config_path):
                     idx_event += 1
 
     fileh.close()
+
 
 if __name__ == "__main__":
     fire.Fire(main)
