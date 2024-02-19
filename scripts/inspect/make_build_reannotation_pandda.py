@@ -208,8 +208,8 @@ def _make_test_dataset_psuedo_pandda(
             if database_event_idx == 10466:
                 rprint(event_row)
 
-            if event_map_sample_idx >200:
-                break
+            # if event_map_sample_idx >200:
+            #     break
 
         # # Select events and Organise by dtag
         # events = {}
