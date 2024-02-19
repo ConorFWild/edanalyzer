@@ -78,7 +78,7 @@ def _get_known_hit_poses(
 
             # Get rotation and translation
             if cutoff <= 0.5:
-                rot = small_rotations[rng.randint(0, len(small_rotations))]
+                rot = small_rotations[rng.integers(0, len(small_rotations))]
             else:
                 rot = R.random()
 
@@ -130,6 +130,7 @@ def _get_close_distances(known_hit_centroid,
         distances[j] = distance
     return distances
 
+
 def _get_close_events(
         known_hit_centroid,
         experiment_hit_results,
@@ -138,6 +139,7 @@ def _get_close_events(
     distances = _get_close_distances(known_hit_centroid, experiment_hit_results)
 
     return [res for res, dis in zip(experiment_hit_results, distances) if dis < delta]
+
 
 def _get_closest_event(
         known_hit_centroid,
@@ -208,7 +210,7 @@ def main(config_path):
         for experiment in sorted_experiments:
             experiment_hit_results = [res for res in query_events if
                                       ([x for x in res[0].annotations][0].annotation) & (
-                                                  experiment.path == res[3].path)]
+                                              experiment.path == res[3].path)]
             experiment_hit_datasets = set(
                 [
                     experiment_hit_result[0].dtag
@@ -264,7 +266,7 @@ def main(config_path):
                     # )
                     close_events = _get_close_events(
                         known_hit_centroids[known_hit_dataset][known_hit_residue],
-                            [x for x in experiment_hit_results if x[0].dtag == known_hit_dataset],
+                        [x for x in experiment_hit_results if x[0].dtag == known_hit_dataset],
                     )
                     rprint(f"Got {len(close_events)} close events")
 
@@ -295,7 +297,7 @@ def main(config_path):
                         event_map_sample.append()
 
                         # Get the base event
-                        poss, elements = _res_to_array(known_hits[known_hit_dataset][known_hit_residue],)
+                        poss, elements = _res_to_array(known_hits[known_hit_dataset][known_hit_residue], )
                         size = min(60, poss.shape[0])
                         elements_array = np.zeros(60, dtype=np.int32)
                         pose_array = np.zeros((60, 3))
