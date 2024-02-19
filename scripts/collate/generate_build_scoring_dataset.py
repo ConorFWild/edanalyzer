@@ -137,7 +137,7 @@ def _get_close_events(
 ):
     distances = _get_close_distances(known_hit_centroid, experiment_hit_results)
 
-    return [res for res, dis in zip(known_hit_centroid, distances) if dis < delta]
+    return [res for res, dis in zip(experiment_hit_results, distances) if dis < delta]
 
 def _get_closest_event(
         known_hit_centroid,
