@@ -197,8 +197,8 @@ def _make_test_dataset_psuedo_pandda(
                 "r_work": 0.0,
                 "analysed_resolution": 0.0,
                 "map_uncertainty": 0.0,
-                "analysed": False,
-                "interesting": False,
+                # "analysed": False,
+                # "interesting": False,
                 "exclude_from_z_map_analysis": False,
                 "exclude_from_characterisation": False,
             }
