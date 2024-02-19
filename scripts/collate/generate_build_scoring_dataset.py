@@ -251,8 +251,8 @@ def main(config_path):
             event_map_sample = table_event_map_sample.row
             known_hit_pos_sample = table_known_hit_pos_sample.row
 
-            if idx_event > 100:
-                break
+            # if idx_event > 100:
+            #     break
 
             # Get the closest annotated event to the known hit
             for known_hit_dataset in known_hits:
