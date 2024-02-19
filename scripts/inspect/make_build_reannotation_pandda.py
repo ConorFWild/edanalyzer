@@ -203,7 +203,8 @@ def _make_test_dataset_psuedo_pandda(
                 "exclude_from_characterisation": False,
             }
             event_rows.append(event_row)
-            rprint(event_row)
+            if event_id == 10466:
+                rprint(event_row)
 
             if event_map_sample_idx >200:
                 break
