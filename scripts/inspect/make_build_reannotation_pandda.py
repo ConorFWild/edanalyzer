@@ -90,7 +90,7 @@ def _make_test_dataset_psuedo_pandda(
         custom_annotations = pickle.load(f)
 
     # Open a file in "w"rite mode
-    fileh = tables.open_file("output/build_data.h5", mode="r")
+    fileh = tables.open_file("output/build_data_v2.h5", mode="r")
     print(fileh)
 
     # Get the HDF5 root group
