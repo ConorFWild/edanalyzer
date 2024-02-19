@@ -267,7 +267,8 @@ def main(config_path):
                         known_hit_centroids[known_hit_dataset][known_hit_residue],
                         [x for x in experiment_hit_results if x[0].dtag == known_hit_dataset],
                     )
-                    rprint(f"Got {len(close_events)} close events")
+                    close_event_ids = [res[0].id for res in close_events]
+                    rprint(f"Got {len(close_events)} close events: {close_event_ids}")
 
                     for _event in close_events:
 
