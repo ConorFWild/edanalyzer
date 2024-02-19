@@ -111,7 +111,7 @@ def _get_known_hit_poses(
             if num_sampled >= num_poses:
                 break
 
-    return poses, [elements_array] * 4 * num_poses, rmsds
+    return poses, [elements_array] * 6 * num_poses, rmsds
 
 
 def _get_close_distances(known_hit_centroid,
