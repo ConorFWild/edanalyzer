@@ -131,6 +131,7 @@ def _make_test_dataset_psuedo_pandda(
             event_map_sample_idx = event_map_sample['idx']
             database_event_idx = event_map_sample['event_idx']
             poses = [x.fetch_all_fields() for x in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}')]
+            psuedo_dtag = f"{database_event_idx}_{event_map_sample['res_id']}"
             # poses = []
             # for pose in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}'):
             #     poses.append(pose.copy())
@@ -158,7 +159,7 @@ def _make_test_dataset_psuedo_pandda(
             st = _get_model(closest_pose)
 
             # Write the model
-            st.write_pdb(str(dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=f'{database_event_idx}')))
+            st.write_pdb(str(dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=f'{psuedo_dtag}')))
 
             # Get the event map
             event_map = _get_event_map(event_map_sample)
@@ -168,7 +169,7 @@ def _make_test_dataset_psuedo_pandda(
             ccp4.grid = event_map
             ccp4.update_ccp4_header()
             event_map_path = dataset_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
-                dtag=f"{database_event_idx}",
+                dtag=f"{psuedo_dtag}",
                 event_idx="1",
                 bdc=f"{event.bdc}"
             )
@@ -176,7 +177,7 @@ def _make_test_dataset_psuedo_pandda(
 
             # Create the event row
             event_row = {
-                "dtag": database_event_idx,
+                "dtag": psuedo_dtag,
                 "event_idx": 1,
                 "1-BDC": event.bdc,
                 "cluster_size": 1,
