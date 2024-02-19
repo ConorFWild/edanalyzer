@@ -12,6 +12,7 @@ class Annotation(tables.IsDescription):
 class EventMapSample(tables.IsDescription):
     idx = tables.Int32Col()
     event_idx= tables.Int32Col()
+    res_id = tables.StringCol(32)
 
     sample = tables.Float32Col(shape=(90, 90, 90))
 
@@ -19,6 +20,7 @@ class EventMapSample(tables.IsDescription):
 class MTZSample(tables.IsDescription):
     idx = tables.Int32Col()
     event_idx= tables.Int32Col()
+    res_id = tables.StringCol(32)
 
     sample = tables.Float32Col(shape=(90, 90, 90))
 

@@ -285,6 +285,7 @@ def main(config_path):
                                                                   np.zeros((90, 90, 90), dtype=np.float32))
                         mtz_sample['idx'] = idx_event
                         mtz_sample['event_idx'] = _event[0].id
+                        mtz_sample['res_id'] = known_hit_residue
                         mtz_sample['sample'] = mtz_sample_array
                         mtz_sample.append()
 
@@ -294,6 +295,7 @@ def main(config_path):
                                                                         np.zeros((90, 90, 90), dtype=np.float32))
                         event_map_sample['idx'] = idx_event
                         event_map_sample['event_idx'] = _event[0].id
+                        event_map_sample['res_id'] = known_hit_residue
                         event_map_sample['sample'] = event_map_sample_array
                         event_map_sample.append()
 
