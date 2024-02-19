@@ -130,6 +130,14 @@ def _get_close_distances(known_hit_centroid,
         distances[j] = distance
     return distances
 
+def _get_close_events(
+        known_hit_centroid,
+        experiment_hit_results,
+        delta=5.0
+):
+    distances = _get_close_distances(known_hit_centroid, experiment_hit_results)
+
+    return [res for res, dis in zip(known_hit_centroid, distances) if dis < delta]
 
 def _get_closest_event(
         known_hit_centroid,
@@ -250,58 +258,82 @@ def main(config_path):
                 for known_hit_residue in known_hits[known_hit_dataset]:
 
                     # Get the associated event
-                    closest_event = _get_closest_event(
+                    # closest_event = _get_closest_event(
+                    #     known_hit_centroids[known_hit_dataset][known_hit_residue],
+                    #     [x for x in experiment_hit_results if x[0].dtag == known_hit_dataset]
+                    # )
+                    close_events = _get_close_events(
                         known_hit_centroids[known_hit_dataset][known_hit_residue],
-                        [x for x in experiment_hit_results if x[0].dtag == known_hit_dataset]
+                            [x for x in experiment_hit_results if x[0].dtag == known_hit_dataset],
                     )
+                    rprint(f"Got {len(close_events)} close events")
 
-                    # Get the sample transform
-                    centroid = np.array([closest_event[0].x, closest_event[0].y, closest_event[0].z])
-                    transform = gemmi.Transform()
-                    transform.mat.fromlist((np.eye(3) * 0.5).tolist())
-                    transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
+                    for _event in close_events:
 
-                    # Record the 2fofc map sample
-                    mtz_grid = _load_xmap_from_mtz_path(closest_event[0].initial_reflections)
-                    mtz_sample_array = _sample_xmap_and_scale(mtz_grid, transform,
-                                                              np.zeros((90, 90, 90), dtype=np.float32))
-                    mtz_sample['idx'] = idx_event
-                    mtz_sample['event_idx'] = closest_event[0].id
-                    mtz_sample['sample'] = mtz_sample_array
-                    mtz_sample.append()
+                        # Get the sample transform
+                        centroid = np.array([_event[0].x, _event[0].y, _event[0].z])
+                        transform = gemmi.Transform()
+                        transform.mat.fromlist((np.eye(3) * 0.5).tolist())
+                        transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
 
-                    # Record the event map sample
-                    event_map_grid = _load_xmap_from_path(closest_event[0].event_map)
-                    event_map_sample_array = _sample_xmap_and_scale(event_map_grid, transform,
-                                                                    np.zeros((90, 90, 90), dtype=np.float32))
-                    event_map_sample['idx'] = idx_event
-                    event_map_sample['event_idx'] = closest_event[0].id
-                    event_map_sample['sample'] = event_map_sample_array
-                    event_map_sample.append()
+                        # Record the 2fofc map sample
+                        mtz_grid = _load_xmap_from_mtz_path(_event[0].initial_reflections)
+                        mtz_sample_array = _sample_xmap_and_scale(mtz_grid, transform,
+                                                                  np.zeros((90, 90, 90), dtype=np.float32))
+                        mtz_sample['idx'] = idx_event
+                        mtz_sample['event_idx'] = _event[0].id
+                        mtz_sample['sample'] = mtz_sample_array
+                        mtz_sample.append()
 
-                    # Generate the decoy/rmsd pairs
-                    poses, elements, rmsds = _get_known_hit_poses(
-                        known_hits[known_hit_dataset][known_hit_residue],
-                    )
+                        # Record the event map sample
+                        event_map_grid = _load_xmap_from_path(_event[0].event_map)
+                        event_map_sample_array = _sample_xmap_and_scale(event_map_grid, transform,
+                                                                        np.zeros((90, 90, 90), dtype=np.float32))
+                        event_map_sample['idx'] = idx_event
+                        event_map_sample['event_idx'] = _event[0].id
+                        event_map_sample['sample'] = event_map_sample_array
+                        event_map_sample.append()
 
-                    # Record the decoy/rmsd pairs with their event map
-                    for pose, element, rmsd in zip(poses, elements, rmsds):
+                        # Get the base event
+                        poss, elements = _res_to_array(known_hits[known_hit_dataset][known_hit_residue],)
+                        size = min(60, poss.shape[0])
+                        elements_array = np.zeros(60, dtype=np.int32)
+                        pose_array = np.zeros((60, 3))
+                        pose_array[:size, :] = poss[:size, :]
+                        elements_array[:size] = elements[:size]
                         known_hit_pos_sample['idx'] = idx_pose
-
-                        # Record the event key
-                        known_hit_pos_sample['database_event_idx'] = closest_event[0].id
-
+                        known_hit_pos_sample['database_event_idx'] = _event[0].id
                         known_hit_pos_sample['event_map_sample_idx'] = idx_event
                         known_hit_pos_sample['mtz_sample_idx'] = idx_event
-
-                        # Record the data
-                        known_hit_pos_sample['positions'] = pose
-                        known_hit_pos_sample['elements'] = element
-                        known_hit_pos_sample['rmsd'] = rmsd
+                        known_hit_pos_sample['positions'] = pose_array
+                        known_hit_pos_sample['elements'] = elements_array
+                        known_hit_pos_sample['rmsd'] = 0.0
                         known_hit_pos_sample.append()
                         idx_pose += 1
 
-                    idx_event += 1
+                        # Generate the decoy/rmsd pairs
+                        poses, elements, rmsds = _get_known_hit_poses(
+                            known_hits[known_hit_dataset][known_hit_residue],
+                        )
+
+                        # Record the decoy/rmsd pairs with their event map
+                        for pose, element, rmsd in zip(poses, elements, rmsds):
+                            known_hit_pos_sample['idx'] = idx_pose
+
+                            # Record the event key
+                            known_hit_pos_sample['database_event_idx'] = _event[0].id
+
+                            known_hit_pos_sample['event_map_sample_idx'] = idx_event
+                            known_hit_pos_sample['mtz_sample_idx'] = idx_event
+
+                            # Record the data
+                            known_hit_pos_sample['positions'] = pose
+                            known_hit_pos_sample['elements'] = element
+                            known_hit_pos_sample['rmsd'] = rmsd
+                            known_hit_pos_sample.append()
+                            idx_pose += 1
+
+                        idx_event += 1
 
     fileh.close()
 
