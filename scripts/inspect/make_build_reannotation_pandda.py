@@ -122,7 +122,7 @@ def _make_test_dataset_psuedo_pandda(
         query = [_x for _x in pony.orm.select(_event for _event in EventORM)]
 
         # Fetch the
-        close_poses = {}
+        close_poses = {_z: {'rmsd': 100} for _z in table_event_map_sample.iterrows}
         begin_get_close_poses = time.time()
         for x in table_known_hit_pos_sample.iterrows():
             y = x.fetch_all_fields()
