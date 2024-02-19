@@ -1,5 +1,6 @@
 import os
 import pickle
+import time
 from pathlib import Path
 
 import yaml
@@ -18,7 +19,6 @@ from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionO
 from edanalyzer import constants
 
 
-
 def _get_event_map(event_map_sample):
     grid = gemmi.FloatGrid(90, 90, 90)
     uc = gemmi.UnitCell(45.0, 45.0, 45.0, 90.0, 90.0, 90.0)
@@ -31,8 +31,6 @@ def _get_event_map(event_map_sample):
 
 
 def _get_model(closest_pose):
-
-
     st = gemmi.Structure()
     st.cell = gemmi.UnitCell(45.0, 45.0, 45.0, 90.0, 90.0, 90.0)
     st.spacegroup_hm = gemmi.SpaceGroup('P1').xhm()
@@ -123,6 +121,18 @@ def _make_test_dataset_psuedo_pandda(
         # partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
         query = [_x for _x in pony.orm.select(_event for _event in EventORM)]
 
+        # Fetch the
+        close_poses = {}
+        begin_get_close_poses = time.time()
+        for x in table_known_hit_pos_sample.iterrows():
+            y = x.fetch_all_fields()
+            close_poses[x['event_map_sample_idx']] = min(
+                [y, close_poses[x['event_map_sample_idx']]],
+                key=lambda _x: _x['rmsd'])
+        finish_get_close_poses = time.time()
+        rprint(finish_get_close_poses)
+
+
         # Iterate over the event maps
         event_rows = []
         for event_map_sample in table_event_map_sample.iterrows():
@@ -130,7 +140,7 @@ def _make_test_dataset_psuedo_pandda(
             # Get the corresponding poses
             event_map_sample_idx = event_map_sample['idx']
             database_event_idx = event_map_sample['event_idx']
-            poses = [x.fetch_all_fields() for x in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}')]
+            # poses = [x.fetch_all_fields() for x in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}')]
             # psuedo_dtag = f"{database_event_idx}_{event_map_sample['res_id'].decode('utf-8')}"
             psuedo_dtag = event_map_sample_idx
             # poses = []
@@ -138,10 +148,11 @@ def _make_test_dataset_psuedo_pandda(
             #     poses.append(pose.copy())
             # for pose in poses:
             #     print(f"IDX: {pose['idx']} : {pose['database_event_idx']}")
-            rprint(f"Got {len(poses)} poses")
+            # rprint(f"Got {len(poses)} poses")
 
             # Get the closest pose
-            closest_pose = min(poses, key=lambda _x: _x['rmsd'])
+            # closest_pose = min(poses, key=lambda _x: _x['rmsd'])
+            closest_pose = close_poses[event_map_sample_idx]
             rprint(f'Closest rmsd is: {closest_pose["rmsd"]}')
 
             # Get the corresponding event
