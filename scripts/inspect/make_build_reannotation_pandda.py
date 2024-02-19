@@ -130,7 +130,7 @@ def _make_test_dataset_psuedo_pandda(
                 [y, close_poses[x['event_map_sample_idx']]],
                 key=lambda _x: _x['rmsd'])
         finish_get_close_poses = time.time()
-        rprint(finish_get_close_poses)
+        rprint(f'Got close poses in: {finish_get_close_poses-begin_get_close_poses}')
 
 
         # Iterate over the event maps
