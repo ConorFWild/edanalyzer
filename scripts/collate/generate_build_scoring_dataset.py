@@ -251,7 +251,7 @@ def main(config_path):
             event_map_sample = table_event_map_sample.row
             known_hit_pos_sample = table_known_hit_pos_sample.row
 
-            if idx_event > 30:
+            if idx_event > 100:
                 break
 
             # Get the closest annotated event to the known hit
@@ -302,7 +302,7 @@ def main(config_path):
                         # Get the base event
                         poss, elements = _res_to_array(known_hits[known_hit_dataset][known_hit_residue], )
                         com = np.mean(poss, axis=0).reshape((1, 3))
-                        event_to_lig_com = com-centroid
+                        event_to_lig_com = com-centroid.reshape((1,3))
                         _poss_centered = poss - com
                         _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape((1, 3)) + event_to_lig_com
                         size = min(60, _rmsd_target.shape[0])
