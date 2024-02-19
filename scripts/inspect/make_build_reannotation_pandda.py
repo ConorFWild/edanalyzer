@@ -129,6 +129,7 @@ def _make_test_dataset_psuedo_pandda(
             rprint(event_map_sample['idx'])
             # Get the corresponding poses
             event_map_sample_idx = event_map_sample['idx']
+            database_event_idx = event_map_sample['event_idx']
             poses = [x.fetch_all_fields() for x in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}')]
             # poses = []
             # for pose in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}'):
@@ -142,14 +143,13 @@ def _make_test_dataset_psuedo_pandda(
             rprint(f'Closest rmsd is: {closest_pose["rmsd"]}')
 
             # Get the corresponding event
-            rprint(f"Database event idx: {closest_pose['database_event_idx']}")
+            rprint(f"Database event idx: {database_event_idx}")
             event = query[event_map_sample['event_idx']]
             # rprint()
-            rprint(f'Closest event id: {closest_pose["database_event_idx"]}')
-            event_id = event.id
+            # event_id = event.id
 
             # Make the dataset dir
-            dataset_dir = processed_datasets_dir / f'{event_id}'
+            dataset_dir = processed_datasets_dir / f'{database_event_idx}'
             try_make(dataset_dir)
             modelled_structures_dir = dataset_dir / "modelled_structures"
             try_make(modelled_structures_dir)
@@ -158,7 +158,7 @@ def _make_test_dataset_psuedo_pandda(
             st = _get_model(closest_pose)
 
             # Write the model
-            st.write_pdb(str(dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=f'{event_id}')))
+            st.write_pdb(str(dataset_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=f'{database_event_idx}')))
 
             # Get the event map
             event_map = _get_event_map(event_map_sample)
@@ -168,7 +168,7 @@ def _make_test_dataset_psuedo_pandda(
             ccp4.grid = event_map
             ccp4.update_ccp4_header()
             event_map_path = dataset_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
-                dtag=f"{event_id}",
+                dtag=f"{database_event_idx}",
                 event_idx="1",
                 bdc=f"{event.bdc}"
             )
@@ -176,7 +176,7 @@ def _make_test_dataset_psuedo_pandda(
 
             # Create the event row
             event_row = {
-                "dtag": event_id,
+                "dtag": database_event_idx,
                 "event_idx": 1,
                 "1-BDC": event.bdc,
                 "cluster_size": 1,
@@ -203,7 +203,7 @@ def _make_test_dataset_psuedo_pandda(
                 "exclude_from_characterisation": False,
             }
             event_rows.append(event_row)
-            if event_id == 10466:
+            if database_event_idx == 10466:
                 rprint(event_row)
 
             if event_map_sample_idx >200:
