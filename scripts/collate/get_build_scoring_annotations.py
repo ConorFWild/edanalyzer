@@ -95,6 +95,8 @@ def main(config_path):
 
             annotation_idx += 1
 
+        table_annotation.flush()
+
         train_valid = [x['idx'] for x in table_annotation.where("""(partition == b'train') & (annotation)""")]
         test_valid = [x['idx'] for x in table_annotation.where("""(partition == b'test') & (annotation)""")]
         rprint(f"Got {len(train_valid)} train datasets and {len(test_valid)} test datasets!")
