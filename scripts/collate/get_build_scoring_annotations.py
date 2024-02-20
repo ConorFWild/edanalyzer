@@ -81,7 +81,8 @@ def main(config_path):
 
             # Get the partition
             event = query[table_event_sample[event_table_idx]['event_idx']]
-            rprint(event.pandda.system.name)
+            if annotation_bool:
+                rprint(event.pandda.system.name)
             if event.pandda.system.name in test_systems:
                 partition = 'test'
             else:
