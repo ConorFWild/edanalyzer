@@ -34,9 +34,7 @@ def main(config_path):
     except Exception as e:
         print(f"Exception setting up database: {e}")
 
-    #
-    with pony.orm.db_session:
-        query = [_x for _x in pony.orm.select(_y for _y in EventORM)]
+
 
     #
     pandda_key = config['panddas']['pandda_key'],
@@ -65,37 +63,41 @@ def main(config_path):
     inspect_table = pd.read_csv(working_dir / 'build_annotation_pandda' / 'analyses' / 'pandda_inspect_events.csv')
 
     #
-    table_annotation_row = table_annotation.row
-    annotation_idx = 0
-    for _idx, row in inspect_table.iterrows():
-        event_table_idx = row['dtag']
+    with pony.orm.db_session:
+        query = [_x for _x in pony.orm.select(_y for _y in EventORM)]
 
-        # Get the annotation
-        annotation = row['Ligand Confidence']
-        if annotation == "High":
-            annotation_bool = True
-        else:
-            annotation_bool = False
+        #
+        table_annotation_row = table_annotation.row
+        annotation_idx = 0
+        for _idx, row in inspect_table.iterrows():
+            event_table_idx = row['dtag']
 
-        # Get the partition
-        event = query[table_event_sample[event_table_idx]['event_idx']]
-        if event.pandda.system.name in test_systems:
-            partition = 'test'
-        else:
-            partition = 'train'
+            # Get the annotation
+            annotation = row['Ligand Confidence']
+            if annotation == "High":
+                annotation_bool = True
+            else:
+                annotation_bool = False
 
-        # Update
-        row['idx'] = annotation_idx
-        row['event_map_table_idx'] = event_table_idx
-        row['annotation'] = annotation_bool
-        row['partition'] = partition
-        row.append()
+            # Get the partition
+            event = query[table_event_sample[event_table_idx]['event_idx']]
+            if event.pandda.system.name in test_systems:
+                partition = 'test'
+            else:
+                partition = 'train'
 
-        annotation_idx += 1
+            # Update
+            row['idx'] = annotation_idx
+            row['event_map_table_idx'] = event_table_idx
+            row['annotation'] = annotation_bool
+            row['partition'] = partition
+            row.append()
 
-    train_valid = [x['idx'] for x in table_annotation.where("""(partition == b'train') & (annotation)""")]
-    test_valid = [x['idx'] for x in table_annotation.where("""(partition == b'test') & (annotation)""")]
-    rprint(f"Got {len(train_valid)} train datasets and {len(test_valid)} test datasets!")
+            annotation_idx += 1
+
+        train_valid = [x['idx'] for x in table_annotation.where("""(partition == b'train') & (annotation)""")]
+        test_valid = [x['idx'] for x in table_annotation.where("""(partition == b'test') & (annotation)""")]
+        rprint(f"Got {len(train_valid)} train datasets and {len(test_valid)} test datasets!")
 
     fileh.close()
 
