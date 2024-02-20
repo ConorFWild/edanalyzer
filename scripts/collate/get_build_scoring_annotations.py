@@ -67,7 +67,7 @@ def main(config_path):
     #
     table_annotation_row = table_annotation.row
     annotation_idx = 0
-    for row in inspect_table.iterrows():
+    for _idx, row in inspect_table.iterrows():
         event_table_idx = row['dtag']
 
         # Get the annotation
