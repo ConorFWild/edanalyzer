@@ -203,7 +203,7 @@ class BuildScoringDatasetHDF5(Dataset):
         self.root = root
         self.event_map_table = root.event_map_sample
         self.pose_table = root.known_hit_pose
-        self.annotation_table = root.annotations
+        self.annotation_table = root.annotation
         self.sample_indexes = sample_indexes
 
     def __len__(self):

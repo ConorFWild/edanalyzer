@@ -35,7 +35,6 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the HDF5 root group
     root = fileh.root
-    table_event_sample = root.event_map_sample
     table_annotation = root.annotation
     table_poses = root.known_hit_pose
 
