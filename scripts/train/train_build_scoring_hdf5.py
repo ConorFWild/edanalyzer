@@ -74,7 +74,7 @@ def main(config_path, batch_size=12, num_workers=None):
         ),
         batch_size=batch_size,
         shuffle=True,
-        num_workers=num_workers,
+        # num_workers=num_workers,
     )
     rprint(f"Got {len(dataset_train)} training samples")
     dataset_test = DataLoader(
@@ -83,7 +83,7 @@ def main(config_path, batch_size=12, num_workers=None):
             np.array(test_pose_idxs)
         ),
         batch_size=batch_size,
-        num_workers=num_workers,
+        # num_workers=num_workers,
     )
     rprint(f"Got {len(dataset_test)} test samples")
 
