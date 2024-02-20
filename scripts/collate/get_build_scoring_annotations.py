@@ -62,6 +62,9 @@ def main(config_path):
     # Create 2 new tables in group1
     rprint(f"Creating table")
     table_annotation = fileh.create_table(root, "annotation", BuildAnnotation, )
+    train_valid = [x['idx'] for x in table_annotation.where("""(partition == b'train') & (annotation)""")]
+    test_valid = [x['idx'] for x in table_annotation.where("""(partition == b'test') & (annotation)""")]
+    rprint(f"Got {len(train_valid)} train datasets and {len(test_valid)} test datasets!")
 
     # Get the PanDDA inspect table
     inspect_table = pd.read_csv(working_dir / 'build_annotation_pandda' / 'analyses' / 'pandda_inspect_events.csv')
@@ -94,6 +97,10 @@ def main(config_path):
         row.append()
 
         annotation_idx += 1
+
+    train_valid = [x['idx'] for x in table_annotation.where("""(partition == b'train') & (annotation)""")]
+    test_valid = [x['idx'] for x in table_annotation.where("""(partition == b'test') & (annotation)""")]
+    rprint(f"Got {len(train_valid)} train datasets and {len(test_valid)} test datasets!")
 
     fileh.close()
 
