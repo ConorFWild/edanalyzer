@@ -53,7 +53,7 @@ def main(config_path):
     # Create 2 new tables in group1
     rprint(f"Creating table")
     try:
-        root.table_annotation.remove()
+        root.annotation.remove()
     except Exception as e:
         rprint(e)
     table_annotation = fileh.create_table(root, "annotation", BuildAnnotation, )
