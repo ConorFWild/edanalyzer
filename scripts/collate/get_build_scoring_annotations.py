@@ -35,7 +35,8 @@ def main(config_path):
         print(f"Exception setting up database: {e}")
 
     #
-    query = [_x for _x in pony.orm.select(_y for _y in EventORM)]
+    with pony.orm.db_session:
+        query = [_x for _x in pony.orm.select(_y for _y in EventORM)]
 
     #
     pandda_key = config['panddas']['pandda_key'],
