@@ -87,11 +87,11 @@ def main(config_path):
                 partition = 'train'
 
             # Update
-            row['idx'] = annotation_idx
-            row['event_map_table_idx'] = event_table_idx
-            row['annotation'] = annotation_bool
-            row['partition'] = partition
-            row.append()
+            table_annotation_row['idx'] = annotation_idx
+            table_annotation_row['event_map_table_idx'] = event_table_idx
+            table_annotation_row['annotation'] = annotation_bool
+            table_annotation_row['partition'] = partition
+            table_annotation_row.append()
 
             annotation_idx += 1
 
