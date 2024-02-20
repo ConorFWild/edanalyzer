@@ -93,7 +93,9 @@ def main(config_path, batch_size=12, num_workers=None):
     # Train
     checkpoint_callback = ModelCheckpoint(dirpath='output/build_scoring_hdf5')
     logger = CSVLogger("output/build_scoring_hdf5/logs")
-    trainer = lt.Trainer(accelerator='gpu', logger=logger, callbacks=[checkpoint_callback], enable_progress_bar=False)
+    trainer = lt.Trainer(accelerator='gpu', logger=logger, callbacks=[checkpoint_callback],
+                         # enable_progress_bar=False
+                         )
     trainer.fit(model, dataset_train, dataset_test)
 
 
