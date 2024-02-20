@@ -1,0 +1,102 @@
+import time
+from pathlib import Path
+
+import fire
+import yaml
+from rich import print as rprint
+import pandas as pd
+import pony
+import joblib
+import pickle
+import gemmi
+import networkx as nx
+import networkx.algorithms.isomorphism as iso
+import numpy as np
+import tables
+from scipy.spatial.transform import Rotation as R
+
+from edanalyzer import constants
+from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale
+from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_system_from_dtag, _get_known_hit_structures, \
+    _get_known_hits, _get_known_hit_centroids, _res_to_array
+from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
+    ExperimentORM, LigandORM, AutobuildORM
+from edanalyzer.data.build_data import BuildAnnotation
+
+
+def main(config_path):
+    rprint(f'Running collate_database from config file: {config_path}')
+    # Load config
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
+
+    #
+    custom_annotations_path = Path(config['working_directory']) / "custom_annotations.pickle"
+    with open(custom_annotations_path, 'rb') as f:
+        custom_annotations = pickle.load(f)
+
+    #
+    working_dir = Path(config['working_directory'])
+    database_path = Path(config['working_directory']) / "database.db"
+    try:
+        db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
+        db.generate_mapping(create_tables=True)
+    except Exception as e:
+        print(f"Exception setting up database: {e}")
+
+    #
+    query = [_x for _x in pony.orm.select(_y for _y in EventORM)]
+
+    #
+    pandda_key = config['panddas']['pandda_key'],
+    test_systems = config['test']['test_systems']
+
+    #
+    # Open a file in "w"rite mode
+    fileh = tables.open_file("output/build_data_v2.h5", mode="r+")
+
+    # Get the HDF5 root group
+    root = fileh.root
+    table_event_sample = root.event_map_sample
+
+    # Create 2 new tables in group1
+    rprint(f"Creating table")
+    table_annotation = fileh.create_table(root, "annotation", BuildAnnotation, )
+
+    # Get the PanDDA inspect table
+    inspect_table = pd.read_csv(working_dir / 'build_annotation_pandda' / 'analyses' / 'pandda_inspect_events.csv')
+
+    #
+    table_annotation_row = table_annotation.row
+    annotation_idx = 0
+    for row in inspect_table.itertuples():
+        event_table_idx = row['dtag']
+
+        # Get the annotation
+        annotation = row['Ligand Confidence']
+        if annotation == "High":
+            annotation_bool = True
+        else:
+            annotation_bool = False
+
+        # Get the partition
+        event = query[table_event_sample[event_table_idx]['event_idx']]
+        if event.pandda.system.name in test_systems:
+            partition = 'test'
+        else:
+            partition = 'train'
+
+        # Update
+        row['idx'] = annotation_idx
+        row['event_map_table_idx'] = event_table_idx
+        row['annotation'] = annotation_bool
+        row['partition'] = partition
+        row.append()
+
+        annotation_idx += 1
+
+    fileh.close()
+
+
+if __name__ == "__main__":
+    fire.Fire(main)
