@@ -59,6 +59,9 @@ def main(config_path, batch_size=12, num_workers=None):
             train_pose_idxs.append(row['idx'])
         elif pose_event_table_idx in test_event_table_idxs:
             test_pose_idxs.append(row['idx'])
+    rprint(f"Got {len(train_pose_idxs)} train samples")
+    rprint(f"Got {len(test_pose_idxs)} test samples")
+
 
     # Get the dataset
 
