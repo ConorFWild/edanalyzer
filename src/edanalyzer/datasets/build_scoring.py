@@ -214,10 +214,10 @@ class BuildScoringDatasetHDF5(Dataset):
         sample_idx = self.sample_indexes[idx]
 
         # Get the event map and pose
-        event_map_data = self.event_map_table[sample_idx]
+        pose_data = self.pose_table[sample_idx]
+        event_map_data = self.event_map_table[pose_data['event_map_sample_idx']]
         event_map = _get_grid_from_hdf5(event_map_data)
 
-        pose_data = self.pose_table[sample_idx]
         residue = _get_res_from_hdf5(pose_data)
 
         # Get the event from the database
