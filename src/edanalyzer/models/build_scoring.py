@@ -22,10 +22,10 @@ class Annotation(tables.IsDescription):
 class LitBuildScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
-        self.resnet = resnet18(num_classes=1, num_input=4).float()
+        self.resnet = resnet18(num_classes=1, num_input=1).float()
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/build_scoring_3')
+        self.output = Path('./output/build_scoring_hdf5')
 
     def forward(self, x):
 

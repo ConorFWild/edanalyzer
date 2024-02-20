@@ -198,8 +198,8 @@ def _get_res_from_hdf5(pose_data):
 
 class BuildScoringDatasetHDF5(Dataset):
 
-    def __init__(self, data, root, sample_indexes):
-        self.data = data
+    def __init__(self, root, sample_indexes):
+        # self.data = data
         self.root = root
         self.event_map_table = root.event_map_sample
         self.pose_table = root.known_hit_pose
@@ -221,7 +221,7 @@ class BuildScoringDatasetHDF5(Dataset):
         residue = _get_res_from_hdf5(pose_data)
 
         # Get the event from the database
-        event = self.data[event_map_data['event_idx']]
+        # event = self.data[event_map_data['event_idx']]
 
         # Get sampling transform
         sample_array = np.zeros(
