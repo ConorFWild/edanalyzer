@@ -6,19 +6,9 @@ import yaml
 from rich import print as rprint
 import pandas as pd
 import pony
-import joblib
 import pickle
-import gemmi
-import networkx as nx
-import networkx.algorithms.isomorphism as iso
-import numpy as np
 import tables
-from scipy.spatial.transform import Rotation as R
 
-from edanalyzer import constants
-from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale
-from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_system_from_dtag, _get_known_hit_structures, \
-    _get_known_hits, _get_known_hit_centroids, _res_to_array
 from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM, AutobuildORM
 from edanalyzer.data.build_data import BuildAnnotation
