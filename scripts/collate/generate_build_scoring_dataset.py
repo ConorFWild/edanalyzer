@@ -192,6 +192,7 @@ def main(config_path):
         table_known_hit_pos_sample = fileh.create_table(root, "known_hit_pose", PoseSample, )
 
     #
+    rprint(f"Querying events...")
     with pony.orm.db_session:
         # partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
         query_events = pony.orm.select(
@@ -209,13 +210,15 @@ def main(config_path):
         }
         sorted_experiments = sorted(query, key=lambda _experiment: experiment_num_datasets[_experiment.path])
 
+        rprint(f"Querying processed events...")
         idx_col_pose = table_known_hit_pos_sample.cols.idx[:]
         idx_pose = int(idx_col_pose.max()) + 1
         idx_col_event = table_event_map_sample.cols.idx[:]
         idx_event = int(idx_col_event.max()) + 1
-        processed_event_idxs = table_event_map_sample.cols.event_idx_col[:]
+        processed_event_idxs = table_event_map_sample.cols.event_idx[:]
 
         for experiment in sorted_experiments:
+            rprint(f"Processing experiment: {experiment.path}")
             experiment_hit_results = [res for res in query_events if
                                       ([x for x in res[0].annotations][0].annotation) & (
                                               experiment.path == res[3].path)]
@@ -268,7 +271,7 @@ def main(config_path):
 
             # Get the closest annotated event to the known hit
             for known_hit_dataset in known_hits:
-                rprint(f"Got {len(known_hits[known_hit_dataset])} hits in dataset!")
+                rprint(f"Got {len(known_hits[known_hit_dataset])} hits in dataset {known_hit_dataset}!")
                 for known_hit_residue in known_hits[known_hit_dataset]:
 
                     # Get the associated event
@@ -285,7 +288,7 @@ def main(config_path):
 
                     for _event in close_events:
                         if _event[0].id in processed_event_idxs:
-                            rprint(f"Already generated poses for: {_event[0].id}")
+                            rprint(f"Already generated poses for: {_event[0].id}! Skipping!")
                             continue
 
                         # Get the sample transform
