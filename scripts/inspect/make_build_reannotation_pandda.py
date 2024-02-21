@@ -136,7 +136,6 @@ def _make_test_dataset_psuedo_pandda(
         finish_get_close_poses = time.time()
         rprint(f'Got close poses in: {finish_get_close_poses-begin_get_close_poses}')
 
-
         # Iterate over the event maps
         event_rows = []
         for event_map_sample in table_event_map_sample.iterrows():
