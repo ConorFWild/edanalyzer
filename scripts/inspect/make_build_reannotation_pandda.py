@@ -82,20 +82,16 @@ def _make_test_dataset_psuedo_pandda(
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
 
-    #
-    custom_annotations_path = Path(config['working_directory']) / "custom_annotations.pickle"
-    with open(custom_annotations_path, 'rb') as f:
-        custom_annotations = pickle.load(f)
-
     # Open a file in "w"rite mode
     fileh = tables.open_file("output/build_data_v2.h5", mode="r")
     print(fileh)
 
     # Get the HDF5 root group
     root = fileh.root
-    table_mtz_sample = root.mtz_sample
+    # table_mtz_sample = root.mtz_sample
     table_event_map_sample = root.event_map_sample
     table_known_hit_pos_sample = root.known_hit_pose
+    table_annotation = root.annotation
 
     # Load database
     working_dir = Path(config['working_directory'])
@@ -104,28 +100,36 @@ def _make_test_dataset_psuedo_pandda(
     db.generate_mapping(create_tables=True)
 
     # Make the directories
-    psuedo_pandda_dir = working_dir / "build_annotation_pandda"
+    psuedo_pandda_dir = working_dir / "build_annotation_pandda_2"
     analyses_dir = psuedo_pandda_dir / "analyses"
     processed_datasets_dir = psuedo_pandda_dir / "processed_datasets"
     analyse_table_path = analyses_dir / "pandda_analyse_events.csv"
-    inspect_table_path = analyses_dir / "pandda_inspect_events.csv"
+    # inspect_table_path = analyses_dir / "pandda_inspect_events.csv"
     analyse_site_table_path = analyses_dir / "pandda_analyse_sites.csv"
-    inspect_site_table_path = analyses_dir / "pandda_inspect_sites.csv"
+    # inspect_site_table_path = analyses_dir / "pandda_inspect_sites.csv"
 
     # Spoof the main directories
     try_make(psuedo_pandda_dir)
     try_make(analyses_dir)
     try_make(processed_datasets_dir)
 
+    # Get the idxs of annotated
+    annotated_idxs = table_annotation.cols.event_map_table_idx[:]
+
     with pony.orm.db_session:
         # partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
         query = [_x for _x in pony.orm.select(_event for _event in EventORM)]
 
         # Fetch the
-        close_poses = {_z['idx']: {'rmsd': 100} for _z in table_event_map_sample.iterrows()}
+        # Get idxs without annotations
+        close_poses = {_z['idx']: {'rmsd': 100} for _z in table_event_map_sample.iterrows() if _z['idx'] not in annotated_idxs}
         begin_get_close_poses = time.time()
         for x in table_known_hit_pos_sample.iterrows():
             y = x.fetch_all_fields()
+            # Skip if processed
+            if y['event_map_sample_idx'] in annotated_idxs:
+                continue
+
             close_poses[x['event_map_sample_idx']] = min(
                 [y, close_poses[x['event_map_sample_idx']]],
                 key=lambda _x: _x['rmsd'])
