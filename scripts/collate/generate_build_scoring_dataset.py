@@ -171,16 +171,25 @@ def main(config_path):
 
     #
     # Open a file in "w"rite mode
-    fileh = tables.open_file("output/build_data_v2.h5", mode="w")
+    fileh = tables.open_file("output/build_data_v2.h5", mode="a")
 
     # Get the HDF5 root group
     root = fileh.root
 
     # Create 2 new tables in group1
-    rprint(f"Creating table")
-    table_mtz_sample = fileh.create_table(root, "mtz_sample", MTZSample, )
-    table_event_map_sample = fileh.create_table(root, "event_map_sample", EventMapSample)
-    table_known_hit_pos_sample = fileh.create_table(root, "known_hit_pose", PoseSample, )
+    rprint(f"Getting or creating table")
+    try:
+        table_mtz_sample = root.mtz_sample
+    except:
+        table_mtz_sample = fileh.create_table(root, "mtz_sample", MTZSample, )
+    try:
+        table_event_map_sample = root.event_map_sample
+    except:
+        table_event_map_sample = fileh.create_table(root, "event_map_sample", EventMapSample)
+    try:
+        table_known_hit_pos_sample = root.known_hit_pose
+    except:
+        table_known_hit_pos_sample = fileh.create_table(root, "known_hit_pose", PoseSample, )
 
     #
     with pony.orm.db_session:

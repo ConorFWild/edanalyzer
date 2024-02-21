@@ -23,11 +23,21 @@ def _get_inspect_tables(possible_pandda_paths):
     inspect_tables = {}
     for possible_pandda_path in possible_pandda_paths:
         analyse_table_path = possible_pandda_path / "analyses" / "pandda_inspect_events.csv"
-        if not analyse_table_path.exists():
+        try:
+            analyse_path_exists = analyse_table_path.exists()
+        except:
+            analyse_path_exists = False
+
+        if not analyse_path_exists.exists():
             analyse_table_paths = [_x for _x in possible_pandda_path.glob("analyses*/pandda_inspect_events.csv")]
             if len(analyse_table_paths) > 0:
                 analyse_table_path = analyse_table_paths[0]
-        if analyse_table_path.exists():
+        try:
+            analyse_path_exists = analyse_table_path.exists()
+        except:
+            analyse_path_exists = False
+
+        if analyse_path_exists:
             try:
                 analyse_table = pd.read_csv(analyse_table_path)
                 if len(analyse_table[analyse_table[constants.PANDDA_INSPECT_VIEWED] == True]) < 15:
