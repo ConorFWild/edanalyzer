@@ -43,18 +43,22 @@ def _get_events(
 ):
     with pony.orm.db_session:
 
-        systems = {}
-        experiments = {}
-        panddas = {}
+        systems = {_system.name: _system for _system in pony.orm.select(_y for _y in SystemORM)}
+        experiments = {Path(_experiment.path): _experiment for _experiment in pony.orm.select(_y for _y in ExperimentORM)}
+        panddas = {Path(_pandda.path): _pandda for _pandda in pony.orm.select(_y for _y in PanDDAORM)}
         annotations = {}
         partitions = {}
-        datasets = {}
+        datasets = {_dataset.dtag: _dataset for _dataset in pony.orm.select(_y for _y in DatasetORM)}
         events = {}
         # Multiprocess PanDDAs, returning valid events for addition to the
         with joblib.Parallel(n_jobs=-1, verbose=50) as parallel:
             # j = 0
             for pandda_path, inspect_table in inspect_tables.items():
+
                 print(f"### {pandda_path} ")
+
+                if pandda_path in panddas:
+                    rprint(f"Already have PanDDA at path: {pandda_path}")
 
                 # if j > 10:
                 #     continue
@@ -591,7 +595,6 @@ def main(config_path):
         for path
         in Path('/').glob(dataset_pattern[1:])
         if not any([path.match(exclude_pattern) for exclude_pattern in config['exclude']])
-
     ]
     rprint(f"Got {len(possible_pandda_paths)} pandda paths!")
     rprint(possible_pandda_paths)
