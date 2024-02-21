@@ -134,7 +134,7 @@ def _make_test_dataset_psuedo_pandda(
                 [y, close_poses[x['event_map_sample_idx']]],
                 key=lambda _x: _x['rmsd'])
         finish_get_close_poses = time.time()
-        rprint(f'Got close poses in: {finish_get_close_poses-begin_get_close_poses}')
+        rprint(f'Got {len(close_poses)} close poses in: {finish_get_close_poses-begin_get_close_poses}')
 
         # Iterate over the event maps
         event_rows = []
@@ -142,6 +142,8 @@ def _make_test_dataset_psuedo_pandda(
             rprint(event_map_sample['idx'])
             # Get the corresponding poses
             event_map_sample_idx = event_map_sample['idx']
+            if event_map_sample_idx in annotated_idxs:
+                continue
             database_event_idx = event_map_sample['event_idx']
             # poses = [x.fetch_all_fields() for x in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}')]
             # psuedo_dtag = f"{database_event_idx}_{event_map_sample['res_id'].decode('utf-8')}"
