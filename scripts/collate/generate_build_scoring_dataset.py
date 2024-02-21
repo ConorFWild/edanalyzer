@@ -48,7 +48,7 @@ rprint(f"Generated small rotations in: {round(time_finish_gen - time_begin_gen, 
 
 
 def _get_known_hit_poses(
-        res,event_to_lig_com,
+        res, event_to_lig_com,
         centroid=np.array([22.5, 22.5, 22.5]).reshape((1, 3)),
         translation=10,
         num_poses=50
@@ -317,9 +317,10 @@ def main(config_path):
                         # Get the base event
                         poss, elements = _res_to_array(known_hits[known_hit_dataset][known_hit_residue], )
                         com = np.mean(poss, axis=0).reshape((1, 3))
-                        event_to_lig_com = com-centroid.reshape((1,3))
+                        event_to_lig_com = com - centroid.reshape((1, 3))
                         _poss_centered = poss - com
-                        _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape((1, 3)) + event_to_lig_com
+                        _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape(
+                            (1, 3)) + event_to_lig_com
                         size = min(60, _rmsd_target.shape[0])
                         elements_array = np.zeros(60, dtype=np.int32)
                         pose_array = np.zeros((60, 3))
@@ -359,8 +360,6 @@ def main(config_path):
                             idx_pose += 1
 
                         idx_event += 1
-
-
 
     fileh.close()
 
