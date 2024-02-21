@@ -266,4 +266,4 @@ class BuildScoringDatasetHDF5(Dataset):
         label = np.array(rmsd)
         label_float = label.astype(np.float32)
 
-        return idx, torch.from_numpy(image_float), torch.from_numpy(label_float)
+        return sample_idx, torch.from_numpy(image_float), torch.from_numpy(label_float)
