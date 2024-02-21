@@ -28,7 +28,7 @@ def _get_inspect_tables(possible_pandda_paths):
         except:
             analyse_path_exists = False
 
-        if not analyse_path_exists.exists():
+        if not analyse_path_exists:
             analyse_table_paths = [_x for _x in possible_pandda_path.glob("analyses*/pandda_inspect_events.csv")]
             if len(analyse_table_paths) > 0:
                 analyse_table_path = analyse_table_paths[0]

@@ -209,8 +209,10 @@ def main(config_path):
         }
         sorted_experiments = sorted(query, key=lambda _experiment: experiment_num_datasets[_experiment.path])
 
-        idx_pose = 0
-        idx_event = 0
+        idx_col_pose = table_known_hit_pos_sample.cols.idx[:]
+        idx_pose = int(idx_col_pose.max()) + 1
+        idx_col_event = table_event_map_sample.cols.idx[:]
+        idx_event = int(idx_col_event.max()) + 1
 
         for experiment in sorted_experiments:
             experiment_hit_results = [res for res in query_events if
