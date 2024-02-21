@@ -213,6 +213,7 @@ def main(config_path):
         idx_pose = int(idx_col_pose.max()) + 1
         idx_col_event = table_event_map_sample.cols.idx[:]
         idx_event = int(idx_col_event.max()) + 1
+        processed_event_idxs = table_event_map_sample.cols.event_idx_col[:]
 
         for experiment in sorted_experiments:
             experiment_hit_results = [res for res in query_events if
@@ -283,6 +284,9 @@ def main(config_path):
                     rprint(f"Got {len(close_events)} close events: {close_event_ids}")
 
                     for _event in close_events:
+                        if _event[0].id in processed_event_idxs:
+                            rprint(f"Already generated poses for: {_event[0].id}")
+                            continue
 
                         # Get the sample transform
                         centroid = np.array([_event[0].x, _event[0].y, _event[0].z])
