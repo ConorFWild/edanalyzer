@@ -22,20 +22,23 @@ from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionO
 def _get_inspect_tables(possible_pandda_paths):
     inspect_tables = {}
     for possible_pandda_path in possible_pandda_paths:
-        analyse_table_paths = possible_pandda_path.glob("analyses*/pandda_inspect_events.csv")
-        for analyse_table_path in analyse_table_paths:
-            if analyse_table_path.exists():
-                try:
-                    analyse_table = pd.read_csv(analyse_table_path)
-                    if len(analyse_table[analyse_table[constants.PANDDA_INSPECT_VIEWED] == True]) < 15:
-                        continue
-                    if len(analyse_table[analyse_table[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == "High"]) < 2:
-                        continue
-                    inspect_tables[possible_pandda_path] = analyse_table
-                except Exception as e:
-                    print(f"\tERROR READING INSPECT TABLE: {analyse_table_path} : {e}")
-            else:
-                print(f"\tERROR READING INSPECT TABLE : {analyse_table_path} : NO SUCH TABLE!")
+        analyse_table_path = possible_pandda_path / "analyses" / "pandda_inspect_events.csv"
+        if not analyse_table_path.exists():
+            analyse_table_paths = [_x for _x in possible_pandda_path.glob("analyses*/pandda_inspect_events.csv")]
+            if len(analyse_table_paths) > 0:
+                analyse_table_path = analyse_table_paths[0]
+        if analyse_table_path.exists():
+            try:
+                analyse_table = pd.read_csv(analyse_table_path)
+                if len(analyse_table[analyse_table[constants.PANDDA_INSPECT_VIEWED] == True]) < 15:
+                    continue
+                if len(analyse_table[analyse_table[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == "High"]) < 2:
+                    continue
+                inspect_tables[possible_pandda_path] = analyse_table
+            except Exception as e:
+                print(f"\tERROR READING INSPECT TABLE: {analyse_table_path} : {e}")
+        else:
+            print(f"\tERROR READING INSPECT TABLE : {analyse_table_path} : NO SUCH TABLE!")
     return inspect_tables
 
 
