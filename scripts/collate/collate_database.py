@@ -13,7 +13,8 @@ import networkx.algorithms.isomorphism as iso
 import numpy as np
 
 from edanalyzer import constants
-from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_system_from_dtag
+from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_system_from_dtag, _get_known_hit_structures, \
+    _get_known_hits, _get_known_hit_centroids, _res_to_array
 from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM, AutobuildORM
 
@@ -375,6 +376,8 @@ def _get_builds(pandda_key, test_systems):
         query = pony.orm.select(
             experiment for experiment in ExperimentORM
         )
+        autobuilds = {_build.dtag: _build for _build in pony.orm.select(_y for _y in AutobuildORM)}
+
 
         # Order experiments from least datasets to most for fast results
         experiment_num_datasets = {
@@ -442,6 +445,9 @@ def _get_builds(pandda_key, test_systems):
             # For each known hit, for each selected autobuild, graph match and symmtery match and get RMSDs
             records = []
             for dtag, dtag_known_hits in known_hits.items():
+                if dtag in autobuilds:
+                    rprint(f"Already have builds for dataset: {dtag}. Skipping!")
+
                 # print(dtag)
                 if dtag not in ligand_graph_matches:
                     continue
