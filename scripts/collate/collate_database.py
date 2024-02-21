@@ -60,6 +60,7 @@ def _get_events(
 
                 if pandda_path in panddas:
                     rprint(f"Already have PanDDA at path: {pandda_path}")
+                    continue
 
                 # if j > 10:
                 #     continue
