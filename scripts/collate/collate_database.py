@@ -447,6 +447,7 @@ def _get_builds(pandda_key, test_systems):
             for dtag, dtag_known_hits in known_hits.items():
                 if dtag in autobuilds:
                     rprint(f"Already have builds for dataset: {dtag}. Skipping!")
+                    continue
 
                 # print(dtag)
                 if dtag not in ligand_graph_matches:
