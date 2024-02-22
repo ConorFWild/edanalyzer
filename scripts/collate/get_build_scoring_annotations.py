@@ -55,7 +55,7 @@ def main(config_path):
     # except Exception as e:
     #     rprint(e)
     try:
-        table_annotation =
+        table_annotation = root.annotation
     except:
         table_annotation = fileh.create_table(root, "annotation", BuildAnnotation, )
     train_valid = [x['idx'] for x in table_annotation.where("""(partition == b'train') & (annotation)""")]
