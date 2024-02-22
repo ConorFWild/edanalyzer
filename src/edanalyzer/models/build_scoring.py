@@ -8,7 +8,7 @@ import lightning as lt
 import yaml
 import tables
 
-from .resnet import resnet18
+from .resnet import resnet18, resnet10
 
 
 class Annotation(tables.IsDescription):
@@ -22,7 +22,7 @@ class Annotation(tables.IsDescription):
 class LitBuildScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
-        self.resnet = resnet18(num_classes=1, num_input=1).float()
+        self.resnet = resnet10(num_classes=1, num_input=1).float()
         self.train_annotations = []
         self.test_annotations = []
         self.output = Path('./output/build_scoring_hdf5')

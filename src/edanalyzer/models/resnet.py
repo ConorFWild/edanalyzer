@@ -1099,6 +1099,7 @@ class SqueezeNet(nn.Module):
         # return self.act(x)
         return x
 
+
 def _squeezenet(version, pretrained, progress, **kwargs):
     model = SqueezeNet(version, **kwargs)
     if pretrained:
@@ -1120,7 +1121,6 @@ def squeezenet1_0(pretrained=False, progress=True, **kwargs):
     return _squeezenet('1_0', pretrained, progress, **kwargs)
 
 
-
 def squeezenet1_1(pretrained=False, progress=True, **kwargs):
     r"""SqueezeNet 1.1 model from the `official SqueezeNet repo
     <https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.1>`_.
@@ -1135,13 +1135,13 @@ def squeezenet1_1(pretrained=False, progress=True, **kwargs):
 
 import torch
 import torch.nn as nn
+
 # from .utils import load_state_dict_from_url
 
 
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
            'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
            'wide_resnet50_2', 'wide_resnet101_2']
-
 
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
@@ -1362,7 +1362,7 @@ class ResNet(nn.Module):
 
         x = self.avgpool(x)
         # x = torch.flatten(x, 1)
-        x = x.view(-1, x.shape[1]*x.shape[2]*x.shape[3]*x.shape[4])
+        x = x.view(-1, x.shape[1] * x.shape[2] * x.shape[3] * x.shape[4])
         x = self.fc(x)
 
         return x
@@ -1376,6 +1376,17 @@ def _resnet(arch, block, layers, pretrained, progress, **kwargs):
                                               progress=progress)
         model.load_state_dict(state_dict)
     return model
+
+
+def resnet10(pretrained=False, progress=True, **kwargs):
+    r"""ResNet-18 model from
+    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _resnet('resnet18', BasicBlock, [1, 1, 1, 1], pretrained, progress,
+                   **kwargs)
 
 
 def resnet18(pretrained=False, progress=True, **kwargs):
