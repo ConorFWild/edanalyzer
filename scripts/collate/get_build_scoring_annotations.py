@@ -68,7 +68,10 @@ def main(config_path):
 
         #
         table_annotation_row = table_annotation.row
-        annotation_idx = 0
+        # annotation_idx = 0
+        idx_col = table_annotation.cols.idx[:]
+        annotation_idx = int(idx_col.max()) + 1
+
         for _idx, row in inspect_table.iterrows():
             event_table_idx = row['dtag']
 
