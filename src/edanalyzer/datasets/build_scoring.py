@@ -197,7 +197,6 @@ def _get_res_from_arrays(positions, elements):
 
 
 def _get_res_from_hdf5(pose_data):
-
     return _get_res_from_arrays(pose_data['positions'], pose_data['elements'])
 
 
@@ -227,7 +226,6 @@ class BuildScoringDatasetHDF5(Dataset):
         event_map = _get_grid_from_hdf5(event_map_data)
         annotation = self.annotation_table[event_map_idx]
 
-
         # Get the valid data
         valid_mask = pose_data['elements'] != 0
         valid_poss = pose_data['positions'][valid_mask]
@@ -243,7 +241,7 @@ class BuildScoringDatasetHDF5(Dataset):
             total_mask = np.full(valid_elements.size, False)
             for _centre in num_centres:
                 selected_atom = rng.integers(1, valid_elements.size)
-                poss_distances = valid_poss - valid_poss[selected_atom,:].reshape((1,3))
+                poss_distances = valid_poss - valid_poss[selected_atom, :].reshape((1, 3))
                 close_mask = poss_distances[np.linalg.norm(poss_distances, axis=1) < 2.5]
                 total_mask[close_mask] = True
 
@@ -293,10 +291,10 @@ class BuildScoringDatasetHDF5(Dataset):
 
         # Make the annotation
         rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
-        if pose_data['rmsd'] > 3.0:
+        if rmsd > 3.0:
             rmsd = 3.0
         else:
-            rmsd = pose_data['rmsd']
+            rmsd = rmsd
         label = np.array(rmsd)
         label_float = label.astype(np.float32)
 
