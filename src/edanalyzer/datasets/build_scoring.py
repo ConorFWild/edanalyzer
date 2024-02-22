@@ -293,8 +293,7 @@ class BuildScoringDatasetHDF5(Dataset):
         rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
         if rmsd > 3.0:
             rmsd = 3.0
-        else:
-            rmsd = rmsd
+
         label = np.array(rmsd)
         label_float = label.astype(np.float32)
 
