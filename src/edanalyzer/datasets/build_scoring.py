@@ -175,11 +175,11 @@ def _get_grid_from_hdf5(event_map_data):
     return grid
 
 
-def _get_res_from_hdf5(pose_data):
+def _get_res_from_arrays(positions, elements):
     res = gemmi.Residue()
     res.name = 'LIG'
 
-    for _pos, _element in zip(pose_data['positions'], pose_data['elements']):
+    for _pos, _element in zip(positions, elements):
         if _element != 0:
             pos = gemmi.Position(_pos[0], _pos[1], _pos[2])
             if _element == 0:
@@ -196,6 +196,11 @@ def _get_res_from_hdf5(pose_data):
     return res
 
 
+def _get_res_from_hdf5(pose_data):
+
+    return _get_res_from_arrays(pose_data['positions'], pose_data['elements'])
+
+
 class BuildScoringDatasetHDF5(Dataset):
 
     def __init__(self, root, sample_indexes):
@@ -203,6 +208,7 @@ class BuildScoringDatasetHDF5(Dataset):
         self.root = root
         self.event_map_table = root.event_map_sample
         self.pose_table = root.known_hit_pose
+        self.delta_table = root.delta
         self.annotation_table = root.annotation
         self.sample_indexes = sample_indexes
 
@@ -215,10 +221,37 @@ class BuildScoringDatasetHDF5(Dataset):
 
         # Get the event map and pose
         pose_data = self.pose_table[sample_idx]
-        event_map_data = self.event_map_table[pose_data['event_map_sample_idx']]
+        event_map_idx = pose_data['event_map_sample_idx']
+        event_map_data = self.event_map_table[event_map_idx]
+        delta = self.delta_table[sample_idx]
         event_map = _get_grid_from_hdf5(event_map_data)
+        annotation = self.annotation_table[event_map_idx]
 
-        residue = _get_res_from_hdf5(pose_data)
+
+        # Get the valid data
+        valid_mask = pose_data['elements'] != 0
+        valid_poss = pose_data['positions'][valid_mask]
+        valid_elements = pose_data['elements'][valid_mask]
+        valid_deltas = delta['delta'][valid_mask]
+
+        # Subsample if training
+        if annotation['partition'] == 'train':
+            rng = np.random.default_rng()
+            num_centres = rng.integers(1, 5)
+
+            # For each centre mask atoms close to it
+            total_mask = np.full(valid_elements.size, False)
+            for _centre in num_centres:
+                selected_atom = rng.integers(1, valid_elements.size)
+                poss_distances = valid_poss - valid_poss[selected_atom,:].reshape((1,3))
+                close_mask = poss_distances[np.linalg.norm(poss_distances, axis=1) < 2.5]
+                total_mask[close_mask] = True
+
+        else:
+            total_mask = np.full(valid_elements.size, True)
+
+        residue = _get_res_from_arrays(valid_poss[total_mask], valid_elements[total_mask])
+        # residue = _get_res_from_hdf5(pose_data)
 
         # Get the event from the database
         # event = self.data[event_map_data['event_idx']]
@@ -259,6 +292,7 @@ class BuildScoringDatasetHDF5(Dataset):
         image_float = image.astype(np.float32)
 
         # Make the annotation
+        rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
         if pose_data['rmsd'] > 3.0:
             rmsd = 3.0
         else:
