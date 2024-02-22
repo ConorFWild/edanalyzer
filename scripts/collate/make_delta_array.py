@@ -68,7 +68,7 @@ def _make_test_dataset_psuedo_pandda(
             _event_sample_idx = _x['event_map_sample_idx']
             _ref_pose = close_poses[_event_sample_idx]['positions']
             _pose = _x['positions']
-            _delta_vecs = _pose - _ref_pose
+            _delta_vecs = _ref_pose - _pose
             _delta = np.linalg.norm(_delta_vecs, axis=1)
 
             delta_row['idx'] = _x['idx']
