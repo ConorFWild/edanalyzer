@@ -50,11 +50,14 @@ def main(config_path):
 
     # Create 2 new tables in group1
     rprint(f"Creating table")
+    # try:
+    #     root.annotation.remove()
+    # except Exception as e:
+    #     rprint(e)
     try:
-        root.annotation.remove()
-    except Exception as e:
-        rprint(e)
-    table_annotation = fileh.create_table(root, "annotation", BuildAnnotation, )
+        table_annotation =
+    except:
+        table_annotation = fileh.create_table(root, "annotation", BuildAnnotation, )
     train_valid = [x['idx'] for x in table_annotation.where("""(partition == b'train') & (annotation)""")]
     test_valid = [x['idx'] for x in table_annotation.where("""(partition == b'test') & (annotation)""")]
     rprint(f"Got {len(train_valid)} train datasets and {len(test_valid)} test datasets!")
@@ -70,7 +73,10 @@ def main(config_path):
         table_annotation_row = table_annotation.row
         # annotation_idx = 0
         idx_col = table_annotation.cols.idx[:]
-        annotation_idx = int(idx_col.max()) + 1
+        if idx_col.size == 0:
+            annotation_idx = 0
+        else:
+            annotation_idx = int(idx_col.max()) + 1
 
         for _idx, row in inspect_table.iterrows():
             event_table_idx = row['dtag']
