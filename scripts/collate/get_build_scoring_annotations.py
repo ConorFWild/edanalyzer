@@ -63,7 +63,7 @@ def main(config_path):
     rprint(f"Got {len(train_valid)} train datasets and {len(test_valid)} test datasets!")
 
     # Get the PanDDA inspect table
-    inspect_table = pd.read_csv(working_dir / 'build_annotation_pandda' / 'analyses' / 'pandda_inspect_events.csv')
+    inspect_table = pd.read_csv(working_dir / 'build_annotation_pandda_2' / 'analyses' / 'pandda_inspect_events.csv')
 
     #
     with pony.orm.db_session:
