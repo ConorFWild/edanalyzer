@@ -74,7 +74,7 @@ def _make_test_dataset_psuedo_pandda(
             delta_row['idx'] = _x['idx']
             delta_row['pose_idx'] = _x['idx']
             delta_row['delta'] = _delta
-            delta_row['delta_vecs'] = _delta_vecs
+            delta_row['delta_vec'] = _delta_vecs
             delta_row.append()
 
     fileh.close()
