@@ -44,3 +44,12 @@ class PoseSample(tables.IsDescription):
 
     event_map_sample_idx = tables.Int32Col()
     mtz_sample_idx = tables.Int32Col()
+
+
+class Delta(tables.IsDescription):
+    idx = tables.Int32Col()
+
+    pose_idx = tables.Int32Col()
+
+    delta = tables.Float32Col(shape=(60,))
+    delta_vec = tables.Float32Col(shape=(60, 3,))
