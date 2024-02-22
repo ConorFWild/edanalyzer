@@ -240,7 +240,7 @@ class BuildScoringDatasetHDF5(Dataset):
             # For each centre mask atoms close to it
             total_mask = np.full(valid_elements.size, False)
             for _centre in num_centres:
-                selected_atom = rng.integers(1, valid_elements.size)
+                selected_atom = rng.integers(0, valid_elements.size)
                 poss_distances = valid_poss - valid_poss[selected_atom, :].reshape((1, 3))
                 close_mask = poss_distances[np.linalg.norm(poss_distances, axis=1) < 2.5]
                 total_mask[close_mask] = True
