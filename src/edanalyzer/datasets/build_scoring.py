@@ -279,7 +279,7 @@ class BuildScoringDatasetHDF5(Dataset):
         )
 
         image_ligand_mask[image_ligand_mask < 0.9] = 0.0
-        image_ligand_mask[image_ligand_mask > 0.9] = 1.0
+        image_ligand_mask[image_ligand_mask >= 0.9] = 1.0
 
         # Make the image
         image = np.stack(

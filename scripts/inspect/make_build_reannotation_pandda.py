@@ -17,6 +17,7 @@ import tables
 from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM, AutobuildORM
 from edanalyzer import constants
+from edanalyzer.utils import try_make, try_link
 
 
 def _get_event_map(event_map_sample):
@@ -58,20 +59,6 @@ def _get_model(closest_pose):
     st.add_model(model)
     return st
 
-
-def try_make(path):
-    try:
-        os.mkdir(path)
-    except Exception as e:
-        return
-
-
-def try_link(source_path, target_path):
-    try:
-        os.symlink(Path(source_path).resolve(), target_path)
-    except Exception as e:
-        # print(e)
-        return
 
 
 def _make_test_dataset_psuedo_pandda(
