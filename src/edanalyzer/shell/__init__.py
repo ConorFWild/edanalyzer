@@ -2,8 +2,8 @@ import subprocess
 
 PANDDA_JOB_SCRIPT = (
     '#!/bin/sh \n'
-    'module load buster \n'
-    'export PYTHONPATH="" \n'
+    # 'module load buster \n'
+    # 'export PYTHONPATH="" \n'
     'source act_con \n'
     'conda activate pandda2_ray \n'
     'python -u /dls/science/groups/i04-1/conor_dev/pandda_2_gemmi/scripts/pandda.py '
