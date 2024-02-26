@@ -42,8 +42,12 @@ def _run_panddas(config_path, num_cpus=36):
             _experiment_system_name = _experiment.system.name
             if not _experiment_system_name in system_experiments:
                 system_experiments[_experiment_system_name] = {}
-            system_experiments[_experiment_system_name][_experiment.path] = len(
+
+            num_datasets = len(
                 [x for x in Path(_experiment.model_dir).glob("*")])
+            if num_datasets > 0:
+
+                system_experiments[_experiment_system_name][_experiment.path] = num_datasets
 
         rprint(f"System Experiments:")
         rprint(system_experiments)
