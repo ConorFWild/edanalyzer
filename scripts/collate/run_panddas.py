@@ -17,7 +17,6 @@ from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionO
 
 
 def _run_panddas(config_path, num_cpus=36):
-
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
 
@@ -33,7 +32,7 @@ def _run_panddas(config_path, num_cpus=36):
         query_events = pony.orm.select(
             (event, event.annotations, event.pandda, event.pandda.experiment, event.pandda.system) for
             event in EventORM)
-        query = { _x.path: _x for _x in pony.orm.select(
+        query = {_x.path: _x for _x in pony.orm.select(
             experiment for experiment in ExperimentORM
         )}
 
@@ -43,7 +42,8 @@ def _run_panddas(config_path, num_cpus=36):
             _experiment_system_name = _experiment.system.name
             if not _experiment_system_name in system_experiments:
                 system_experiments[_experiment_system_name] = {}
-            system_experiments[_experiment_system_name][_experiment.path] = len([x for x in Path(_experiment.model_dir).glob("*")])
+            system_experiments[_experiment_system_name][_experiment.path] = len(
+                [x for x in Path(_experiment.model_dir).glob("*")])
 
         rprint(f"System Experiments:")
         rprint(system_experiments)
@@ -68,8 +68,8 @@ def _run_panddas(config_path, num_cpus=36):
             _x: query[largest_system_experiments[_x]['path']]
             for _x
             in sorted(
-            largest_system_experiments,
-            key=lambda _experiment: largest_system_experiments[_experiment.path]['size'])
+                largest_system_experiments,
+                key=lambda _system: largest_system_experiments[_system]['size'])
         }
         rprint(f"Sorted Systems:")
         rprint(sorted_systems)
@@ -107,7 +107,6 @@ def _run_panddas(config_path, num_cpus=36):
             rprint(indent_text(job_script))
             # exit()
 
-
             # Create the submission command
             submit_script(
                 job_script,
@@ -118,6 +117,7 @@ def _run_panddas(config_path, num_cpus=36):
             # Submit the job
 
             time.sleep(10)
+
 
 if __name__ == "__main__":
     fire.Fire(_run_panddas)
