@@ -78,7 +78,7 @@ def _run_panddas(config_path, num_cpus=36):
         rprint(f"Sorted Systems:")
         rprint(sorted_systems)
 
-        exit()
+        # exit()
 
         for system_name, experiment in sorted_systems.items():
 
