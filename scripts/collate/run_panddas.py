@@ -6,6 +6,7 @@ import fire
 from rich import print as rprint
 import pandas as pd
 import pony
+import yaml
 
 from edanalyzer.format import indent_text
 from edanalyzer.utils import try_make, try_link
@@ -15,7 +16,12 @@ from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionO
     ExperimentORM, LigandORM, AutobuildORM
 
 
-def _run_panddas(working_directory, pandda_key, num_cpus, mem, max_cores):
+def _run_panddas(config_path, num_cpus=36):
+
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
+
+    working_directory = Path(config['working_directory'])
     database_path = working_directory / "database.db"
     try:
         db.bind(provider='sqlite', filename=f"{database_path}")
