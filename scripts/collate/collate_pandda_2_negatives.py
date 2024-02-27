@@ -20,9 +20,9 @@ def main(config_path):
         config = yaml.safe_load(f)
 
     #
-    custom_annotations_path = Path(config['working_directory']) / "custom_annotations.pickle"
-    with open(custom_annotations_path, 'rb') as f:
-        custom_annotations = pickle.load(f)
+    # custom_annotations_path = Path(config['working_directory']) / "custom_annotations.pickle"
+    # with open(custom_annotations_path, 'rb') as f:
+    #     custom_annotations = pickle.load(f)
 
     #
     working_dir = Path(config['working_directory'])
