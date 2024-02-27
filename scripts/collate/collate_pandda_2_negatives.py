@@ -49,19 +49,19 @@ def main(config_path):
     # Create 2 new tables in group1
     rprint(f"Getting or creating table")
     try:
-        table_mtz_sample = root.mtz_sample
+        table_mtz_sample = root.pandda_2_mtz_sample
     except:
         table_mtz_sample = fileh.create_table(root, "pandda_2_mtz_sample", MTZSample, )
     try:
-        table_event_map_sample = root.event_map_sample
+        table_event_map_sample = root.pandda_2_mtz_sample
     except:
         table_event_map_sample = fileh.create_table(root, "pandda_2_mtz_sample", EventMapSample)
     try:
-        table_known_hit_pos_sample = root.known_hit_pose
+        table_known_hit_pos_sample = root.pandda_2_mtz_sample
     except:
         table_known_hit_pos_sample = fileh.create_table(root, "pandda_2_mtz_sample", PoseSample, )
     try:
-        table_annotation = root.annotation
+        table_annotation = root.pandda_2_annotation
     except:
         table_annotation = fileh.create_table(root, "pandda_2_annotation", BuildAnnotation, )
 
