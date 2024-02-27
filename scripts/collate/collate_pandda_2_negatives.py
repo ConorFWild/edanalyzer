@@ -8,8 +8,13 @@ import pony
 import pickle
 import tables
 
+import numpy as np
+import gemmi
+
 from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM, AutobuildORM
+from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_system_from_dtag, _get_known_hit_structures, \
+    _get_known_hits, _get_known_hit_centroids, _res_to_array
 from edanalyzer.data.build_data import BuildAnnotation
 
 
@@ -55,6 +60,25 @@ def main(config_path):
         high_rank_low_conf = inspect_table[(inspect_table['Ligand Confidence'] == "Low") & (inspect_table['z_peak'] > 0.5)]
 
         rprint(f'Got {len(high_rank_low_conf)} high ranking, low confidence events')
+
+        all_builds = []
+        for _idx, _row in high_rank_low_conf.iterrows():
+            x, y, z = _row['x'], _row['y'], _row['z']
+
+            dtag_dir = pandda_dir / 'processed_dataset' / _row['dtag']
+            autobuild_dir = dtag_dir / 'autobuild'
+
+            builds = []
+            for _autobuild_path in autobuild_dir.glob('*'):
+                st = gemmi.read_structure(str(_autobuild_path))
+                centroid = np.mean(_res_to_array(st[0][0][0]), axis=0)
+                distance = np.linalg.norm(centroid.flatten() - np.array([x,y,z]))
+                if distance < 3.0:
+                    all_builds.append((str(pandda_dir), str(_autobuild_path)))
+
+        rprint(f'Got {len(all_builds)} builds for high ranking, low confidence events')
+
+
 
 
 if __name__ == "__main__":
