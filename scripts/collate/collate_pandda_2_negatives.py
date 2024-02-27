@@ -74,7 +74,7 @@ def main(config_path):
                 st = gemmi.read_structure(str(_autobuild_path))
                 centroid = np.mean(_res_to_array(st[0][0][0]), axis=0)
                 distance = np.linalg.norm(centroid.flatten() - np.array([x,y,z]))
-                rprint(distance)
+                # rprint(distance)
                 if distance < 3.0:
                     all_builds.append((str(pandda_dir), str(_autobuild_path)))
 
