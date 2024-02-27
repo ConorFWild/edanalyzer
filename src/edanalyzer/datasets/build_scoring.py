@@ -234,7 +234,7 @@ class BuildScoringDatasetHDF5(Dataset):
             delta = self.delta_table[sample_idx[1]]
             annotation = self.annotation_table[event_map_idx]
         else:
-            pose_data = self.pandda_2_pose_take[sample_idx[1]]
+            pose_data = self.pandda_2_pose_table[sample_idx[1]]
             event_map_idx = pose_data['event_map_sample_idx']
 
             event_map_data = self.pandda_2_event_map_table[event_map_idx]
