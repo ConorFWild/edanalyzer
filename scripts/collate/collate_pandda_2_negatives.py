@@ -194,6 +194,16 @@ def main(config_path):
                 known_hit_pos_sample['elements'] = elements_array
                 known_hit_pos_sample['rmsd'] = 0.0
                 known_hit_pos_sample.append()
+
+                _delta_vecs = pose_array - pose_array
+                _delta = np.linalg.norm(_delta_vecs, axis=1)
+
+                delta_row['idx'] = idx_pose
+                delta_row['pose_idx'] = idx_pose
+                delta_row['delta'] = _delta
+                delta_row['delta_vec'] = _delta_vecs
+                delta_row.append()
+
                 idx_pose += 1
 
                 # Generate the decoy/rmsd pairs
