@@ -55,11 +55,11 @@ def main(config_path):
     try:
         table_event_map_sample = root.pandda_2_mtz_sample
     except:
-        table_event_map_sample = fileh.create_table(root, "pandda_2_mtz_sample", EventMapSample)
+        table_event_map_sample = fileh.create_table(root, "pandda_2_event_map_sample", EventMapSample)
     try:
         table_known_hit_pos_sample = root.pandda_2_mtz_sample
     except:
-        table_known_hit_pos_sample = fileh.create_table(root, "pandda_2_mtz_sample", PoseSample, )
+        table_known_hit_pos_sample = fileh.create_table(root, "pandda_2_known_hit_pose", PoseSample, )
     try:
         table_annotation = root.pandda_2_annotation
     except:
