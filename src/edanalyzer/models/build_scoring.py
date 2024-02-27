@@ -66,11 +66,11 @@ class LitBuildScoring(lt.LightningModule):
 
         # print(idx)
 
-        for j in range(idx[0].size(0)):
+        for j in range(len(idx[0])):
             self.test_annotations.append(
                 {
                     "idx": str(idx[1][j].to(torch.device("cpu")).detach().numpy()),
-                    'table': int(idx[0][j].to(torch.device("cpu")).detach().numpy()),
+                    'table': int(idx[0][j]),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
                     "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
                     'set': 1
