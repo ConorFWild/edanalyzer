@@ -72,7 +72,7 @@ def main(config_path):
             builds = []
             for _autobuild_path in autobuild_dir.glob('*'):
                 st = gemmi.read_structure(str(_autobuild_path))
-                centroid = np.mean(_res_to_array(st[0][0][0]), axis=0)
+                centroid = np.mean(_res_to_array(st[0][0][0])[0], axis=0)
                 distance = np.linalg.norm(centroid.flatten() - np.array([x,y,z]))
                 # rprint(distance)
                 if distance < 3.0:
