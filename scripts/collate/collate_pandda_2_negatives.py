@@ -65,7 +65,7 @@ def main(config_path):
         for _idx, _row in high_rank_low_conf.iterrows():
             x, y, z = _row['x'], _row['y'], _row['z']
 
-            dtag_dir = pandda_dir / 'processed_dataset' / _row['dtag']
+            dtag_dir = pandda_dir / 'processed_datasets' / _row['dtag']
             autobuild_dir = dtag_dir / 'autobuild'
             rprint(autobuild_dir)
 
