@@ -13,7 +13,6 @@ import networkx as nx
 import networkx.algorithms.isomorphism as iso
 import numpy as np
 import tables
-from scipy.spatial.transform import Rotation as R
 
 from edanalyzer import constants
 from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale
@@ -23,95 +22,7 @@ from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionO
     ExperimentORM, LigandORM, AutobuildORM
 from edanalyzer.data.build_data import PoseSample, MTZSample, EventMapSample
 
-rng = np.random.default_rng()
 
-rprint(f'Generating small rotations')
-time_begin_gen = time.time()
-small_rotations = []
-identity = np.eye(3)
-for j in range(20):
-    rotations = R.random(100000)
-    rotmat = rotations.as_matrix()
-    mask = (rotmat > (0.9 * np.eye(3)))
-    diag = mask[:, np.array([0, 1, 2]), np.array([0, 1, 2])]
-    rot_mask = diag.sum(axis=1)
-    valid_rots = rotmat[rot_mask == 3, :, :]
-    rots = [x for x in valid_rots]
-    small_rotations += rots
-# while len(small_rotations) < 10000:
-#     rot = R.random()
-#     if np.allclose(rot.as_matrix(), identity, atol=0.1, rtol=0.0):
-#         small_rotations.append(rot)
-#         rprint(len(small_rotations))
-time_finish_gen = time.time()
-rprint(f"Generated small rotations in: {round(time_finish_gen - time_begin_gen, 2)}")
-
-
-def _get_known_hit_poses(
-        res, event_to_lig_com,
-        centroid=np.array([22.5, 22.5, 22.5]).reshape((1, 3)),
-        translation=10,
-        num_poses=50
-):
-    # Get pos array
-    poss, elements = _res_to_array(res)
-
-    size = min(60, poss.shape[0])
-
-    elements_array = np.zeros(60, dtype=np.int32)
-    elements_array[:size] = elements[:size]
-
-    # Iterate over poses
-    poses = []
-    rmsds = []
-    for cutoff in [0.25, 0.5, 1.0, 2.0, 3.0, 10.0]:
-        num_sampled = 0
-        translation = cutoff
-        rprint(f"Cutoff: {cutoff}")
-        while True:
-            # Copy the pos array
-            _poss = np.copy(poss)
-
-            # Get rotation and translation
-            if cutoff <= 0.5:
-                rot = R.from_matrix(small_rotations[rng.integers(0, len(small_rotations))])
-            else:
-                rot = R.random()
-
-            _translation = rng.uniform(-translation / 3, translation / 3, size=3).reshape((1, 3))
-
-            # Cetner
-            com = np.mean(_poss, axis=0).reshape((1, 3))
-            _poss_centered = _poss - com
-
-            # Get target
-            _rmsd_target = np.copy(_poss_centered) + centroid + event_to_lig_com
-
-            # Randomly perturb and reorient
-
-            _rotated_poss = rot.apply(_poss_centered)
-            new_com = _translation + centroid + event_to_lig_com
-            _new_poss = _rotated_poss + new_com
-
-            # Get RMSD to original
-            rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(_rmsd_target - _new_poss, axis=1))) / _new_poss.shape[0])
-
-            if rmsd < cutoff:
-                num_sampled += 1
-            else:
-                continue
-
-            rmsds.append(rmsd)
-
-            # Pad the poss to a uniform size
-            pose_array = np.zeros((60, 3))
-            pose_array[:size, :] = _new_poss[:size, :]
-            poses.append(pose_array)
-
-            if num_sampled >= num_poses:
-                break
-
-    return poses, [elements_array] * 6 * num_poses, rmsds
 
 
 def _get_close_distances(known_hit_centroid,
