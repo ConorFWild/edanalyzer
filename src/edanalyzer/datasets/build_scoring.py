@@ -227,7 +227,7 @@ class BuildScoringDatasetHDF5(Dataset):
 
         # Get the event map and pose
         if sample_idx[0] == 'normal':
-            pose_data = self.pose_table[sample_idx]
+            pose_data = self.pose_table[sample_idx[1]]
             event_map_idx = pose_data['event_map_sample_idx']
 
             event_map_data = self.event_map_table[event_map_idx]
