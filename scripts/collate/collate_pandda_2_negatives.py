@@ -57,3 +57,5 @@ def main(config_path):
         rprint(f'Got {len(high_rank_low_conf)} high ranking, low confidence events')
 
 
+if __name__ == "__main__":
+    fire.Fire(main)
