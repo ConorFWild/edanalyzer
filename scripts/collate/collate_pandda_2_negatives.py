@@ -69,14 +69,18 @@ def main(config_path):
             autobuild_dir = dtag_dir / 'autobuild'
             # rprint(autobuild_dir)
 
-            builds = []
+            builds = {}
             for _autobuild_path in autobuild_dir.glob('*'):
                 st = gemmi.read_structure(str(_autobuild_path))
                 centroid = np.mean(_res_to_array(st[0][0][0])[0], axis=0)
                 distance = np.linalg.norm(centroid.flatten() - np.array([x,y,z]))
                 # rprint(distance)
-                if distance < 3.0:
-                    all_builds.append((str(pandda_dir), str(_autobuild_path)))
+                builds[_autobuild_path] = distance
+
+
+            closest_build_key = min(builds, key=lambda _x: builds[_x])
+            if builds[closest_build_key] < 3.0:
+                all_builds.append((str(pandda_dir), str(closest_build_key)))
 
         rprint(f'Got {len(all_builds)} builds for high ranking, low confidence events')
 
