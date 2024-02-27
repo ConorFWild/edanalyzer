@@ -43,11 +43,11 @@ class LitBuildScoring(lt.LightningModule):
         loss = F.mse_loss(score, y)
         self.log('train_loss', loss)
 
-        for j in range(idx.size(0)):
+        for j in range(idx[0].size(0)):
             self.train_annotations.append(
                 {
-                    "idx": str(idx[j][1].to(torch.device("cpu")).detach().numpy()),
-                    'table': int(idx[j][0].to(torch.device("cpu")).detach().numpy()),
+                    "idx": str(idx[1][j].to(torch.device("cpu")).detach().numpy()),
+                    'table': int(idx[0][j].to(torch.device("cpu")).detach().numpy()),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
                     "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
                     'set': 0
@@ -64,13 +64,13 @@ class LitBuildScoring(lt.LightningModule):
         self.log('test_loss', loss)
         # self.log('test_score', )
 
-        print(idx)
+        # print(idx)
 
-        for j in range(idx.size(0)):
+        for j in range(idx[0].size(0)):
             self.test_annotations.append(
                 {
-                    "idx": str(idx[j][1].to(torch.device("cpu")).detach().numpy()),
-                    'table': int(idx[j][0].to(torch.device("cpu")).detach().numpy()),
+                    "idx": str(idx[1][j].to(torch.device("cpu")).detach().numpy()),
+                    'table': int(idx[0][j].to(torch.device("cpu")).detach().numpy()),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
                     "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
                     'set': 1
