@@ -47,7 +47,7 @@ def main(config_path):
     result_dir = Path('output') / 'panddas'
 
     # Loop over panddas
-
+    all_pandda_builds = []
     for pandda_dir in result_dir.glob('*'):
         inspect_table_path = pandda_dir / 'analyses' / 'pandda_inspect_events.csv'
         if not inspect_table_path.exists():
@@ -83,7 +83,9 @@ def main(config_path):
                 all_builds.append((str(pandda_dir), str(closest_build_key)))
 
         rprint(f'Got {len(all_builds)} builds for high ranking, low confidence events')
+        all_pandda_builds += all_builds
 
+    rprint(len(all_pandda_builds))
 
 
 
