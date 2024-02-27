@@ -95,8 +95,6 @@ def main(config_path, batch_size=12, num_workers=None):
     )
     rprint(f"Got {len(dataset_test)} test samples")
 
-    exit()
-
     # Get the model
     model = LitBuildScoring()
 
