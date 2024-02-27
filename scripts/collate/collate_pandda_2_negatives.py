@@ -17,7 +17,7 @@ from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_syste
     _get_known_hits, _get_known_hit_centroids, _res_to_array, _get_known_hit_poses
 from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM, AutobuildORM
-from edanalyzer.data.build_data import PoseSample, MTZSample, EventMapSample
+from edanalyzer.data.build_data import PoseSample, MTZSample, EventMapSample, BuildAnnotation
 
 
 def main(config_path):
@@ -63,7 +63,7 @@ def main(config_path):
     try:
         table_annotation = root.annotation
     except:
-        table_annotation = fileh.create_table(root, "annotation", BuildAnnotation, )
+        table_annotation = fileh.create_table(root, "pandda_2_annotation", BuildAnnotation, )
 
     #
     rprint(f"Querying processed events...")
