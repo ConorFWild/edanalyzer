@@ -14,6 +14,7 @@ from .resnet import resnet18, resnet10
 class Annotation(tables.IsDescription):
     epoch = tables.Int32Col()
     idx = tables.Int32Col()
+    table = tables.StringCol(32)
     y = tables.Float32Col()
     y_hat = tables.Float32Col()
     set = tables.Int32Col()
@@ -45,7 +46,8 @@ class LitBuildScoring(lt.LightningModule):
         for j in range(idx.size(0)):
             self.train_annotations.append(
                 {
-                    "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
+                    "idx": str(idx[j][1].to(torch.device("cpu")).detach().numpy()),
+                    'table': int(idx[j][0].to(torch.device("cpu")).detach().numpy()),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
                     "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
                     'set': 0
@@ -65,7 +67,8 @@ class LitBuildScoring(lt.LightningModule):
         for j in range(idx.size(0)):
             self.test_annotations.append(
                 {
-                    "idx": int(idx[j].to(torch.device("cpu")).detach().numpy()),
+                    "idx": str(idx[j][1].to(torch.device("cpu")).detach().numpy()),
+                    'table': int(idx[j][0].to(torch.device("cpu")).detach().numpy()),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
                     "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
                     'set': 1
@@ -97,6 +100,7 @@ class LitBuildScoring(lt.LightningModule):
         for _annotation in self.train_annotations:
             annotation['epoch'] = int(self.trainer.current_epoch)
             annotation['idx'] = int(_annotation['idx'])
+            annotation['table'] = str(_annotation['table'])
             annotation['y'] = float(_annotation['y'])
             annotation['y_hat'] = float(_annotation['y_hat'])
             annotation['set'] = int(_annotation['set'])
@@ -132,6 +136,7 @@ class LitBuildScoring(lt.LightningModule):
         for _annotation in self.test_annotations:
             annotation['epoch'] = int(self.trainer.current_epoch)
             annotation['idx'] = int(_annotation['idx'])
+            annotation['table'] = str(_annotation['table'])
             annotation['y'] = float(_annotation['y'])
             annotation['y_hat'] = float(_annotation['y_hat'])
             annotation['set'] = int(_annotation['set'])

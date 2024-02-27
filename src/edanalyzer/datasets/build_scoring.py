@@ -205,10 +205,17 @@ class BuildScoringDatasetHDF5(Dataset):
     def __init__(self, root, sample_indexes):
         # self.data = data
         self.root = root
+
         self.event_map_table = root.event_map_sample
         self.pose_table = root.known_hit_pose
         self.delta_table = root.delta
         self.annotation_table = root.annotation
+
+        self.pandda_2_event_map_table = root.pandda_2_event_map_sample
+        self.pandda_2_pose_table = root.pandda_2_known_hit_pose
+        self.pandda_2_delta_table = root.pandda_2_delta
+        self.pandda_2_annotation_table = root.pandda_2_annotation
+
         self.sample_indexes = sample_indexes
 
     def __len__(self):
@@ -219,12 +226,23 @@ class BuildScoringDatasetHDF5(Dataset):
         sample_idx = self.sample_indexes[idx]
 
         # Get the event map and pose
-        pose_data = self.pose_table[sample_idx]
-        event_map_idx = pose_data['event_map_sample_idx']
-        event_map_data = self.event_map_table[event_map_idx]
-        delta = self.delta_table[sample_idx]
+        if sample_idx[0] == 'normal':
+            pose_data = self.pose_table[sample_idx]
+            event_map_idx = pose_data['event_map_sample_idx']
+
+            event_map_data = self.event_map_table[event_map_idx]
+            delta = self.delta_table[sample_idx]
+            annotation = self.annotation_table[event_map_idx]
+        else:
+            pose_data = self.pandda_2_pose_take[sample_idx[1]]
+            event_map_idx = pose_data['event_map_sample_idx']
+
+            event_map_data = self.pandda_2_event_map_table[event_map_idx]
+            delta = self.pandda_2_delta_table[sample_idx[1]]
+            annotation = self.pandda_2_annotation_table[event_map_idx]
+
+        #
         event_map = _get_grid_from_hdf5(event_map_data)
-        annotation = self.annotation_table[event_map_idx]
 
         # Get the valid data
         valid_mask = pose_data['elements'] != 0
