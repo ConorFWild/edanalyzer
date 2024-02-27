@@ -25,7 +25,7 @@ class LitBuildScoring(lt.LightningModule):
         self.resnet = resnet10(num_classes=1, num_input=1).float()
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/build_scoring_hdf5')
+        self.output = Path('./output/build_scoring_hdf5_pandda_2')
 
     def forward(self, x):
 
