@@ -43,11 +43,11 @@ class LitBuildScoring(lt.LightningModule):
         loss = F.mse_loss(score, y)
         self.log('train_loss', loss)
 
-        for j in range(idx[0].size(0)):
+        for j in range(len(idx[0])):
             self.train_annotations.append(
                 {
-                    "idx": str(idx[1][j].to(torch.device("cpu")).detach().numpy()),
-                    'table': int(idx[0][j].to(torch.device("cpu")).detach().numpy()),
+                    "idx": int(idx[1][j].to(torch.device("cpu")).detach().numpy()),
+                    'table': str(idx[0][j]),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
                     "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
                     'set': 0
@@ -69,8 +69,8 @@ class LitBuildScoring(lt.LightningModule):
         for j in range(len(idx[0])):
             self.test_annotations.append(
                 {
-                    "idx": str(idx[1][j].to(torch.device("cpu")).detach().numpy()),
-                    'table': int(idx[0][j]),
+                    "idx": int(idx[1][j].to(torch.device("cpu")).detach().numpy()),
+                    'table': str(idx[0][j]),
                     "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
                     "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
                     'set': 1
