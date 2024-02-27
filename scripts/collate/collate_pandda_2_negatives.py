@@ -17,7 +17,7 @@ from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_syste
     _get_known_hits, _get_known_hit_centroids, _res_to_array, _get_known_hit_poses
 from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM, AutobuildORM
-from edanalyzer.data.build_data import PoseSample, MTZSample, EventMapSample, BuildAnnotation
+from edanalyzer.data.build_data import PoseSample, MTZSample, EventMapSample, BuildAnnotation, Delta
 
 
 def main(config_path):
@@ -64,6 +64,10 @@ def main(config_path):
         table_annotation = root.pandda_2_annotation
     except:
         table_annotation = fileh.create_table(root, "pandda_2_annotation", BuildAnnotation, )
+    try:
+        table_delta = root.pandda_2_delta
+    except:
+        table_delta = fileh.create_table(root, "pandda_2_delta", Delta, )
 
     #
     rprint(f"Querying processed events...")
@@ -85,12 +89,13 @@ def main(config_path):
     else:
         annotation_idx = int(idx_col_annotation.max()) + 1
 
+
     #
     mtz_sample = table_mtz_sample.row
     event_map_sample = table_event_map_sample.row
     known_hit_pos_sample = table_known_hit_pos_sample.row
     table_annotation_row = table_annotation.row
-
+    delta_row = table_delta.row
     #
     pandda_key = config['panddas']['pandda_key'],
     test_systems = config['test']['test_systems']
@@ -227,6 +232,16 @@ def main(config_path):
                     known_hit_pos_sample['elements'] = element
                     known_hit_pos_sample['rmsd'] = rmsd
                     known_hit_pos_sample.append()
+
+                    _delta_vecs = pose_array - pose
+                    _delta = np.linalg.norm(_delta_vecs, axis=1)
+
+                    delta_row['idx'] = idx_pose
+                    delta_row['pose_idx'] = idx_pose
+                    delta_row['delta'] = _delta
+                    delta_row['delta_vec'] = _delta_vecs
+                    delta_row.append()
+
                     idx_pose += 1
 
                 idx_event += 1
