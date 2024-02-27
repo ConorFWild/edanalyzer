@@ -67,6 +67,7 @@ def main(config_path):
 
             dtag_dir = pandda_dir / 'processed_dataset' / _row['dtag']
             autobuild_dir = dtag_dir / 'autobuild'
+            rprint(autobuild_dir)
 
             builds = []
             for _autobuild_path in autobuild_dir.glob('*'):
