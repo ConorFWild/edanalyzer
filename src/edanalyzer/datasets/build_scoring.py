@@ -212,7 +212,7 @@ class BuildScoringDatasetHDF5(Dataset):
         self.sample_indexes = sample_indexes
 
     def __len__(self):
-        return self.sample_indexes.size
+        return len(self.sample_indexes)
 
     def __getitem__(self, idx: int):
         # Get the sample idx

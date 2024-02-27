@@ -35,30 +35,38 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the HDF5 root group
     root = fileh.root
-    table_annotation = root.annotation
-    table_poses = root.known_hit_pose
-
-    # Get train and test event idxs
-    train_event_table_idxs = set([
-        _x['event_map_table_idx']
-        for _x
-        in table_annotation.where("""(partition == b'train') & (annotation)""")
-    ])
-    test_event_table_idxs = set([
-        _x['event_map_table_idx']
-        for _x
-        in table_annotation.where("""(partition == b'test') & (annotation)""")
-    ])
-
-    #
     train_pose_idxs = []
     test_pose_idxs = []
-    for row in table_poses.iterrows():
-        pose_event_table_idx = row['event_map_sample_idx']
-        if pose_event_table_idx in train_event_table_idxs:
-            train_pose_idxs.append(row['idx'])
-        elif pose_event_table_idx in test_event_table_idxs:
-            test_pose_idxs.append(row['idx'])
+    for table_type in ['normal', 'pandda_2']:
+        if table_type == 'normal':
+            table_annotation = root.annotation
+            table_poses = root.known_hit_pose
+        else:
+            table_annotation = root.pandda_2_annotation
+            table_poses = root.pandda_2_known_hit_pose
+
+        # Get train and test event idxs
+        train_event_table_idxs = set([
+            _x['event_map_table_idx']
+            for _x
+            in table_annotation.where("""(partition == b'train') & (annotation)""")
+        ])
+        test_event_table_idxs = set([
+            _x['event_map_table_idx']
+            for _x
+            in table_annotation.where("""(partition == b'test') & (annotation)""")
+        ])
+
+        #
+
+        for row in table_poses.iterrows():
+            pose_event_table_idx = row['event_map_sample_idx']
+            if pose_event_table_idx in train_event_table_idxs:
+                train_pose_idxs.append((table_type, row['idx']))
+            elif pose_event_table_idx in test_event_table_idxs:
+                test_pose_idxs.append((table_type, row['idx']))
+        rprint(f"\tGot {len(train_pose_idxs)} train samples")
+        rprint(f"\tGot {len(test_pose_idxs)} test samples")
     rprint(f"Got {len(train_pose_idxs)} train samples")
     rprint(f"Got {len(test_pose_idxs)} test samples")
 
@@ -70,7 +78,7 @@ def main(config_path, batch_size=12, num_workers=None):
     dataset_train = DataLoader(
         BuildScoringDatasetHDF5(
             root,
-            np.array(train_pose_idxs)
+            train_pose_idxs
         ),
         batch_size=batch_size,
         shuffle=True,
@@ -80,12 +88,14 @@ def main(config_path, batch_size=12, num_workers=None):
     dataset_test = DataLoader(
         BuildScoringDatasetHDF5(
             root,
-            np.array(test_pose_idxs)
+            test_pose_idxs
         ),
         batch_size=batch_size,
         # num_workers=num_workers,
     )
     rprint(f"Got {len(dataset_test)} test samples")
+
+    exit()
 
     # Get the model
     model = LitBuildScoring()
