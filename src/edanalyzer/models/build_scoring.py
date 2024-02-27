@@ -64,6 +64,8 @@ class LitBuildScoring(lt.LightningModule):
         self.log('test_loss', loss)
         # self.log('test_score', )
 
+        print(idx)
+
         for j in range(idx.size(0)):
             self.test_annotations.append(
                 {
