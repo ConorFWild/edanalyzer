@@ -308,8 +308,14 @@ class BuildScoringDatasetHDF5(Dataset):
         image_float = image.astype(np.float32)
 
         # Make the annotation
-        rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
-        if rmsd > 3.0:
+        if sample_idx[0] == 'normal':
+
+            rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
+
+            if rmsd > 3.0:
+                rmsd = 3.0
+
+        else:
             rmsd = 3.0
 
         label = np.array(rmsd)
