@@ -414,7 +414,7 @@ class BuildScoringDatasetCorrelation(Dataset):
 
         # Get the sampling transform for the reference event map
         reference_poss = reference_pose_data['positions'][valid_mask][total_mask]
-        ref_res = _get_centroid_from_res(reference_poss)
+        ref_res = _get_res_from_arrays(reference_poss, valid_elements[total_mask])
         alignment = R.align_vectors(  # Alignment rotates lig being sampled to overlap lig in ref frame - i.e.
             reference_poss-np.mean(reference_poss, axis=1),  # Align to
             valid_poss[total_mask] - np.mean(valid_poss[total_mask], axis=0),
