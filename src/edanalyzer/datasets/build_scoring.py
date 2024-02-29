@@ -357,6 +357,7 @@ class BuildScoringDatasetCorrelationHDF5(Dataset):
         event_map_data = self.event_map_table[event_map_idx]
         delta = self.delta_table[sample_idx[1]]
         annotation = self.annotation_table[event_map_idx]
+        reference_pose_data = self.pose_table[delta['pose_idx']]
         # else:
         #     pose_data = self.pandda_2_pose_table[sample_idx[1]]
         #     event_map_idx = pose_data['event_map_sample_idx']
@@ -366,7 +367,9 @@ class BuildScoringDatasetCorrelationHDF5(Dataset):
         #     annotation = self.pandda_2_annotation_table[event_map_idx]
 
         #
+        reference_event_map = _get_grid_from_hdf5(event_map_data)
         event_map = _get_grid_from_hdf5(event_map_data)
+
 
         # Get the valid data
         valid_mask = pose_data['elements'] != 0
@@ -396,7 +399,7 @@ class BuildScoringDatasetCorrelationHDF5(Dataset):
         # Get the event from the database
         # event = self.data[event_map_data['event_idx']]
 
-        # Get sampling transform
+        # Get sampling transform for the event map
         sample_array = np.zeros(
             (30, 30, 30),
             dtype=np.float32,
@@ -408,9 +411,26 @@ class BuildScoringDatasetCorrelationHDF5(Dataset):
             centroid
         )
 
+        # Get the sampling transform for the reference event map
+        reference_poss = reference_pose_data['positions'][valid_mask][total_mask]
+        ref_res = _get_centroid_from_res(reference_poss)
+        alignment = R.align_vectors(  # Alignment rotates lig being sampled to overlap lig in ref frame - i.e.
+            reference_poss-np.mean(reference_poss, axis=1),  # Align to
+            valid_poss[total_mask] - np.mean(valid_poss[total_mask], axis=0),
+        ).as_matrix()
+        ref_orientation = np.matmul(alignment, orientation)
+        ref_centroid = _get_centroid_from_res(ref_res)
+        ref_transform = _get_transform_from_orientation_centroid(
+            ref_orientation,
+            ref_centroid
+        )
+
         # Get sample image
         event_map_sample = _sample_xmap_and_scale(
             event_map, transform, np.copy(sample_array)
+        )
+        ref_event_map_sample = _sample_xmap_and_scale(
+            reference_event_map, ref_transform, np.copy(sample_array)
         )
 
         ligand_mask_grid = _get_ligand_mask_float(event_map, residue)
@@ -423,6 +443,18 @@ class BuildScoringDatasetCorrelationHDF5(Dataset):
         image_ligand_mask[image_ligand_mask < 0.9] = 0.0
         image_ligand_mask[image_ligand_mask >= 0.9] = 1.0
 
+        masked_event_map = event_map_sample * image_ligand_mask
+        masked_reference_event_map = ref_event_map_sample * image_ligand_mask
+
+        corr = np.corrcoef(
+            np.hstack(
+                (
+                    masked_event_map.reshape(-1,1),
+                    masked_reference_event_map.reshape(-1,1)
+                )
+            )
+        )[0,1]
+
         # Make the image
         image = np.stack(
             [event_map_sample * image_ligand_mask, ],
@@ -432,17 +464,17 @@ class BuildScoringDatasetCorrelationHDF5(Dataset):
         image_float = image.astype(np.float32)
 
         # Make the annotation
-        if sample_idx[0] == 'normal':
+        # if sample_idx[0] == 'normal':
+        #
+        #     rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
+        #
+        #     if rmsd > 3.0:
+        #         rmsd = 3.0
+        #
+        # else:
+        #     rmsd = 3.0
 
-            rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
-
-            if rmsd > 3.0:
-                rmsd = 3.0
-
-        else:
-            rmsd = 3.0
-
-        label = np.array(rmsd)
+        label = np.array(corr)
         label_float = label.astype(np.float32)
 
         return sample_idx, torch.from_numpy(image_float), torch.from_numpy(label_float)
