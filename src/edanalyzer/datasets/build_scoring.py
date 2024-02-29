@@ -448,7 +448,10 @@ class BuildScoringDatasetCorrelation(Dataset):
         masked_reference_event_map = ref_event_map_sample * image_ligand_mask
 
         print(masked_event_map)
+        print(np.sum(masked_event_map[~np.isnana()]))
         print(masked_reference_event_map)
+        print(np.sum(masked_reference_event_map[~np.isnana()]))
+
 
         corr = np.corrcoef(
             np.hstack(
