@@ -452,14 +452,16 @@ class BuildScoringDatasetCorrelation(Dataset):
         print(masked_reference_event_map)
         print(np.sum(masked_reference_event_map[~np.isnan(masked_reference_event_map)]))
 
-
-        corrmat = np.corrcoef(
-            np.hstack(
+        sample_mat = np.hstack(
                 (
                     masked_event_map.reshape(-1,1),
                     masked_reference_event_map.reshape(-1,1)
                 )
             )
+        print(sample_mat)
+
+        corrmat = np.corrcoef(
+            sample_mat
         )
         print(corrmat)
         corr = corrmat[0,1]
