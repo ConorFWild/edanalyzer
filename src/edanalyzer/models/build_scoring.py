@@ -159,7 +159,7 @@ class LitBuildScoringCorrelation(lt.LightningModule):
 
     def forward(self, x):
 
-        return F.sigmoid(self.resnet(x))
+        return (2* F.sigmoid(self.resnet(x))) -1
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
@@ -168,7 +168,7 @@ class LitBuildScoringCorrelation(lt.LightningModule):
     def training_step(self, train_batch, batch_idx):
         idx, x, y = train_batch
         y = y.view(y.size(0), -1)
-        score = 1 * F.sigmoid(self.resnet(x))
+        score = (2 * F.sigmoid(self.resnet(x))) -1
         loss = F.mse_loss(score, y)
         self.log('train_loss', loss)
 
@@ -188,7 +188,7 @@ class LitBuildScoringCorrelation(lt.LightningModule):
     def validation_step(self, test_batch, batch_idx):
         idx, x, y = test_batch
         y = y.view(y.size(0), -1)
-        score = 1 * F.sigmoid(self.resnet(x))
+        score = (2 * F.sigmoid(self.resnet(x))) -1
         loss = F.mse_loss(score, y)
         self.log('test_loss', loss)
         # self.log('test_score', )
