@@ -448,9 +448,9 @@ class BuildScoringDatasetCorrelation(Dataset):
         masked_reference_event_map = ref_event_map_sample * image_ligand_mask
 
         print(masked_event_map)
-        print(np.sum(masked_event_map[~np.isnan()]))
+        print(np.sum(masked_event_map[~np.isnan(masked_event_map)]))
         print(masked_reference_event_map)
-        print(np.sum(masked_reference_event_map[~np.isnan()]))
+        print(np.sum(masked_reference_event_map[~np.isnan(masked_reference_event_map)]))
 
 
         corrmat = np.corrcoef(
