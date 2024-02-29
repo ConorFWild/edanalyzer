@@ -3,6 +3,7 @@ import dataclasses
 import numpy as np
 import torch
 import gemmi
+from scipy.spatial.transform import Rotation as R
 
 from torch.utils.data import Dataset
 
@@ -324,7 +325,7 @@ class BuildScoringDatasetHDF5(Dataset):
         return sample_idx, torch.from_numpy(image_float), torch.from_numpy(label_float)
 
 
-class BuildScoringDatasetCorrelationHDF5(Dataset):
+class BuildScoringDatasetCorrelation(Dataset):
 
     def __init__(self, root, sample_indexes):
         # self.data = data
@@ -454,6 +455,8 @@ class BuildScoringDatasetCorrelationHDF5(Dataset):
                 )
             )
         )[0,1]
+
+        assert (corr == 1.0) | (sample_idx != delta['pose_idx'])
 
         # Make the image
         image = np.stack(
