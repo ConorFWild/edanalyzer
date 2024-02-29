@@ -456,9 +456,7 @@ class BuildScoringDatasetCorrelation(Dataset):
             )
         )[0,1]
 
-        print(corr)
-        print(sample_idx)
-        print(delta['pose_idx'])
+        print([corr, sample_idx,delta['pose_idx']])
 
         assert (corr == 1.0) | (sample_idx != delta['pose_idx'])
 
