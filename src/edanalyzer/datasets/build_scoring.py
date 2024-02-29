@@ -416,7 +416,7 @@ class BuildScoringDatasetCorrelation(Dataset):
         reference_poss = reference_pose_data['positions'][valid_mask][total_mask]
         ref_res = _get_res_from_arrays(reference_poss, valid_elements[total_mask])
         alignment = R.align_vectors(  # Alignment rotates lig being sampled to overlap lig in ref frame - i.e.
-            reference_poss-np.mean(reference_poss, axis=1),  # Align to
+            reference_poss-np.mean(reference_poss, axis=0),  # Align to
             valid_poss[total_mask] - np.mean(valid_poss[total_mask], axis=0),
         ).as_matrix()
         ref_orientation = np.matmul(alignment, orientation)
