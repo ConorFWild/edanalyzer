@@ -72,7 +72,8 @@ def _make_test_dataset_psuedo_pandda(
             _delta = np.linalg.norm(_delta_vecs, axis=1)
 
             delta_row['idx'] = _x['idx']
-            delta_row['pose_idx'] = _x['idx']
+            # delta_row['pose_idx'] = _x['idx']
+            delta_row['pose_idx'] = close_poses[_event_sample_idx]['idx']
             delta_row['delta'] = _delta
             delta_row['delta_vec'] = _delta_vecs
             delta_row.append()

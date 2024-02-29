@@ -322,3 +322,127 @@ class BuildScoringDatasetHDF5(Dataset):
         label_float = label.astype(np.float32)
 
         return sample_idx, torch.from_numpy(image_float), torch.from_numpy(label_float)
+
+
+class BuildScoringDatasetCorrelationHDF5(Dataset):
+
+    def __init__(self, root, sample_indexes):
+        # self.data = data
+        self.root = root
+
+        self.event_map_table = root.event_map_sample
+        self.pose_table = root.known_hit_pose
+        self.delta_table = root.delta
+        self.annotation_table = root.annotation
+
+        # self.pandda_2_event_map_table = root.pandda_2_event_map_sample
+        # self.pandda_2_pose_table = root.pandda_2_known_hit_pose
+        # self.pandda_2_delta_table = root.pandda_2_delta
+        # self.pandda_2_annotation_table = root.pandda_2_annotation
+
+        self.sample_indexes = sample_indexes
+
+    def __len__(self):
+        return len(self.sample_indexes)
+
+    def __getitem__(self, idx: int):
+        # Get the sample idx
+        sample_idx = self.sample_indexes[idx]
+
+        # Get the event map and pose
+        # if sample_idx[0] == 'normal':
+        pose_data = self.pose_table[sample_idx[1]]
+        event_map_idx = pose_data['event_map_sample_idx']
+
+        event_map_data = self.event_map_table[event_map_idx]
+        delta = self.delta_table[sample_idx[1]]
+        annotation = self.annotation_table[event_map_idx]
+        # else:
+        #     pose_data = self.pandda_2_pose_table[sample_idx[1]]
+        #     event_map_idx = pose_data['event_map_sample_idx']
+        #
+        #     event_map_data = self.pandda_2_event_map_table[event_map_idx]
+        #     delta = self.pandda_2_delta_table[sample_idx[1]]
+        #     annotation = self.pandda_2_annotation_table[event_map_idx]
+
+        #
+        event_map = _get_grid_from_hdf5(event_map_data)
+
+        # Get the valid data
+        valid_mask = pose_data['elements'] != 0
+        valid_poss = pose_data['positions'][valid_mask]
+        valid_elements = pose_data['elements'][valid_mask]
+        valid_deltas = delta['delta'][valid_mask]
+
+        # Subsample if training
+        if annotation['partition'] == 'train':
+            rng = np.random.default_rng()
+            num_centres = rng.integers(1, 5)
+
+            # For each centre mask atoms close to it
+            total_mask = np.full(valid_elements.size, False)
+            for _centre in num_centres:
+                selected_atom = rng.integers(0, valid_elements.size)
+                poss_distances = valid_poss - valid_poss[selected_atom, :].reshape((1, 3))
+                close_mask = poss_distances[np.linalg.norm(poss_distances, axis=1) < 2.5]
+                total_mask[close_mask] = True
+
+        else:
+            total_mask = np.full(valid_elements.size, True)
+
+        residue = _get_res_from_arrays(valid_poss[total_mask], valid_elements[total_mask])
+        # residue = _get_res_from_hdf5(pose_data)
+
+        # Get the event from the database
+        # event = self.data[event_map_data['event_idx']]
+
+        # Get sampling transform
+        sample_array = np.zeros(
+            (30, 30, 30),
+            dtype=np.float32,
+        )
+        orientation = _get_random_orientation()
+        centroid = _get_centroid_from_res(residue)
+        transform = _get_transform_from_orientation_centroid(
+            orientation,
+            centroid
+        )
+
+        # Get sample image
+        event_map_sample = _sample_xmap_and_scale(
+            event_map, transform, np.copy(sample_array)
+        )
+
+        ligand_mask_grid = _get_ligand_mask_float(event_map, residue)
+        image_ligand_mask = _sample_xmap(
+            ligand_mask_grid,
+            transform,
+            np.copy(sample_array)
+        )
+
+        image_ligand_mask[image_ligand_mask < 0.9] = 0.0
+        image_ligand_mask[image_ligand_mask >= 0.9] = 1.0
+
+        # Make the image
+        image = np.stack(
+            [event_map_sample * image_ligand_mask, ],
+            axis=0
+        )
+
+        image_float = image.astype(np.float32)
+
+        # Make the annotation
+        if sample_idx[0] == 'normal':
+
+            rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
+
+            if rmsd > 3.0:
+                rmsd = 3.0
+
+        else:
+            rmsd = 3.0
+
+        label = np.array(rmsd)
+        label_float = label.astype(np.float32)
+
+        return sample_idx, torch.from_numpy(image_float), torch.from_numpy(label_float)

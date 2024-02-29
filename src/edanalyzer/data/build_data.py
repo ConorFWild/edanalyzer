@@ -16,6 +16,13 @@ class BuildAnnotation(tables.IsDescription):
     partition = tables.StringCol(32)
 
 
+class BuildCorrelation(tables.IsDescription):  #*
+    # Calculate the difference between the observed and human
+    # modelled density at all atomic coordinates and
+    #
+    idx = tables.Int32Col()
+
+
 class EventMapSample(tables.IsDescription):
     idx = tables.Int32Col()
     event_idx = tables.Int32Col()
