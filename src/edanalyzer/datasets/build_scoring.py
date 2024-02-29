@@ -447,10 +447,7 @@ class BuildScoringDatasetCorrelation(Dataset):
         masked_event_map = event_map_sample * image_ligand_mask
         masked_reference_event_map = ref_event_map_sample * image_ligand_mask
 
-        print(masked_event_map)
-        print(np.sum(masked_event_map[~np.isnan(masked_event_map)]))
-        print(masked_reference_event_map)
-        print(np.sum(masked_reference_event_map[~np.isnan(masked_reference_event_map)]))
+
 
         sample_mat = np.hstack(
                 (
@@ -458,15 +455,15 @@ class BuildScoringDatasetCorrelation(Dataset):
                     masked_reference_event_map[masked_reference_event_map != 0.0].reshape(-1,1)
                 )
             )
-        print(sample_mat)
+        # print(sample_mat)
 
         corrmat = np.corrcoef(
             sample_mat.T
         )
-        print(corrmat)
+        # print(corrmat)
         corr = corrmat[0,1]
 
-        print([corr, sample_idx, delta['pose_idx']])
+        # print([corr, sample_idx, delta['pose_idx']])
 
         # assert (corr == 1.0) | (sample_idx[1] != delta['pose_idx'])
 
