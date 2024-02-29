@@ -453,14 +453,16 @@ class BuildScoringDatasetCorrelation(Dataset):
         print(np.sum(masked_reference_event_map[~np.isnan()]))
 
 
-        corr = np.corrcoef(
+        corrmat = np.corrcoef(
             np.hstack(
                 (
                     masked_event_map.reshape(-1,1),
                     masked_reference_event_map.reshape(-1,1)
                 )
             )
-        )[0,1]
+        )
+        print(corr)
+        corr = corrmat[0,1]
 
         print([corr, sample_idx, delta['pose_idx']])
 
