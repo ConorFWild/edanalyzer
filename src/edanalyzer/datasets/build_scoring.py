@@ -461,7 +461,7 @@ class BuildScoringDatasetCorrelation(Dataset):
         print(sample_mat)
 
         corrmat = np.corrcoef(
-            sample_mat
+            sample_mat.T
         )
         print(corrmat)
         corr = corrmat[0,1]
