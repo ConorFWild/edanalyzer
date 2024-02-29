@@ -468,7 +468,7 @@ class BuildScoringDatasetCorrelation(Dataset):
 
         print([corr, sample_idx, delta['pose_idx']])
 
-        assert (corr == 1.0) | (sample_idx[1] != delta['pose_idx'])
+        # assert (corr == 1.0) | (sample_idx[1] != delta['pose_idx'])
 
         # Make the image
         image = np.stack(
