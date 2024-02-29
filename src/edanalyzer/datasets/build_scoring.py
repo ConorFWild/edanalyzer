@@ -461,7 +461,7 @@ class BuildScoringDatasetCorrelation(Dataset):
                 )
             )
         )
-        print(corr)
+        print(corrmat)
         corr = corrmat[0,1]
 
         print([corr, sample_idx, delta['pose_idx']])
