@@ -454,8 +454,8 @@ class BuildScoringDatasetCorrelation(Dataset):
 
         sample_mat = np.hstack(
                 (
-                    masked_event_map.reshape(-1,1),
-                    masked_reference_event_map.reshape(-1,1)
+                    masked_event_map[masked_event_map != 0.0].reshape(-1,1),
+                    masked_reference_event_map[masked_reference_event_map != 0.0].reshape(-1,1)
                 )
             )
         print(sample_mat)
