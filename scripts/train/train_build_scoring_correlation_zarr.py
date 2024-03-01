@@ -53,12 +53,14 @@ def main(config_path, batch_size=12, num_workers=None):
         train_event_table_idxs = set([
             _x['event_map_table_idx']
             for _x
-            in table_annotation.where("""(partition == b'train') & (annotation)""")
+            in table_annotation[
+                (table_annotation['partition'] == b'train') & (table_annotation['annotation'])] #.where("""(partition == b'train') & (annotation)""")
         ])
         test_event_table_idxs = set([
             _x['event_map_table_idx']
             for _x
-            in table_annotation.where("""(partition == b'test') & (annotation)""")
+            in table_annotation[
+                (table_annotation['partition'] == b'train') & (table_annotation['annotation'])]
         ])
 
         #
