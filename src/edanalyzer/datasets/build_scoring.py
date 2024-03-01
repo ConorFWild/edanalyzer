@@ -372,7 +372,7 @@ class BuildScoringDatasetCorrelation(Dataset):
         #
         reference_event_map = _get_grid_from_hdf5(event_map_data)
         event_map = _get_grid_from_hdf5(event_map_data)
-        mtz_map = _get_grid_from_hdf5(mtz_map_data)
+        # mtz_map = _get_grid_from_hdf5(mtz_map_data)
 
 
         # Get the valid data
