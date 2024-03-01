@@ -34,7 +34,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # fileh = tables.open_file("output/build_data_correlation.h5", mode="r")
 
-    zarr_path = '../output/build_data_correlation.zarr'
+    zarr_path = 'output/build_data_correlation.zarr'
     root = zarr.open(zarr_path, mode='r')
 
     # Get the HDF5 root group
