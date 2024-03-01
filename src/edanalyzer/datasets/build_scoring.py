@@ -647,7 +647,7 @@ class BuildScoringDatasetCorrelationZarr(Dataset):
         image = np.stack(
             [
                 event_map_sample * image_ligand_mask,
-                mtz_map
+                mtz_map_sample * image_ligand_mask
              ],
             axis=0
         )
