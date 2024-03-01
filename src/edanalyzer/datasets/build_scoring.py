@@ -502,7 +502,7 @@ class BuildScoringDatasetCorrelationZarr(Dataset):
         self.root = zarr.open(zarr_path, mode='r')
 
         self.event_map_table = self.root['event_map_sample']
-        self.mtz_map_table = self.root['']
+        self.mtz_map_table = self.root['mtz_sample']
         self.pose_table = self.root['known_hit_pose']
         self.delta_table = self.root['delta']
         self.annotation_table = self.root['annotation']
