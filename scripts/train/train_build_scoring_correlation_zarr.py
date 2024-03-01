@@ -50,21 +50,24 @@ def main(config_path, batch_size=12, num_workers=None):
             table_poses = root.pandda_2_known_hit_pose
 
         # Get train and test event idxs
+        rprint(f'Getting idxs of valid train event maps...')
         train_event_table_idxs = set([
             _x['event_map_table_idx']
             for _x
             in table_annotation.get_mask_selection(
                 (table_annotation['partition'] == b'train') & (table_annotation['annotation'])) #.where("""(partition == b'train') & (annotation)""")
         ])
+        rprint(f'Getting idxs of valid test event maps...')
         test_event_table_idxs = set([
             _x['event_map_table_idx']
             for _x
             in table_annotation.get_mask_selection(
-                (table_annotation['partition'] == b'train') & (table_annotation['annotation']))
+                (table_annotation['partition'] == b'test') & (table_annotation['annotation']))
         ])
 
         #
 
+        rprint(f"Filtering poses to those matching valid event maps...")
         for row in table_poses:
             pose_event_table_idx = row['event_map_sample_idx']
             if pose_event_table_idx in train_event_table_idxs:
