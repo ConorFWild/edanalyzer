@@ -65,7 +65,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
         #
 
-        for row in table_poses.iterrows():
+        for row in table_poses:
             pose_event_table_idx = row['event_map_sample_idx']
             if pose_event_table_idx in train_event_table_idxs:
                 train_pose_idxs.append((table_type, row['idx']))
