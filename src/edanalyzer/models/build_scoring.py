@@ -155,7 +155,7 @@ class LitBuildScoringCorrelation(lt.LightningModule):
         self.resnet = resnet10(num_classes=1, num_input=2).float()
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/build_scoring_correlation')
+        self.output = Path('./output/build_scoring_correlation_zarr')
 
     def forward(self, x):
 

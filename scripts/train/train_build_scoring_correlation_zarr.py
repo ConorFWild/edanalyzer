@@ -10,7 +10,7 @@ import numpy as np
 import tables
 import zarr
 
-from edanalyzer.datasets.build_scoring import BuildScoringDataset, BuildScoringDatasetItem, BuildScoringDatasetCorrelation
+from edanalyzer.datasets.build_scoring import BuildScoringDataset, BuildScoringDatasetItem, BuildScoringDatasetCorrelationZarr
 from edanalyzer.models.build_scoring import LitBuildScoringCorrelation
 from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 
@@ -80,7 +80,7 @@ def main(config_path, batch_size=12, num_workers=None):
     # with pony.orm.db_session:
     #     query = [_x for _x in pony.orm.select(_y for _y in EventORM)]
     dataset_train = DataLoader(
-        BuildScoringDatasetCorrelation(
+        BuildScoringDatasetCorrelationZarr(
             zarr_path,
             train_pose_idxs
         ),
@@ -90,7 +90,7 @@ def main(config_path, batch_size=12, num_workers=None):
     )
     rprint(f"Got {len(dataset_train)} training samples")
     dataset_test = DataLoader(
-        BuildScoringDatasetCorrelation(
+        BuildScoringDatasetCorrelationZarr(
             zarr_path,
             test_pose_idxs
         ),
@@ -103,8 +103,8 @@ def main(config_path, batch_size=12, num_workers=None):
     model = LitBuildScoringCorrelation()
 
     # Train
-    checkpoint_callback = ModelCheckpoint(dirpath='output/build_scoring_correlation')
-    logger = CSVLogger("output/build_scoring_correlation/logs")
+    checkpoint_callback = ModelCheckpoint(dirpath='output/build_scoring_correlation_zarr')
+    logger = CSVLogger("output/build_scoring_correlation_zarr/logs")
     trainer = lt.Trainer(accelerator='gpu', logger=logger, callbacks=[checkpoint_callback],
                          enable_progress_bar=False
                          )
