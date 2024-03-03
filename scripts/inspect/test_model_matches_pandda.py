@@ -84,7 +84,7 @@ def main(model_path, structure_path, event_map_path, mtz_path):
             mtz_map_sample * image_ligand_mask
         ],
         axis=0
-    )
+    )[np.newaxis, :]
 
     image_float = image.astype(np.float32)
 
