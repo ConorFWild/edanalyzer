@@ -54,6 +54,9 @@ def main(config_path):
     table_event_map_sample = root['event_map_sample']
     table_known_hit_pos_sample = root['known_hit_pose']
 
+    # PanDDA 2 events
+
+
     #
     rprint(f"Querying events...")
     with pony.orm.db_session:

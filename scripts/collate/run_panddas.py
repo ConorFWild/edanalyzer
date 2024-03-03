@@ -86,7 +86,7 @@ def _run_panddas(config_path, num_cpus=36):
             # continue
 
             model_building_dir = Path(experiment.model_dir)
-            result_dir = Path('output') / 'panddas'
+            result_dir = Path('output') / 'panddas_new_score'
             pandda_dir = result_dir / f"{system_name}"
 
             # Setup output directories
