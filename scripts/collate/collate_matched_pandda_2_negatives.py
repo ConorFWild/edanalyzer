@@ -64,8 +64,11 @@ def main(config_path):
 
         for _record in table_event_map_sample:
             database_event_idx = _record['event_idx']
-            database_event = query_events[database_event_idx][0]
+            # database_event = query_events[database_event_idx][0]
+            database_event = EventORM[database_event_idx]
+            rprint(f"Database event idx: {database_event_idx}. Database event id: {database_event.id}")
             assert database_event.id == database_event_idx
+
             rprint(f"Matched to event: {database_event}")
 
             exit()
