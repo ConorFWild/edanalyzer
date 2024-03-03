@@ -95,6 +95,8 @@ def main(model_path, structure_path, event_map_path, mtz_path):
     # Add model to device
     model.to('cpu')
 
+    model.eval()
+
 
     # Run the model
     cnn = model.float()
