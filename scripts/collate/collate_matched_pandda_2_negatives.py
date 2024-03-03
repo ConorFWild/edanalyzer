@@ -67,7 +67,7 @@ def main(config_path):
             database_event_idx = _record['event_idx']
             assert query_events[database_event_idx].id == database_event_idx
 
-
+            exit()
 
 
 
