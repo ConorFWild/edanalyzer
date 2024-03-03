@@ -24,7 +24,6 @@ from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionO
 from edanalyzer.data.build_data import PoseSample, MTZSample, EventMapSample
 
 
-
 def main(config_path):
     rprint(f'Running collate_database from config file: {config_path}')
     # Load config
@@ -68,7 +67,6 @@ def main(config_path):
             assert query_events[database_event_idx].id == database_event_idx
 
             exit()
-
 
 
 if __name__ == "__main__":
