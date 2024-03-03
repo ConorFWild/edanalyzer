@@ -34,7 +34,7 @@ def main(model_path, structure_path, event_map_path, mtz_path):
     #     config = yaml.safe_load(f)
 
     # Load the data
-    st = _load_xmap_from_path(structure_path)
+    st = _get_structure_from_path(structure_path)
     event_map_grid = _load_xmap_from_path(event_map_path)
     mtz_grid = _load_xmap_from_mtz_path(mtz_path)
 
