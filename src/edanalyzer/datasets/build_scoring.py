@@ -607,7 +607,7 @@ class BuildScoringDatasetCorrelationZarr(Dataset):
             reference_event_map, ref_transform, np.copy(sample_array)
         )
         mtz_map_sample = _sample_xmap_and_scale(
-            mtz_map, ref_transform, np.copy(sample_array)
+            mtz_map, transform, np.copy(sample_array)
         )
 
         ligand_mask_grid = _get_ligand_mask_float(event_map, residue)
