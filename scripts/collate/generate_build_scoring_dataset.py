@@ -418,13 +418,13 @@ def main(config_path):
                         idx_pose += 1
 
                         # Generate the decoy/rmsd pairs
-                        poses, atom, elements, rmsds = _get_known_hit_poses(
+                        poses, atoms, elements, rmsds = _get_known_hit_poses(
                             known_hits[known_hit_dataset][known_hit_residue],
                             event_to_lig_com
                         )
 
                         # Record the decoy/rmsd pairs with their event map
-                        for pose, element, rmsd in zip(poses, elements, rmsds):
+                        for pose, atom, element, rmsd in zip(poses, atom, elements, rmsds):
                             # known_hit_pos_sample['idx'] = idx_pose
 
                             # Record the event key
@@ -439,14 +439,14 @@ def main(config_path):
                             # known_hit_pos_sample['atoms'] = atom
                             # known_hit_pos_sample['elements'] = element
                             # known_hit_pos_sample['rmsd'] = rmsd
-                            rprint((idx_pose,
-                                        _event[0].id,
-                                        idx_event,
-                                        idx_event,
-                                        pose,
-                                        atom,
-                                        element,
-                                        rmsd))
+                            # rprint((idx_pose,
+                            #             _event[0].id,
+                            #             idx_event,
+                            #             idx_event,
+                            #             pose,
+                            #             atom,
+                            #             element,
+                            #             rmsd))
                             known_hit_pos_sample = np.array(
                                 [
                                     (
