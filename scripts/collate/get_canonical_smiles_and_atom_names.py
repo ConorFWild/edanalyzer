@@ -101,7 +101,7 @@ def main(config_path):
                         cif[key]
                     except:
                         try:
-                            key = "data_comp_UNL"
+                            key = "data_UNL"
                             cif[key]
                         except:
                             rprint(_cif_path)
