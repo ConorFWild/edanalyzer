@@ -95,6 +95,9 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     if not aromatic_bond_loop:
         aromatic_bond_loop = [None] * len(bond_1_id_loop)
 
+
+
+
     try:
         # Iteratively add the relevant bonds
         for bond_atom_1, bond_atom_2, bond_type, aromatic in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop,
@@ -237,10 +240,11 @@ def main(config_path):
     # Try to create the atom name/canonical smiles array
     # try:
     del root['ligand_data']
-    root.create_group(
+    ligand_data = root.create_group(
         'ligand_data',
+        shape=event_map_table.shape,
         dtype=[
-            ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (60,))
+            ('idx', 'i8'), ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (60,)), ('connectivity', '?', (60,60,))
         ]
     )
     # except:
@@ -316,14 +320,19 @@ def main(config_path):
                 rprint(atom_ints)
                 rprint(matched_pose_atom_array)
                 if np.array_equal(atom_ints, matched_pose_atom_array):
-                    matched_cifs.append(_cif_path)
+                    matched_cifs.append(
+                        (
+                            _cif_path,
+                            cif[key]
+                        )
+                        )
 
             if len(matched_cifs) == 0:
                 rprint(f"MATCH FAILED!")
                 continue
             else:
                 rprint(f'MATCHED!')
-            cif_path = matched_cifs[0]
+            ligand_data = matched_cifs[0]
 
             # Make atom name array
             # atom_element_array = [_x for _x in block.find_loop('_chem_comp_atom.type_symbol')]
@@ -331,14 +340,48 @@ def main(config_path):
             # rprint(atom_name_array)
 
             # Get Mol
-            mol = get_fragment_mol_from_dataset_cif_path(cif_path)
+            mol = get_fragment_mol_from_dataset_cif_path(ligand_data[0])
             rprint(mol)
+
+            # Get canoncial smiles
             smiles = Chem.MolToSmiles(mol)
             rprint(smiles)
 
-            # Get canoncial smiles
-
             # Store canonical smiles
+
+            # Store the atom array
+            atom_element_array = [_x for _x in ligand_data[1].find_loop('_chem_comp_atom.type_symbol')]
+            atom_id_array = np.array([x for j, x in enumerate(ligand_data[1].find_loop('_chem_comp_atom.atom_id')) if atom_element_array[j] != 'H'])
+            atom_array = np.zeros((60,), dtype='<U5')
+            atom_array[:atom_array.size] = atom_id_array[:]
+
+            # Store the connectivity matrix
+            id_to_idx = {}
+            for j, atom_id in enumerate(atom_id_array):
+                id_to_idx[atom_id] = j
+            bond_matrix = np.zeros(
+                (
+                    60,
+                    60
+                ),
+                dtype='?')
+            bond_1_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_1'))
+            bond_2_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_2'))
+            for _bond_1_id, _bond_2_id in zip(bond_1_id_loop, bond_2_id_loop):
+                if _bond_1_id not in atom_id_array:
+                    continue
+                if _bond_2_id not in atom_id_array:
+                    continue
+                _bond_1_idx, _bond_2_idx = id_to_idx[_bond_1_id], id_to_idx[_bond_2_id]
+                bond_matrix[_bond_1_idx, _bond_2_idx] = True
+                bond_matrix[_bond_2_idx, _bond_1_idx] = True
+
+            #
+
+            new_ligand_data = (_record['idx'], smiles, atom_array, bond_matrix)
+            rprint(new_ligand_data)
+
+
 
     ...
 
