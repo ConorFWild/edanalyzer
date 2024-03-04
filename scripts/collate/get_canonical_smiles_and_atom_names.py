@@ -47,6 +47,7 @@ def main(config_path):
 
     # Open the event map store
     event_map_table = root['event_map_sample']
+    pose_table = root['known_hit_pose']
 
 
     # Try to create the atom name/canonical smiles array
@@ -65,15 +66,58 @@ def main(config_path):
         # Iterate over event maps
         for _record in event_map_table:
 
+
             # Get corresponding event
             database_event_idx = _record['event_idx']
             database_event = EventORM[database_event_idx]
 
+            # Get a pose with the event
+            matching_poses = pose_table.get_mask_selection(
+                pose_table['database_event_idx'] == database_event_idx
+            )
+            rprint(f'Got {len(matching_poses)} matching poses')
+            matched_pose = matching_poses[0]
+
             # Get event cif
             dtag_dir = Path(database_event.pandda.path) / 'processed_datasets' / database_event.dtag / 'ligand_files'
             smiles = [x for x in dtag_dir.glob('*.smiles')]
-            cifs = [x for x in dtag_dir.glob('*.cif') if x.stem not in constants.LIGAND_IGNORE_REGEXES]
-            rprint(f'{database_event.dtag}: {len(smiles)} smiles : {len(cifs)} cifs')
+            cif_paths = [x for x in dtag_dir.glob('*.cif') if x.stem not in constants.LIGAND_IGNORE_REGEXES]
+            rprint(f'{database_event.dtag}: {len(smiles)} smiles : {len(cif_paths)} cifs')
+
+            # See which cif matches the element sequence
+            for _cif_path in cif_paths:
+                cif = gemmi.cif.read(str(_cif_path))
+
+                key = "comp_LIG"
+                try:
+                    cif['comp_LIG']
+                except:
+                    key = "data_comp_XXX"
+
+                # Find the relevant atoms loop
+                atom_id_loop = list(cif[key].find_loop('_chem_comp_atom.atom_id'))
+                atom_type_loop = list(cif[key].find_loop('_chem_comp_atom.type_symbol'))
+                atom_charge_loop = list(cif[key].find_loop('_chem_comp_atom.charge'))
+                if not atom_charge_loop:
+                    atom_charge_loop = list(cif[key].find_loop('_chem_comp_atom.partial_charge'))
+                    if not atom_charge_loop:
+                        atom_charge_loop = [0] * len(atom_id_loop)
+
+                aromatic_atom_loop = list(cif[key].find_loop('_chem_comp_atom.aromatic'))
+                if not aromatic_atom_loop:
+                    aromatic_atom_loop = [None] * len(atom_id_loop)
+
+                # Get the mapping
+                id_to_idx = {}
+                for j, atom_id in enumerate(atom_id_loop):
+                    id_to_idx[atom_id] = j
+
+                atom_ints = [gemmi.Element(_atom_name).atomic_number for _atom_name in atom_type_loop]
+                rprint(atom_ints)
+                rprint(matched_pose['elements'])
+
+
+
 
             # Make atom name array
 
