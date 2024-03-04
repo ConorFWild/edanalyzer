@@ -334,6 +334,13 @@ def main(config_path):
 
             if len(matched_cifs) == 0:
                 rprint(f"MATCH FAILED!")
+                new_ligand_data = (
+                    _record['idx'],
+                    None,
+                    None,
+                    None,
+                )
+                rprint(new_ligand_data)
                 continue
             else:
                 rprint(f'MATCHED!')
