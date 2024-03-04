@@ -357,6 +357,8 @@ def _res_to_array(res):
     for atom in res.first_conformer():
         pos = atom.pos
         element = atom.element.atomic_number
+        if atom.has_altloc():
+            raise Exception
         if element == 1:
             continue
         poss.append([pos.x, pos.y, pos.z])
