@@ -343,7 +343,7 @@ def _get_known_hits(known_hit_structures):
         centroids[structure_key] = {}
         for model in structure:
             for chain in model:
-                for res in chain:
+                for res in chain.first_conformer():
                     if res.name in ["LIG", "XXX"]:
                         centroids[structure_key][f"{chain.name}_{res.seqid.num}"] = res
 
