@@ -519,6 +519,7 @@ def _get_matched_cifs(
 
     dtag_dir = Path(event.pandda.path) / 'processed_datasets' / event.dtag / 'ligand_files'
     cif_paths = [x for x in dtag_dir.glob('*.cif') if x.stem not in constants.LIGAND_IGNORE_REGEXES]
+    rprint(f'Got {len(cif_paths)} ligand cif paths!')
 
     matched_paths = []
     for _cif_path in cif_paths:
