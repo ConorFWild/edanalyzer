@@ -61,6 +61,9 @@ def main(config_path):
     except:
         rprint(f"Already created ligand data table!")
 
+    pose_table_idxs = pose_table['idx']
+    pose_table_database_events = pose_table['database_event_idx']
+
     with pony.orm.db_session:
 
         # Iterate over event maps
@@ -72,11 +75,11 @@ def main(config_path):
             database_event = EventORM[database_event_idx]
 
             # Get a pose with the event
-            matching_poses = pose_table.get_mask_selection(
-                pose_table['database_event_idx'] == database_event_idx
-            )
-            rprint(f'Got {len(matching_poses)} matching poses')
-            matched_pose = matching_poses[0]
+            rprint(f"Getting matched poses...")
+            matching_pose_mask = pose_table_database_events == database_event_idx
+            matching_pose_table_idxs = pose_table_idxs[matching_pose_mask]
+            rprint(f'Got {len(matching_pose_table_idxs)} matching poses')
+            matched_pose = pose_table[matching_pose_table_idxs[0]]
 
             # Get event cif
             dtag_dir = Path(database_event.pandda.path) / 'processed_datasets' / database_event.dtag / 'ligand_files'
