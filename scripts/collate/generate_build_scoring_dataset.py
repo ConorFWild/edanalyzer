@@ -341,10 +341,10 @@ def main(config_path):
                                 known_hit_residue,
                                 mtz_sample_array
                             )
-                        rprint(mtz_sample)
-                        # table_mtz_sample.append(
-                        #     mtz_sample
-                        # )
+                        # rprint(mtz_sample)
+                        table_mtz_sample.append(
+                            mtz_sample
+                        )
 
                         # Record the event map sample
                         event_map_grid = _load_xmap_from_path(_event[0].event_map)
@@ -360,10 +360,10 @@ def main(config_path):
                                 known_hit_residue,
                                 event_map_sample_array
                             )
-                        rprint(event_map_sample)
-                        # table_event_map_sample.append(
-                        #     event_map_sample
-                        # )
+                        # rprint(event_map_sample)
+                        table_event_map_sample.append(
+                            event_map_sample
+                        )
 
                         # Get the base event
                         poss, atom, elements = _res_to_array(known_hits[known_hit_dataset][known_hit_residue], )
@@ -396,10 +396,10 @@ def main(config_path):
                                 elements_array,
                                 0.0
                             )
-                        rprint(known_hit_pos_sample)
-                        # table_known_hit_pos_sample.append(
-                        #     known_hit_pos_sample
-                        # )
+                        # rprint(known_hit_pos_sample)
+                        table_known_hit_pos_sample.append(
+                            known_hit_pos_sample
+                        )
                         idx_pose += 1
 
                         # Generate the decoy/rmsd pairs
@@ -434,10 +434,10 @@ def main(config_path):
                                     element,
                                     rmsd
                                 )
-                            rprint(known_hit_pos_sample)
-                            # table_known_hit_pos_sample.append(
-                            #     known_hit_pos_sample
-                            # )
+                            # rprint(known_hit_pos_sample)
+                            table_known_hit_pos_sample.append(
+                                known_hit_pos_sample
+                            )
 
                             _delta_vecs = pose_array - pose
                             _delta = np.linalg.norm(_delta_vecs, axis=1)
@@ -447,14 +447,14 @@ def main(config_path):
                                     _delta,
                                     _delta_vecs,
                                 )
-                            rprint(delta_sample)
-                            # delta_table.append(
-                            #     delta_sample
-                            # )
+                            # rprint(delta_sample)
+                            delta_table.append(
+                                delta_sample
+                            )
 
                             # known_hit_pos_sample.append()
                             idx_pose += 1
-                            exit()
+                            # exit()
 
                         idx_event += 1
 
