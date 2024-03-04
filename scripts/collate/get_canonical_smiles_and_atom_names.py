@@ -100,7 +100,11 @@ def main(config_path):
                         key = "data_comp_XXX"
                         cif[key]
                     except:
-                        rprint(_cif_path)
+                        try:
+                            key = "data_comp_UNL"
+                            cif[key]
+                        except:
+                            rprint(_cif_path)
 
                 # Find the relevant atoms loop
                 atom_id_loop = list(cif[key].find_loop('_chem_comp_atom.atom_id'))
