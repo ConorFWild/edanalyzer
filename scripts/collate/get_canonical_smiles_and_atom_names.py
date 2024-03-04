@@ -358,7 +358,7 @@ def main(config_path):
             atom_element_array = [_x for _x in ligand_data[1].find_loop('_chem_comp_atom.type_symbol')]
             atom_id_array = np.array([x for j, x in enumerate(ligand_data[1].find_loop('_chem_comp_atom.atom_id')) if atom_element_array[j] != 'H'])
             atom_array = np.zeros((60,), dtype='<U5')
-            atom_array[:atom_array.size] = atom_id_array[:]
+            atom_array[:atom_id_array.size] = atom_id_array[:]
 
             # Store the connectivity matrix
             id_to_idx = {}
