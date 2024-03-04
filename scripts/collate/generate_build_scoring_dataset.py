@@ -121,14 +121,14 @@ def main(config_path):
         dtype=event_map_sample_dtype
     )
     known_hit_pos_sample_dtype = [
-            ('idx', '<i4'),
-            ('database_event_idx', '<i4'),
-            ('event_map_sample_idx', '<i4'),
-            ('mtz_sample_idx', '<i4'),
-            ('positions', '<f4', (60, 3)),
-            ('atoms', '<U5', (60,)),
-            ('elements', '<i4', (60,)),
-            ('rmsd', '<f4')]
+        ('idx', '<i4'),
+        ('database_event_idx', '<i4'),
+        ('event_map_sample_idx', '<i4'),
+        ('mtz_sample_idx', '<i4'),
+        ('positions', '<f4', (60, 3)),
+        ('atoms', '<U5', (60,)),
+        ('elements', '<i4', (60,)),
+        ('rmsd', '<f4')]
     table_known_hit_pos_sample = root.create_dataset(
         'known_hit_pose',
         shape=(0,),
@@ -137,12 +137,12 @@ def main(config_path):
     )
     delta_dtype = [
 
-            ('idx', '<i4'),
-            ('pose_idx', '<i4'),
-            ('delta', '<f4', (60,)),
-            ('delta_vec', '<f4', (60, 3)),
+        ('idx', '<i4'),
+        ('pose_idx', '<i4'),
+        ('delta', '<f4', (60,)),
+        ('delta_vec', '<f4', (60, 3)),
 
-        ]
+    ]
     delta_table = root.create_dataset(
         'delta',
         shape=(0,),
@@ -151,10 +151,10 @@ def main(config_path):
     )
     annotation_dtype = [
 
-            ('idx', '<i4'),
-            ('event_map_table_idx', '<i4'),
-            ('annotation', '?'),
-            ('partition', 'S32')]
+        ('idx', '<i4'),
+        ('event_map_table_idx', '<i4'),
+        ('annotation', '?'),
+        ('partition', 'S32')]
     annotation_table = root.create_dataset(
         'annotation',
         shape=(0,),
@@ -163,8 +163,8 @@ def main(config_path):
 
     )
     ligand_data_dtype = [
-            ('idx', 'i8'), ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (60,)), ('connectivity', '?', (60, 60,))
-        ]
+        ('idx', 'i8'), ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (60,)), ('connectivity', '?', (60, 60,))
+    ]
     ligand_data_table = root.create_dataset(
         'ligand_data',
         shape=(0,),
@@ -286,9 +286,11 @@ def main(config_path):
                         atom_ids_array = np.zeros((60,), dtype='<U5')
                         atom_ids = _get_atom_ids(matched_cif)
                         atom_ids_array[:len(atom_ids)] = atom_ids[:len(atom_ids)]
-                        connectivity_array = np.zeros((60,60), dtype='?')
+                        connectivity_array = np.zeros((60, 60), dtype='?')
                         connectivity = _get_connectivity(matched_cif)
-                        connectivity_array[:connectivity.shape[0], :connectivity.shape[1]] = connectivity[:connectivity.shape[0], :connectivity.shape[1]]
+                        connectivity_array[:connectivity.shape[0], :connectivity.shape[1]] = connectivity[
+                                                                                             :connectivity.shape[0],
+                                                                                             :connectivity.shape[1]]
 
                         ligand_data_sample = np.array([(
                             idx_event,
@@ -437,16 +439,20 @@ def main(config_path):
                             # known_hit_pos_sample['atoms'] = atom
                             # known_hit_pos_sample['elements'] = element
                             # known_hit_pos_sample['rmsd'] = rmsd
-                            known_hit_pos_sample = np.array([(
-                                idx_pose,
-                                _event[0].id,
-                                idx_event,
-                                idx_event,
-                                pose,
-                                atom,
-                                element,
-                                rmsd
-                            )], dtype=known_hit_pos_sample_dtype
+                            known_hit_pos_sample = np.array(
+                                [
+                                    (
+                                        idx_pose,
+                                        _event[0].id,
+                                        idx_event,
+                                        idx_event,
+                                        pose,
+                                        atom,
+                                        element,
+                                        rmsd
+                                    )
+                                ],
+                                dtype=known_hit_pos_sample_dtype
                             )
                             # rprint(known_hit_pos_sample)
                             table_known_hit_pos_sample.append(
