@@ -316,9 +316,9 @@ def main(config_path):
                                 partition
                             )
                             rprint(annotation_data)
-                            # annotation_table.append(
-                            #     annotation_data
-                            # )
+                        # annotation_table.append(
+                        #     annotation_data
+                        # )
 
 
                         # Get the sample transform
