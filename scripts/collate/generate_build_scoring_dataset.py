@@ -288,7 +288,7 @@ def main(config_path):
                         atom_ids_array[:len(atom_ids)] = atom_ids[:len(atom_ids)]
                         connectivity_array = np.zeros((60,60), dtype='?')
                         connectivity = _get_connectivity(matched_cif)
-                        connectivity_array[:connectivity.shape[0], connectivity.shape[1]] = connectivity[:connectivity.shape[0], connectivity.shape[1]]
+                        connectivity_array[:connectivity.shape[0], connectivity.shape[1]] = connectivity[:connectivity.shape[0], :connectivity.shape[1]]
 
                         ligand_data_sample = np.array([(
                             idx_event,
