@@ -25,7 +25,6 @@ from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionO
     ExperimentORM, LigandORM, AutobuildORM
 from edanalyzer.data.build_data import PoseSample, MTZSample, EventMapSample
 
-
 bond_type_cif_to_rdkit = {
     'single': Chem.rdchem.BondType.SINGLE,
     'double': Chem.rdchem.BondType.DOUBLE,
@@ -38,6 +37,7 @@ bond_type_cif_to_rdkit = {
     'deloc': Chem.rdchem.BondType.SINGLE
 
 }
+
 
 def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     # Open the cif document with gemmi
@@ -56,7 +56,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
             cif[key]
         except:
             try:
-                key='comp_UNL'
+                key = 'comp_UNL'
                 cif[key]
             except:
                 raise Exception
@@ -68,11 +68,11 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     if not atom_charge_loop:
         atom_charge_loop = list(cif[key].find_loop('_chem_comp_atom.partial_charge'))
         if not atom_charge_loop:
-            atom_charge_loop = [0]*len(atom_id_loop)
+            atom_charge_loop = [0] * len(atom_id_loop)
 
     aromatic_atom_loop = list(cif[key].find_loop('_chem_comp_atom.aromatic'))
     if not aromatic_atom_loop:
-        aromatic_atom_loop = [None]*len(atom_id_loop)
+        aromatic_atom_loop = [None] * len(atom_id_loop)
 
     # Get the mapping
     id_to_idx = {}
@@ -93,11 +93,12 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     bond_type_loop = list(cif[key].find_loop('_chem_comp_bond.type'))
     aromatic_bond_loop = list(cif[key].find_loop('_chem_comp_bond.aromatic'))
     if not aromatic_bond_loop:
-        aromatic_bond_loop = [None]*len(bond_1_id_loop)
+        aromatic_bond_loop = [None] * len(bond_1_id_loop)
 
     try:
         # Iteratively add the relevant bonds
-        for bond_atom_1, bond_atom_2, bond_type, aromatic in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop, aromatic_bond_loop):
+        for bond_atom_1, bond_atom_2, bond_type, aromatic in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop,
+                                                                 aromatic_bond_loop):
             bond_type = bond_type_cif_to_rdkit[bond_type]
             if aromatic:
                 if aromatic == "y":
@@ -126,7 +127,6 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     #     ba2 = bond.GetEndAtomIdx()
     #     print(f"{bond.GetBondType()} : {edited_mol.GetAtomWithIdx(ba1).GetSymbol()} : {edited_mol.GetAtomWithIdx(ba2).GetSymbol()}")  #*}")
     # print(Chem.MolToMolBlock(edited_mol))
-
 
     # HANDLE SULFONATES
     # forward_mol = Chem.ReplaceSubstructs(
@@ -166,11 +166,11 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     #     sulfonate["O3"] for sulfonate in sulfonates.values()
     # ]
     # print(f"Atom idxs to charge: {atoms_to_charge}")
-    bonds_to_double =[
-        (sulfonate["S"], sulfonate["O1"]) for sulfonate in sulfonates.values()
-    ] + [
-        (sulfonate["S"], sulfonate["O2"]) for sulfonate in sulfonates.values()
-    ]
+    bonds_to_double = [
+                          (sulfonate["S"], sulfonate["O1"]) for sulfonate in sulfonates.values()
+                      ] + [
+                          (sulfonate["S"], sulfonate["O2"]) for sulfonate in sulfonates.values()
+                      ]
     print(f"Bonds to double: {bonds_to_double}")
 
     # Replace the bonds and update O3's charge
@@ -210,6 +210,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     # Chem.SanitizeMol(new_mol)
     return new_mol
 
+
 def main(config_path):
     # Get the database
     rprint(f'Running collate_database from config file: {config_path}')
@@ -233,7 +234,6 @@ def main(config_path):
     event_map_table = root['event_map_sample']
     pose_table = root['known_hit_pose']
 
-
     # Try to create the atom name/canonical smiles array
     try:
         root.create_group(
@@ -252,7 +252,6 @@ def main(config_path):
 
         # Iterate over event maps
         for _record in event_map_table:
-
 
             # Get corresponding event
             database_event_idx = _record['event_idx']
@@ -310,7 +309,8 @@ def main(config_path):
                     id_to_idx[atom_id] = j
 
                 atom_ints = np.array(
-                    [gemmi.Element(_atom_name).atomic_number for _atom_name in atom_type_loop if gemmi.Element(_atom_name).atomic_number != 1]
+                    [gemmi.Element(_atom_name).atomic_number for _atom_name in atom_type_loop if
+                     gemmi.Element(_atom_name).atomic_number != 1]
                 )
                 rprint(atom_ints)
                 rprint(matched_pose_atom_array)
@@ -332,12 +332,15 @@ def main(config_path):
             # Get Mol
             mol = get_fragment_mol_from_dataset_cif_path(cif_path)
             rprint(mol)
+            smiles = Chem.MolToSmiles(mol)
+            rprint(smiles)
 
             # Get canoncial smiles
 
             # Store canonical smiles
 
     ...
+
 
 if __name__ == "__main__":
     fire.Fire(main)
