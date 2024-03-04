@@ -424,7 +424,7 @@ def main(config_path):
                         )
 
                         # Record the decoy/rmsd pairs with their event map
-                        for pose, atom, element, rmsd in zip(poses, atom, elements, rmsds):
+                        for pose, atom, element, rmsd in zip(poses, atoms, elements, rmsds):
                             # known_hit_pos_sample['idx'] = idx_pose
 
                             # Record the event key
