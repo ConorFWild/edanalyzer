@@ -419,7 +419,7 @@ def main(config_path):
 
     rprint(f"Num Matched: {num_matched}")
     rprint(f"Num Not Matched: {num_not_matched}")
-
+    print(ligand_data_table.info)
     ...
 
 
