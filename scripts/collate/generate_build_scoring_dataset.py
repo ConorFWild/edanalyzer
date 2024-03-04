@@ -119,7 +119,7 @@ def main(config_path):
         'known_hit_pose',
         shape=(20,),
         chunk=(20,),
-        dtype=[[
+        dtype=[
             ('idx', '<i4'),
             ('database_event_idx', '<i4'),
             ('event_map_sample_idx', '<i4'),
@@ -127,7 +127,7 @@ def main(config_path):
             ('positions', '<f4', (60, 3)),
             ('atoms', '<U5', (60,)),
             ('elements', '<i4', (60,)),
-            ('rmsd', '<f4')]]
+            ('rmsd', '<f4')]
     )
 
     delta_table = root.create_dataset(
@@ -135,12 +135,12 @@ def main(config_path):
         shape=(20,),
         chunks=(20,),
         dtype=[
-            [
+
                 ('idx', '<i4'),
                 ('pose_idx', '<i4'),
                 ('delta', '<f4', (60,)),
                 ('delta_vec', '<f4', (60, 3)),
-            ]
+
         ]
     )
     annotation_table = root.create_dataset(
@@ -148,12 +148,12 @@ def main(config_path):
         shape=(20,),
         chunks=(20,),
         dtype=[
-            [
+
                 ('idx', '<i4'),
                 ('event_map_table_idx', '<i4'),
                 ('annotation', '?'),
                 ('partition', 'S32')]
-        ]
+
     )
     ligand_data_table = root.create_dataset(
         'ligand_data',
