@@ -105,16 +105,19 @@ def main(config_path):
     root = zarr.open('output/build_data_v3.zarr', 'w')
     table_mtz_sample = root.create_dataset(
         'mtz_sample',
+        shape=(20,),
         chunk=(20,),
         dtype=[('idx', '<i4'), ('event_idx', '<i4'), ('res_id', 'S32'), ('sample', '<f4', (90, 90, 90))]
     )
     table_event_map_sample = root.create_dataset(
         'event_map_sample',
+        shape=(20,),
         chunk=(20,),
         dtype=[('idx', '<i4'), ('event_idx', '<i4'), ('res_id', 'S32'), ('sample', '<f4', (90, 90, 90))]
     )
     table_known_hit_pos_sample = root.create_dataset(
         'known_hit_pose',
+        shape=(20,),
         chunk=(20,),
         dtype=[[
             ('idx', '<i4'),
@@ -129,6 +132,7 @@ def main(config_path):
 
     delta_table = root.create_dataset(
         'delta',
+        shape=(20,),
         chunks=(20,),
         dtype=[
             [
@@ -141,6 +145,7 @@ def main(config_path):
     )
     annotation_table = root.create_dataset(
         'annotation',
+        shape=(20,),
         chunks=(20,),
         dtype=[
             [
@@ -152,6 +157,7 @@ def main(config_path):
     )
     ligand_data_table = root.create_dataset(
         'ligand_data',
+        shape=(20,),
         chunks=(20,),
         dtype=[
             ('idx', 'i8'), ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (60,)), ('connectivity', '?', (60, 60,))
