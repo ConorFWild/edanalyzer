@@ -285,7 +285,7 @@ def main(config_path):
                         smiles = _get_smiles(matched_cif)
                         atom_ids_array = np.zeros((60,), dtype='<U5')
                         atom_ids = _get_atom_ids(matched_cif)
-                        atom_ids_array[:atom_ids.size] = atom_ids[:atom_ids_array]
+                        atom_ids_array[:atom_ids.size] = atom_ids[:atom_ids.size]
                         connectivity_array = np.zeros((60,60), dtype='?')
                         connectivity = _get_connectivity(matched_cif)
                         connectivity_array[:connectivity.shape[0], connectivity.shape[1]] = connectivity[:connectivity.shape[0], connectivity.shape[1]]
