@@ -243,9 +243,10 @@ def main(config_path):
         del root['ligand_data']
     except:
         rprint(f'No ligand data array! Making one!')
-    ligand_data = root.create_group(
+    ligand_data = root.create_dataset(
         'ligand_data',
         shape=event_map_table.shape,
+        chunks=(20,),
         dtype=[
             ('idx', 'i8'), ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (60,)), ('connectivity', '?', (60,60,))
         ]
