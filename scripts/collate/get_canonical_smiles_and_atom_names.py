@@ -239,7 +239,7 @@ def main(config_path):
         root.create_group(
             'ligand_data',
             dtype=[
-                ('canonical_smiles', '<U200'), ('atom_ids', '<U5', (60,))
+                ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (60,))
             ]
         )
     except:
