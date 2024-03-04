@@ -439,6 +439,14 @@ def main(config_path):
                             # known_hit_pos_sample['atoms'] = atom
                             # known_hit_pos_sample['elements'] = element
                             # known_hit_pos_sample['rmsd'] = rmsd
+                            rprint((idx_pose,
+                                        _event[0].id,
+                                        idx_event,
+                                        idx_event,
+                                        pose,
+                                        atom,
+                                        element,
+                                        rmsd))
                             known_hit_pos_sample = np.array(
                                 [
                                     (
