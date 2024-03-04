@@ -89,6 +89,7 @@ def main(config_path):
             rprint(f'{database_event.dtag}: {len(smiles)} smiles : {len(cif_paths)} cifs')
 
             # See which cif matches the element sequence
+            matched_cifs = []
             for _cif_path in cif_paths:
                 cif = gemmi.cif.read(str(_cif_path))
 
@@ -130,13 +131,18 @@ def main(config_path):
                 rprint(atom_ints)
                 rprint(matched_pose_atom_array)
                 if np.array_equal(atom_ints, matched_pose_atom_array):
-                    rprint(f'MATCHED!')
-                else:
-                    rprint(f"MATCH FAILED!")
+                    matched_cifs.append(cif)
 
-
+            if len(matched_cifs) == 0:
+                rprint(f"MATCH FAILED!")
+                continue
+            else:
+                rprint(f'MATCHED!')
+            matched_cif = matched_cifs[0]
 
             # Make atom name array
+            atom_name_array = np.array(list(cif[key].find_loop('_chem_comp_atom.atom_id')))
+            rprint(atom_name_array)
 
             # Get Mol
 
