@@ -315,7 +315,7 @@ def main(config_path):
                                 annotation_bool,
                                 partition
                             )
-                            rprint(annotation_data)
+                        rprint(annotation_data)
                         # annotation_table.append(
                         #     annotation_data
                         # )
