@@ -295,27 +295,27 @@ def main(config_path):
                         # )
 
                         # Check for an annotation
-                        event_annotation_table = inspect_table[inspect_table['dtag'] == _event[0].id]
-                        if len(event_annotation_table) == 0:
-                            annotation_data = ()
-                        else:
-                            annotation_row = event_annotation_table.iloc[0]
-                            annotation = annotation_row['Ligand Confidence']
-                            if annotation == "High":
-                                annotation_bool = True
-                            else:
-                                annotation_bool = False
-                            if _event[0].pandda.system.name in test_systems:
-                                partition = 'test'
-                            else:
-                                partition = 'train'
-                            annotation_data = (
-                                idx_event,
-                                idx_event,
-                                annotation_bool,
-                                partition
-                            )
-                        rprint(annotation_data)
+                        # event_annotation_table = inspect_table[inspect_table['dtag'] == _event[0].id]
+                        # if len(event_annotation_table) == 0:
+                        #     annotation_data = ()
+                        # else:
+                        #     annotation_row = event_annotation_table.iloc[0]
+                        #     annotation = annotation_row['Ligand Confidence']
+                        #     if annotation == "High":
+                        #         annotation_bool = True
+                        #     else:
+                        #         annotation_bool = False
+                        #     if _event[0].pandda.system.name in test_systems:
+                        #         partition = 'test'
+                        #     else:
+                        #         partition = 'train'
+                        #     annotation_data = (
+                        #         idx_event,
+                        #         idx_event,
+                        #         annotation_bool,
+                        #         partition
+                        #     )
+                        # rprint(annotation_data)
                         # annotation_table.append(
                         #     annotation_data
                         # )
