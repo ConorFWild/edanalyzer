@@ -239,7 +239,10 @@ def main(config_path):
 
     # Try to create the atom name/canonical smiles array
     # try:
-    del root['ligand_data']
+    try:
+        del root['ligand_data']
+    except:
+        rprint(f'No ligand data array! Making one!')
     ligand_data = root.create_group(
         'ligand_data',
         shape=event_map_table.shape,
