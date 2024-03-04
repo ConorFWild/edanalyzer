@@ -236,6 +236,7 @@ def main(config_path):
 
     # Try to create the atom name/canonical smiles array
     # try:
+    del root['ligand_data']
     root.create_group(
         'ligand_data',
         dtype=[
