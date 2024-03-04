@@ -191,6 +191,7 @@ def main(config_path):
         # processed_event_idxs = table_event_map_sample.cols.event_idx[:]
         idx_pose = 0
         idx_event = 0
+        processed_event_idxs = []
 
         for experiment in sorted_experiments:
             rprint(f"Processing experiment: {experiment.path}")
