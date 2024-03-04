@@ -184,11 +184,13 @@ def main(config_path):
         sorted_experiments = sorted(query, key=lambda _experiment: experiment_num_datasets[_experiment.path])
 
         rprint(f"Querying processed events...")
-        idx_col_pose = table_known_hit_pos_sample.cols.idx[:]
-        idx_pose = int(idx_col_pose.max()) + 1
-        idx_col_event = table_event_map_sample.cols.idx[:]
-        idx_event = int(idx_col_event.max()) + 1
-        processed_event_idxs = table_event_map_sample.cols.event_idx[:]
+        # idx_col_pose = table_known_hit_pos_sample.cols.idx[:]
+        # idx_pose = int(idx_col_pose.max()) + 1
+        # idx_col_event = table_event_map_sample.cols.idx[:]
+        # idx_event = int(idx_col_event.max()) + 1
+        # processed_event_idxs = table_event_map_sample.cols.event_idx[:]
+        idx_pose = 0
+        idx_event = 0
 
         for experiment in sorted_experiments:
             rprint(f"Processing experiment: {experiment.path}")
