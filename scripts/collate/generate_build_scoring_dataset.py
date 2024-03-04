@@ -293,8 +293,8 @@ def main(config_path):
                         ligand_data_sample = np.array([(
                             idx_event,
                             smiles,
-                            atom_ids,
-                            connectivity
+                            atom_ids_array,
+                            connectivity_array
                         )], dtype=ligand_data_dtype)
                         # rprint(ligand_data_sample)
                         ligand_data_table.append(
