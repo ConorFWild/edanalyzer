@@ -346,6 +346,7 @@ def main(config_path):
                             ),
                             dtype=mtz_sample_dtype
                         )
+                        rprint(table_mtz_sample)
                         rprint(mtz_sample)
                         table_mtz_sample.append(
                             mtz_sample
