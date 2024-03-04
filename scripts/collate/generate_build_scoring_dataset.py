@@ -79,7 +79,6 @@ def main(config_path):
     working_dir = Path(config['working_directory'])
     inspect_table = pd.read_csv(working_dir / 'build_annotation_pandda_2' / 'analyses' / 'pandda_inspect_events.csv')
 
-
     #
     pandda_key = config['panddas']['pandda_key'],
     test_systems = config['test']['test_systems']
@@ -121,11 +120,7 @@ def main(config_path):
         chunks=(20,),
         dtype=event_map_sample_dtype
     )
-    table_known_hit_pos_sample = root.create_dataset(
-        'known_hit_pose',
-        shape=(0,),
-        chunks=(20,),
-        dtype=[
+    known_hit_pos_sample_dtype = [
             ('idx', '<i4'),
             ('database_event_idx', '<i4'),
             ('event_map_sample_idx', '<i4'),
@@ -134,40 +129,47 @@ def main(config_path):
             ('atoms', '<U5', (60,)),
             ('elements', '<i4', (60,)),
             ('rmsd', '<f4')]
+    table_known_hit_pos_sample = root.create_dataset(
+        'known_hit_pose',
+        shape=(0,),
+        chunks=(20,),
+        dtype=known_hit_pos_sample_dtype
     )
+    delta_dtype = [
 
+            ('idx', '<i4'),
+            ('pose_idx', '<i4'),
+            ('delta', '<f4', (60,)),
+            ('delta_vec', '<f4', (60, 3)),
+
+        ]
     delta_table = root.create_dataset(
         'delta',
         shape=(0,),
         chunks=(20,),
-        dtype=[
-
-                ('idx', '<i4'),
-                ('pose_idx', '<i4'),
-                ('delta', '<f4', (60,)),
-                ('delta_vec', '<f4', (60, 3)),
-
-        ]
+        dtype=delta_dtype
     )
+    annotation_dtype = [
+
+            ('idx', '<i4'),
+            ('event_map_table_idx', '<i4'),
+            ('annotation', '?'),
+            ('partition', 'S32')]
     annotation_table = root.create_dataset(
         'annotation',
         shape=(0,),
         chunks=(20,),
-        dtype=[
-
-                ('idx', '<i4'),
-                ('event_map_table_idx', '<i4'),
-                ('annotation', '?'),
-                ('partition', 'S32')]
+        dtype=annotation_dtype
 
     )
+    ligand_data_dtype = [
+            ('idx', 'i8'), ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (60,)), ('connectivity', '?', (60, 60,))
+        ]
     ligand_data_table = root.create_dataset(
         'ligand_data',
         shape=(0,),
         chunks=(20,),
-        dtype=[
-            ('idx', 'i8'), ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (60,)), ('connectivity', '?', (60, 60,))
-        ]
+        dtype=ligand_data_dtype
     )
 
     #
@@ -198,8 +200,6 @@ def main(config_path):
         idx_pose = 0
         idx_event = 0
         processed_event_idxs = []
-
-
 
         for experiment in sorted_experiments:
             rprint(f"Processing experiment: {experiment.path}")
@@ -285,16 +285,16 @@ def main(config_path):
                         smiles = _get_smiles(matched_cif)
                         atom_ids = _get_atom_ids(matched_cif)
                         connectivity = _get_connectivity(matched_cif)
-                        ligand_data_sample = (
-                                idx_event,
-                                smiles,
-                                atom_ids,
-                                connectivity
-                            )
-                        rprint(ligand_data_sample)
-                        # ligand_data_table.append(
-                        #     ligand_data_sample
-                        # )
+                        ligand_data_sample = np.array([(
+                            idx_event,
+                            smiles,
+                            atom_ids,
+                            connectivity
+                        )], dtype=ligand_data_dtype)
+                        # rprint(ligand_data_sample)
+                        ligand_data_table.append(
+                            ligand_data_sample
+                        )
 
                         # Check for an annotation
                         # event_annotation_table = inspect_table[inspect_table['dtag'] == _event[0].id]
@@ -322,7 +322,6 @@ def main(config_path):
                         #     annotation_data
                         # )
 
-
                         # Get the sample transform
                         centroid = np.array([_event[0].x, _event[0].y, _event[0].z])
                         transform = gemmi.Transform()
@@ -346,8 +345,8 @@ def main(config_path):
                             )],
                             dtype=mtz_sample_dtype
                         )
-                        rprint(table_mtz_sample)
-                        rprint(mtz_sample)
+                        # rprint(table_mtz_sample)
+                        # rprint(mtz_sample)
                         table_mtz_sample.append(
                             mtz_sample
                         )
@@ -360,12 +359,14 @@ def main(config_path):
                         # event_map_sample['event_idx'] = _event[0].id
                         # event_map_sample['res_id'] = known_hit_residue
                         # event_map_sample['sample'] = event_map_sample_array
-                        event_map_sample = (
+                        event_map_sample = np.array(
+                            [(
                                 idx_event,
                                 _event[0].id,
                                 known_hit_residue,
                                 event_map_sample_array
-                            )
+                            )], dtype=event_map_sample_dtype
+                        )
                         # rprint(event_map_sample)
                         table_event_map_sample.append(
                             event_map_sample
@@ -392,16 +393,17 @@ def main(config_path):
                         # known_hit_pos_sample['positions'] = pose_array
                         # known_hit_pos_sample['elements'] = elements_array
                         # known_hit_pos_sample['rmsd'] = 0.0
-                        known_hit_pos_sample = (
-                                idx_pose,
-                                _event[0].id,
-                                idx_event,
-                                idx_event,
-                                pose_array,
-                                atom_array,
-                                elements_array,
-                                0.0
-                            )
+                        known_hit_pos_sample = np.array([(
+                            idx_pose,
+                            _event[0].id,
+                            idx_event,
+                            idx_event,
+                            pose_array,
+                            atom_array,
+                            elements_array,
+                            0.0
+                        )], dtype=known_hit_pos_sample_dtype
+                        )
                         # rprint(known_hit_pos_sample)
                         table_known_hit_pos_sample.append(
                             known_hit_pos_sample
@@ -430,16 +432,17 @@ def main(config_path):
                             # known_hit_pos_sample['atoms'] = atom
                             # known_hit_pos_sample['elements'] = element
                             # known_hit_pos_sample['rmsd'] = rmsd
-                            known_hit_pos_sample = (
-                                    idx_pose,
-                                    _event[0].id,
-                                    idx_event,
-                                    idx_event,
-                                    pose,
-                                    atom,
-                                    element,
-                                    rmsd
-                                )
+                            known_hit_pos_sample = np.array([(
+                                idx_pose,
+                                _event[0].id,
+                                idx_event,
+                                idx_event,
+                                pose,
+                                atom,
+                                element,
+                                rmsd
+                            )], dtype=known_hit_pos_sample_dtype
+                            )
                             # rprint(known_hit_pos_sample)
                             table_known_hit_pos_sample.append(
                                 known_hit_pos_sample
@@ -447,12 +450,13 @@ def main(config_path):
 
                             _delta_vecs = pose_array - pose
                             _delta = np.linalg.norm(_delta_vecs, axis=1)
-                            delta_sample = (
-                                    idx_pose,
-                                    idx_pose,
-                                    _delta,
-                                    _delta_vecs,
-                                )
+                            delta_sample = np.array([(
+                                idx_pose,
+                                idx_pose,
+                                _delta,
+                                _delta_vecs,
+                            )], dtype=delta_dtype
+                            )
                             # rprint(delta_sample)
                             delta_table.append(
                                 delta_sample
