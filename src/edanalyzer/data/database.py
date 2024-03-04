@@ -494,8 +494,8 @@ def _get_lig_block_from_path(path):
 def  _match_atoms(atom_name_array, block):
     atom_id_loop = list(block.find_loop('_chem_comp_atom.atom_id'))
     atom_element_loop = list(block.find_loop('_chem_comp_atom.type_symbol'))
-    rprint(atom_id_loop)
-    rprint(atom_name_array)
+    # rprint(atom_id_loop)
+    # rprint(atom_name_array)
 
     filtered_atom_id_loop = [_x for _x, _el in zip(atom_id_loop, atom_element_loop) if _el != 'H']
     rprint(filtered_atom_id_loop)
