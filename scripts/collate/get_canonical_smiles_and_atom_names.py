@@ -246,7 +246,7 @@ def main(config_path):
     ligand_data = root.create_dataset(
         'ligand_data',
         shape=event_map_table.shape,
-        chunks=(20,),
+        chunks=(1,),
         dtype=[
             ('idx', 'i8'), ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (60,)), ('connectivity', '?', (60,60,))
         ]
