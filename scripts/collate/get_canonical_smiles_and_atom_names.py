@@ -235,15 +235,15 @@ def main(config_path):
     pose_table = root['known_hit_pose']
 
     # Try to create the atom name/canonical smiles array
-    try:
-        root.create_group(
-            'ligand_data',
-            dtype=[
-                ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (60,))
-            ]
-        )
-    except:
-        rprint(f"Already created ligand data table!")
+    # try:
+    root.create_group(
+        'ligand_data',
+        dtype=[
+            ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (60,))
+        ]
+    )
+    # except:
+    #     rprint(f"Already created ligand data table!")
 
     pose_table_idxs = pose_table['idx']
     pose_table_database_events = pose_table['database_event_idx']
