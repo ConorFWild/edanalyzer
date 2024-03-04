@@ -383,7 +383,12 @@ def main(config_path):
 
             #
 
-            new_ligand_data = (_record['idx'], smiles, atom_array, bond_matrix)
+            new_ligand_data = (
+                _record['idx'],
+                smiles,
+                atom_array,
+                bond_matrix,
+            )
             rprint(new_ligand_data)
 
 
