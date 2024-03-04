@@ -142,7 +142,7 @@ def main(config_path):
 
             # Make atom name array
             atom_element_array = [_x for _x in block.find_loop('_chem_comp_atom.type_symbol')]
-            atom_name_array = np.array([x for j, x in enumerate(block.find_loop('_chem_comp_atom.atom_id')) if atom_element_array[j] != 1])
+            atom_name_array = np.array([x for j, x in enumerate(block.find_loop('_chem_comp_atom.atom_id')) if atom_element_array[j] != 'H'])
             rprint(atom_name_array)
 
             # Get Mol
