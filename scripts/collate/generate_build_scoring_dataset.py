@@ -76,6 +76,10 @@ def main(config_path):
     except Exception as e:
         print(f"Exception setting up database: {e}")
 
+    working_dir = Path(config['working_directory'])
+    inspect_table = pd.read_csv(working_dir / 'build_annotation_pandda_2' / 'analyses' / 'pandda_inspect_events.csv')
+
+
     #
     pandda_key = config['panddas']['pandda_key'],
     test_systems = config['test']['test_systems']
@@ -193,6 +197,8 @@ def main(config_path):
         idx_event = 0
         processed_event_idxs = []
 
+
+
         for experiment in sorted_experiments:
             rprint(f"Processing experiment: {experiment.path}")
             experiment_hit_results = [res for res in query_events if
@@ -287,6 +293,33 @@ def main(config_path):
                         # ligand_data_table.append(
                         #     ligand_data_sample
                         # )
+
+                        # Check for an annotation
+                        event_annotation_table = inspect_table[inspect_table['dtag'] == _event[0].id]
+                        if len(event_annotation_table) == 0:
+                            annotation_data = ()
+                        else:
+                            annotation_row = event_annotation_table.iloc[0]
+                            annotation = annotation_row['Ligand Confidence']
+                            if annotation == "High":
+                                annotation_bool = True
+                            else:
+                                annotation_bool = False
+                            if _event[0].pandda.system.name in test_systems:
+                                partition = 'test'
+                            else:
+                                partition = 'train'
+                            annotation_data = (
+                                idx_event,
+                                idx_event,
+                                annotation_bool,
+                                partition
+                            )
+                            rprint(annotation_data)
+                            # annotation_table.append(
+                            #     annotation_data
+                            # )
+
 
                         # Get the sample transform
                         centroid = np.array([_event[0].x, _event[0].y, _event[0].z])
