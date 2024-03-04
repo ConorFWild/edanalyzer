@@ -107,17 +107,19 @@ def main(config_path):
     #     table_known_hit_pos_sample = fileh.create_table(root, "known_hit_pose", PoseSample, )
 
     root = zarr.open('output/build_data_v3.zarr', 'w')
+    mtz_sample_dtype = [('idx', '<i4'), ('event_idx', '<i4'), ('res_id', 'S32'), ('sample', '<f4', (90, 90, 90))]
     table_mtz_sample = root.create_dataset(
         'mtz_sample',
         shape=(20,),
         chunks=(20,),
-        dtype=[('idx', '<i4'), ('event_idx', '<i4'), ('res_id', 'S32'), ('sample', '<f4', (90, 90, 90))]
+        dtype=mtz_sample_dtype
     )
+    event_map_sample_dtype = [('idx', '<i4'), ('event_idx', '<i4'), ('res_id', 'S32'), ('sample', '<f4', (90, 90, 90))]
     table_event_map_sample = root.create_dataset(
         'event_map_sample',
         shape=(20,),
         chunks=(20,),
-        dtype=[('idx', '<i4'), ('event_idx', '<i4'), ('res_id', 'S32'), ('sample', '<f4', (90, 90, 90))]
+        dtype=event_map_sample_dtype
     )
     table_known_hit_pos_sample = root.create_dataset(
         'known_hit_pose',
@@ -335,12 +337,15 @@ def main(config_path):
                         # mtz_sample['event_idx'] = _event[0].id
                         # mtz_sample['res_id'] = known_hit_residue
                         # mtz_sample['sample'] = mtz_sample_array
-                        mtz_sample =                             (
+                        mtz_sample = np.array(
+                            (
                                 idx_event,
                                 _event[0].id,
                                 known_hit_residue,
                                 mtz_sample_array
-                            )
+                            ),
+                            dtype=mtz_sample_dtype
+                        )
                         # rprint(mtz_sample)
                         table_mtz_sample.append(
                             mtz_sample
