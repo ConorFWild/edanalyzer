@@ -6,6 +6,9 @@ from rich import print as rprint
 import gemmi
 from pathlib import Path
 from scipy.spatial.transform import Rotation as R
+from rdkit import Chem
+from rdkit.Chem import AllChem
+
 
 from edanalyzer import constants
 
