@@ -131,17 +131,17 @@ def main(config_path):
                 rprint(atom_ints)
                 rprint(matched_pose_atom_array)
                 if np.array_equal(atom_ints, matched_pose_atom_array):
-                    matched_cifs.append(cif)
+                    matched_cifs.append(cif[key])
 
             if len(matched_cifs) == 0:
                 rprint(f"MATCH FAILED!")
                 continue
             else:
                 rprint(f'MATCHED!')
-            matched_cif = matched_cifs[0]
+            block = matched_cifs[0]
 
             # Make atom name array
-            atom_name_array = np.array(list(cif[key].find_loop('_chem_comp_atom.atom_id')))
+            atom_name_array = np.array(list(block.find_loop('_chem_comp_atom.atom_id')))
             rprint(atom_name_array)
 
             # Get Mol
