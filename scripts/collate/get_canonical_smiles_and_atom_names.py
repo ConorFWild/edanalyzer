@@ -383,6 +383,8 @@ def main(config_path):
 
             #
 
+            rprint(bond_matrix[:10, :10])
+
             new_ligand_data = (
                 _record['idx'],
                 smiles,
