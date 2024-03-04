@@ -117,7 +117,7 @@ def main(config_path):
 
                 atom_ints = [gemmi.Element(_atom_name).atomic_number for _atom_name in atom_type_loop if gemmi.Element(_atom_name).atomic_number != 1]
                 rprint(atom_ints)
-                rprint(matched_pose['elements'])
+                rprint(matched_pose['elements'][matched_pose['elements'] != 0])
 
 
 
