@@ -357,8 +357,8 @@ def _res_to_array(res):
     for atom in res.first_conformer():
         pos = atom.pos
         element = atom.element.atomic_number
-        if atom.has_altloc():
-            raise Exception
+        # if atom.has_altloc():
+        #     raise Exception
         if element == 1:
             continue
         poss.append([pos.x, pos.y, pos.z])
@@ -523,7 +523,7 @@ def _get_matched_cifs(
         known_hit_residue,
         event,
 ):
-    atom_name_array = [atom.name for atom in known_hit_residue if atom.element.name != 'H']
+    atom_name_array = [atom.name for atom in known_hit_residue.first_conformer() if atom.element.name != 'H']
 
     dtag_dir = Path(event.pandda.path) / 'processed_datasets' / event.dtag / 'ligand_files'
     cif_paths = [x for x in dtag_dir.glob('*.cif') if x.stem not in constants.LIGAND_IGNORE_REGEXES]
