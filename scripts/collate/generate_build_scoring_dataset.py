@@ -125,9 +125,9 @@ def main(config_path):
         ('database_event_idx', '<i4'),
         ('event_map_sample_idx', '<i4'),
         ('mtz_sample_idx', '<i4'),
-        ('positions', '<f4', (60, 3)),
-        ('atoms', '<U5', (60,)),
-        ('elements', '<i4', (60,)),
+        ('positions', '<f4', (100, 3)),
+        ('atoms', '<U5', (100,)),
+        ('elements', '<i4', (100,)),
         ('rmsd', '<f4')]
     table_known_hit_pos_sample = root.create_dataset(
         'known_hit_pose',
@@ -139,8 +139,8 @@ def main(config_path):
 
         ('idx', '<i4'),
         ('pose_idx', '<i4'),
-        ('delta', '<f4', (60,)),
-        ('delta_vec', '<f4', (60, 3)),
+        ('delta', '<f4', (100,)),
+        ('delta_vec', '<f4', (100, 3)),
 
     ]
     delta_table = root.create_dataset(
@@ -163,7 +163,7 @@ def main(config_path):
 
     )
     ligand_data_dtype = [
-        ('idx', 'i8'), ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (60,)), ('connectivity', '?', (60, 60,))
+        ('idx', 'i8'), ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (100,)), ('connectivity', '?', (100, 100,))
     ]
     ligand_data_table = root.create_dataset(
         'ligand_data',
@@ -283,10 +283,10 @@ def main(config_path):
                         matched_cif = matched_cifs[0]
 
                         smiles = _get_smiles(matched_cif)
-                        atom_ids_array = np.zeros((60,), dtype='<U5')
+                        atom_ids_array = np.zeros((100,), dtype='<U5')
                         atom_ids = _get_atom_ids(matched_cif)
                         atom_ids_array[:len(atom_ids)] = atom_ids[:len(atom_ids)]
-                        connectivity_array = np.zeros((60, 60), dtype='?')
+                        connectivity_array = np.zeros((100, 100), dtype='?')
                         connectivity = _get_connectivity(matched_cif)
                         connectivity_array[:connectivity.shape[0], :connectivity.shape[1]] = connectivity[
                                                                                              :connectivity.shape[0],
@@ -386,10 +386,10 @@ def main(config_path):
                         _poss_centered = poss - com
                         _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape(
                             (1, 3)) + event_to_lig_com
-                        size = min(60, _rmsd_target.shape[0])
-                        atom_array = np.zeros(60, dtype='<U5')
-                        elements_array = np.zeros(60, dtype=np.int32)
-                        pose_array = np.zeros((60, 3))
+                        size = min(100, _rmsd_target.shape[0])
+                        atom_array = np.zeros(100, dtype='<U5')
+                        elements_array = np.zeros(100, dtype=np.int32)
+                        pose_array = np.zeros((100, 3))
                         pose_array[:size, :] = _rmsd_target[:size, :]
                         atom_array[:size] = atom[:size]
                         elements_array[:size] = elements[:size]
