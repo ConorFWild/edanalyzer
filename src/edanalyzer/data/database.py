@@ -7,7 +7,6 @@ import gemmi
 from pathlib import Path
 from scipy.spatial.transform import Rotation as R
 
-
 from edanalyzer import constants
 
 
@@ -51,6 +50,7 @@ def _get_system_from_dtag(dtag):
         system_name = dtag[:last_hypen_pos]
 
         return system_name
+
 
 def try_open_map(path):
     try:
@@ -102,6 +102,7 @@ def _has_parsable_pdb(compound_dir):
         #     return True
 
     return False
+
 
 def get_ligand_num_atoms(ligand):
     num_atoms = 0
@@ -178,6 +179,7 @@ def get_event_ligand(inspect_model_path, x, y, z, cutoff=10.0):
         return ligand_dict[min_dist_id]
     else:
         return None
+
 
 def _parse_inspect_table_row(
         row,
@@ -344,8 +346,10 @@ def _get_known_hits(known_hit_structures):
 
     return centroids
 
+
 def _res_to_array(res):
     poss = []
+    atoms = []
     elements = []
     for atom in res:
         pos = atom.pos
@@ -353,16 +357,18 @@ def _res_to_array(res):
         if element == 1:
             continue
         poss.append([pos.x, pos.y, pos.z])
+        atoms.append(atom.name)
         elements.append(element)
 
-    return np.array(poss), np.array(elements)
+    return np.array(poss), np.array(atoms), np.array(elements)
+
 
 def _get_known_hit_centroids(known_hits):
     centroids = {}
     for dtag in known_hits:
         centroids[dtag] = {}
         for res_id in known_hits[dtag]:
-            poss, elements = _res_to_array(known_hits[dtag][res_id])
+            poss, atom, elements = _res_to_array(known_hits[dtag][res_id])
             centroids[dtag][res_id] = np.mean(poss, axis=0)
 
     return centroids
@@ -400,12 +406,15 @@ def _get_known_hit_poses(
         num_poses=50
 ):
     # Get pos array
-    poss, elements = _res_to_array(res)
+    poss, atoms, elements = _res_to_array(res)
 
     size = min(60, poss.shape[0])
 
     elements_array = np.zeros(60, dtype=np.int32)
     elements_array[:size] = elements[:size]
+
+    atom_array = np.zeros(60, dtype='<U5')
+    atom_array[:size] = atoms[:size]
 
     # Iterate over poses
     poses = []
@@ -457,4 +466,289 @@ def _get_known_hit_poses(
             if num_sampled >= num_poses:
                 break
 
-    return poses, [elements_array] * 6 * num_poses, rmsds
+    return poses, [atom_array] * 6, [elements_array] * 6 * num_poses, rmsds
+
+def _get_lig_block_from_path(path):
+    cif = gemmi.cif.read(str(path))
+
+    key = "comp_LIG"
+    try:
+        cif['comp_LIG']
+    except:
+        try:
+            key = "data_comp_XXX"
+            cif[key]
+        except:
+            try:
+                key = "comp_UNL"
+                cif[key]
+            except:
+                rprint(path)
+    return cif[key]
+
+def  _match_atoms(atom_name_array, block):
+    atom_id_loop = list(block.find_loop('_chem_comp_atom.atom_id'))
+    atom_element_loop = list(block.find_loop('_chem_comp_atom.type_symbol'))
+
+    if len(atom_id_loop) != len(atom_name_array):
+        return None
+
+    match = {}
+    for _j, atom_1_id in enumerate([_x for _x, _el in zip(atom_id_loop, atom_element_loop) if _el != 'H']):
+        for _k, atom_2_id in enumerate(atom_name_array):
+            if atom_1_id == atom_2_id:
+                match[_j] = _k
+
+    if len(match) != len(atom_id_loop):
+        return None
+
+    else:
+        return match
+
+
+
+
+def _get_matched_cifs(
+        known_hit_residue,
+        event,
+):
+    atom_name_array = [atom.name for atom in known_hit_residue if atom.element.name != 'H']
+
+    dtag_dir = Path(event.pandda.path) / 'processed_datasets' / event.dtag / 'ligand_files'
+    cif_paths = [x for x in dtag_dir.glob('*.cif') if x.stem not in constants.LIGAND_IGNORE_REGEXES]
+
+    matched_paths = []
+    for _cif_path in cif_paths:
+        block = _get_lig_block_from_path(_cif_path)
+        match = _match_atoms(atom_name_array, block)
+
+        if match:
+            matched_paths.append((_cif_path, block, match))
+
+    return matched_paths
+
+
+bond_type_cif_to_rdkit = {
+    'single': Chem.rdchem.BondType.SINGLE,
+    'double': Chem.rdchem.BondType.DOUBLE,
+    'triple': Chem.rdchem.BondType.TRIPLE,
+    'SINGLE': Chem.rdchem.BondType.SINGLE,
+    'DOUBLE': Chem.rdchem.BondType.DOUBLE,
+    'TRIPLE': Chem.rdchem.BondType.TRIPLE,
+    'aromatic': Chem.rdchem.BondType.AROMATIC,
+    # 'deloc': Chem.rdchem.BondType.OTHER
+    'deloc': Chem.rdchem.BondType.SINGLE
+
+}
+
+
+def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
+    # Open the cif document with gemmi
+    cif = gemmi.cif.read(str(dataset_cif_path))
+
+    # Create a blank rdkit mol
+    mol = Chem.Mol()
+    editable_mol = Chem.EditableMol(mol)
+
+    key = "comp_LIG"
+    try:
+        cif['comp_LIG']
+    except:
+        try:
+            key = "data_comp_XXX"
+            cif[key]
+        except:
+            try:
+                key = 'comp_UNL'
+                cif[key]
+            except:
+                raise Exception
+
+    # Find the relevant atoms loop
+    atom_id_loop = list(cif[key].find_loop('_chem_comp_atom.atom_id'))
+    atom_type_loop = list(cif[key].find_loop('_chem_comp_atom.type_symbol'))
+    atom_charge_loop = list(cif[key].find_loop('_chem_comp_atom.charge'))
+    if not atom_charge_loop:
+        atom_charge_loop = list(cif[key].find_loop('_chem_comp_atom.partial_charge'))
+        if not atom_charge_loop:
+            atom_charge_loop = [0] * len(atom_id_loop)
+
+    aromatic_atom_loop = list(cif[key].find_loop('_chem_comp_atom.aromatic'))
+    if not aromatic_atom_loop:
+        aromatic_atom_loop = [None] * len(atom_id_loop)
+
+    # Get the mapping
+    id_to_idx = {}
+    for j, atom_id in enumerate(atom_id_loop):
+        id_to_idx[atom_id] = j
+
+    # Iteratively add the relveant atoms
+    for atom_id, atom_type, atom_charge in zip(atom_id_loop, atom_type_loop, atom_charge_loop):
+        if len(atom_type) > 1:
+            atom_type = atom_type[0] + atom_type[1].lower()
+        atom = Chem.Atom(atom_type)
+        atom.SetFormalCharge(round(float(atom_charge)))
+        editable_mol.AddAtom(atom)
+
+    # Find the bonds loop
+    bond_1_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_1'))
+    bond_2_id_loop = list(cif[key].find_loop('_chem_comp_bond.atom_id_2'))
+    bond_type_loop = list(cif[key].find_loop('_chem_comp_bond.type'))
+    aromatic_bond_loop = list(cif[key].find_loop('_chem_comp_bond.aromatic'))
+    if not aromatic_bond_loop:
+        aromatic_bond_loop = [None] * len(bond_1_id_loop)
+
+
+
+
+    try:
+        # Iteratively add the relevant bonds
+        for bond_atom_1, bond_atom_2, bond_type, aromatic in zip(bond_1_id_loop, bond_2_id_loop, bond_type_loop,
+                                                                 aromatic_bond_loop):
+            bond_type = bond_type_cif_to_rdkit[bond_type]
+            if aromatic:
+                if aromatic == "y":
+                    bond_type = bond_type_cif_to_rdkit['aromatic']
+
+            editable_mol.AddBond(
+                id_to_idx[bond_atom_1],
+                id_to_idx[bond_atom_2],
+                order=bond_type
+            )
+    except Exception as e:
+        print(e)
+        print(atom_id_loop)
+        print(id_to_idx)
+        print(bond_1_id_loop)
+        print(bond_2_id_loop)
+        raise Exception
+
+    edited_mol = editable_mol.GetMol()
+    # for atom in edited_mol.GetAtoms():
+    #     print(atom.GetSymbol())
+    #     for bond in atom.GetBonds():
+    #         print(f"\t\t{bond.GetBondType()}")
+    # for bond in edited_mol.GetBonds():
+    #     ba1 = bond.GetBeginAtomIdx()
+    #     ba2 = bond.GetEndAtomIdx()
+    #     print(f"{bond.GetBondType()} : {edited_mol.GetAtomWithIdx(ba1).GetSymbol()} : {edited_mol.GetAtomWithIdx(ba2).GetSymbol()}")  #*}")
+    # print(Chem.MolToMolBlock(edited_mol))
+
+    # HANDLE SULFONATES
+    # forward_mol = Chem.ReplaceSubstructs(
+    #     edited_mol,
+    #     Chem.MolFromSmiles('S(O)(O)(O)'),
+    #     Chem.MolFromSmiles('S(=O)(=O)(O)'),
+    #     replaceAll=True,)[0]
+    patt = Chem.MolFromSmarts('S(-O)(-O)(-O)')
+    matches = edited_mol.GetSubstructMatches(patt)
+
+    sulfonates = {}
+    for match in matches:
+        sfn = 1
+        sulfonates[sfn] = {}
+        on = 1
+        for atom_idx in match:
+            atom = edited_mol.GetAtomWithIdx(atom_idx)
+            if atom.GetSymbol() == "S":
+                sulfonates[sfn]["S"] = atom_idx
+            else:
+                atom_charge = atom.GetFormalCharge()
+
+                if atom_charge == -1:
+                    continue
+                else:
+                    if on == 1:
+                        sulfonates[sfn]["O1"] = atom_idx
+                        on += 1
+                    elif on == 2:
+                        sulfonates[sfn]["O2"] = atom_idx
+                        on += 1
+                # elif on == 3:
+                #     sulfonates[sfn]["O3"] = atom_idx
+    print(f"Matches to sulfonates: {matches}")
+
+    # atoms_to_charge = [
+    #     sulfonate["O3"] for sulfonate in sulfonates.values()
+    # ]
+    # print(f"Atom idxs to charge: {atoms_to_charge}")
+    bonds_to_double = [
+                          (sulfonate["S"], sulfonate["O1"]) for sulfonate in sulfonates.values()
+                      ] + [
+                          (sulfonate["S"], sulfonate["O2"]) for sulfonate in sulfonates.values()
+                      ]
+    print(f"Bonds to double: {bonds_to_double}")
+
+    # Replace the bonds and update O3's charge
+    new_editable_mol = Chem.EditableMol(Chem.Mol())
+    for atom in edited_mol.GetAtoms():
+        atom_idx = atom.GetIdx()
+        new_atom = Chem.Atom(atom.GetSymbol())
+        charge = atom.GetFormalCharge()
+        # if atom_idx in atoms_to_charge:
+        #     charge = -1
+        new_atom.SetFormalCharge(charge)
+        new_editable_mol.AddAtom(new_atom)
+
+    for bond in edited_mol.GetBonds():
+        bond_atom_1 = bond.GetBeginAtomIdx()
+        bond_atom_2 = bond.GetEndAtomIdx()
+        double_bond = False
+        for bond_idxs in bonds_to_double:
+            if (bond_atom_1 in bond_idxs) & (bond_atom_2 in bond_idxs):
+                double_bond = True
+        if double_bond:
+            new_editable_mol.AddBond(
+                bond_atom_1,
+                bond_atom_2,
+                order=bond_type_cif_to_rdkit['double']
+            )
+        else:
+            new_editable_mol.AddBond(
+                bond_atom_1,
+                bond_atom_2,
+                order=bond.GetBondType()
+            )
+    new_mol = new_editable_mol.GetMol()
+    # print(Chem.MolToMolBlock(new_mol))
+
+    new_mol.UpdatePropertyCache()
+    # Chem.SanitizeMol(new_mol)
+    return new_mol
+
+def _get_smiles(matched_cif):
+    mol = get_fragment_mol_from_dataset_cif_path(matched_cif[0])
+    smiles = Chem.MolToSmiles(mol)
+    return smiles
+
+def _get_atom_ids(matched_cif):
+    atom_ids = list(matched_cif[1].find_loop('_chem_comp_atom.atom_id'))
+    atom_types =  list(matched_cif[2].find_loop('_chem_comp_atom.type_symbol'))
+
+    return [_x for _x, _y in zip(atom_ids, atom_types) if _y != 'H']
+
+def _get_connectivity(matched_cif):
+    atom_id_array = _get_atom_ids(matched_cif)
+    block = matched_cif[1]
+
+    id_to_idx = {}
+    for j, atom_id in enumerate(atom_id_array):
+        id_to_idx[atom_id] = j
+    bond_matrix = np.zeros(
+        (
+            60,
+            60
+        ),
+        dtype='?')
+    bond_1_id_loop = list(block.find_loop('_chem_comp_bond.atom_id_1'))
+    bond_2_id_loop = list(block.find_loop('_chem_comp_bond.atom_id_2'))
+    for _bond_1_id, _bond_2_id in zip(bond_1_id_loop, bond_2_id_loop):
+        if _bond_1_id not in atom_id_array:
+            continue
+        if _bond_2_id not in atom_id_array:
+            continue
+        _bond_1_idx, _bond_2_idx = id_to_idx[_bond_1_id], id_to_idx[_bond_2_id]
+        bond_matrix[_bond_1_idx, _bond_2_idx] = True
+        bond_matrix[_bond_2_idx, _bond_1_idx] = True
+
+    return bond_matrix
