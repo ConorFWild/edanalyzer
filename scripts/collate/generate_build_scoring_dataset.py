@@ -415,6 +415,7 @@ def main(config_path):
 
                             # known_hit_pos_sample.append()
                             idx_pose += 1
+                            exit()
 
                         idx_event += 1
 
