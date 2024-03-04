@@ -98,6 +98,7 @@ def main(config_path):
                 except:
                     try:
                         key = "data_comp_XXX"
+                        cif[key]
                     except:
                         rprint(_cif_path)
 
