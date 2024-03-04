@@ -253,9 +253,10 @@ def main(config_path):
     )
     # except:
     #     rprint(f"Already created ligand data table!")
-
+    rprint(f'Getting pose table mapping...')
     pose_table_idxs = pose_table['idx']
     pose_table_database_events = pose_table['database_event_idx']
+    rprint(f'Got pose table mapping!')
 
     with pony.orm.db_session:
 
