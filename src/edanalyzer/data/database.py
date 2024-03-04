@@ -354,7 +354,7 @@ def _res_to_array(res):
     poss = []
     atoms = []
     elements = []
-    for atom in res:
+    for atom in res.first_conformer():
         pos = atom.pos
         element = atom.element.atomic_number
         if element == 1:
