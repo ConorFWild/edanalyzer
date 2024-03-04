@@ -243,7 +243,7 @@ def main(config_path):
         del root['ligand_data']
     except:
         rprint(f'No ligand data array! Making one!')
-    ligand_data = root.create_dataset(
+    ligand_data_table = root.create_dataset(
         'ligand_data',
         shape=event_map_table.shape,
         chunks=(20,),
@@ -261,6 +261,8 @@ def main(config_path):
     with pony.orm.db_session:
 
         # Iterate over event maps
+        num_matched = 0
+        num_not_matched = 0
         for _record in event_map_table:
 
             # Get corresponding event
@@ -336,15 +338,28 @@ def main(config_path):
                 rprint(f"MATCH FAILED!")
                 new_ligand_data = (
                     _record['idx'],
-                    None,
-                    None,
-                    None,
+                    '',
+                    np.zeros(
+                        (
+                            60,
+                        ),
+                        dtype='<U5'),
+                    np.zeros(
+                        (
+                            60,
+                            60
+                        ),
+                        dtype='?'),
                 )
                 rprint(new_ligand_data)
+                ligand_data_table[_record['idx']] = new_ligand_data
+                num_not_matched += 1
                 continue
             else:
                 rprint(f'MATCHED!')
+                num_matched += 1
             ligand_data = matched_cifs[0]
+
 
             # Make atom name array
             # atom_element_array = [_x for _x in block.find_loop('_chem_comp_atom.type_symbol')]
@@ -398,9 +413,12 @@ def main(config_path):
                 atom_array,
                 bond_matrix,
             )
+            ligand_data_table[_record['idx']] = new_ligand_data
             rprint(new_ligand_data)
 
 
+    rprint(f"Num Matched: {num_matched}")
+    rprint(f"Num Not Matched: {num_not_matched}")
 
     ...
 
