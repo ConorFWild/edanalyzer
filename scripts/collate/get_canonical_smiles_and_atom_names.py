@@ -115,7 +115,7 @@ def main(config_path):
                 for j, atom_id in enumerate(atom_id_loop):
                     id_to_idx[atom_id] = j
 
-                atom_ints = [gemmi.Element(_atom_name).atomic_number for _atom_name in atom_type_loop]
+                atom_ints = [gemmi.Element(_atom_name).atomic_number for _atom_name in atom_type_loop if gemmi.Element(_atom_name).atomic_number != 1]
                 rprint(atom_ints)
                 rprint(matched_pose['elements'])
 
