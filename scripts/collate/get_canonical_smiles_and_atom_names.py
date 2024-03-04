@@ -141,7 +141,8 @@ def main(config_path):
             block = matched_cifs[0]
 
             # Make atom name array
-            atom_name_array = np.array(list(block.find_loop('_chem_comp_atom.atom_id')))
+            atom_element_array = [_x for _x in block.find_loop('_chem_comp_atom.type_symbol')]
+            atom_name_array = np.array([x for j, x in enumerate(block.find_loop('_chem_comp_atom.atom_id')) if atom_element_array[j] != 1])
             rprint(atom_name_array)
 
             # Get Mol
