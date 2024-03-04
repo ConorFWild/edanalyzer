@@ -80,6 +80,7 @@ def main(config_path):
             matching_pose_table_idxs = pose_table_idxs[matching_pose_mask]
             rprint(f'Got {len(matching_pose_table_idxs)} matching poses')
             matched_pose = pose_table[matching_pose_table_idxs[0]]
+            matched_pose_atom_array = matched_pose['elements'][matched_pose['elements'] != 0]
 
             # Get event cif
             dtag_dir = Path(database_event.pandda.path) / 'processed_datasets' / database_event.dtag / 'ligand_files'
@@ -117,7 +118,7 @@ def main(config_path):
 
                 atom_ints = [gemmi.Element(_atom_name).atomic_number for _atom_name in atom_type_loop if gemmi.Element(_atom_name).atomic_number != 1]
                 rprint(atom_ints)
-                rprint(matched_pose['elements'][matched_pose['elements'] != 0])
+                rprint(matched_pose_atom_array)
 
 
 
