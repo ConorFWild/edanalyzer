@@ -265,7 +265,7 @@ def main(config_path):
 
                         # Get the associated ligand data
                         matched_cifs = _get_matched_cifs(
-                            known_hit_residue,
+                            known_hits[known_hit_dataset][known_hit_residue],
                             _event[0],
                         )
                         if len(matched_cifs) == 0:
