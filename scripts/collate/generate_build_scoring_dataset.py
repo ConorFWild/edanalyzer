@@ -283,8 +283,13 @@ def main(config_path):
                         matched_cif = matched_cifs[0]
 
                         smiles = _get_smiles(matched_cif)
+                        atom_ids_array = np.zeros((60,), dtype='<U5')
                         atom_ids = _get_atom_ids(matched_cif)
+                        atom_ids_array[:atom_ids.size] = atom_ids[:atom_ids_array]
+                        connectivity_array = np.zeros((60,60), dtype='?')
                         connectivity = _get_connectivity(matched_cif)
+                        connectivity_array[:connectivity.shape[0], connectivity.shape[1]] = connectivity[:connectivity.shape[0], connectivity.shape[1]]
+
                         ligand_data_sample = np.array([(
                             idx_event,
                             smiles,
