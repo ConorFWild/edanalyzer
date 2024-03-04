@@ -72,7 +72,8 @@ def main(config_path):
             # Get event cif
             dtag_dir = Path(database_event.pandda.path) / 'processed_datasets' / database_event.dtag / 'ligand_files'
             smiles = [x for x in dtag_dir.glob('*.smiles')]
-            rprint(f'{database_event.dtag}: {smiles}')
+            cifs = [x for x in dtag_dir.glob('*.cif')]
+            rprint(f'{database_event.dtag}: {len(smiles)} smiles : {len(cifs)} cifs')
 
             # Make atom name array
 
