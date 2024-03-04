@@ -502,6 +502,7 @@ def  _match_atoms(atom_name_array, block):
     rprint(atom_name_array)
 
     if len(filtered_atom_id_loop) != len(atom_name_array):
+        rprint(f"Different number of atoms! No Match!!")
         return None
 
     match = {}
@@ -510,7 +511,8 @@ def  _match_atoms(atom_name_array, block):
             if atom_1_id == atom_2_id:
                 match[_j] = _k
 
-    if len(match) != len(atom_id_loop):
+    if len(match) != len(filtered_atom_id_loop):
+        rprint(f"Only partial match {len(match)} / {len(filtered_atom_id_loop)}! Skipping!" )
         return None
 
     else:
