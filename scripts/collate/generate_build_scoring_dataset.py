@@ -338,12 +338,12 @@ def main(config_path):
                         # mtz_sample['res_id'] = known_hit_residue
                         # mtz_sample['sample'] = mtz_sample_array
                         mtz_sample = np.array(
-                            (
+                            [(
                                 idx_event,
                                 _event[0].id,
                                 known_hit_residue,
                                 mtz_sample_array
-                            ),
+                            )],
                             dtype=mtz_sample_dtype
                         )
                         rprint(table_mtz_sample)
