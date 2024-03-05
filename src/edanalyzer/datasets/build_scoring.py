@@ -748,7 +748,7 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
 
         residue = _get_res_from_arrays(valid_poss[total_mask], valid_elements[total_mask])
 
-        reference_event_map = _get_predicted_density_from_res(residue, event_map)
+        predicted_map = _get_predicted_density_from_res(residue, event_map)
 
         # residue = _get_res_from_hdf5(pose_data)
 
@@ -781,17 +781,20 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
             ref_centroid
         )
 
+        reference_predicted_map = _get_predicted_density_from_res(ref_res, event_map)
+
+
         # Get sample image
         event_map_sample = _sample_xmap_and_scale(
             event_map, transform, np.copy(sample_array)
         )
 
         predicted_map_sample = _sample_xmap_and_scale(
-            reference_event_map, transform, np.copy(sample_array)
+            predicted_map, transform, np.copy(sample_array)
         )
 
         ref_predictited_map_sample = _sample_xmap_and_scale(
-            reference_event_map, ref_transform, np.copy(sample_array)
+            reference_predicted_map, ref_transform, np.copy(sample_array)
         )
 
         mtz_map_sample = _sample_xmap_and_scale(
