@@ -794,7 +794,7 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
         )
 
         ref_predictited_map_sample = _sample_xmap_and_scale(
-            reference_predicted_map, ref_transform, np.copy(sample_array)
+            reference_predicted_map, transform, np.copy(sample_array)
         )
 
         mtz_map_sample = _sample_xmap_and_scale(
