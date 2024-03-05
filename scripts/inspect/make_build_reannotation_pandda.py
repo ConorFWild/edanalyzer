@@ -71,7 +71,7 @@ def _make_test_dataset_psuedo_pandda(
         config = yaml.safe_load(f)
 
     # Open a file in "w"rite mode
-    root = zarr.open_file("output/build_data_v3.h5", mode="r")
+    root = zarr.open("output/build_data_v3.h5", mode="r")
     print(root)
 
     # Get the HDF5 root group
