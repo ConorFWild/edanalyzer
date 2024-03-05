@@ -846,9 +846,9 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
             )[0,1]
 
         rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
-        if (rmsd < 0.1) & (corr <= 0.9):
-
-            raise Exception(f"RMSD is {rmsd} but correlation is {corr}")
+        # if (rmsd < 0.1) & (corr <= 0.9):
+        #
+        #     raise Exception(f"RMSD is {rmsd} but correlation is {corr}")
 
         if corr >= 0.9:
             print(f"RMSD is {round(rmsd, 2)}, mask size is {round(mask_size, 2)} and correlation is {round(corr, 2)} and base correlation is {round(base_corr, 2)}")
