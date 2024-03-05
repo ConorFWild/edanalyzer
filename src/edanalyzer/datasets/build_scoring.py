@@ -815,19 +815,24 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
         masked_predicted_map = predicted_map_sample * image_ligand_mask
         masked_ref_predicted_map = ref_predictited_map_sample * image_ligand_mask
 
-        sample_mat = np.hstack(
-            (
-                masked_predicted_map[masked_event_map != 0.0].reshape(-1, 1),
-                masked_ref_predicted_map[masked_event_map != 0.0].reshape(-1, 1)
-            )
-        )
-        # print(sample_mat)
+        mask = (masked_predicted_map != 0.0) & (masked_ref_predicted_map != 0.0)
+        if np.sum(mask) < 10:
+            corr = 0.0
+        else:
 
-        corrmat = np.corrcoef(
-            sample_mat.T
-        )
-        # print(corrmat)
-        corr = corrmat[0, 1]
+            sample_mat = np.hstack(
+                (
+                    masked_predicted_map[mask].reshape(-1, 1),
+                    masked_ref_predicted_map[mask].reshape(-1, 1)
+                )
+            )
+            # print(sample_mat)
+
+            corrmat = np.corrcoef(
+                sample_mat.T
+            )
+            # print(corrmat)
+            corr = corrmat[0, 1]
 
         rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
         if (rmsd < 0.1) & (corr <= 0.9):
