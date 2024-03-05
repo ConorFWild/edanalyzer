@@ -374,7 +374,6 @@ class BuildScoringDatasetCorrelation(Dataset):
         event_map = _get_grid_from_hdf5(event_map_data)
         # mtz_map = _get_grid_from_hdf5(mtz_map_data)
 
-
         # Get the valid data
         valid_mask = pose_data['elements'] != 0
         valid_poss = pose_data['positions'][valid_mask]
@@ -419,7 +418,7 @@ class BuildScoringDatasetCorrelation(Dataset):
         reference_poss = reference_pose_data['positions'][valid_mask][total_mask]
         ref_res = _get_res_from_arrays(reference_poss, valid_elements[total_mask])
         alignment = R.align_vectors(  # Alignment rotates lig being sampled to overlap lig in ref frame - i.e.
-            reference_poss-np.mean(reference_poss, axis=0),  # Align to
+            reference_poss - np.mean(reference_poss, axis=0),  # Align to
             valid_poss[total_mask] - np.mean(valid_poss[total_mask], axis=0),
         )[0].as_matrix()
         ref_orientation = np.matmul(alignment, orientation)
@@ -450,21 +449,19 @@ class BuildScoringDatasetCorrelation(Dataset):
         masked_event_map = event_map_sample * image_ligand_mask
         masked_reference_event_map = ref_event_map_sample * image_ligand_mask
 
-
-
         sample_mat = np.hstack(
-                (
-                    masked_event_map[masked_event_map != 0.0].reshape(-1,1),
-                    masked_reference_event_map[masked_event_map != 0.0].reshape(-1,1)
-                )
+            (
+                masked_event_map[masked_event_map != 0.0].reshape(-1, 1),
+                masked_reference_event_map[masked_event_map != 0.0].reshape(-1, 1)
             )
+        )
         # print(sample_mat)
 
         corrmat = np.corrcoef(
             sample_mat.T
         )
         # print(corrmat)
-        corr = corrmat[0,1]
+        corr = corrmat[0, 1]
 
         # print([corr, sample_idx, delta['pose_idx']])
 
@@ -544,7 +541,6 @@ class BuildScoringDatasetCorrelationZarr(Dataset):
         event_map = _get_grid_from_hdf5(event_map_data)
         mtz_map = _get_grid_from_hdf5(mtz_map_data)
 
-
         # Get the valid data
         valid_mask = pose_data['elements'] != 0
         valid_poss = pose_data['positions'][valid_mask]
@@ -589,7 +585,7 @@ class BuildScoringDatasetCorrelationZarr(Dataset):
         reference_poss = reference_pose_data['positions'][valid_mask][total_mask]
         ref_res = _get_res_from_arrays(reference_poss, valid_elements[total_mask])
         alignment = R.align_vectors(  # Alignment rotates lig being sampled to overlap lig in ref frame - i.e.
-            reference_poss-np.mean(reference_poss, axis=0),  # Align to
+            reference_poss - np.mean(reference_poss, axis=0),  # Align to
             valid_poss[total_mask] - np.mean(valid_poss[total_mask], axis=0),
         )[0].as_matrix()
         ref_orientation = np.matmul(alignment, orientation)
@@ -623,21 +619,19 @@ class BuildScoringDatasetCorrelationZarr(Dataset):
         masked_event_map = event_map_sample * image_ligand_mask
         masked_reference_event_map = ref_event_map_sample * image_ligand_mask
 
-
-
         sample_mat = np.hstack(
-                (
-                    masked_event_map[masked_event_map != 0.0].reshape(-1,1),
-                    masked_reference_event_map[masked_event_map != 0.0].reshape(-1,1)
-                )
+            (
+                masked_event_map[masked_event_map != 0.0].reshape(-1, 1),
+                masked_reference_event_map[masked_event_map != 0.0].reshape(-1, 1)
             )
+        )
         # print(sample_mat)
 
         corrmat = np.corrcoef(
             sample_mat.T
         )
         # print(corrmat)
-        corr = corrmat[0,1]
+        corr = corrmat[0, 1]
 
         # print([corr, sample_idx, delta['pose_idx']])
 
@@ -648,7 +642,200 @@ class BuildScoringDatasetCorrelationZarr(Dataset):
             [
                 event_map_sample * image_ligand_mask,
                 mtz_map_sample * image_ligand_mask
-             ],
+            ],
+            axis=0
+        )
+
+        image_float = image.astype(np.float32)
+
+        # Make the annotation
+        # if sample_idx[0] == 'normal':
+        #
+        #     rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
+        #
+        #     if rmsd > 3.0:
+        #         rmsd = 3.0
+        #
+        # else:
+        #     rmsd = 3.0
+
+        label = np.array(corr)
+        label_float = label.astype(np.float32)
+
+        return sample_idx, torch.from_numpy(image_float), torch.from_numpy(label_float)
+
+
+def _get_predicted_density_from_res(residue, event_map):
+    optimized_structure = gemmi.Structure()
+    model = gemmi.Model()
+    chain = gemmi.Chain()
+
+    chain.add_residue(residue)
+    model.add_chain(chain)
+    optimized_structure.add_model(model)
+
+    # Get the electron density of the optimized structure
+    optimized_structure.cell = event_map.unit_cell
+    optimized_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
+    dencalc = gemmi.DensityCalculatorE()
+    # dencalc.d_min = res#*2
+    # dencalc.rate = 2.0
+    dencalc.set_grid_cell_and_spacegroup(optimized_structure)
+    dencalc.initialize_grid_to_size(event_map.nu, event_map.nv, event_map.nw)
+    dencalc.add_model_density_to_grid(optimized_structure[0])
+    calc_grid = dencalc.grid
+
+    return calc_grid
+
+
+class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
+
+    def __init__(self, zarr_path, sample_indexes):
+        # self.data = data
+        self.root = zarr.open(zarr_path, mode='r')
+
+        self.event_map_table = self.root['event_map_sample']
+        self.mtz_map_table = self.root['mtz_sample']
+        self.pose_table = self.root['known_hit_pose']
+        self.delta_table = self.root['delta']
+        self.annotation_table = self.root['annotation']
+
+        self.sample_indexes = sample_indexes
+
+    def __len__(self):
+        return len(self.sample_indexes)
+
+    def __getitem__(self, idx: int):
+        # Get the sample idx
+        sample_idx = self.sample_indexes[idx]
+
+        # Get the event map and pose
+        # if sample_idx[0] == 'normal':
+        pose_data = self.pose_table[sample_idx[1]]
+        event_map_idx = pose_data['event_map_sample_idx']
+
+        event_map_data = self.event_map_table[event_map_idx]
+        mtz_map_data = self.mtz_map_table[event_map_idx]
+        delta = self.delta_table[sample_idx[1]]
+        annotation = self.annotation_table[event_map_idx]
+        reference_pose_data = self.pose_table[delta['pose_idx']]
+
+        #
+        event_map = _get_grid_from_hdf5(event_map_data)
+        mtz_map = _get_grid_from_hdf5(mtz_map_data)
+
+        # Get the valid data
+        valid_mask = pose_data['elements'] != 0
+        valid_poss = pose_data['positions'][valid_mask]
+        valid_elements = pose_data['elements'][valid_mask]
+        valid_deltas = delta['delta'][valid_mask]
+
+        # Subsample if training
+        if annotation['partition'] == 'train':
+            rng = np.random.default_rng()
+            num_centres = rng.integers(1, 5)
+
+            # For each centre mask atoms close to it
+            total_mask = np.full(valid_elements.size, False)
+            for _centre in num_centres:
+                selected_atom = rng.integers(0, valid_elements.size)
+                poss_distances = valid_poss - valid_poss[selected_atom, :].reshape((1, 3))
+                close_mask = poss_distances[np.linalg.norm(poss_distances, axis=1) < 2.5]
+                total_mask[close_mask] = True
+
+        else:
+            total_mask = np.full(valid_elements.size, True)
+
+        residue = _get_res_from_arrays(valid_poss[total_mask], valid_elements[total_mask])
+
+        reference_event_map = _get_predicted_density_from_res(residue, event_map)
+
+        # residue = _get_res_from_hdf5(pose_data)
+
+        # Get the event from the database
+        # event = self.data[event_map_data['event_idx']]
+
+        # Get sampling transform for the event map
+        sample_array = np.zeros(
+            (30, 30, 30),
+            dtype=np.float32,
+        )
+        orientation = _get_random_orientation()
+        centroid = _get_centroid_from_res(residue)
+        transform = _get_transform_from_orientation_centroid(
+            orientation,
+            centroid
+        )
+
+        # Get the sampling transform for the reference event map
+        reference_poss = reference_pose_data['positions'][valid_mask][total_mask]
+        ref_res = _get_res_from_arrays(reference_poss, valid_elements[total_mask])
+        alignment = R.align_vectors(  # Alignment rotates lig being sampled to overlap lig in ref frame - i.e.
+            reference_poss - np.mean(reference_poss, axis=0),  # Align to
+            valid_poss[total_mask] - np.mean(valid_poss[total_mask], axis=0),
+        )[0].as_matrix()
+        ref_orientation = np.matmul(alignment, orientation)
+        ref_centroid = _get_centroid_from_res(ref_res)
+        ref_transform = _get_transform_from_orientation_centroid(
+            ref_orientation,
+            ref_centroid
+        )
+
+        # Get sample image
+        event_map_sample = _sample_xmap_and_scale(
+            event_map, transform, np.copy(sample_array)
+        )
+
+        predicted_map_sample = _sample_xmap_and_scale(
+            reference_event_map, transform, np.copy(sample_array)
+        )
+
+        ref_predictited_map_sample = _sample_xmap_and_scale(
+            reference_event_map, ref_transform, np.copy(sample_array)
+        )
+
+        mtz_map_sample = _sample_xmap_and_scale(
+            mtz_map, transform, np.copy(sample_array)
+        )
+
+        ligand_mask_grid = _get_ligand_mask_float(event_map, residue)
+        image_ligand_mask = _sample_xmap(
+            ligand_mask_grid,
+            transform,
+            np.copy(sample_array)
+        )
+
+        image_ligand_mask[image_ligand_mask < 0.9] = 0.0
+        image_ligand_mask[image_ligand_mask >= 0.9] = 1.0
+
+        masked_event_map = event_map_sample * image_ligand_mask
+        masked_predicted_map = predicted_map_sample * image_ligand_mask
+        masked_ref_predicted_map = ref_predictited_map_sample * image_ligand_mask
+
+        sample_mat = np.hstack(
+            (
+                masked_predicted_map[masked_event_map != 0.0].reshape(-1, 1),
+                masked_ref_predicted_map[masked_event_map != 0.0].reshape(-1, 1)
+            )
+        )
+        # print(sample_mat)
+
+        corrmat = np.corrcoef(
+            sample_mat.T
+        )
+        # print(corrmat)
+        corr = corrmat[0, 1]
+
+        # print([corr, sample_idx, delta['pose_idx']])
+
+        # assert (corr == 1.0) | (sample_idx[1] != delta['pose_idx'])
+
+        # Make the image
+        image = np.stack(
+            [
+                event_map_sample * image_ligand_mask,
+                mtz_map_sample * image_ligand_mask
+            ],
             axis=0
         )
 
