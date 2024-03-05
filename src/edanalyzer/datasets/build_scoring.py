@@ -854,7 +854,8 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
             print(f"RMSD is {round(rmsd, 2)}, mask size is {round(mask_size)} and correlation is {round(corr)} and base correlation is {round(base_corr)}")
 
         if corr <= 0.1:
-            print(f"RMSD is {round(rmsd, 2)}, mask size is {round(mask_size)} and correlation is {round(corr)} and base correlation is {round(base_corr)}")
+            if corr > 0.0:
+                print(f"RMSD is {round(rmsd, 2)}, mask size is {round(mask_size)} and correlation is {round(corr)} and base correlation is {round(base_corr)}")
 
 
         # print([corr, sample_idx, delta['pose_idx']])
