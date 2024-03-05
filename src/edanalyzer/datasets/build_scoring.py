@@ -829,6 +829,8 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
         # print(corrmat)
         corr = corrmat[0, 1]
 
+        assert (np.sqrt(np.mean(np.square(valid_deltas[total_mask]))) < 0.1) & (corr > 0.9)
+
         # print([corr, sample_idx, delta['pose_idx']])
 
         # assert (corr == 1.0) | (sample_idx[1] != delta['pose_idx'])
