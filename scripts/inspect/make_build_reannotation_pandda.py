@@ -7,6 +7,7 @@ import yaml
 import fire
 import pony
 from rich import print as rprint
+import zarr
 
 import pandas as pd
 import gemmi
@@ -70,15 +71,15 @@ def _make_test_dataset_psuedo_pandda(
         config = yaml.safe_load(f)
 
     # Open a file in "w"rite mode
-    fileh = tables.open_file("output/build_data_v2.h5", mode="r")
-    print(fileh)
+    root = zarr.open_file("output/build_data_v3.h5", mode="r")
+    print(root)
 
     # Get the HDF5 root group
-    root = fileh.root
+    # root = fileh.root
     # table_mtz_sample = root.mtz_sample
-    table_event_map_sample = root.event_map_sample
-    table_known_hit_pos_sample = root.known_hit_pose
-    table_annotation = root.annotation
+    table_event_map_sample = root['event_map_sample']
+    table_known_hit_pos_sample = root['known_hit_pose']
+    table_annotation = root['annotation']
 
     # Load database
     working_dir = Path(config['working_directory'])
@@ -101,7 +102,7 @@ def _make_test_dataset_psuedo_pandda(
     try_make(processed_datasets_dir)
 
     # Get the idxs of annotated
-    annotated_idxs = table_annotation.cols.event_map_table_idx[:]
+    # annotated_idxs = table_annotation.cols.event_map_table_idx[:]
 
     with pony.orm.db_session:
         # partitions = {partition.name: partition for partition in pony.orm.select(p for p in PartitionORM)}
@@ -114,8 +115,8 @@ def _make_test_dataset_psuedo_pandda(
         for x in table_known_hit_pos_sample.iterrows():
             y = x.fetch_all_fields()
             # Skip if processed
-            if y['event_map_sample_idx'] in annotated_idxs:
-                continue
+            # if y['event_map_sample_idx'] in annotated_idxs:
+            #     continue
 
             close_poses[x['event_map_sample_idx']] = min(
                 [y, close_poses[x['event_map_sample_idx']]],
@@ -129,8 +130,8 @@ def _make_test_dataset_psuedo_pandda(
             rprint(event_map_sample['idx'])
             # Get the corresponding poses
             event_map_sample_idx = event_map_sample['idx']
-            if event_map_sample_idx in annotated_idxs:
-                continue
+            # if event_map_sample_idx in annotated_idxs:
+            #     continue
             database_event_idx = event_map_sample['event_idx']
             # poses = [x.fetch_all_fields() for x in table_known_hit_pos_sample.where(f'event_map_sample_idx == {event_map_sample_idx}')]
             # psuedo_dtag = f"{database_event_idx}_{event_map_sample['res_id'].decode('utf-8')}"
