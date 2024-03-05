@@ -681,8 +681,8 @@ def _get_predicted_density_from_res(residue, event_map):
     dencalc.d_min = 2.0  #*2
     # dencalc.rate = 1.5
     dencalc.set_grid_cell_and_spacegroup(optimized_structure)
-    dencalc.initialize_grid_to_size(event_map.nu, event_map.nv, event_map.nw)
-    dencalc.add_model_density_to_grid(optimized_structure[0])
+    # dencalc.initialize_grid_to_size(event_map.nu, event_map.nv, event_map.nw)
+    dencalc.put_model_density_on_grid(optimized_structure[0])
     calc_grid = dencalc.grid
 
     return calc_grid
