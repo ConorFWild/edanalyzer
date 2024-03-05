@@ -851,7 +851,7 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
             raise Exception(f"RMSD is {rmsd} but correlation is {corr}")
 
         if corr >= 0.9:
-            print(f"RMSD is {rmsd}, mask size is {mask_size} and correlation is {corr} and base correlation is {base_corr}")
+            print(f"RMSD is {round(rmsd, 2)}, mask size is {round(mask_size)} and correlation is {round(corr)} and base correlation is {round(base_corr)}")
 
         # print([corr, sample_idx, delta['pose_idx']])
 
