@@ -818,6 +818,7 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
         mask = (masked_predicted_map != 0.0) & (masked_ref_predicted_map != 0.0)
         if np.sum(mask) < 10:
             corr = 0.0
+            base_corr = 0.0
         else:
 
             sample_mat = np.hstack(
@@ -834,13 +835,22 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
             # print(corrmat)
             corr = corrmat[0, 1]
 
+            base_corr = np.corrcoef(
+                np.hstack(
+                    (
+                        masked_event_map[mask].reshape(-1, 1),
+                        masked_ref_predicted_map[mask].reshape(-1, 1)
+                    )
+                ).T
+            )[0,1]
+
         rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
         if (rmsd < 0.1) & (corr <= 0.9):
 
             raise Exception(f"RMSD is {rmsd} but correlation is {corr}")
 
         if corr >= 0.9:
-            print(f"RMSD is {rmsd} and correlation is {corr}")
+            print(f"RMSD is {rmsd} and correlation is {corr} and base correlation is {base_corr}")
 
         # print([corr, sample_idx, delta['pose_idx']])
 
