@@ -816,7 +816,8 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
         masked_ref_predicted_map = ref_predictited_map_sample * image_ligand_mask
 
         mask = (masked_predicted_map != 0.0) & (masked_ref_predicted_map != 0.0)
-        if np.sum(mask) < 10:
+        mask_size = np.sum(mask)
+        if mask_size < 10:
             corr = 0.0
             base_corr = 0.0
         else:
@@ -850,7 +851,7 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
             raise Exception(f"RMSD is {rmsd} but correlation is {corr}")
 
         if corr >= 0.9:
-            print(f"RMSD is {rmsd} and correlation is {corr} and base correlation is {base_corr}")
+            print(f"RMSD is {rmsd}, mask size is {mask_size} and correlation is {corr} and base correlation is {base_corr}")
 
         # print([corr, sample_idx, delta['pose_idx']])
 
