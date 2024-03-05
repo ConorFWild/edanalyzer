@@ -834,6 +834,9 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
 
             raise Exception(f"RMSD is {rmsd} but correlation is {corr}")
 
+        if corr >= 0.9:
+            print(f"RMSD is {rmsd} and correlation is {corr}")
+
         # print([corr, sample_idx, delta['pose_idx']])
 
         # assert (corr == 1.0) | (sample_idx[1] != delta['pose_idx'])
