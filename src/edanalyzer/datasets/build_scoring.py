@@ -850,12 +850,12 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
         #
         #     raise Exception(f"RMSD is {rmsd} but correlation is {corr}")
 
-        if corr >= 0.9:
-            print(f"HIGH CORR: RMSD is {round(rmsd, 2)}, mask size is {round(mask_size, 2)} and correlation is {round(corr, 2)} and base correlation is {round(base_corr, 2)}")
-
-        if corr <= 0.1:
-            if corr > 0.0:
-                print(f"LOW CORR: RMSD {round(rmsd, 2)}, mask size: {round(mask_size, 2)}, mask pred sum: {round(np.sum(masked_predicted_map[mask]),2)}, mask ref pred sum: {round(np.sum(masked_ref_predicted_map[mask]),2)}, correlation: {round(corr, 2)}, base correlation: {round(base_corr, 2)}, ")
+        # if corr >= 0.9:
+        #     print(f"HIGH CORR: RMSD is {round(rmsd, 2)}, mask size is {round(mask_size, 2)} and correlation is {round(corr, 2)} and base correlation is {round(base_corr, 2)}")
+        #
+        # if corr <= 0.1:
+        #     if corr > 0.0:
+        #         print(f"LOW CORR: RMSD {round(rmsd, 2)}, mask size: {round(mask_size, 2)}, mask pred sum: {round(np.sum(masked_predicted_map[mask]),2)}, mask ref pred sum: {round(np.sum(masked_ref_predicted_map[mask]),2)}, correlation: {round(corr, 2)}, base correlation: {round(base_corr, 2)}, ")
 
 
         # print([corr, sample_idx, delta['pose_idx']])
