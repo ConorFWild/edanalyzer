@@ -292,7 +292,7 @@ def _make_test_dataset_psuedo_pandda(
         site_table.to_csv(analyse_site_table_path, index=False)
         # site_table.to_csv(inspect_site_table_path, index=False)
 
-    fileh.close()
+    # fileh.close()
 
 
 if __name__ == "__main__":
