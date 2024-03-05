@@ -667,8 +667,8 @@ class BuildScoringDatasetCorrelationZarr(Dataset):
 
 def _get_predicted_density_from_res(residue, event_map):
     optimized_structure = gemmi.Structure()
-    model = gemmi.Model()
-    chain = gemmi.Chain()
+    model = gemmi.Model('0')
+    chain = gemmi.Chain('A')
 
     chain.add_residue(residue)
     model.add_chain(chain)
