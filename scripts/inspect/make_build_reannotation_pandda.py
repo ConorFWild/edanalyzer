@@ -110,7 +110,8 @@ def _make_test_dataset_psuedo_pandda(
 
         # Fetch the
         # Get idxs without annotations
-        close_poses = {_z['idx']: {'rmsd': 100} for _z in table_event_map_sample.iterrows() if _z['idx'] }
+        event_map_idxs = table_event_map_sample['idx']
+        close_poses = {_z['idx']: {'rmsd': 100} for _z in event_map_idxs }
         begin_get_close_poses = time.time()
         for x in table_known_hit_pos_sample:
             y=x
