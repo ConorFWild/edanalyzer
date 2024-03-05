@@ -87,7 +87,7 @@ def _make_test_dataset_psuedo_pandda(
     db.generate_mapping(create_tables=True)
 
     # Make the directories
-    psuedo_pandda_dir = working_dir / "build_annotation_pandda_2"
+    psuedo_pandda_dir = working_dir / "build_annotation_pandda_3"
     analyses_dir = psuedo_pandda_dir / "analyses"
     processed_datasets_dir = psuedo_pandda_dir / "processed_datasets"
     analyse_table_path = analyses_dir / "pandda_analyse_events.csv"
