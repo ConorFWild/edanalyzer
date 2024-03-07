@@ -152,7 +152,7 @@ class LitBuildScoring(lt.LightningModule):
 class LitBuildScoringCorrelation(lt.LightningModule):
     def __init__(self):
         super().__init__()
-        self.resnet = resnet10(num_classes=2, num_input=2).float()
+        self.resnet = resnet10(num_classes=3, num_input=2).float()
         self.train_annotations = []
         self.test_annotations = []
         self.output = Path('./output/build_scoring_pred_both')
@@ -203,8 +203,8 @@ class LitBuildScoringCorrelation(lt.LightningModule):
                 {
                     "idx": int(idx[1][j].to(torch.device("cpu")).detach().numpy()),
                     'table': str(idx[0][j]),
-                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()],
-                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()],
+                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][0],
+                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
                     'set': 1
                 }
             )
