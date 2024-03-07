@@ -884,7 +884,7 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
         # else:
         #     rmsd = 3.0
 
-        label = np.array(corr)
+        label = np.array([corr, base_corr])
         label_float = label.astype(np.float32)
 
         return sample_idx, torch.from_numpy(image_float), torch.from_numpy(label_float)

@@ -108,8 +108,8 @@ def main(config_path, batch_size=12, num_workers=None):
     model = LitBuildScoringCorrelation()
 
     # Train
-    checkpoint_callback = ModelCheckpoint(dirpath='output/build_scoring_pred_correlation')
-    logger = CSVLogger("output/build_scoring_pred_correlation/logs")
+    checkpoint_callback = ModelCheckpoint(dirpath='output/build_scoring_pred_both')
+    logger = CSVLogger("output/build_scoring_pred_both/logs")
     trainer = lt.Trainer(accelerator='gpu', logger=logger, callbacks=[checkpoint_callback],
                          enable_progress_bar=False
                          )
