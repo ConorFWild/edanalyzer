@@ -195,6 +195,9 @@ class LitBuildScoringCorrelation(lt.LightningModule):
 
         # print(idx)
 
+        rprint(y)
+        rprint(score)
+
         for j in range(len(idx[0])):
             self.test_annotations.append(
                 {
