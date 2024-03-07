@@ -200,8 +200,8 @@ class LitBuildScoringCorrelation(lt.LightningModule):
                 {
                     "idx": int(idx[1][j].to(torch.device("cpu")).detach().numpy()),
                     'table': str(idx[0][j]),
-                    "y": float(y[j].to(torch.device("cpu")).detach().numpy()[0]),
-                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
+                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()],
+                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()],
                     'set': 1
                 }
             )
