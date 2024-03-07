@@ -874,17 +874,19 @@ class BuildScoringDatasetSyntheticCorrelationZarr(Dataset):
         image_float = image.astype(np.float32)
 
         # Make the annotation
-        # if sample_idx[0] == 'normal':
-        #
-        #     rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
-        #
-        #     if rmsd > 3.0:
-        #         rmsd = 3.0
-        #
-        # else:
-        #     rmsd = 3.0
+        if sample_idx[0] == 'normal':
 
-        label = np.array([corr, base_corr])
+            _rmsd = np.sqrt(np.mean(np.square(valid_deltas[total_mask])))
+
+            if _rmsd > 2.5:
+                _rmsd = 2.5
+
+            rmsd = 1.0-((2/2.5)*_rmsd)
+
+        else:
+            rmsd = -1.0
+
+        label = np.array([corr, base_corr, rmsd])
         label_float = label.astype(np.float32)
 
         return sample_idx, torch.from_numpy(image_float), torch.from_numpy(label_float)
