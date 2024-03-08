@@ -185,6 +185,7 @@ def main(config_path):
                         [x for x in experiment_hit_results if x[0].dtag == known_hit_dataset],
                     )
                 rprint(f'Got {len(close_events)} close events')
+                close_events_dict = {}
 
                 # 2. Get the blobs for each zmap
                 zblobs = {}
@@ -250,7 +251,7 @@ def main(config_path):
                             distances[(_known_hit_residue, _event_id, _blob_id,)] = np.linalg.norm(blob_centroid.flatten()-residue_centroid.flatten())
 
 
-                rprint(distances)
+                rprint({_key: (close_events_dict[_key[1]].size, _distance) for _key, _distance in distances.items())
                 rprint(f'Got {len(distances)} distances')
 
 
