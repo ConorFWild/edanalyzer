@@ -247,8 +247,8 @@ def main(config_path):
 
                     ligand_data_sample = np.array([(
                         tmp_idx_ligand_data,
-                        smiles,
                         num_heavy_atoms,
+                        smiles,
                         atom_ids_array,
                         connectivity_array
                     )], dtype=ligand_data_dtype)
