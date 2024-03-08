@@ -312,8 +312,15 @@ def main(config_path):
 
                 blob_closest_lig_df = df[df['_dist'] == closest]
 
+                all_hits = []
                 non_hits = []
                 for _idx, _row in  blob_closest_lig_df.iterrows():
+                    all_hits.append(
+                        (
+                            _idx,
+                            _row
+                        )
+                    )
                     if _row['_dist'] > 10.0:
                         non_hits.append(
                             (
@@ -325,7 +332,9 @@ def main(config_path):
                 # rprint(non_hits)
 
                 # Sample the density for each non-hit
+                # for _non_hit_idx, _row in non_hits:
                 for _non_hit_idx, _row in non_hits:
+
                     # Get the sample transform
                     blob = zblobs[_non_hit_idx[0]]['events'][_non_hit_idx[1]]
                     blob_centroid = blob.centroid
@@ -358,9 +367,9 @@ def main(config_path):
                     rprint('Point Array')
                     rprint(blob.point_array.shape)
                     masked_vals = ligand_mask_array[
-                        blob.point_array[:,0],
-                        blob.point_array[:,1],
-                        blob.point_array[:,2],
+                        blob.point_array[:, 0],
+                        blob.point_array[:, 1],
+                        blob.point_array[:, 2],
                     ]
                     rprint('Masked Z map vals')
                     rprint(masked_vals)
