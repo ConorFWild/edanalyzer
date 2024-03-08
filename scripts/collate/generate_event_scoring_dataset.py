@@ -289,9 +289,9 @@ def main(config_path):
                 )
                 rprint(df)
 
-                grouping = df.groupby(by=['_event_id', '_blob_id']).min()
+                grouping = df.groupby(by=['_event_id', '_blob_id'])['_dist'].min()
                 rprint(grouping)
-
+                rprint(df[df['_dist'] == grouping])
 
                 exit()
 
