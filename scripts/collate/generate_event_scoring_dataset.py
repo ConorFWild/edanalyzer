@@ -93,7 +93,7 @@ def main(config_path):
     root = zarr.open('output/build_data_v3.zarr', 'w')
 
     z_map_sample_dtype = [('idx', '<i4'), ('event_idx', '<i4'), ('res_id', 'S32'), ('sample', '<f4', (90, 90, 90))]
-    table_event_map_sample = root.create_dataset(
+    table_z_map_sample = root.create_dataset(
         'event_map_sample',
         shape=(0,),
         chunks=(1,),
@@ -192,6 +192,7 @@ def main(config_path):
                 # close_events_dict = {close_event[0].id: close_event for close_event in close_events}
 
                 # 2. Get the blobs for each zmap
+                zmaps = {}
                 zblobs = {}
                 for event in close_events:
                     dataset = XRayDataset.from_paths(
@@ -200,6 +201,7 @@ def main(config_path):
                         None
                     )
                     zmap = _load_xmap_from_path(event[0].z_map)
+                    zmaps[event[0].id] = zmap
                     zmap_array = np.array(zmap, copy=False)
                     # Resample the zmap to the reference frame
 
@@ -305,10 +307,68 @@ def main(config_path):
 
                 non_hits = []
                 for _idx, _row in  blob_closest_lig_df.iterrows():
-                    if _row['_dist'] > 9.0:
-                        non_hits.append(_idx)
+                    if _row['_dist'] > 10.0:
+                        non_hits.append(
+                            (
+                                _idx,
+                                _row
+                            )
+                        )
 
-                rprint(non_hits)
+                # rprint(non_hits)
+
+                # Sample the density for each non-hit
+                for _non_hit_idx, _row in non_hits:
+                    # Get the sample transform
+                    _centroid = zblobs[_non_hit_idx[0]]['events'][_non_hit_idx[1]]
+                    centroid = np.array([_centroid[0], _centroid[1], _centroid[2]])
+                    transform = gemmi.Transform()
+                    transform.mat.fromlist((np.eye(3) * 0.5).tolist())
+                    transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
+
+                    # Record the 2fofc map sample
+                    z_map_sample_array = _sample_xmap_and_scale(
+                        zmaps[_non_hit_idx[0]],
+                        transform,
+                        np.zeros((90, 90, 90), dtype=np.float32),
+                    )
+                    z_map_sample = np.array(
+                        [(
+                            idx_z_map,
+                            _non_hit_idx[0],
+                            _row['_known_hit_residue'],
+                            z_map_sample_array
+                        )],
+                        dtype=z_map_sample_dtype
+                    )
+                    table_z_map_sample.append(
+                        z_map_sample
+                    )
+
+
+                # Sample the density in the Z-map
+                # Get the sample transform
+
+                centroid = np.array([_event[0].x, _event[0].y, _event[0].z])
+                transform = gemmi.Transform()
+                transform.mat.fromlist((np.eye(3) * 0.5).tolist())
+                transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
+
+                # Record the 2fofc map sample
+                mtz_grid = _load_xmap_from_mtz_path(_event[0].initial_reflections)
+                mtz_sample_array = _sample_xmap_and_scale(mtz_grid, transform,
+                                                          np.zeros((90, 90, 90), dtype=np.float32))
+
+                #
+                mtz_sample = np.array(
+                    [(
+                        idx_event,
+                        _event[0].id,
+                        known_hit_residue,
+                        mtz_sample_array
+                    )],
+                    dtype=mtz_sample_dtype
+                )
 
                 exit()
 
