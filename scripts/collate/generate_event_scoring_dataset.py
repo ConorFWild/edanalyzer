@@ -249,7 +249,7 @@ def main(config_path):
                     zmaps[event[0].id] = new_grid
 
                 for (_known_hit_residue, _event_id), event in close_events.items():
-                    ligand_mask = _get_ligand_mask_float(zmaps[_event_id], _residue, radius=1.5)
+                    ligand_mask = _get_ligand_mask_float(zmaps[_event_id], known_hits[known_hit_dataset][_known_hit_residue], radius=1.5)
                     ligand_masks[(_known_hit_residue, event[0].id)] = ligand_mask
 
                 rprint(f'Got {len([y for x in zblobs.values() for y in x["events"]])} z blobs')
