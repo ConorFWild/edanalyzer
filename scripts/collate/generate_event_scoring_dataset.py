@@ -292,14 +292,14 @@ def main(config_path):
                 grouping = df.groupby(by=['_event_id', '_blob_id'])
                 rprint(grouping)
 
-                closest = grouping['_dist'].apply(min)
+                closest = grouping['_dist'].transform(min)
                 rprint(closest)
                 rprint(df['_dist'])
                 # rprint(grouping['_dist'])
                 # rprint(closest.reset_index())
 
-                # mask = grouping['_dist'] == closest
-                # rprint(mask)
+                mask = grouping['_dist'] == closest
+                rprint(mask)
 
                 rprint(df[df['_dist'] == closest])
 
