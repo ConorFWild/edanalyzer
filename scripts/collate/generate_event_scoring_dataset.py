@@ -242,36 +242,7 @@ def main(config_path):
                 close_event_dict = {close_event[0].id: close_event for close_event in close_events.values()}
 
                 # Get the base event
-                residue_pose_idxs = {}
-                for known_hit_residue in known_hits[known_hit_dataset]:
-                    poss, atom, elements = _res_to_array(known_hits[known_hit_dataset][known_hit_residue], )
-                    com = np.mean(poss, axis=0).reshape((1, 3))
-                    event_to_lig_com = com - centroid.reshape((1, 3))
-                    _poss_centered = poss - com
-                    _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape(
-                        (1, 3)) + event_to_lig_com
-                    size = min(100, _rmsd_target.shape[0])
-                    atom_array = np.zeros(100, dtype='<U5')
-                    elements_array = np.zeros(100, dtype=np.int32)
-                    pose_array = np.zeros((100, 3))
-                    pose_array[:size, :] = _rmsd_target[:size, :]
-                    atom_array[:size] = atom[:size]
-                    elements_array[:size] = elements[:size]
 
-                    residue_pose_idxs[known_hit_residue] = idx_pose
-                    known_hit_pos_sample = np.array([(
-                        idx_pose,
-                        pose_array,
-                        atom_array,
-                        elements_array,
-                    )],
-                        dtype=known_hit_pose_sample_dtype
-                    )
-                    # rprint(known_hit_pos_sample)
-                    table_known_hit_pose_sample.append(
-                        known_hit_pos_sample
-                    )
-                    idx_pose += 1
 
                 # Get the ligand data for each of the events found
                 ligand_data = {}
@@ -482,6 +453,8 @@ def main(config_path):
                     transform.mat.fromlist((np.eye(3) * 0.5).tolist())
                     transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
 
+
+
                     # Record the 2fofc map sample
                     z_map_sample_array = _sample_xmap_and_scale(
                         zmaps[_non_hit_idx[0]],
@@ -550,6 +523,38 @@ def main(config_path):
                     transform = gemmi.Transform()
                     transform.mat.fromlist((np.eye(3) * 0.5).tolist())
                     transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
+
+                    # Get the pose of the ligand
+                    residue_pose_idxs = {}
+                    for known_hit_residue in known_hits[known_hit_dataset]:
+                        poss, atom, elements = _res_to_array(known_hits[known_hit_dataset][known_hit_residue], )
+                        com = np.mean(poss, axis=0).reshape((1, 3))
+                        event_to_lig_com = com - centroid.reshape((1, 3))
+                        _poss_centered = poss - com
+                        _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape(
+                            (1, 3)) + event_to_lig_com
+                        size = min(100, _rmsd_target.shape[0])
+                        atom_array = np.zeros(100, dtype='<U5')
+                        elements_array = np.zeros(100, dtype=np.int32)
+                        pose_array = np.zeros((100, 3))
+                        pose_array[:size, :] = _rmsd_target[:size, :]
+                        atom_array[:size] = atom[:size]
+                        elements_array[:size] = elements[:size]
+
+                        residue_pose_idxs[known_hit_residue] = idx_pose
+                        known_hit_pos_sample = np.array([(
+                            idx_pose,
+                            pose_array,
+                            atom_array,
+                            elements_array,
+                        )],
+                            dtype=known_hit_pose_sample_dtype
+                        )
+                        # rprint(known_hit_pos_sample)
+                        table_known_hit_pose_sample.append(
+                            known_hit_pos_sample
+                        )
+                        idx_pose += 1
 
                     # Sample the zmap
                     z_map_sample = _sample_xmap_and_scale(
