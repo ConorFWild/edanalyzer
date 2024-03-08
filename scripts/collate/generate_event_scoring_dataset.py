@@ -255,7 +255,7 @@ def main(config_path):
                                 gemmi.Asu.Any
                             ).dist()
 
-
+                rprint({_resid: np.mean(_res_to_array(_residue)[0], axis=0) for _resid, _residue in known_hits[known_hit_dataset].items()})
                 rprint({_key: (round(zblobs[_key[1]]['events'][_key[2]].size,2), round(_distance, 2)) for _key, _distance in distances.items()})
                 rprint(f'Got {len(distances)} distances')
 
