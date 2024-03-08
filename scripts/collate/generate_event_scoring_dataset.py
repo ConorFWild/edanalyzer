@@ -300,7 +300,7 @@ def main(config_path):
                 mask = grouping['_dist'] == closest
                 rprint(mask)
 
-                rprint(grouping[mask])
+                rprint(df[df['_dist'] == closest.reset_index()])
 
                 exit()
 
