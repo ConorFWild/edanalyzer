@@ -415,7 +415,7 @@ def _get_transform_from_orientation_centroid(orientation, centroid):
     return transform
 
 
-def _get_ligand_mask(dmap, res):
+def _get_ligand_mask(dmap, res, radius=2.5):
     mask = gemmi.Int8Grid(dmap.nu, dmap.nv, dmap.nw)
     mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
     mask.set_unit_cell(dmap.unit_cell)
@@ -425,7 +425,7 @@ def _get_ligand_mask(dmap, res):
         pos = atom.pos
         mask.set_points_around(
             pos,
-            radius=2.5,
+            radius=radius,
             value=1,
         )
 

@@ -245,7 +245,7 @@ def main(config_path):
                     zmaps[event[0].id] = new_grid
 
                     for _known_hit_residue, _residue in known_hits[known_hit_dataset].items():
-                        ligand_mask = _get_ligand_mask(new_grid, _residue)
+                        ligand_mask = _get_ligand_mask(new_grid, _residue, radius=1.5)
 
                         ligand_masks[(_known_hit_residue, event[0].id)] = ligand_mask
 
