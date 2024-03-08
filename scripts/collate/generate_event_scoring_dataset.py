@@ -123,7 +123,7 @@ def main(config_path):
         shape=(0,90,90,90),
         chunks=(1,None, None, None),
         dtype=z_map_sample_dtype,
-        compressor=Blosc(cname='zlib', clevel=9, shuffle=Blosc.SHUFFLE),
+        compressor=Blosc(cname='zlib', clevel=9, shuffle=Blosc.BITSHUFFLE),
         filters=[Delta(dtype=z_map_sample_dtype)]
     )
 
