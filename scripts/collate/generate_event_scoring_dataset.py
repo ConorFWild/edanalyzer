@@ -182,12 +182,12 @@ def main(config_path):
                 close_events = {}
                 for known_hit_residue in known_hits[known_hit_dataset]:
                     # Get the associated event
-                    close_events = _get_close_events(
+                    _close_events = _get_close_events(
                         known_hit_centroids[known_hit_dataset][known_hit_residue],
                         [x for x in experiment_hit_results if x[0].dtag == known_hit_dataset],
                     )
-                    for close_event in close_events:
-                        close_events[(known_hit_residue, close_event[0].id)] = close_event
+                    for _close_event in _close_events:
+                        close_events[(known_hit_residue, _close_event[0].id)] = _close_event
                 rprint(f'Got {len(close_events)} close events')
                 if len(close_events) != 2:
                     continue
