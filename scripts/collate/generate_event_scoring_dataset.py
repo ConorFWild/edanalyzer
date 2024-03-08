@@ -297,8 +297,8 @@ def main(config_path):
                 rprint(grouping['_dist'])
                 rprint(closest.reset_index())
 
-                mask = grouping['_dist'] == closest
-                rprint(mask)
+                # mask = grouping['_dist'] == closest
+                # rprint(mask)
 
                 rprint(df[df['_dist'] == closest.reset_index()])
 
