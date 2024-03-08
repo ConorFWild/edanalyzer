@@ -19,7 +19,7 @@ from scipy.ndimage import map_coordinates
 from scipy.interpolate import RegularGridInterpolator
 
 from edanalyzer import constants
-from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale, _get_ligand_mask
+from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale, _get_ligand_mask_float
 from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_system_from_dtag, _get_known_hit_structures, \
     _get_known_hits, _get_known_hit_centroids, _res_to_array, _get_known_hit_poses, _get_matched_cifs, _get_smiles, \
     _get_atom_ids, _get_connectivity
@@ -245,7 +245,7 @@ def main(config_path):
                     zmaps[event[0].id] = new_grid
 
                     for _known_hit_residue, _residue in known_hits[known_hit_dataset].items():
-                        ligand_mask = _get_ligand_mask(new_grid, _residue, radius=1.5)
+                        ligand_mask = _get_ligand_mask_float(new_grid, _residue, radius=1.5)
 
                         ligand_masks[(_known_hit_residue, event[0].id)] = ligand_mask
 
