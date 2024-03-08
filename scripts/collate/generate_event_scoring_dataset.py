@@ -286,7 +286,7 @@ def main(config_path):
                         for (_known_hit_residue, _event_id, _blob_id), _dist
                         in distances.items()
                     ],
-                )
+                ).set_index(['_event_id', '_blob_id'])
                 rprint(df)
 
                 grouping = df.groupby(by=['_event_id', '_blob_id'])
