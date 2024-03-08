@@ -186,7 +186,7 @@ def main(config_path):
                 # 2. Get the blobs for each zmap
                 zblobs = {}
                 for event in close_events:
-                    zmap = _load_xmap_from_path(event.z_map)
+                    zmap = _load_xmap_from_path(event[0].z_map)
                     reference_frame = DFrame(
                         known_hit_structures[known_hit_dataset],
                         None,
@@ -195,7 +195,7 @@ def main(config_path):
                         zmap,
                         reference_frame,
                     )
-                    zblobs[event.id] = {
+                    zblobs[event[0].id] = {
                         'events': events,
                         'cutoff': cutoff
                     }
