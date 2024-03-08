@@ -333,7 +333,7 @@ def main(config_path):
 
                 # Sample the density for each non-hit
                 # for _non_hit_idx, _row in non_hits:
-                for _non_hit_idx, _row in non_hits:
+                for _non_hit_idx, _row in all_hits:
 
                     # Get the sample transform
                     blob = zblobs[_non_hit_idx[0]]['events'][_non_hit_idx[1]]
