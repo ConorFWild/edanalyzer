@@ -263,7 +263,7 @@ def main(config_path):
                 rprint(f'Got {len(distances)} distances')
                 ref_event_distance = cell.find_nearest_image(
                                 gemmi.Position(residue_centroid[0], residue_centroid[1], residue_centroid[2]),
-                                gemmi.Position(event.x, event.y, event.z),
+                                gemmi.Position(event[0].x, event[0].y, event[0].z),
                                 gemmi.Asu.Any
                             ).dist()
                 rprint(f'Reference event distance: {ref_event_distance}')
