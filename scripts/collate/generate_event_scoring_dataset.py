@@ -238,6 +238,7 @@ def main(config_path):
                     atom_ids_array = np.zeros((100,), dtype='<U5')
                     atom_ids = _get_atom_ids(matched_cif)
                     atom_ids_array[:len(atom_ids)] = atom_ids[:len(atom_ids)]
+                    num_heavy_atoms = len(atom_ids)
                     connectivity_array = np.zeros((100, 100), dtype='?')
                     connectivity = _get_connectivity(matched_cif)
                     connectivity_array[:connectivity.shape[0], :connectivity.shape[1]] = connectivity[
@@ -247,6 +248,7 @@ def main(config_path):
                     ligand_data_sample = np.array([(
                         tmp_idx_ligand_data,
                         smiles,
+                        num_heavy_atoms,
                         atom_ids_array,
                         connectivity_array
                     )], dtype=ligand_data_dtype)
