@@ -19,7 +19,7 @@ from scipy.ndimage import map_coordinates
 from scipy.interpolate import RegularGridInterpolator
 
 from edanalyzer import constants
-from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale
+from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale, _get_ligand_mask
 from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_system_from_dtag, _get_known_hit_structures, \
     _get_known_hits, _get_known_hit_centroids, _res_to_array, _get_known_hit_poses, _get_matched_cifs, _get_smiles, \
     _get_atom_ids, _get_connectivity
@@ -194,6 +194,7 @@ def main(config_path):
                 # 2. Get the blobs for each zmap
                 zmaps = {}
                 zblobs = {}
+                ligand_masks = {}
                 for event in close_events:
                     dataset = XRayDataset.from_paths(
                         event[0].initial_structure,
@@ -201,7 +202,6 @@ def main(config_path):
                         None
                     )
                     zmap = _load_xmap_from_path(event[0].z_map)
-                    zmaps[event[0].id] = zmap
                     zmap_array = np.array(zmap, copy=False)
                     # Resample the zmap to the reference frame
 
@@ -242,6 +242,13 @@ def main(config_path):
                         'events': events,
                         'cutoff': cutoff
                     }
+                    zmaps[event[0].id] = new_grid
+
+                    for _known_hit_residue, _residue in known_hits[known_hit_dataset].items():
+                        ligand_mask = _get_ligand_mask(new_grid, _residue)
+
+                        ligand_masks[(_known_hit_residue, event[0].id)] = ligand_mask
+
                 rprint(f'Got {len([y for x in zblobs.values() for y in x["events"]])} z blobs')
 
                 # 3. Get distances from event blobs to residues
@@ -345,6 +352,13 @@ def main(config_path):
                     table_z_map_sample.append(
                         z_map_sample
                     )
+
+                    ligand_mask = ligand_masks[(_row['_known_hit_residue'], _non_hit_idx[0])]
+                    ligand_mask_array = np.array(ligand_mask, copy=False)
+                    masked_vals = ligand_mask_array[blob.point_array]
+                    rprint(np.sum(masked_vals))
+
+                    idx_z_map += 1
 
                 rprint(table_z_map_sample[:2])
                 # Sample the density in the Z-map
