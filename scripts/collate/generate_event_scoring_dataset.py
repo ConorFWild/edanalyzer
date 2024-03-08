@@ -202,7 +202,8 @@ def main(config_path):
                         None,
                     )
                     all_coords = np.argwhere(np.ones(reference_frame.spacing))
-                    coordinate_array = all_coords / ( np.array(reference_frame.spacing) / zmap_array.shape )
+                    coordinate_array = all_coords / ( np.array(reference_frame.spacing) / zmap_array.shape ).reshape(1,-1)
+                    rprint(coordinate_array.shape)
                     resampling = map_coordinates(
                         np.array(zmap, copy=False,),
                         coordinate_array
