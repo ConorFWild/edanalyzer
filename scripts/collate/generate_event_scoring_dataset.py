@@ -320,8 +320,9 @@ def main(config_path):
                 # Sample the density for each non-hit
                 for _non_hit_idx, _row in non_hits:
                     # Get the sample transform
-                    _centroid = zblobs[_non_hit_idx[0]]['events'][_non_hit_idx[1]]
-                    centroid = np.array([_centroid[0], _centroid[1], _centroid[2]])
+                    blob = zblobs[_non_hit_idx[0]]['events'][_non_hit_idx[1]]
+                    blob_centroid = blob.centroid
+                    centroid = np.array([blob_centroid[0], blob_centroid[1], blob_centroid[2]])
                     transform = gemmi.Transform()
                     transform.mat.fromlist((np.eye(3) * 0.5).tolist())
                     transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
