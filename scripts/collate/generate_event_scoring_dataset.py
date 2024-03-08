@@ -226,7 +226,7 @@ def main(config_path):
                     rprint(zmap)
                     rprint(zmap.unit_cell)
                     events, cutoff = ClusterDensityDBSCAN()(
-                        zmap,
+                        new_grid,
                         reference_frame,
                     )
                     zblobs[event[0].id] = {
