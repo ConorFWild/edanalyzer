@@ -248,7 +248,12 @@ def main(config_path):
                             residue_centroid = np.mean(_res_to_array(_residue)[0], axis=0)
 
                             # Get the distance from the blob centroid to residue centroid
-                            distances[(_known_hit_residue, _event_id, _blob_id,)] = np.linalg.norm(blob_centroid.flatten()-residue_centroid.flatten())
+                            cell = known_hit_structures[known_hit_dataset].cell
+                            distances[(_known_hit_residue, _event_id, _blob_id,)] = cell.find_nearest_image(
+                                gemmi.Position(residue_centroid[0], residue_centroid[1], residue_centroid[2]),
+                                gemmi.Position(blob_centroid[0], blob_centroid[1], blob_centroid[2]),
+
+                            )
 
 
                 rprint({_key: (zblobs[_key[1]]['events'][_key[2]].size, _distance) for _key, _distance in distances.items()})
