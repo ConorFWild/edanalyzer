@@ -520,16 +520,21 @@ def  _match_atoms(atom_name_array, block):
 
 
 
-
-def _get_matched_cifs(
-        known_hit_residue,
-        event,
-):
-    atom_name_array = [atom.name for atom in known_hit_residue.first_conformer() if atom.element.name != 'H']
+def _get_event_cifs(event):
 
     dtag_dir = Path(event.pandda.path) / 'processed_datasets' / event.dtag / 'ligand_files'
     cif_paths = [x for x in dtag_dir.glob('*.cif') if x.stem not in constants.LIGAND_IGNORE_REGEXES]
     rprint(f'Got {len(cif_paths)} ligand cif paths!')
+
+    return cif_paths
+
+def _get_matched_cifs(
+            known_hit_residue,
+            event,
+    ):
+    atom_name_array = [atom.name for atom in known_hit_residue.first_conformer() if atom.element.name != 'H']
+
+    cif_paths = _get_event_cifs(event)
 
     matched_paths = []
     for _cif_path in cif_paths:
