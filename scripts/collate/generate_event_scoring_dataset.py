@@ -189,7 +189,7 @@ def main(config_path):
                 rprint(f'Got {len(close_events)} close events')
                 if len(close_events) != 2:
                     continue
-                # close_events_dict = {close_event[0].id: close_event for close_event in close_events}
+                close_events_dict = {close_event[0].id: close_event for close_event in close_events}
 
                 # 2. Get the blobs for each zmap
                 zmaps = {}
@@ -381,9 +381,24 @@ def main(config_path):
                     idx_z_map += 1
 
                 for (_resid, _event_id), _ligand_mask in ligand_masks.items():
-                    zmap_array = np.array(zmaps[_event_id], copy=False)
-                    mask_array = np.array(_ligand_mask, copy=False)
-                    selected_zs = zmap_array[np.nonzero(mask_array)]
+                    # zmap_array = np.array(zmaps[_event_id], copy=False)
+                    # mask_array = np.array(_ligand_mask, copy=False)
+                    event = close_events_dict[_event_id]
+                    centroid = np.array([_event[0].x, _event[0].y, _event[0].z])
+                    transform = gemmi.Transform()
+                    transform.mat.fromlist((np.eye(3) * 0.5).tolist())
+                    transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
+                    z_map_sample = _sample_xmap_and_scale(
+                        zmaps[_event_id],
+                        transform,
+                        np.zeros((90, 90, 90), dtype=np.float32))
+                    ligand_mask_sample = _sample_xmap_and_scale(
+                        _ligand_mask,
+                        transform,
+                        np.zeros((90, 90, 90), dtype=np.float32))
+                    )
+
+                    selected_zs = z_map_sample[np.nonzero(ligand_mask_sample > 0.9)]
                     rprint(np.mean(selected_zs[selected_zs > 0.0]))
 
                 rprint(table_z_map_sample[:2])
