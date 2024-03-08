@@ -445,7 +445,10 @@ def main(config_path):
 
                 # For each non-hit add a non-hit sample to the store
                 rprint(f'Have {len(non_hits)} non hits to add to store!')
-                for _non_hit_idx, _row in [x for x in random.shuffle(list(range(len(non_hits))))][:10]:
+                random_ints = list(range(len(non_hits)))
+                random.shuffle(random_ints)
+                rprint(random_ints[:2])
+                for _non_hit_idx, _row in random_ints[:10]:
                     # Get the sample transform
                     blob = zblobs[_non_hit_idx[0]]['events'][_non_hit_idx[1]]
                     blob_centroid = blob.centroid
