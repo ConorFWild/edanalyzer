@@ -197,6 +197,8 @@ def main(config_path):
                         dataset,
                         None,
                     )
+                    rprint(reference_frame.spacing)
+                    rprint(zmap)
                     events, cutoff = ClusterDensityDBSCAN()(
                         zmap,
                         reference_frame,
