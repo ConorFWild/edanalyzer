@@ -253,7 +253,7 @@ def main(config_path):
                         connectivity_array
                     )], dtype=ligand_data_dtype)
                     tmp_idx_ligand_data += 1
-                    ligand_data[known_hit_residue] = ligand_data_sample
+                    ligand_data[known_hit_residue] = ligand_data_sample[0]
 
                     # rprint(ligand_data_sample)
 
