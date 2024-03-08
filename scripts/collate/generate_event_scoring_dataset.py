@@ -99,7 +99,7 @@ def main(config_path):
     z_map_sample_metadata_dtype = [
         ('idx', '<i4'),
         ('event_idx', '<i4'),
-        ('res_id', 'S32'),
+        ('res_id', '<U32'),
         ('ligand_data_idx', 'i8')
     ]
     table_z_map_sample_metadata = root.create_dataset(
