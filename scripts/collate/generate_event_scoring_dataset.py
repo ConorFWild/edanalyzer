@@ -287,21 +287,28 @@ def main(config_path):
                         in distances.items()
                     ],
                 ).set_index(['_event_id', '_blob_id', ])
-                rprint(df)
+                # rprint(df)
 
                 grouping = df.groupby(by=['_event_id', '_blob_id'])
-                rprint(grouping)
+                # rprint(grouping)
 
                 closest = grouping['_dist'].transform(min)
-                rprint(closest)
-                rprint(df['_dist'])
+                # rprint(closest)
+                # rprint(df['_dist'])
                 # rprint(grouping['_dist'])
                 # rprint(closest.reset_index())
 
                 # mask = grouping == closest
                 # rprint(mask)
 
-                rprint(df[df['_dist'] == closest])
+                blob_closest_lig_df = df[df['_dist'] == closest]
+
+                non_hits = []
+                for _idx, _row in  blob_closest_lig_df.iterrows():
+                    if _row['_dist'] > 9.0:
+                        non_hits.append(_idx)
+
+                rprint(non_hits)
 
                 exit()
 
