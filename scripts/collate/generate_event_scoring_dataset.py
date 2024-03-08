@@ -294,6 +294,7 @@ def main(config_path):
 
                 closest = grouping['_dist'].apply(min)
                 rprint(closest)
+                rprint(grouping['dist'])
 
                 mask = grouping['_dist'] == closest
                 rprint(mask)
