@@ -425,11 +425,22 @@ def main(config_path):
                         transform,
                         np.zeros((90, 90, 90), dtype=np.float32),
                     )
-                    z_map_sample = np.array(
+                    z_map_sample_metadata = np.array(
                         [(
                             idx_z_map,
                             _non_hit_idx[0],
                             _row['_known_hit_residue'],
+                            ligand_data[_row['_known_hit_residue']]
+                        )],
+                        dtype=z_map_sample_metadata_dtype
+                    )
+                    table_z_map_sample_metadata.append(
+                        z_map_sample_metadata
+                    )
+
+                    z_map_sample = np.array(
+                        [(
+                            idx_z_map,
                             z_map_sample_array
                         )],
                         dtype=z_map_sample_dtype
