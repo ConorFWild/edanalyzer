@@ -5,6 +5,7 @@ import fire
 import yaml
 from rich import print as rprint
 import pandas as pd
+
 pd.set_option('display.max_rows', 500)
 import pony
 import joblib
@@ -19,7 +20,8 @@ from scipy.ndimage import map_coordinates
 from scipy.interpolate import RegularGridInterpolator
 
 from edanalyzer import constants
-from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale, _get_ligand_mask_float
+from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale, \
+    _get_ligand_mask_float
 from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_system_from_dtag, _get_known_hit_structures, \
     _get_known_hits, _get_known_hit_centroids, _res_to_array, _get_known_hit_poses, _get_matched_cifs, _get_smiles, \
     _get_atom_ids, _get_connectivity
@@ -249,7 +251,8 @@ def main(config_path):
                     zmaps[event[0].id] = new_grid
 
                 for (_known_hit_residue, _event_id), event in close_events.items():
-                    ligand_mask = _get_ligand_mask_float(zmaps[_event_id], known_hits[known_hit_dataset][_known_hit_residue], radius=1.5)
+                    ligand_mask = _get_ligand_mask_float(zmaps[_event_id],
+                                                         known_hits[known_hit_dataset][_known_hit_residue], radius=1.5)
                     ligand_masks[(_known_hit_residue, event[0].id)] = ligand_mask
 
                 rprint(f'Got {len([y for x in zblobs.values() for y in x["events"]])} z blobs')
@@ -273,16 +276,17 @@ def main(config_path):
                             gemmi.Asu.Any
                         ).dist()
 
-
-
-                rprint({_resid: np.mean(_res_to_array(_residue)[0], axis=0) for _resid, _residue in known_hits[known_hit_dataset].items()})
-                rprint({_key: {'size': round(zblobs[_key[1]]['events'][_key[2]].size,2), 'dist': round(_distance, 2)} for _key, _distance in distances.items()})
+                rprint({_resid: np.mean(_res_to_array(_residue)[0], axis=0) for _resid, _residue in
+                        known_hits[known_hit_dataset].items()})
+                rprint(
+                    {_key: {'size': round(zblobs[_key[1]]['events'][_key[2]].size, 2), 'dist': round(_distance, 2)} for
+                     _key, _distance in distances.items()})
                 rprint(f'Got {len(distances)} distances')
                 ref_event_distance = cell.find_nearest_image(
-                                gemmi.Position(residue_centroid[0], residue_centroid[1], residue_centroid[2]),
-                                gemmi.Position(event[0].x, event[0].y, event[0].z),
-                                gemmi.Asu.Any
-                            ).dist()
+                    gemmi.Position(residue_centroid[0], residue_centroid[1], residue_centroid[2]),
+                    gemmi.Position(event[0].x, event[0].y, event[0].z),
+                    gemmi.Asu.Any
+                ).dist()
                 rprint(f'Reference event distance: {ref_event_distance}')
 
                 # 4. Match blobs to the residues (or not)
@@ -318,7 +322,7 @@ def main(config_path):
 
                 all_hits = []
                 non_hits = []
-                for _idx, _row in  blob_closest_lig_df.iterrows():
+                for _idx, _row in blob_closest_lig_df.iterrows():
                     all_hits.append(
                         (
                             _idx,
@@ -338,7 +342,6 @@ def main(config_path):
                 # Sample the density for each non-hit
                 # for _non_hit_idx, _row in non_hits:
                 for _non_hit_idx, _row in all_hits:
-
                     # Get the sample transform
                     blob = zblobs[_non_hit_idx[0]]['events'][_non_hit_idx[1]]
                     blob_centroid = blob.centroid
@@ -387,7 +390,7 @@ def main(config_path):
                 for (_resid, _event_id), _ligand_mask in ligand_masks.items():
                     # zmap_array = np.array(zmaps[_event_id], copy=False)
                     # mask_array = np.array(_ligand_mask, copy=False)
-                    event = close_events_dict[_event_id]
+                    event = close_event_dict[_event_id]
                     centroid = np.array([event[0].x, event[0].y, event[0].z])
                     transform = gemmi.Transform()
                     transform.mat.fromlist((np.eye(3) * 0.5).tolist())
@@ -400,7 +403,6 @@ def main(config_path):
                         _ligand_mask,
                         transform,
                         np.zeros((90, 90, 90), dtype=np.float32))
-
 
                     selected_zs = z_map_sample[np.nonzero(ligand_mask_sample > 0.9)]
                     rprint(np.mean(selected_zs[selected_zs > 0.0]))
@@ -431,7 +433,6 @@ def main(config_path):
                 )
 
                 exit()
-
 
                 for known_hit_residue in known_hits[known_hit_dataset]:
 
