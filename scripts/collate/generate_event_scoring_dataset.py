@@ -226,8 +226,9 @@ def main(config_path):
                     rprint(f'Zmap: {zmap}')
                     rprint(f'Zmap unit cell: {zmap.unit_cell}')
                     rprint(f'Resampledc zmap: {new_grid}')
+                    sparse_z_map = reference_frame.mask(new_grid)
                     events, cutoff = ClusterDensityDBSCAN()(
-                        new_grid,
+                        sparse_z_map,
                         reference_frame,
                     )
                     zblobs[event[0].id] = {
