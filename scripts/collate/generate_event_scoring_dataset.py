@@ -16,7 +16,7 @@ import networkx.algorithms.isomorphism as iso
 import numpy as np
 import tables
 import zarr
-from numcodecs import Blosc
+from numcodecs import Blosc, Delta
 from scipy.ndimage import map_coordinates
 from scipy.interpolate import RegularGridInterpolator
 
@@ -123,7 +123,8 @@ def main(config_path):
         shape=(0,90,90,90),
         chunks=(1,None, None, None),
         dtype=z_map_sample_dtype,
-        compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
+        compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE),
+        filters=[Delta(dtype=z_map_sample_dtype)]
     )
 
     ligand_data_dtype = [
