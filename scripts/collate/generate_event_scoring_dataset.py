@@ -430,7 +430,7 @@ def main(config_path):
                             idx_z_map,
                             _non_hit_idx[0],
                             _row['_known_hit_residue'],
-                            ligand_data[_row['_known_hit_residue']]
+                            ligand_data[_row['_known_hit_residue']][0]
                         )],
                         dtype=z_map_sample_metadata_dtype
                     )
