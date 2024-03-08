@@ -251,7 +251,7 @@ def main(config_path):
                             distances[(_known_hit_residue, _event_id, _blob_id,)] = np.linalg.norm(blob_centroid.flatten()-residue_centroid.flatten())
 
 
-                rprint({_key: (close_events_dict[_key[1]].size, _distance) for _key, _distance in distances.items())
+                rprint({_key: (close_events_dict[_key[1]].size, _distance) for _key, _distance in distances.items()})
                 rprint(f'Got {len(distances)} distances')
 
 
