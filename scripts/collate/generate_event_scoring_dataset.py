@@ -174,7 +174,8 @@ def main(config_path):
 
                 # 1. Get the events that are close to any of the fragment hits in the dataset
                 # 2. blobfind in the associated z maps
-                # 3. match blobs to residues (positives) or be unable to (negatives)
+                # 3. Get distances from event blobs to residues
+                # 4. match blobs to residues (positives) or be unable to (negatives)
 
                 # Get the close events for each residue
                 close_events = []
@@ -238,7 +239,7 @@ def main(config_path):
                     }
                 rprint(f'Got {len([y for x in zblobs.values() for y in x["events"]])} z blobs')
 
-                # 3. Match blobs to the residues or not
+                # 3. Get distances from event blobs to residues
                 distances = {}
                 for _event_id, _zblobs in zblobs.items():
                     blobs, cutoff = _zblobs['events'], _zblobs['cutoff']
@@ -268,7 +269,25 @@ def main(config_path):
                             ).dist()
                 rprint(f'Reference event distance: {ref_event_distance}')
 
-                #
+                # 4. Match blobs to the residues (or not)
+                # Matching rules are:
+                # Blobs further than 7A from any residue get selected as non-hits
+                df = pd.DataFrame(
+                    [
+                        {
+                            '_known_hit_residue': _known_hit_residue,
+                            '_event_id': _event_id,
+                            '_blob_id': _blob_id,
+                            '_dist': _dist
+                        }
+                        for (_known_hit_residue, _event_id, _blob_id), _dist
+                        in distances.items()
+                    ]
+                )
+
+                multindex = pd.MultiIndex.from_frame(df)
+                rprint(multindex)
+
 
                 exit()
 
