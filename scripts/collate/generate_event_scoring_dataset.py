@@ -25,6 +25,7 @@ from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionO
 
 from pandda_gemmi.event_model.cluster import ClusterDensityDBSCAN
 from pandda_gemmi.alignment import Alignment, DFrame
+from pandda_gemmi.dataset import XRayDataset, StructureArray, Structure
 
 
 def _get_close_distances(known_hit_centroid,
@@ -186,6 +187,11 @@ def main(config_path):
                 # 2. Get the blobs for each zmap
                 zblobs = {}
                 for event in close_events:
+                    dataset = XRayDataset.from_paths(
+                        known_hit_structures[known_hit_dataset],
+                        event[0].initial_reflections,
+                        None
+                    )
                     zmap = _load_xmap_from_path(event[0].z_map)
                     reference_frame = DFrame(
                         known_hit_structures[known_hit_dataset],
