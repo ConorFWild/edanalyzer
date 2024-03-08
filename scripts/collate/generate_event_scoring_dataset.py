@@ -5,6 +5,7 @@ import fire
 import yaml
 from rich import print as rprint
 import pandas as pd
+pd.set_option('display.max_rows', 500)
 import pony
 import joblib
 import pickle
