@@ -94,16 +94,29 @@ def main(config_path):
     # Construct the data store
     root = zarr.open('output/build_data_v3.zarr', 'w')
 
-    z_map_sample_dtype = [('idx', '<i4'), ('event_idx', '<i4'), ('res_id', 'S32'), ('sample', '<f4', (90, 90, 90))]
+    z_map_sample_metadata_dtype = [
+        ('idx', '<i4'),
+        ('event_idx', '<i4'),
+        ('res_id', 'S32'),
+        ('ligand_data_idx', 'i8')
+    ]
+    table_z_map_sample_metadata = root.create_dataset(
+        'z_map_sample_metadata',
+        shape=(0,),
+        chunks=(1,),
+        dtype=z_map_sample_metadata_dtype
+    )
+
+    z_map_sample_dtype = [('idx', '<i4'), ('sample', '<f4', (90, 90, 90))]
     table_z_map_sample = root.create_dataset(
-        'event_map_sample',
+        'z_map_sample',
         shape=(0,),
         chunks=(1,),
         dtype=z_map_sample_dtype
     )
 
     ligand_data_dtype = [
-        ('idx', 'i8'), ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (100,)), ('connectivity', '?', (100, 100,))
+        ('idx', 'i8'), ('num_heavy_atoms', 'i8'), ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (100,)), ('connectivity', '?', (100, 100,))
     ]
     ligand_data_table = root.create_dataset(
         'ligand_data',
@@ -134,6 +147,7 @@ def main(config_path):
         #
         rprint(f"Querying processed events...")
         idx_z_map = 0
+        idx_ligand_data = 0
         processed_event_idxs = []
 
         for experiment in sorted_experiments:
@@ -175,6 +189,9 @@ def main(config_path):
             for known_hit_dataset in known_hits:
                 rprint(f"Got {len(known_hits[known_hit_dataset])} hits in dataset {known_hit_dataset}!")
 
+                # Get the ligand data for the dataset
+
+
                 # 1. Get the events that are close to any of the fragment hits in the dataset
                 # 2. blobfind in the associated z maps
                 # 3. Get distances from event blobs to residues
@@ -194,6 +211,56 @@ def main(config_path):
                 if len(close_events) != 2:
                     continue
                 close_event_dict = {close_event[0].id: close_event for close_event in close_events.values()}
+
+                # Get the ligand data for each of the events found
+                ligand_data = {}
+                tmp_idx_ligand_data = idx_ligand_data
+                for known_hit_residue in known_hits[known_hit_dataset]:
+                    matched_cifs = []
+                    for _event_id, _event in close_event_dict.items():
+
+                        # Get the associated ligand data
+                        matched_cifs += _get_matched_cifs(
+                            known_hits[known_hit_dataset][known_hit_residue],
+                            _event[0],
+                        )
+                        # if len(matched_cifs) == 0:
+                        #     rprint(f'NO MATCHED LIGAND DATA!!!!!!')
+                        #     continue
+
+                    if len(matched_cifs) == 0:
+                        continue
+
+                    matched_cif = matched_cifs[0]
+
+                    smiles = _get_smiles(matched_cif)
+                    atom_ids_array = np.zeros((100,), dtype='<U5')
+                    atom_ids = _get_atom_ids(matched_cif)
+                    atom_ids_array[:len(atom_ids)] = atom_ids[:len(atom_ids)]
+                    connectivity_array = np.zeros((100, 100), dtype='?')
+                    connectivity = _get_connectivity(matched_cif)
+                    connectivity_array[:connectivity.shape[0], :connectivity.shape[1]] = connectivity[
+                                                                                         :connectivity.shape[0],
+                                                                                         :connectivity.shape[1]]
+
+                    ligand_data_sample = np.array([(
+                        tmp_idx_ligand_data,
+                        smiles,
+                        atom_ids_array,
+                        connectivity_array
+                    )], dtype=ligand_data_dtype)
+                    tmp_idx_ligand_data += 1
+                    ligand_data[known_hit_residue] = ligand_data_sample
+
+                    # rprint(ligand_data_sample)
+
+
+                if len(ligand_data) == len(known_hits[known_hit_dataset]):
+                    for known_hit_residue, ligand_data_sample in ligand_data.items():
+                        ligand_data_table.append(
+                            ligand_data_sample
+                        )
+                        idx_ligand_data += 1
 
                 # 2. Get the blobs for each zmap
                 zmaps = {}
@@ -339,8 +406,7 @@ def main(config_path):
 
                 # rprint(non_hits)
 
-                # Sample the density for each non-hit
-                # for _non_hit_idx, _row in non_hits:
+                # For each non-hit add a non-hit sample to the store
                 for _non_hit_idx, _row in all_hits:
                     # Get the sample transform
                     blob = zblobs[_non_hit_idx[0]]['events'][_non_hit_idx[1]]
@@ -387,18 +453,25 @@ def main(config_path):
 
                     idx_z_map += 1
 
+
+                # For each hit residue/event pair, add a hit sample to the store
                 for (_resid, _event_id), _ligand_mask in ligand_masks.items():
-                    # zmap_array = np.array(zmaps[_event_id], copy=False)
-                    # mask_array = np.array(_ligand_mask, copy=False)
+                    # Get the corresponding event
                     event = close_event_dict[_event_id]
+
+                    # Get the sample transform
                     centroid = np.array([event[0].x, event[0].y, event[0].z])
                     transform = gemmi.Transform()
                     transform.mat.fromlist((np.eye(3) * 0.5).tolist())
                     transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
+
+                    # Sample the zmap
                     z_map_sample = _sample_xmap_and_scale(
                         zmaps[_event_id],
                         transform,
                         np.zeros((90, 90, 90), dtype=np.float32))
+
+                    # Sample the ligand mask
                     ligand_mask_sample = _sample_xmap_and_scale(
                         _ligand_mask,
                         transform,
