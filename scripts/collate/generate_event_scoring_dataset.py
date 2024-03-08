@@ -109,23 +109,23 @@ def main(config_path):
         dtype=z_map_sample_metadata_dtype
     )
 
-    # z_map_sample_dtype = [('idx', '<i4'), ('sample', '<f4', (90, 90, 90))]
-    # table_z_map_sample = root.create_dataset(
-    #     'z_map_sample',
-    #     shape=(0,),
-    #     chunks=(1,),
-    #     dtype=z_map_sample_dtype,
-    #     compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
-    # )
-    z_map_sample_dtype = '<f4'
+    z_map_sample_dtype = [('idx', '<i4'), ('sample', '<f4', (90, 90, 90))]
     table_z_map_sample = root.create_dataset(
         'z_map_sample',
-        shape=(0,90,90,90),
-        chunks=(1,None, None, None),
+        shape=(0,),
+        chunks=(1,),
         dtype=z_map_sample_dtype,
-        compressor=Blosc(cname='zlib', clevel=9, shuffle=Blosc.SHUFFLE),
-        filters=[Delta(dtype=z_map_sample_dtype)]
+        compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
     )
+    # z_map_sample_dtype = '<f4'
+    # table_z_map_sample = root.create_dataset(
+    #     'z_map_sample',
+    #     shape=(0,90,90,90),
+    #     chunks=(1,None, None, None),
+    #     dtype=z_map_sample_dtype,
+    #     compressor=Blosc(cname='zlib', clevel=9, shuffle=Blosc.SHUFFLE),
+    #     filters=[Delta(dtype=z_map_sample_dtype)]
+    # )
 
     ligand_data_dtype = [
         ('idx', 'i8'),
@@ -459,14 +459,14 @@ def main(config_path):
                         z_map_sample_metadata
                     )
 
-                    # z_map_sample = np.array(
-                    #     [(
-                    #         idx_z_map,
-                    #         z_map_sample_array
-                    #     )],
-                    #     dtype=z_map_sample_dtype
-                    # )
-                    z_map_sample = z_map_sample_array[np.newaxis, :]
+                    z_map_sample = np.array(
+                        [(
+                            idx_z_map,
+                            z_map_sample_array
+                        )],
+                        dtype=z_map_sample_dtype
+                    )
+                    # z_map_sample = z_map_sample_array[np.newaxis, :]
                     table_z_map_sample.append(
                         z_map_sample
                     )
