@@ -384,7 +384,7 @@ def main(config_path):
                     # zmap_array = np.array(zmaps[_event_id], copy=False)
                     # mask_array = np.array(_ligand_mask, copy=False)
                     event = close_events_dict[_event_id]
-                    centroid = np.array([_event[0].x, _event[0].y, _event[0].z])
+                    centroid = np.array([event[0].x, event[0].y, event[0].z])
                     transform = gemmi.Transform()
                     transform.mat.fromlist((np.eye(3) * 0.5).tolist())
                     transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
