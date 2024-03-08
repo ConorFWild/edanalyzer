@@ -188,7 +188,7 @@ def main(config_path):
                 zblobs = {}
                 for event in close_events:
                     dataset = XRayDataset.from_paths(
-                        known_hit_structures[known_hit_dataset],
+                        event[0].initial_structure,
                         event[0].initial_reflections,
                         None
                     )
