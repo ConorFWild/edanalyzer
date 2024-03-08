@@ -16,8 +16,10 @@ import networkx.algorithms.isomorphism as iso
 import numpy as np
 import tables
 import zarr
+from numcodecs import Blosc
 from scipy.ndimage import map_coordinates
 from scipy.interpolate import RegularGridInterpolator
+
 
 from edanalyzer import constants
 from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale, \
@@ -112,7 +114,8 @@ def main(config_path):
         'z_map_sample',
         shape=(0,),
         chunks=(1,),
-        dtype=z_map_sample_dtype
+        dtype=z_map_sample_dtype,
+        compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
     )
 
     ligand_data_dtype = [
@@ -186,18 +189,15 @@ def main(config_path):
             known_hit_centroids: dict[str, dict[str, np.ndarray]] = _get_known_hit_centroids(known_hits)
 
             # Get the closest annotated event to the known hit
+            # 1. Get the events that are close to any of the fragment hits in the dataset
+            # 1.5 Get the associated ligand data
+            # 2. blobfind in the associated z maps
+            # 3. Get distances from event blobs to residues
+            # 4. match blobs to residues (positives) or be unable to (negatives)
             for known_hit_dataset in known_hits:
                 rprint(f"Got {len(known_hits[known_hit_dataset])} hits in dataset {known_hit_dataset}!")
 
-                # Get the ligand data for the dataset
-
-
-                # 1. Get the events that are close to any of the fragment hits in the dataset
-                # 2. blobfind in the associated z maps
-                # 3. Get distances from event blobs to residues
-                # 4. match blobs to residues (positives) or be unable to (negatives)
-
-                # Get the close events for each residue
+                # 1. Get the close events for each residue
                 close_events = {}
                 for known_hit_residue in known_hits[known_hit_dataset]:
                     # Get the associated event
