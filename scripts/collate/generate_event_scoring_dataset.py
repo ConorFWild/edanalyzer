@@ -506,6 +506,7 @@ def main(config_path):
 
                     selected_zs = z_map_sample[np.nonzero(ligand_mask_sample > 0.9)]
                     rprint(np.mean(selected_zs[selected_zs > 0.0]))
+                    rprint(np.mean(z_map_sample[z_map_sample > 0.0]))
 
                 # rprint(table_z_map_sample[:2])
                 # # Sample the density in the Z-map
