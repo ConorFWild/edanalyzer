@@ -179,13 +179,15 @@ def main(config_path):
                 # 4. match blobs to residues (positives) or be unable to (negatives)
 
                 # Get the close events for each residue
-                close_events = []
+                close_events = {}
                 for known_hit_residue in known_hits[known_hit_dataset]:
                     # Get the associated event
-                    close_events += _get_close_events(
+                    close_events = _get_close_events(
                         known_hit_centroids[known_hit_dataset][known_hit_residue],
                         [x for x in experiment_hit_results if x[0].dtag == known_hit_dataset],
                     )
+                    for close_event in close_events:
+                        close_events[(known_hit_residue, close_event[0].id)] = close_event
                 rprint(f'Got {len(close_events)} close events')
                 if len(close_events) != 2:
                     continue
@@ -195,7 +197,7 @@ def main(config_path):
                 zmaps = {}
                 zblobs = {}
                 ligand_masks = {}
-                for event in close_events:
+                for (_known_hit_residue, _event_id), event in close_events.items():
                     dataset = XRayDataset.from_paths(
                         event[0].initial_structure,
                         event[0].initial_reflections,
@@ -244,10 +246,10 @@ def main(config_path):
                     }
                     zmaps[event[0].id] = new_grid
 
-                    for _known_hit_residue, _residue in known_hits[known_hit_dataset].items():
-                        ligand_mask = _get_ligand_mask_float(new_grid, _residue, radius=1.5)
+                    # for _known_hit_residue, _residue in known_hits[known_hit_dataset].items():
+                    ligand_mask = _get_ligand_mask_float(new_grid, _residue, radius=1.5)
 
-                        ligand_masks[(_known_hit_residue, event[0].id)] = ligand_mask
+                    ligand_masks[(_known_hit_residue, event[0].id)] = ligand_mask
 
                 rprint(f'Got {len([y for x in zblobs.values() for y in x["events"]])} z blobs')
 
