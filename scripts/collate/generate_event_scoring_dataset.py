@@ -558,6 +558,20 @@ def main(config_path):
                         transform,
                         np.zeros((90, 90, 90), dtype=np.float32))
 
+                    z_map_sample_metadata = np.array(
+                        [(
+                            idx_z_map,
+                            _event_id,
+                            _resid,
+                            ligand_data[_resid][0][0],
+                            idx_pose
+                        )],
+                        dtype=z_map_sample_metadata_dtype
+                    )
+                    table_z_map_sample_metadata.append(
+                        z_map_sample_metadata
+                    )
+
                     z_map_sample = np.array(
                         [(
                             idx_z_map,
