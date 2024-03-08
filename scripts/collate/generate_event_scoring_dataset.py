@@ -186,6 +186,8 @@ def main(config_path):
                         [x for x in experiment_hit_results if x[0].dtag == known_hit_dataset],
                     )
                 rprint(f'Got {len(close_events)} close events')
+                if len(close_events) != 2:
+                    continue
                 # close_events_dict = {close_event[0].id: close_event for close_event in close_events}
 
                 # 2. Get the blobs for each zmap
