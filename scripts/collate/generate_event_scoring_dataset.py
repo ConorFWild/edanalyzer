@@ -194,7 +194,7 @@ def main(config_path):
                     )
                     zmap = _load_xmap_from_path(event[0].z_map)
                     reference_frame = DFrame(
-                        known_hit_structures[known_hit_dataset],
+                        dataset,
                         None,
                     )
                     events, cutoff = ClusterDensityDBSCAN()(
