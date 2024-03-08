@@ -286,7 +286,7 @@ def main(config_path):
                         for (_known_hit_residue, _event_id, _blob_id), _dist
                         in distances.items()
                     ],
-                ).set_index(['_event_id', '_blob_id'])
+                ).set_index(['_event_id', '_blob_id', '_known_hit_residue'])
                 rprint(df)
 
                 grouping = df.groupby(by=['_event_id', '_blob_id'])
@@ -294,13 +294,13 @@ def main(config_path):
 
                 closest = grouping['_dist'].apply(min)
                 rprint(closest)
-                rprint(grouping['_dist'])
-                rprint(closest.reset_index())
+                # rprint(grouping['_dist'])
+                # rprint(closest.reset_index())
 
                 # mask = grouping['_dist'] == closest
                 # rprint(mask)
 
-                rprint(df[df['_dist'] == closest.reset_index()['_dist']])
+                rprint(df[df['_dist'] == closest['_dist']])
 
                 exit()
 
