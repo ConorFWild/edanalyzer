@@ -345,7 +345,7 @@ def main(config_path):
                         z_map_sample
                     )
 
-                rprint(table_z_map_sample[:])
+                rprint(table_z_map_sample[:2])
                 # Sample the density in the Z-map
                 # Get the sample transform
 
