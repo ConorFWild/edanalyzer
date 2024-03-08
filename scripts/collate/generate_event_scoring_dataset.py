@@ -396,7 +396,7 @@ def main(config_path):
                         _ligand_mask,
                         transform,
                         np.zeros((90, 90, 90), dtype=np.float32))
-                    )
+
 
                     selected_zs = z_map_sample[np.nonzero(ligand_mask_sample > 0.9)]
                     rprint(np.mean(selected_zs[selected_zs > 0.0]))
