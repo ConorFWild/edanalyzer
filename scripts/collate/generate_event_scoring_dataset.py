@@ -235,7 +235,7 @@ def main(config_path):
                         'events': events,
                         'cutoff': cutoff
                     }
-                rprint(f'Got {len([y for x in zblobs for y in x])} z blobs')
+                rprint(f'Got {len([y for x in zblobs.values() for y in x])} z blobs')
 
                 # 3. Match blobs to the residues or not
                 distances = {}
