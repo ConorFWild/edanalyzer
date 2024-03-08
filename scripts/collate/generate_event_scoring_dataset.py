@@ -253,7 +253,7 @@ def main(config_path):
                                 gemmi.Position(residue_centroid[0], residue_centroid[1], residue_centroid[2]),
                                 gemmi.Position(blob_centroid[0], blob_centroid[1], blob_centroid[2]),
                                 gemmi.Asu.Any
-                            )
+                            ).dist()
 
 
                 rprint({_key: (zblobs[_key[1]]['events'][_key[2]].size, _distance) for _key, _distance in distances.items()})
