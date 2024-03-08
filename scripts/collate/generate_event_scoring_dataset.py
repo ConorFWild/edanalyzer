@@ -219,7 +219,7 @@ def main(config_path):
                     # )
                     new_grid = reference_frame.get_grid()
                     new_grid_array = np.array(new_grid, copy=False)
-                    new_grid_array[all_coords[:,0],all_coords[:,1],all_coords[:,2]] = resampling[:,:,:]
+                    new_grid_array[all_coords[:,0],all_coords[:,1],all_coords[:,2]] = resampling
                     rprint(resampling.shape)
                     rprint(reference_frame.spacing)
                     rprint(reference_frame.unit_cell)
