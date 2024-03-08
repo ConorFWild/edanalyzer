@@ -92,7 +92,7 @@ def main(config_path):
     test_systems = config['test']['test_systems']
 
     # Construct the data store
-    root = zarr.open('output/build_data_v3.zarr', 'w')
+    root = zarr.open('output/event_data.zarr', 'w')
 
     z_map_sample_metadata_dtype = [
         ('idx', '<i4'),
@@ -425,6 +425,12 @@ def main(config_path):
                         transform,
                         np.zeros((90, 90, 90), dtype=np.float32),
                     )
+                    rprint([(
+                            idx_z_map,
+                            _non_hit_idx[0],
+                            _row['_known_hit_residue'],
+                            ligand_data[_row['_known_hit_residue']][0]
+                        )],)
                     z_map_sample_metadata = np.array(
                         [(
                             idx_z_map,
