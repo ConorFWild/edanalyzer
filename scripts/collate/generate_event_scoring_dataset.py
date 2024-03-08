@@ -447,7 +447,6 @@ def main(config_path):
                 rprint(f'Have {len(non_hits)} non hits to add to store!')
                 random_ints = list(range(len(non_hits)))
                 random.shuffle(random_ints)
-                rprint(random_ints[:2])
                 for _x in random_ints[:10]:
                     _non_hit_idx, _row = non_hits[_x]
                     # Get the sample transform
