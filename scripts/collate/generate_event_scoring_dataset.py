@@ -207,6 +207,7 @@ def main(config_path):
                         np.array(zmap, copy=False,),
                         coordinate_array
                     )
+                    new_grid = reference_frame.get_grid()
                     rprint(resampling.shape)
                     rprint(reference_frame.spacing)
                     rprint(reference_frame.unit_cell)
