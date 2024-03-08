@@ -256,21 +256,22 @@ def main(config_path):
 
                 # 3. Get distances from event blobs to residues
                 distances = {}
-                for _event_id, _zblobs in zblobs.items():
-                    blobs, cutoff = _zblobs['events'], _zblobs['cutoff']
+                for (_known_hit_residue, _event_id), event in close_events.items():
+
+                    blobs, cutoff = zblobs[_event_id]['events'], zblobs[_event_id]['cutoff']
                     for _blob_id, _blob in blobs.items():
                         blob_centroid = _blob.centroid
 
-                        for _known_hit_residue, _residue in known_hits[known_hit_dataset].items():
-                            residue_centroid = np.mean(_res_to_array(_residue)[0], axis=0)
+                        _residue = known_hits[known_hit_dataset][_known_hit_residue]
+                        residue_centroid = np.mean(_res_to_array(_residue)[0], axis=0)
 
-                            # Get the distance from the blob centroid to residue centroid
-                            cell = known_hit_structures[known_hit_dataset].cell
-                            distances[(_known_hit_residue, _event_id, _blob_id,)] = cell.find_nearest_image(
-                                gemmi.Position(residue_centroid[0], residue_centroid[1], residue_centroid[2]),
-                                gemmi.Position(blob_centroid[0], blob_centroid[1], blob_centroid[2]),
-                                gemmi.Asu.Any
-                            ).dist()
+                        # Get the distance from the blob centroid to residue centroid
+                        cell = known_hit_structures[known_hit_dataset].cell
+                        distances[(_known_hit_residue, _event_id, _blob_id,)] = cell.find_nearest_image(
+                            gemmi.Position(residue_centroid[0], residue_centroid[1], residue_centroid[2]),
+                            gemmi.Position(blob_centroid[0], blob_centroid[1], blob_centroid[2]),
+                            gemmi.Asu.Any
+                        ).dist()
 
 
 
