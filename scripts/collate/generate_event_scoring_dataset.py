@@ -100,7 +100,8 @@ def main(config_path):
         ('idx', '<i4'),
         ('event_idx', '<i4'),
         ('res_id', '<U32'),
-        ('ligand_data_idx', 'i8')
+        ('ligand_data_idx', 'i8'),
+        ('pose_data_idx', 'i8')
     ]
     table_z_map_sample_metadata = root.create_dataset(
         'z_map_sample_metadata',
@@ -141,6 +142,20 @@ def main(config_path):
         dtype=ligand_data_dtype
     )
 
+    known_hit_pose_sample_dtype = [
+        ('idx', '<i8'),
+        ('positions', '<f4', (100, 3)),
+        ('atoms', '<U5', (100,)),
+        ('elements', '<i4', (100,)),
+        # ('rmsd', '<f4')
+    ]
+    table_known_hit_pose_sample = root.create_dataset(
+        'known_hit_pose',
+        shape=(0,),
+        chunks=(1,),
+        dtype=known_hit_pose_sample_dtype
+    )
+
     #
     rprint(f"Querying events...")
     with pony.orm.db_session:
@@ -164,6 +179,7 @@ def main(config_path):
         rprint(f"Querying processed events...")
         idx_z_map = 0
         idx_ligand_data = 0
+        idx_pose = 0
         processed_event_idxs = []
 
         for experiment in sorted_experiments:
@@ -224,6 +240,38 @@ def main(config_path):
                 # if len(close_events) != 2:
                 #     continue
                 close_event_dict = {close_event[0].id: close_event for close_event in close_events.values()}
+
+                # Get the base event
+                residue_pose_idxs = {}
+                for known_hit_residue in known_hits[known_hit_dataset]:
+                    poss, atom, elements = _res_to_array(known_hits[known_hit_dataset][known_hit_residue], )
+                    com = np.mean(poss, axis=0).reshape((1, 3))
+                    event_to_lig_com = com - centroid.reshape((1, 3))
+                    _poss_centered = poss - com
+                    _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape(
+                        (1, 3)) + event_to_lig_com
+                    size = min(100, _rmsd_target.shape[0])
+                    atom_array = np.zeros(100, dtype='<U5')
+                    elements_array = np.zeros(100, dtype=np.int32)
+                    pose_array = np.zeros((100, 3))
+                    pose_array[:size, :] = _rmsd_target[:size, :]
+                    atom_array[:size] = atom[:size]
+                    elements_array[:size] = elements[:size]
+
+                    residue_pose_idxs[known_hit_residue] = idx_pose
+                    known_hit_pos_sample = np.array([(
+                        idx_pose,
+                        pose_array,
+                        atom_array,
+                        elements_array,
+                    )],
+                        dtype=known_hit_pose_sample_dtype
+                    )
+                    # rprint(known_hit_pos_sample)
+                    table_known_hit_pose_sample.append(
+                        known_hit_pos_sample
+                    )
+                    idx_pose += 1
 
                 # Get the ligand data for each of the events found
                 ligand_data = {}
@@ -451,7 +499,8 @@ def main(config_path):
                             idx_z_map,
                             _non_hit_idx[0],
                             _row['_known_hit_residue'],
-                            ligand_data[_row['_known_hit_residue']][0][0]
+                            ligand_data[_row['_known_hit_residue']][0][0],
+                            residue_pose_idxs[_row['_known_hit_residue']]
                         )],
                         dtype=z_map_sample_metadata_dtype
                     )
