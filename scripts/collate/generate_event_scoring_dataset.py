@@ -366,6 +366,7 @@ def main(config_path):
                 # 4. Match blobs to the residues (or not)
                 # Matching rules are:
                 # Blobs further than 7A from any residue get selected as non-hits
+                rprint(f"Matching blobs to residues...")
                 df = pd.DataFrame(
                     [
                         {
@@ -414,7 +415,7 @@ def main(config_path):
                 # rprint(non_hits)
 
                 # For each non-hit add a non-hit sample to the store
-                for _non_hit_idx, _row in all_hits:
+                for _non_hit_idx, _row in non_hits:
                     # Get the sample transform
                     blob = zblobs[_non_hit_idx[0]]['events'][_non_hit_idx[1]]
                     blob_centroid = blob.centroid
