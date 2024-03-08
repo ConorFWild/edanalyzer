@@ -252,7 +252,7 @@ def main(config_path):
                             distances[(_known_hit_residue, _event_id, _blob_id,)] = cell.find_nearest_image(
                                 gemmi.Position(residue_centroid[0], residue_centroid[1], residue_centroid[2]),
                                 gemmi.Position(blob_centroid[0], blob_centroid[1], blob_centroid[2]),
-
+                                gemmi.Asu.Any
                             )
 
 
