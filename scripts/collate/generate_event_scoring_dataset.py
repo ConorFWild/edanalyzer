@@ -266,7 +266,7 @@ def main(config_path):
                                 gemmi.Position(event.x, event.y, event.z),
                                 gemmi.Asu.Any
                             ).dist()
-                rprint(f'Reference event distance: {}')
+                rprint(f'Reference event distance: {ref_event_distance}')
 
                 #
 
