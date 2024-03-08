@@ -261,6 +261,12 @@ def main(config_path):
                 rprint({_resid: np.mean(_res_to_array(_residue)[0], axis=0) for _resid, _residue in known_hits[known_hit_dataset].items()})
                 rprint({_key: {'size': round(zblobs[_key[1]]['events'][_key[2]].size,2), 'dist': round(_distance, 2)} for _key, _distance in distances.items()})
                 rprint(f'Got {len(distances)} distances')
+                ref_event_distance = cell.find_nearest_image(
+                                gemmi.Position(residue_centroid[0], residue_centroid[1], residue_centroid[2]),
+                                gemmi.Position(event.x, event.y, event.z),
+                                gemmi.Asu.Any
+                            ).dist()
+                rprint(f'Reference event distance: {}')
 
                 #
 
