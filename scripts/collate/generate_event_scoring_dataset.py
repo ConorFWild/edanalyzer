@@ -383,7 +383,8 @@ def main(config_path):
                 for (_resid, _event_id), _ligand_mask in ligand_masks.items():
                     zmap_array = np.array(zmaps[_event_id], copy=False)
                     mask_array = np.array(_ligand_mask, copy=False)
-                    rprint(np.mean(zmap_array[np.nonzero(mask_array)]))
+                    selected_zs = zmap_array[np.nonzero(mask_array)]
+                    rprint(np.mean(selected_zs[selected_zs > 0.0]))
 
                 rprint(table_z_map_sample[:2])
                 # Sample the density in the Z-map
