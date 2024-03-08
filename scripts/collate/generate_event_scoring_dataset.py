@@ -15,6 +15,7 @@ import numpy as np
 import tables
 import zarr
 from scipy.ndimage import map_coordinates
+from scipy.interpolate import RegularGridInterpolator
 
 from edanalyzer import constants
 from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale
@@ -204,6 +205,14 @@ def main(config_path):
                     all_coords = np.argwhere(np.ones(reference_frame.spacing))
                     coordinate_array = all_coords / ( np.array(reference_frame.spacing) / zmap_array.shape ).reshape(1,-1)
                     rprint(coordinate_array.shape)
+
+                    x, y, z = np.arange(zmap_array.shape[0]), np.arange(zmap_array.shape[1]), np.arange(zmap_array.shape[2]),
+                    rprint(f'x,y,z shapes: {x.shape}, {y.shape}, {z.shape}')
+                    interp = RegularGridInterpolator((x, y, z), zmap_array)
+
+                    interpolated = interp(coordinate_array)
+                    rprint(interpolated.shape)
+
                     resampling = map_coordinates(
                         np.array(zmap, copy=False,),
                         coordinate_array
