@@ -119,7 +119,11 @@ def main(config_path):
     )
 
     ligand_data_dtype = [
-        ('idx', 'i8'), ('num_heavy_atoms', 'i8'), ('canonical_smiles', '<U300'), ('atom_ids', '<U5', (100,)), ('connectivity', '?', (100, 100,))
+        ('idx', 'i8'),
+        ('num_heavy_atoms', 'i8'),
+        ('canonical_smiles', '<U300'),
+        ('atom_ids', '<U5', (100,)),
+        ('connectivity', '?', (100, 100,))
     ]
     ligand_data_table = root.create_dataset(
         'ligand_data',
@@ -208,8 +212,8 @@ def main(config_path):
                     for _close_event in _close_events:
                         close_events[(known_hit_residue, _close_event[0].id)] = _close_event
                 rprint(f'Got {len(close_events)} close events')
-                if len(close_events) != 2:
-                    continue
+                # if len(close_events) != 2:
+                #     continue
                 close_event_dict = {close_event[0].id: close_event for close_event in close_events.values()}
 
                 # Get the ligand data for each of the events found
@@ -346,12 +350,12 @@ def main(config_path):
                             gemmi.Asu.Any
                         ).dist()
 
-                rprint({_resid: np.mean(_res_to_array(_residue)[0], axis=0) for _resid, _residue in
-                        known_hits[known_hit_dataset].items()})
-                rprint(
-                    {_key: {'size': round(zblobs[_key[1]]['events'][_key[2]].size, 2), 'dist': round(_distance, 2)} for
-                     _key, _distance in distances.items()})
-                rprint(f'Got {len(distances)} distances')
+                # rprint({_resid: np.mean(_res_to_array(_residue)[0], axis=0) for _resid, _residue in
+                #         known_hits[known_hit_dataset].items()})
+                # rprint(
+                #     {_key: {'size': round(zblobs[_key[1]]['events'][_key[2]].size, 2), 'dist': round(_distance, 2)} for
+                #      _key, _distance in distances.items()})
+                # rprint(f'Got {len(distances)} distances')
                 ref_event_distance = cell.find_nearest_image(
                     gemmi.Position(residue_centroid[0], residue_centroid[1], residue_centroid[2]),
                     gemmi.Position(event[0].x, event[0].y, event[0].z),
@@ -425,12 +429,12 @@ def main(config_path):
                         transform,
                         np.zeros((90, 90, 90), dtype=np.float32),
                     )
-                    rprint([(
-                            idx_z_map,
-                            _non_hit_idx[0],
-                            _row['_known_hit_residue'],
-                            ligand_data[_row['_known_hit_residue']][0]
-                        )],)
+                    # rprint([(
+                    #         idx_z_map,
+                    #         _non_hit_idx[0],
+                    #         _row['_known_hit_residue'],
+                    #         ligand_data[_row['_known_hit_residue']][0]
+                    #     )],)
                     z_map_sample_metadata = np.array(
                         [(
                             idx_z_map,
@@ -455,21 +459,21 @@ def main(config_path):
                         z_map_sample
                     )
 
-                    ligand_mask = ligand_masks[(_row['_known_hit_residue'], _non_hit_idx[0])]
-                    ligand_mask_array = np.array(ligand_mask, copy=False)
-                    rprint('Point Array')
-                    rprint(blob.point_array.shape)
-                    masked_vals = ligand_mask_array[
-                        blob.point_array[:, 0],
-                        blob.point_array[:, 1],
-                        blob.point_array[:, 2],
-                    ]
-                    rprint('Masked Z map vals')
-                    rprint(masked_vals)
-                    rprint('Selected ligand volume from mask array')
-                    rprint(np.sum(masked_vals))
-                    rprint(f'Total ligand volume in mask array')
-                    rprint(np.sum(ligand_mask_array))
+                    # ligand_mask = ligand_masks[(_row['_known_hit_residue'], _non_hit_idx[0])]
+                    # ligand_mask_array = np.array(ligand_mask, copy=False)
+                    # rprint('Point Array')
+                    # rprint(blob.point_array.shape)
+                    # masked_vals = ligand_mask_array[
+                    #     blob.point_array[:, 0],
+                    #     blob.point_array[:, 1],
+                    #     blob.point_array[:, 2],
+                    # ]
+                    # rprint('Masked Z map vals')
+                    # rprint(masked_vals)
+                    # rprint('Selected ligand volume from mask array')
+                    # rprint(np.sum(masked_vals))
+                    # rprint(f'Total ligand volume in mask array')
+                    # rprint(np.sum(ligand_mask_array))
 
                     idx_z_map += 1
 
