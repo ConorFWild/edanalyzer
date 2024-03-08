@@ -243,10 +243,11 @@ def main(config_path):
                     blobs, cutoff = _zblobs['events'], _zblobs['cutoff']
                     for _blob_id, _blob in blobs.items():
                         blob_centroid = _blob.centroid
-                        residue_centroid = ...
+                        for _known_hit_residue, _residue in known_hits[known_hit_dataset].items():
+                            residue_centroid = np.mean(_res_to_array(_residue), axis=0)
 
-                        # Get the distance from the blob centroid to residue centroid
-                        distances[(_event_id, _blob_id)] = np.linalg.norm(blob_centroid.flatten()-residue_centroid.flatten())
+                            # Get the distance from the blob centroid to residue centroid
+                            distances[(_event_id, _blob_id)] = np.linalg.norm(blob_centroid.flatten()-residue_centroid.flatten())
 
 
                 rprint(f'Got {len(distances)} distances')
