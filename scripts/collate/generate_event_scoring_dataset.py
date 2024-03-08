@@ -415,6 +415,7 @@ def main(config_path):
                 # rprint(non_hits)
 
                 # For each non-hit add a non-hit sample to the store
+                rprint(f'Have {len(non_hits)} non hits to add to store!')
                 for _non_hit_idx, _row in non_hits:
                     # Get the sample transform
                     blob = zblobs[_non_hit_idx[0]]['events'][_non_hit_idx[1]]
@@ -480,6 +481,7 @@ def main(config_path):
 
 
                 # For each hit residue/event pair, add a hit sample to the store
+                rprint(f'Have {len(ligand_masks)} hits to add to store!')
                 for (_resid, _event_id), _ligand_mask in ligand_masks.items():
                     # Get the corresponding event
                     event = close_event_dict[_event_id]
