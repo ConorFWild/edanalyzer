@@ -256,7 +256,7 @@ def main(config_path):
                             ).dist()
 
 
-                rprint({_key: (zblobs[_key[1]]['events'][_key[2]].size, _distance) for _key, _distance in distances.items()})
+                rprint({_key: (round(zblobs[_key[1]]['events'][_key[2]].size,2), round(_distance, 2)) for _key, _distance in distances.items()})
                 rprint(f'Got {len(distances)} distances')
 
 
