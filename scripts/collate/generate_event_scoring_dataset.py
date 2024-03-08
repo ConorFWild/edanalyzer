@@ -229,6 +229,7 @@ def main(config_path):
                         #     continue
 
                     if len(matched_cifs) == 0:
+                        rprint(f'NO MATCHED LIGAND DATA!!!!!!')
                         continue
 
                     matched_cif = matched_cifs[0]
