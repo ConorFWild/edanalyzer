@@ -226,6 +226,9 @@ def main(config_path):
             # 4. match blobs to residues (positives) or be unable to (negatives)
             for known_hit_dataset in known_hits:
                 rprint(f"Got {len(known_hits[known_hit_dataset])} hits in dataset {known_hit_dataset}!")
+                if len(known_hits[known_hit_dataset]) == 0:
+                    rprint(f"SKIPPING!")
+                    continue
 
                 # 1. Get the close events for each residue
                 close_events = {}
