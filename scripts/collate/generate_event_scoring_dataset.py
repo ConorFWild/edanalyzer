@@ -191,13 +191,13 @@ def main(config_path):
                 rprint(f'Got {len(close_events)} close events')
                 if len(close_events) != 2:
                     continue
-                close_events_dict = {close_event[0].id: close_event for close_event in close_events}
+                close_event_dict = {close_event[0].id: close_event for close_event in close_events.values()}
 
                 # 2. Get the blobs for each zmap
                 zmaps = {}
                 zblobs = {}
                 ligand_masks = {}
-                for (_known_hit_residue, _event_id), event in close_events.items():
+                for _event_id, event in close_event_dict.items():
                     dataset = XRayDataset.from_paths(
                         event[0].initial_structure,
                         event[0].initial_reflections,
@@ -212,10 +212,12 @@ def main(config_path):
                         None,
                     )
                     all_coords = np.argwhere(np.ones(reference_frame.spacing))
-                    coordinate_array = all_coords / ( np.array(reference_frame.spacing) / zmap_array.shape ).reshape(1,-1)
+                    coordinate_array = all_coords / (np.array(reference_frame.spacing) / zmap_array.shape).reshape(1,
+                                                                                                                   -1)
                     rprint(coordinate_array.shape)
 
-                    x, y, z = np.arange(zmap_array.shape[0]), np.arange(zmap_array.shape[1]), np.arange(zmap_array.shape[2]),
+                    x, y, z = np.arange(zmap_array.shape[0]), np.arange(zmap_array.shape[1]), np.arange(
+                        zmap_array.shape[2]),
                     rprint(f'x,y,z shapes: {x.shape}, {y.shape}, {z.shape}')
                     interp = RegularGridInterpolator((x, y, z), zmap_array)
 
@@ -228,7 +230,7 @@ def main(config_path):
                     # )
                     new_grid = reference_frame.get_grid()
                     new_grid_array = np.array(new_grid, copy=False)
-                    new_grid_array[all_coords[:,0], all_coords[:,1], all_coords[:,2]] = resampling
+                    new_grid_array[all_coords[:, 0], all_coords[:, 1], all_coords[:, 2]] = resampling
                     rprint(f'Resample shape: {resampling.shape}')
                     rprint(f'Reference spacig: {reference_frame.spacing}')
                     rprint(f'Reference unit cell: {reference_frame.unit_cell}')
@@ -246,9 +248,8 @@ def main(config_path):
                     }
                     zmaps[event[0].id] = new_grid
 
-                    # for _known_hit_residue, _residue in known_hits[known_hit_dataset].items():
-                    ligand_mask = _get_ligand_mask_float(new_grid, _residue, radius=1.5)
-
+                for (_known_hit_residue, _event_id), event in close_events.items():
+                    ligand_mask = _get_ligand_mask_float(zmaps[_event_id], _residue, radius=1.5)
                     ligand_masks[(_known_hit_residue, event[0].id)] = ligand_mask
 
                 rprint(f'Got {len([y for x in zblobs.values() for y in x["events"]])} z blobs')
