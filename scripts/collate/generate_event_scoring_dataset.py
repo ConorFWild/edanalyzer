@@ -356,9 +356,14 @@ def main(config_path):
                     ligand_mask = ligand_masks[(_row['_known_hit_residue'], _non_hit_idx[0])]
                     ligand_mask_array = np.array(ligand_mask, copy=False)
                     rprint(blob.point_array)
-                    masked_vals = ligand_mask_array[blob.point_array[:,0], blob.point_array[:,1],blob.point_array[:,2],]
+                    masked_vals = ligand_mask_array[
+                        blob.point_array[:,0],
+                        blob.point_array[:,1],
+                        blob.point_array[:,2],
+                    ]
                     rprint(masked_vals)
                     rprint(np.sum(masked_vals))
+                    rprint(np.sum(ligand_mask_array))
 
                     idx_z_map += 1
 
