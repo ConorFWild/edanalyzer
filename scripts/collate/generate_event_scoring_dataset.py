@@ -448,7 +448,8 @@ def main(config_path):
                 random_ints = list(range(len(non_hits)))
                 random.shuffle(random_ints)
                 rprint(random_ints[:2])
-                for _non_hit_idx, _row in random_ints[:10]:
+                for _x in random_ints[:10]:
+                    _non_hit_idx, _row = non_hits[_x]
                     # Get the sample transform
                     blob = zblobs[_non_hit_idx[0]]['events'][_non_hit_idx[1]]
                     blob_centroid = blob.centroid
