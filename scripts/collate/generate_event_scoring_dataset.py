@@ -246,7 +246,7 @@ def main(config_path):
                         residue_centroid = ...
 
                         # Get the distance from the blob centroid to residue centroid
-                        distances[(_event_id, _blob_id)] = np.linalg.norm(blob_centroid-residue_centroid)
+                        distances[(_event_id, _blob_id)] = np.linalg.norm(blob_centroid.flatten()-residue_centroid.flatten())
 
 
                 rprint(f'Got {len(distances)} distances')
