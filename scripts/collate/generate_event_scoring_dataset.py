@@ -284,9 +284,10 @@ def main(config_path):
                         in distances.items()
                     ]
                 )
+                rprint(df)
 
-                multindex = pd.MultiIndex.from_frame(df)
-                rprint(multindex)
+                grouping = df.groupby(by=['_event_id', '_blob_id']).min()
+                rprint(grouping)
 
 
                 exit()
