@@ -504,19 +504,19 @@ def main(config_path):
                     selected_zs = z_map_sample[np.nonzero(ligand_mask_sample > 0.9)]
                     rprint(np.mean(selected_zs[selected_zs > 0.0]))
 
-                rprint(table_z_map_sample[:2])
-                # Sample the density in the Z-map
-                # Get the sample transform
-
-                centroid = np.array([_event[0].x, _event[0].y, _event[0].z])
-                transform = gemmi.Transform()
-                transform.mat.fromlist((np.eye(3) * 0.5).tolist())
-                transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
-
-                # Record the 2fofc map sample
-                mtz_grid = _load_xmap_from_mtz_path(_event[0].initial_reflections)
-                mtz_sample_array = _sample_xmap_and_scale(mtz_grid, transform,
-                                                          np.zeros((90, 90, 90), dtype=np.float32))
+                # rprint(table_z_map_sample[:2])
+                # # Sample the density in the Z-map
+                # # Get the sample transform
+                #
+                # centroid = np.array([_event[0].x, _event[0].y, _event[0].z])
+                # transform = gemmi.Transform()
+                # transform.mat.fromlist((np.eye(3) * 0.5).tolist())
+                # transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
+                #
+                # # Record the 2fofc map sample
+                # mtz_grid = _load_xmap_from_mtz_path(_event[0].initial_reflections)
+                # mtz_sample_array = _sample_xmap_and_scale(mtz_grid, transform,
+                #                                           np.zeros((90, 90, 90), dtype=np.float32))
 
                 #
                 # mtz_sample = np.array(
