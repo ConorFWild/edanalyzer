@@ -473,7 +473,7 @@ def main(config_path):
                             _non_hit_idx[0],
                             _row['_known_hit_residue'],
                             ligand_data[_row['_known_hit_residue']][0][0],
-                            residue_pose_idxs[_row['_known_hit_residue']]
+                            -1
                         )],
                         dtype=z_map_sample_metadata_dtype
                     )
@@ -525,42 +525,49 @@ def main(config_path):
                     transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
 
                     # Get the pose of the ligand
-                    residue_pose_idxs = {}
-                    for known_hit_residue in known_hits[known_hit_dataset]:
-                        poss, atom, elements = _res_to_array(known_hits[known_hit_dataset][known_hit_residue], )
-                        com = np.mean(poss, axis=0).reshape((1, 3))
-                        event_to_lig_com = com - centroid.reshape((1, 3))
-                        _poss_centered = poss - com
-                        _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape(
-                            (1, 3)) + event_to_lig_com
-                        size = min(100, _rmsd_target.shape[0])
-                        atom_array = np.zeros(100, dtype='<U5')
-                        elements_array = np.zeros(100, dtype=np.int32)
-                        pose_array = np.zeros((100, 3))
-                        pose_array[:size, :] = _rmsd_target[:size, :]
-                        atom_array[:size] = atom[:size]
-                        elements_array[:size] = elements[:size]
+                    poss, atom, elements = _res_to_array(known_hits[known_hit_dataset][_resid], )
+                    com = np.mean(poss, axis=0).reshape((1, 3))
+                    event_to_lig_com = com - centroid.reshape((1, 3))
+                    _poss_centered = poss - com
+                    _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape(
+                        (1, 3)) + event_to_lig_com
+                    size = min(100, _rmsd_target.shape[0])
+                    atom_array = np.zeros(100, dtype='<U5')
+                    elements_array = np.zeros(100, dtype=np.int32)
+                    pose_array = np.zeros((100, 3))
+                    pose_array[:size, :] = _rmsd_target[:size, :]
+                    atom_array[:size] = atom[:size]
+                    elements_array[:size] = elements[:size]
 
-                        residue_pose_idxs[known_hit_residue] = idx_pose
-                        known_hit_pos_sample = np.array([(
-                            idx_pose,
-                            pose_array,
-                            atom_array,
-                            elements_array,
-                        )],
-                            dtype=known_hit_pose_sample_dtype
-                        )
-                        # rprint(known_hit_pos_sample)
-                        table_known_hit_pose_sample.append(
-                            known_hit_pos_sample
-                        )
-                        idx_pose += 1
+                    known_hit_pos_sample = np.array([(
+                        idx_pose,
+                        pose_array,
+                        atom_array,
+                        elements_array,
+                    )],
+                        dtype=known_hit_pose_sample_dtype
+                    )
+                    # rprint(known_hit_pos_sample)
+                    table_known_hit_pose_sample.append(
+                        known_hit_pos_sample
+                    )
 
                     # Sample the zmap
-                    z_map_sample = _sample_xmap_and_scale(
+                    _z_map_sample = _sample_xmap_and_scale(
                         zmaps[_event_id],
                         transform,
                         np.zeros((90, 90, 90), dtype=np.float32))
+
+                    z_map_sample = np.array(
+                        [(
+                            idx_z_map,
+                            z_map_sample_array
+                        )],
+                        dtype=z_map_sample_dtype
+                    )
+                    table_z_map_sample.append(
+                        z_map_sample
+                    )
 
                     # Sample the ligand mask
                     ligand_mask_sample = _sample_xmap_and_scale(
@@ -568,9 +575,13 @@ def main(config_path):
                         transform,
                         np.zeros((90, 90, 90), dtype=np.float32))
 
-                    selected_zs = z_map_sample[np.nonzero(ligand_mask_sample > 0.9)]
+                    selected_zs = _z_map_sample[np.nonzero(ligand_mask_sample > 0.9)]
                     rprint(np.mean(selected_zs[selected_zs > 0.0]))
-                    rprint(np.mean(z_map_sample[z_map_sample > 0.0]))
+                    rprint(np.mean(_z_map_sample[_z_map_sample > 0.0]))
+
+                    idx_pose += 1
+                    idx_z_map += 1
+
 
                 # rprint(table_z_map_sample[:2])
                 # # Sample the density in the Z-map
