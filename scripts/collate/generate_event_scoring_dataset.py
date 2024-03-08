@@ -380,6 +380,11 @@ def main(config_path):
 
                     idx_z_map += 1
 
+                for (_resid, _event_id), _ligand_mask in ligand_masks.items():
+                    zmap_array = np.array(zmaps[_event_id], copy=False)
+                    mask_array = np.array(_ligand_mask, copy=False)
+                    rprint(np.mean(zmap_array[mask_array]))
+
                 rprint(table_z_map_sample[:2])
                 # Sample the density in the Z-map
                 # Get the sample transform
