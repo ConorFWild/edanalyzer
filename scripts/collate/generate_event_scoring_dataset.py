@@ -294,6 +294,7 @@ def main(config_path):
 
                 closest = grouping['_dist'].apply(min)
                 rprint(closest)
+                rprint(df['_dist'])
                 # rprint(grouping['_dist'])
                 # rprint(closest.reset_index())
 
