@@ -14,6 +14,7 @@ import networkx.algorithms.isomorphism as iso
 import numpy as np
 import tables
 import zarr
+from scipy.ndimage import map_coordinates
 
 from edanalyzer import constants
 from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale
@@ -193,10 +194,20 @@ def main(config_path):
                         None
                     )
                     zmap = _load_xmap_from_path(event[0].z_map)
+                    zmap_array = np.array(zmap, copy=False)
+                    # Resample the zmap to the reference frame
+
                     reference_frame = DFrame(
                         dataset,
                         None,
                     )
+                    all_coords = np.arghwere(np.ones(reference_frame.spacing))
+                    coordinate_array = all_coords / ( np.array(reference_frame.spacing) / zmap_array.shape )
+                    resampling = map_coordinates(
+                        np.array(zmap, copy=False,),
+                        coordinate_array
+                    )
+                    rprint(resampling.shape)
                     rprint(reference_frame.spacing)
                     rprint(reference_frame.unit_cell)
                     rprint(zmap)
