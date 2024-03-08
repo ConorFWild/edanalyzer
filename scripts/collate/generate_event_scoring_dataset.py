@@ -210,13 +210,13 @@ def main(config_path):
                     rprint(f'x,y,z shapes: {x.shape}, {y.shape}, {z.shape}')
                     interp = RegularGridInterpolator((x, y, z), zmap_array)
 
-                    interpolated = interp(coordinate_array)
-                    rprint(interpolated.shape)
+                    resampling = interp(coordinate_array)
+                    rprint(resampling.shape)
 
-                    resampling = map_coordinates(
-                        np.array(zmap, copy=False,),
-                        coordinate_array
-                    )
+                    # resampling = map_coordinates(
+                    #     np.array(zmap, copy=False,),
+                    #     coordinate_array
+                    # )
                     new_grid = reference_frame.get_grid()
                     new_grid_array = np.array(new_grid, copy=False)
                     new_grid_array[:,:,:] = resampling[:,:,:]
