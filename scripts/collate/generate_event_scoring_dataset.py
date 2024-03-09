@@ -312,6 +312,8 @@ def main(config_path):
                             ligand_data_sample
                         )
                         idx_ligand_data += 1
+                else:
+                    rprint(f'Couldnt get cifs for all dataset hit residues! Skipping!' )
 
                 # 2. Get the blobs for each zmap
                 zmaps = {}
