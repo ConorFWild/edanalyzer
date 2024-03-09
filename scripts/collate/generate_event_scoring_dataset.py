@@ -331,8 +331,7 @@ def main(config_path):
                     coordinate_array = all_coords / ((np.array(reference_frame.spacing)-1) / (np.array(zmap_array.shape)-1)).reshape(1,
                                                                                                                    -1)
                     rprint(coordinate_array.shape)
-                    rprint(np.min(coordinate_array, axis=0))
-                    rprint(np.max(coordinate_array, axis=0))
+
 
                     x, y, z = np.arange(zmap_array.shape[0]), np.arange(zmap_array.shape[1]), np.arange(
                         zmap_array.shape[2]),
@@ -342,6 +341,8 @@ def main(config_path):
                     interp = RegularGridInterpolator((x, y, z), zmap_array)
 
                     clipped_coords = np.clip(coordinate_array, np.array([0,0,0]).reshape(1,3), np.array([x[-1], y[-1], z[-1]]).reshape(1,3))
+                    rprint(np.min(clipped_coords, axis=0))
+                    rprint(np.max(clipped_coords, axis=0))
                     resampling = interp(clipped_coords)
                     rprint(resampling.shape)
 
