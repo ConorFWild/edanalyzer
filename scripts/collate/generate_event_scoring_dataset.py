@@ -55,9 +55,13 @@ def _get_close_events(
         delta=5.0
 ):
     distances = _get_close_distances(known_hit_centroid, experiment_hit_results)
-    rprint(distances)
+    # rprint(distances)
+    close_events = []
+    for j, dist in distances.items():
+        if dist < delta:
+            close_events.append(experiment_hit_results[j])
 
-    return [res for res, dis in zip(experiment_hit_results, distances) if dis < delta]
+    return close_events
 
 
 def _get_closest_event(
