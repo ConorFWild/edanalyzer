@@ -225,7 +225,7 @@ def main(config_path):
             # 3. Get distances from event blobs to residues
             # 4. match blobs to residues (positives) or be unable to (negatives)
             for known_hit_dataset in known_hits:
-                if (known_hit_dataset not in ['CLIC-x0191', 'CLIC-x0132']:
+                if (known_hit_dataset not in ['CLIC-x0191', 'CLIC-x0132']):
                     continue
 
                 rprint(f"Got {len(known_hits[known_hit_dataset])} hits in dataset {known_hit_dataset}!")
