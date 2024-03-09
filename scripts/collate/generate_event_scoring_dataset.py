@@ -341,7 +341,7 @@ def main(config_path):
                     rprint(f'x,y,z reference shapes: {reference_frame.spacing}')
                     interp = RegularGridInterpolator((x, y, z), zmap_array)
 
-                    clipped_coords = np.clip(coordinate_array, np.array([0,0,0]).reshape(1,3), np.array(x[-1], y[-1], z[-1]).reshape(1,3))
+                    clipped_coords = np.clip(coordinate_array, np.array([0,0,0]).reshape(1,3), np.array([x[-1], y[-1], z[-1]]).reshape(1,3))
                     resampling = interp(clipped_coords)
                     rprint(resampling.shape)
 
