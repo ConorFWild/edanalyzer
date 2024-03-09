@@ -256,8 +256,9 @@ def main(config_path):
                 tmp_idx_ligand_data = idx_ligand_data
                 for known_hit_residue in known_hits[known_hit_dataset]:
                     matched_cifs = []
-                    for _event_id, _event in close_event_dict.items():
-
+                    for (_resid, _event_id), _event in close_events.items():
+                        if _resid != known_hit_residue:
+                            continue
                         # Get the associated ligand data
                         matched_cifs += _get_matched_cifs(
                             known_hits[known_hit_dataset][known_hit_residue],
@@ -307,7 +308,6 @@ def main(config_path):
                 # 2. Get the blobs for each zmap
                 zmaps = {}
                 zblobs = {}
-                ligand_masks = {}
                 for _event_id, event in close_event_dict.items():
                     dataset = XRayDataset.from_paths(
                         event[0].initial_structure,
@@ -362,9 +362,12 @@ def main(config_path):
                     }
                     zmaps[event[0].id] = new_grid
 
+                ligand_masks = {}
                 for (_known_hit_residue, _event_id), event in close_events.items():
-                    ligand_mask = _get_ligand_mask_float(zmaps[_event_id],
-                                                         known_hits[known_hit_dataset][_known_hit_residue], radius=1.5)
+                    ligand_mask = _get_ligand_mask_float(
+                        zmaps[_event_id],
+                        known_hits[known_hit_dataset][_known_hit_residue],
+                        radius=1.5)
                     ligand_masks[(_known_hit_residue, event[0].id)] = ligand_mask
 
                 rprint(f'Got {len([y for x in zblobs.values() for y in x["events"]])} z blobs')
