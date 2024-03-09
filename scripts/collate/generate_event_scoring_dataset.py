@@ -254,6 +254,7 @@ def main(config_path):
                 close_event_dict = {close_event[0].id: close_event for close_event in close_events.values()}
                 if len(close_events) == 0:
                     rprint(f'NO CLOSE EVENTS! SKIPPING!')
+                    continue
 
                 # Get the base event
 
