@@ -326,6 +326,7 @@ def main(config_path):
                     coordinate_array = all_coords / (np.array(reference_frame.spacing) / zmap_array.shape).reshape(1,
                                                                                                                    -1)
                     rprint(coordinate_array.shape)
+                    rprint(np.min(coordinate_array, axis=0))
                     rprint(np.max(coordinate_array, axis=0))
 
                     x, y, z = np.arange(zmap_array.shape[0]), np.arange(zmap_array.shape[1]), np.arange(
