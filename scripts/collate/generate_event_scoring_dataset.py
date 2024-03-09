@@ -225,6 +225,9 @@ def main(config_path):
             # 3. Get distances from event blobs to residues
             # 4. match blobs to residues (positives) or be unable to (negatives)
             for known_hit_dataset in known_hits:
+                if (known_hit_dataset != 'CLIC-x0191') | (known_hit_dataset != 'CLIC-x0132'):
+                    continue
+
                 rprint(f"Got {len(known_hits[known_hit_dataset])} hits in dataset {known_hit_dataset}!")
                 if len(known_hits[known_hit_dataset]) == 0:
                     rprint(f"SKIPPING!")
@@ -597,240 +600,15 @@ def main(config_path):
                         np.zeros((90, 90, 90), dtype=np.float32))
 
                     selected_zs = _z_map_sample[np.nonzero(ligand_mask_sample > 0.9)]
-                    rprint(np.mean(selected_zs[selected_zs > 0.0]))
-                    rprint(np.mean(_z_map_sample[_z_map_sample > 0.0]))
+                    rprint(selected_zs)
+                    rprint(_z_map_sample)
+                    rprint(f'Selected zs high: {_resid}, {_event_id} : {np.mean(selected_zs[selected_zs > 0.0])}')
+                    rprint(f'Selected zs high: {_resid}, {_event_id} : {np.mean(_z_map_sample[_z_map_sample > 0.0])}')
 
                     idx_pose += 1
                     idx_z_map += 1
 
 
-                # rprint(table_z_map_sample[:2])
-                # # Sample the density in the Z-map
-                # # Get the sample transform
-                #
-                # centroid = np.array([_event[0].x, _event[0].y, _event[0].z])
-                # transform = gemmi.Transform()
-                # transform.mat.fromlist((np.eye(3) * 0.5).tolist())
-                # transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
-                #
-                # # Record the 2fofc map sample
-                # mtz_grid = _load_xmap_from_mtz_path(_event[0].initial_reflections)
-                # mtz_sample_array = _sample_xmap_and_scale(mtz_grid, transform,
-                #                                           np.zeros((90, 90, 90), dtype=np.float32))
-
-                #
-                # mtz_sample = np.array(
-                #     [(
-                #         idx_event,
-                #         _event[0].id,
-                #         known_hit_residue,
-                #         mtz_sample_array
-                #     )],
-                #     dtype=mtz_sample_dtype
-                # )
-                #
-                # exit()
-                #
-                # for known_hit_residue in known_hits[known_hit_dataset]:
-                #
-                #     # Get the associated event
-                #     close_events = _get_close_events(
-                #         known_hit_centroids[known_hit_dataset][known_hit_residue],
-                #         [x for x in experiment_hit_results if x[0].dtag == known_hit_dataset],
-                #     )
-                #     close_event_ids = [res[0].id for res in close_events]
-                #     rprint(f"Got {len(close_events)} close events: {close_event_ids}")
-                #
-                #     for _event in close_events:
-                #         if _event[0].id in processed_event_idxs:
-                #             rprint(f"Already generated poses for: {_event[0].id}! Skipping!")
-                #             continue
-                #
-                #         # Get the associated ligand data
-                #         matched_cifs = _get_matched_cifs(
-                #             known_hits[known_hit_dataset][known_hit_residue],
-                #             _event[0],
-                #         )
-                #         if len(matched_cifs) == 0:
-                #             rprint(f'NO MATCHED LIGAND DATA!!!!!!')
-                #             continue
-                #
-                #         matched_cif = matched_cifs[0]
-                #
-                #         smiles = _get_smiles(matched_cif)
-                #         atom_ids_array = np.zeros((100,), dtype='<U5')
-                #         atom_ids = _get_atom_ids(matched_cif)
-                #         atom_ids_array[:len(atom_ids)] = atom_ids[:len(atom_ids)]
-                #         connectivity_array = np.zeros((100, 100), dtype='?')
-                #         connectivity = _get_connectivity(matched_cif)
-                #         connectivity_array[:connectivity.shape[0], :connectivity.shape[1]] = connectivity[
-                #                                                                              :connectivity.shape[0],
-                #                                                                              :connectivity.shape[1]]
-                #
-                #         ligand_data_sample = np.array([(
-                #             idx_event,
-                #             smiles,
-                #             atom_ids_array,
-                #             connectivity_array
-                #         )], dtype=ligand_data_dtype)
-                #         # rprint(ligand_data_sample)
-                #         ligand_data_table.append(
-                #             ligand_data_sample
-                #         )
-                #
-                #         # Get the sample transform
-                #         centroid = np.array([_event[0].x, _event[0].y, _event[0].z])
-                #         transform = gemmi.Transform()
-                #         transform.mat.fromlist((np.eye(3) * 0.5).tolist())
-                #         transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
-                #
-                #         # Record the 2fofc map sample
-                #         mtz_grid = _load_xmap_from_mtz_path(_event[0].initial_reflections)
-                #         mtz_sample_array = _sample_xmap_and_scale(mtz_grid, transform,
-                #                                                   np.zeros((90, 90, 90), dtype=np.float32))
-                #
-                #         mtz_sample = np.array(
-                #             [(
-                #                 idx_event,
-                #                 _event[0].id,
-                #                 known_hit_residue,
-                #                 mtz_sample_array
-                #             )],
-                #             dtype=mtz_sample_dtype
-                #         )
-                #
-                #         table_mtz_sample.append(
-                #             mtz_sample
-                #         )
-                #
-                #         # Record the event map sample
-                #         event_map_grid = _load_xmap_from_path(_event[0].event_map)
-                #         event_map_sample_array = _sample_xmap_and_scale(event_map_grid, transform,
-                #                                                         np.zeros((90, 90, 90), dtype=np.float32))
-                #         # event_map_sample['idx'] = idx_event
-                #         # event_map_sample['event_idx'] = _event[0].id
-                #         # event_map_sample['res_id'] = known_hit_residue
-                #         # event_map_sample['sample'] = event_map_sample_array
-                #         event_map_sample = np.array(
-                #             [(
-                #                 idx_event,
-                #                 _event[0].id,
-                #                 known_hit_residue,
-                #                 event_map_sample_array
-                #             )], dtype=event_map_sample_dtype
-                #         )
-                #         # rprint(event_map_sample)
-                #         table_event_map_sample.append(
-                #             event_map_sample
-                #         )
-                #
-                #         # Get the base event
-                #         poss, atom, elements = _res_to_array(known_hits[known_hit_dataset][known_hit_residue], )
-                #         com = np.mean(poss, axis=0).reshape((1, 3))
-                #         event_to_lig_com = com - centroid.reshape((1, 3))
-                #         _poss_centered = poss - com
-                #         _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape(
-                #             (1, 3)) + event_to_lig_com
-                #         size = min(100, _rmsd_target.shape[0])
-                #         atom_array = np.zeros(100, dtype='<U5')
-                #         elements_array = np.zeros(100, dtype=np.int32)
-                #         pose_array = np.zeros((100, 3))
-                #         pose_array[:size, :] = _rmsd_target[:size, :]
-                #         atom_array[:size] = atom[:size]
-                #         elements_array[:size] = elements[:size]
-                #         # known_hit_pos_sample['idx'] = idx_pose
-                #         # known_hit_pos_sample['database_event_idx'] = _event[0].id
-                #         # known_hit_pos_sample['event_map_sample_idx'] = idx_event
-                #         # known_hit_pos_sample['mtz_sample_idx'] = idx_event
-                #         # known_hit_pos_sample['positions'] = pose_array
-                #         # known_hit_pos_sample['elements'] = elements_array
-                #         # known_hit_pos_sample['rmsd'] = 0.0
-                #         known_hit_pos_sample = np.array([(
-                #             idx_pose,
-                #             _event[0].id,
-                #             idx_event,
-                #             idx_event,
-                #             pose_array,
-                #             atom_array,
-                #             elements_array,
-                #             0.0
-                #         )], dtype=known_hit_pos_sample_dtype
-                #         )
-                #         # rprint(known_hit_pos_sample)
-                #         table_known_hit_pos_sample.append(
-                #             known_hit_pos_sample
-                #         )
-                #         idx_pose += 1
-                #
-                #         # Generate the decoy/rmsd pairs
-                #         poses, atoms, elements, rmsds = _get_known_hit_poses(
-                #             known_hits[known_hit_dataset][known_hit_residue],
-                #             event_to_lig_com
-                #         )
-                #
-                #         # Record the decoy/rmsd pairs with their event map
-                #         for pose, atom, element, rmsd in zip(poses, atoms, elements, rmsds):
-                #             # known_hit_pos_sample['idx'] = idx_pose
-                #
-                #             # Record the event key
-                #             # known_hit_pos_sample['database_event_idx'] = _event[0].id
-                #             #
-                #             # known_hit_pos_sample['event_map_sample_idx'] = idx_event
-                #             # known_hit_pos_sample['mtz_sample_idx'] = idx_event
-                #             #
-                #             # # Record the data
-                #             # known_hit_pos_sample['positions'] = pose
-                #             #
-                #             # known_hit_pos_sample['atoms'] = atom
-                #             # known_hit_pos_sample['elements'] = element
-                #             # known_hit_pos_sample['rmsd'] = rmsd
-                #             # rprint((idx_pose,
-                #             #             _event[0].id,
-                #             #             idx_event,
-                #             #             idx_event,
-                #             #             pose,
-                #             #             atom,
-                #             #             element,
-                #             #             rmsd))
-                #             known_hit_pos_sample = np.array(
-                #                 [
-                #                     (
-                #                         idx_pose,
-                #                         _event[0].id,
-                #                         idx_event,
-                #                         idx_event,
-                #                         pose,
-                #                         atom,
-                #                         element,
-                #                         rmsd
-                #                     )
-                #                 ],
-                #                 dtype=known_hit_pos_sample_dtype
-                #             )
-                #             # rprint(known_hit_pos_sample)
-                #             table_known_hit_pos_sample.append(
-                #                 known_hit_pos_sample
-                #             )
-                #
-                #             _delta_vecs = pose_array - pose
-                #             _delta = np.linalg.norm(_delta_vecs, axis=1)
-                #             delta_sample = np.array([(
-                #                 idx_pose,
-                #                 idx_pose,
-                #                 _delta,
-                #                 _delta_vecs,
-                #             )], dtype=delta_dtype
-                #             )
-                #             # rprint(delta_sample)
-                #             delta_table.append(
-                #                 delta_sample
-                #             )
-                #
-                #             # known_hit_pos_sample.append()
-                #             idx_pose += 1
-                #             # exit()
-                #
-                #         idx_event += 1
 
 
 if __name__ == "__main__":
