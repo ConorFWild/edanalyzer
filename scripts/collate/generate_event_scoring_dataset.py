@@ -605,6 +605,7 @@ def main(config_path):
                     selected_zs = _z_map_sample[lig_selection]
                     # rprint(selected_zs)
                     # rprint(_z_map_sample)
+                    rprint(f'Ligand com: {com} : event com: {centroid}')
                     rprint(f'Ligand size: {lig_selection[0].size}')
                     rprint(f'Selected zs high: {_resid}, {_event_id} : {np.mean(selected_zs[selected_zs > 0.0])} ')
                     rprint(f'Zmap high: {_resid}, {_event_id} : {np.mean(_z_map_sample[_z_map_sample > 0.0])} ')
