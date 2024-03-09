@@ -528,6 +528,7 @@ def main(config_path):
                 # For each hit residue/event pair, add a hit sample to the store
                 rprint(f'Have {len(ligand_masks)} hits to add to store!')
                 for (_resid, _event_id), _ligand_mask in ligand_masks.items():
+                    rprint(f'{_resid} : {_event_id}')
                     # Get the corresponding event
                     event = close_event_dict[_event_id]
 
