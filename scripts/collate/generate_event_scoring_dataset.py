@@ -336,6 +336,7 @@ def main(config_path):
 
                     x, y, z = np.arange(zmap_array.shape[0]), np.arange(zmap_array.shape[1]), np.arange(
                         zmap_array.shape[2]),
+                    rprint(f'Zmap array shape: {zmap_array.shape}')
                     rprint(f'x,y,z shapes: {x[-1]}, {y[-1]}, {z[-1]}')
                     rprint(f'x,y,z reference shapes: {reference_frame.spacing}')
                     interp = RegularGridInterpolator((x, y, z), zmap_array)
