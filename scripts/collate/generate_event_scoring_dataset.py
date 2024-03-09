@@ -321,7 +321,7 @@ def main(config_path):
                     reference_frame = DFrame(
                         dataset,
                         None,
-                    ) 143 / ()
+                    )
                     all_coords = np.argwhere(np.ones(reference_frame.spacing))
                     coordinate_array = all_coords / ((np.array(reference_frame.spacing)-1) / (np.array(zmap_array.shape)-1)).reshape(1,
                                                                                                                    -1)
