@@ -332,6 +332,7 @@ def main(config_path):
                     x, y, z = np.arange(zmap_array.shape[0]), np.arange(zmap_array.shape[1]), np.arange(
                         zmap_array.shape[2]),
                     rprint(f'x,y,z shapes: {x.shape}, {y.shape}, {z.shape}')
+                    rprint(f'x,y,z reference shapes: {reference_frame.spacing}')
                     interp = RegularGridInterpolator((x, y, z), zmap_array)
 
                     resampling = interp(coordinate_array)
