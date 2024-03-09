@@ -314,6 +314,7 @@ def main(config_path):
                         idx_ligand_data += 1
                 else:
                     rprint(f'Couldnt get cifs for all dataset hit residues! Skipping!' )
+                    continue
 
                 # 2. Get the blobs for each zmap
                 zmaps = {}
