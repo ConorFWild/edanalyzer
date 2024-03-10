@@ -157,7 +157,7 @@ def _make_test_dataset_psuedo_pandda(
             ccp4 = gemmi.Ccp4Map()
             ccp4.grid = event_map
             ccp4.update_ccp4_header()
-            z_map_path = dataset_dir / constants.PANDDA_Z_MAP_TEMPLATE.format(
+            z_map_path = dataset_dir / constants.PANDDA_ZMAP_TEMPLATE.format(
                 dtag=f"{psuedo_dtag}",
             )
             ccp4.write_ccp4_map(str(z_map_path))
