@@ -624,13 +624,13 @@ def main(config_path):
                         transform,
                         np.zeros((90, 90, 90), dtype=np.float32))
                     lig_selection = np.nonzero(ligand_mask_sample > 0.9)
-                    selected_zs = z_map_sample[lig_selection]
+                    selected_zs = z_map_sample_array[lig_selection]
                     # rprint(selected_zs)
                     # rprint(_z_map_sample)
                     rprint(f'Ligand com: {com} : event com: {centroid}')
                     rprint(f'Ligand size: {lig_selection[0].size}')
                     rprint(f'Selected zs high: {_resid}, {_event_id} : {np.mean(selected_zs[selected_zs > 0.0])} ')
-                    rprint(f'Zmap high: {_resid}, {_event_id} : {np.mean(_z_map_sample[_z_map_sample > 0.0])} ')
+                    rprint(f'Zmap high: {_resid}, {_event_id} : {np.mean(z_map_sample_array[z_map_sample_array > 0.0])} ')
 
                     idx_pose += 1
                     idx_z_map += 1
