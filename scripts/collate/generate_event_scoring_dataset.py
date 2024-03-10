@@ -635,7 +635,7 @@ def main(config_path):
                     idx_pose += 1
                     idx_z_map += 1
 
-
+    rprint(f'Finished!')
 
 
 if __name__ == "__main__":
