@@ -186,9 +186,10 @@ def main(config_path):
         idx_z_map = 0
         idx_ligand_data = 0
         idx_pose = 0
+        experiment_num = 0
         processed_event_idxs = []
 
-        for j, experiment in enumerate(sorted_experiments):
+        for experiment in sorted_experiments:
             rprint(f"Processing experiment: {experiment.path}")
             experiment_hit_results = [res for res in query_events if
                                       ([x for x in res[0].annotations][0].annotation) & (
@@ -634,7 +635,8 @@ def main(config_path):
 
                     idx_pose += 1
                     idx_z_map += 1
-            if j > 5:
+            experiment_num += 1
+            if experiment_num > 5:
                 break
 
     rprint(f'Finished!')
