@@ -110,7 +110,6 @@ def _make_test_dataset_psuedo_pandda(
         j = 0
         for z_map_metadata_sample in table_z_map_sample_metadata:
 
-
             # Get the corresponding database event and pose
             z_map_metadata_sample_idx = z_map_metadata_sample['idx']
             database_event_idx = z_map_metadata_sample['event_idx']
@@ -151,6 +150,7 @@ def _make_test_dataset_psuedo_pandda(
 
             # Get the event map
             z_map_sample = table_z_map_sample[z_map_metadata_sample_idx]
+            assert z_map_sample['idx'] == z_map_metadata_sample_idx
             event_map = _get_event_map(z_map_sample)
 
             # Write the event map

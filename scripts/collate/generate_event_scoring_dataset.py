@@ -588,7 +588,7 @@ def main(config_path):
                     )
 
                     # Sample the zmap
-                    _z_map_sample = _sample_xmap_and_scale(
+                    z_map_sample_array = _sample_xmap_and_scale(
                         zmaps[_event_id],
                         transform,
                         np.zeros((90, 90, 90), dtype=np.float32))
@@ -634,6 +634,7 @@ def main(config_path):
 
                     idx_pose += 1
                     idx_z_map += 1
+            break
 
     rprint(f'Finished!')
 
