@@ -33,6 +33,7 @@ class SimpleConvolutionalEncoder(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
 
         for m in self.modules():
+            print(m)
             if isinstance(m, nn.Conv3d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
             elif isinstance(m, (nn.BatchNorm3d, nn.GroupNorm)):
@@ -80,6 +81,7 @@ class SimpleConvolutionalDecoder(nn.Module):
         # self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
 
         for m in self.modules():
+            print(m)
             if isinstance(m, nn.ConvTranspose3d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
             elif isinstance(m, (nn.BatchNorm3d, nn.GroupNorm)):
