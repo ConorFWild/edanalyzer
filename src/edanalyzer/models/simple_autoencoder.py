@@ -9,16 +9,18 @@ def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
 
 
 class Block(nn.Module):
-    def __init__(self, inplanes, outplanes):
+    def __init__(self, inplanes, outplanes, last=False):
         super(Block, self).__init__()
         self.conv = conv3x3(inplanes, outplanes, 2)
         self.bn = nn.BatchNorm3d(outplanes)
         self.relu = nn.ReLU(inplace=True)
         self.drop = nn.Dropout()
+        self.last = last
 
     def forward(self, x):
         x = self.conv(x)
-        x = self.bn(x)
+        if not self.last:
+            x = self.bn(x)
         x = self.relu(x)
         x = self.drop(x)
         return x
@@ -34,7 +36,7 @@ class SimpleConvolutionalEncoder(nn.Module):
         self.layer2 = Block(2, 4)
         self.layer3 = Block(4, 8)
         self.layer4 = Block(8, 16)
-        self.layer5 = Block(16, 32)
+        self.layer5 = Block(16, 32, last=True)
 
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
 
