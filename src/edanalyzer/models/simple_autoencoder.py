@@ -29,7 +29,13 @@ class SimpleConvolutionalEncoder(nn.Module):
         super(SimpleConvolutionalEncoder, self).__init__()
 
         # Layers
-        self.layers = [Block(2 ^ j, 2 ^ (j + 1)) for j in range(5)]
+        # Layers
+        self.layer1 = BlockTranspose(1, 2)
+        self.layer2 = BlockTranspose(2, 4)
+        self.layer3 = BlockTranspose(4, 8)
+        self.layer4 = BlockTranspose(8, 16)
+        self.layer5 = BlockTranspose(16, 32)
+
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
 
         for m in self.modules():
@@ -41,8 +47,13 @@ class SimpleConvolutionalEncoder(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
-        for layer in self.layers:
-            x = layer(x)
+        # for layer in self.layers:
+        #     x = layer(x)
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.layer5(x)
 
         x = self.avgpool(x)
         x = x.view(-1, x.shape[1] * x.shape[2] * x.shape[3] * x.shape[4])
@@ -53,7 +64,7 @@ class SimpleConvolutionalEncoder(nn.Module):
 def convtranspose3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
     return nn.ConvTranspose3d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=dilation, groups=groups, bias=False, dilation=dilation)
+                              padding=dilation, groups=groups, bias=False, dilation=dilation)
 
 
 class BlockTranspose(nn.Module):
@@ -77,7 +88,12 @@ class SimpleConvolutionalDecoder(nn.Module):
         super(SimpleConvolutionalDecoder, self).__init__()
 
         # Layers
-        self.layers = [BlockTranspose(2 ^ j, 2 ^ (j + 1)) for j in range(5)]
+        self.layer1 = BlockTranspose(32, 16)
+        self.layer2 = BlockTranspose(16, 8)
+        self.layer3 = BlockTranspose(8, 4)
+        self.layer4 = BlockTranspose(4, 2)
+        self.layer5 = BlockTranspose(2, 1)
+
         # self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
 
         for m in self.modules():
@@ -89,8 +105,12 @@ class SimpleConvolutionalDecoder(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
-        for layer in self.layers:
-            x = layer(x)
+        # for layer in self.layers:
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.layer5(x)
 
         x = self.avgpool(x)
         # x = x.view(-1, x.shape[1] * x.shape[2] * x.shape[3] * x.shape[4])
