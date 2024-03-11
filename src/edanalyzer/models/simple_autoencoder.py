@@ -10,6 +10,7 @@ def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
 
 class Block(nn.Module):
     def __init__(self, inplanes, outplanes):
+        super(Block, self).__init__()
         self.conv = conv3x3(inplanes, outplanes, 2)
         self.bn = nn.BatchNorm3d(outplanes)
         self.relu = nn.ReLU(inplace=True)
@@ -49,6 +50,7 @@ def convtranspose3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
 
 class BlockTranspose(nn.Module):
     def __init__(self, inplanes, outplanes):
+        super(BlockTranspose, self).__init__()
         self.conv = convtranspose3x3(inplanes, outplanes, 2)
         self.bn = nn.BatchNorm3d(outplanes)
         self.relu = nn.ReLU(inplace=True)
