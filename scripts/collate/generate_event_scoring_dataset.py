@@ -636,8 +636,8 @@ def main(config_path):
                     idx_pose += 1
                     idx_z_map += 1
             experiment_num += 1
-            if experiment_num > 5:
-                break
+            # if experiment_num > 5:
+            #     break
 
     rprint(f'Finished!')
 
