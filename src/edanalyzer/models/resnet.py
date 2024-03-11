@@ -1263,6 +1263,7 @@ class ResNet(nn.Module):
                  width_per_group=64,
                  replace_stride_with_dilation=None,
                  norm_layer=None,
+                 headless=False
 
                  ):
         super(ResNet, self).__init__()
@@ -1281,6 +1282,7 @@ class ResNet(nn.Module):
                              "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
         self.groups = groups
         self.base_width = width_per_group
+        self.headless = headless
         self.conv1 = nn.Conv3d(num_input, self.inplanes, kernel_size=7, stride=2, padding=3,
                                bias=False)
         self.bn1 = norm_layer(self.inplanes)
@@ -1363,7 +1365,8 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         # x = torch.flatten(x, 1)
         x = x.view(-1, x.shape[1] * x.shape[2] * x.shape[3] * x.shape[4])
-        x = self.fc(x)
+        if not self.headless:
+            x = self.fc(x)
 
         return x
         # return self.act(x)
