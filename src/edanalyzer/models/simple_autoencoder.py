@@ -108,7 +108,7 @@ class SimpleConvolutionalDecoder(nn.Module):
 
     def forward(self, x):
         # for layer in self.layers:
-        x = self.avgpool(x)
+        x = x.view(-1, 32, 1, 1, 1)
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
