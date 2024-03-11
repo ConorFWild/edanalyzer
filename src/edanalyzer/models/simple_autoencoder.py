@@ -30,11 +30,11 @@ class SimpleConvolutionalEncoder(nn.Module):
 
         # Layers
         # Layers
-        self.layer1 = BlockTranspose(1, 2)
-        self.layer2 = BlockTranspose(2, 4)
-        self.layer3 = BlockTranspose(4, 8)
-        self.layer4 = BlockTranspose(8, 16)
-        self.layer5 = BlockTranspose(16, 32)
+        self.layer1 = Block(1, 2)
+        self.layer2 = Block(2, 4)
+        self.layer3 = Block(4, 8)
+        self.layer4 = Block(8, 16)
+        self.layer5 = Block(16, 32)
 
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
 
