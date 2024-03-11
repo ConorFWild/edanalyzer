@@ -79,7 +79,7 @@ class BlockTranspose(nn.Module):
 
     def forward(self, x):
         x = self.conv(x)
-        print(x.shape)
+        # print(x.shape)
         x = self.bn(x)
         x = self.relu(x)
         x = self.drop(x)
