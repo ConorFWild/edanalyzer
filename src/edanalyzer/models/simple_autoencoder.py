@@ -32,6 +32,13 @@ class SimpleConvolutionalEncoder(nn.Module):
         self.layers = [Block(2 ^ j, 2 ^ (j + 1)) for j in range(5)]
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
 
+        for m in self.modules():
+            if isinstance(m, nn.Conv3d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            elif isinstance(m, (nn.BatchNorm3d, nn.GroupNorm)):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+
     def forward(self, x):
         for layer in self.layers:
             x = layer(x)
@@ -71,6 +78,13 @@ class SimpleConvolutionalDecoder(nn.Module):
         # Layers
         self.layers = [BlockTranspose(2 ^ j, 2 ^ (j + 1)) for j in range(5)]
         # self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv3d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            elif isinstance(m, (nn.BatchNorm3d, nn.GroupNorm)):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
         for layer in self.layers:
