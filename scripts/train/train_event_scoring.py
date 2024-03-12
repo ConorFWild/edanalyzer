@@ -113,7 +113,7 @@ def main(config_path, batch_size=12, num_workers=None):
     dataset_train = DataLoader(
         EventScoringDataset(
             zarr_path,
-            negative_train_pose_idxs + positive_train_pose_idxs * (int(len(negative_train_pose_idxs) / len(positive_train_pose_idxs)))
+            negative_train_pose_idxs + (positive_train_pose_idxs * (int(len(negative_train_pose_idxs) / len(positive_train_pose_idxs))))
         ),
         batch_size=batch_size,
         shuffle=True,
