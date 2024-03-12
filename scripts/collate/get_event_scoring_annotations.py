@@ -88,7 +88,7 @@ def main(config_path):
 
     # Get the mapping from inspect table rows to database events
     database_event_idx_to_annotation = {}
-    for _row in combined_inspect_table.iterrows():
+    for _idx, _row in combined_inspect_table.iterrows():
         event_sample_idx = _row['dtag']
         database_event_idx = table_event_sample[event_sample_idx]['event_idx']
         database_event_idx_to_annotation[database_event_idx] = _row['Ligand Confidence']
