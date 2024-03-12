@@ -54,7 +54,7 @@ class EventScoringDataset(Dataset):
         assert sample_idx[1] == z_map_sample_idx
         # event_map_idx = pose_data['event_map_sample_idx']
 
-        pose_data_idx = z_map_sample_metadata['known_hit_pose_idx']
+        pose_data_idx = z_map_sample_metadata['pose_data_idx']
         if pose_data_idx != -1:
             pose_data = self.pose_table[pose_data_idx]
         else:
