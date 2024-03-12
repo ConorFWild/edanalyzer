@@ -43,6 +43,7 @@ def main(config_path, batch_size=12, num_workers=None):
         if table_type == 'normal':
             table_annotation = root['annotation']
             table_poses = root['known_hit_pose']
+            table_z_map_sample_metadata = root['z_map_sample_metadata']
         else:
             table_annotation = root.pandda_2_annotation
             table_poses = root.pandda_2_known_hit_pose
@@ -55,6 +56,13 @@ def main(config_path, batch_size=12, num_workers=None):
             in table_annotation.get_mask_selection(
                 (table_annotation['partition'] == b'train') & (table_annotation['annotation']))
         ])
+        train_database_event_idxs = set(
+            [
+                table_z_map_sample_metadata[_x]['event_idx']
+                for _x
+                in train_event_table_idxs
+            ]
+        )
         rprint(f'Getting idxs of valid test event maps...')
         test_event_table_idxs = set([
             _x['event_map_table_idx']
@@ -62,15 +70,28 @@ def main(config_path, batch_size=12, num_workers=None):
             in table_annotation.get_mask_selection(
                 (table_annotation['partition'] == b'test') & (table_annotation['annotation']))
         ])
+        test_database_event_idxs = set(
+            [
+                table_z_map_sample_metadata[_x]['event_idx']
+                for _x
+                in test_event_table_idxs
+            ]
+        )
+        exclude_idxs = set([
+            _x['event_map_table_idx']
+            for _x
+            in table_annotation.get_mask_selection(~table_annotation['annotation'])
+        ])
 
         #
 
         rprint(f"Filtering poses to those matching valid event maps...")
-        for row in table_poses:
-            pose_event_table_idx = row['event_map_sample_idx']
-            if pose_event_table_idx in train_event_table_idxs:
+        for row in table_z_map_sample_metadata:
+            # z_map_sample_metadata_idx = row['event_map_sample_idx']
+            database_event_idx = row['event_idx']
+            if database_event_idx in train_database_event_idxs:
                 train_pose_idxs.append((table_type, row['idx']))
-            elif pose_event_table_idx in test_event_table_idxs:
+            elif database_event_idx in test_database_event_idxs:
                 test_pose_idxs.append((table_type, row['idx']))
         rprint(f"\tGot {len(train_pose_idxs)} train samples")
         rprint(f"\tGot {len(test_pose_idxs)} test samples")
