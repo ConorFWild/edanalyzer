@@ -52,12 +52,15 @@ def main(config_path):
         ('event_map_table_idx', '<i4'),
         ('annotation', '?'),
         ('partition', 'S32')]
-    annotation_table = root.create_dataset(
-        'annotation',
-        shape=(0,),
-        chunks=(1,),
-        dtype=annotation_dtype
-    )
+    try:
+        annotation_table = root.create_dataset(
+            'annotation',
+            shape=(0,),
+            chunks=(1,),
+            dtype=annotation_dtype
+        )
+    except:
+        annotation_table = root['annotation']
     z_map_sample_metadata_table = root['z_map_sample_metadata']
     train_valid = [x['idx'] for x in
                    annotation_table.get_mask_selection((annotation_table['partition'] == 'train') & annotation_table['annotation'])]
