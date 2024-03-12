@@ -60,9 +60,11 @@ def main(config_path):
     )
     z_map_sample_metadata_table = root['z_map_sample_metadata']
     train_valid = [x['idx'] for x in
-                   annotation_table[(annotation_table['partition'] == 'train') & annotation_table['annotation']]]
-    test_valid = [x['idx'] for x in
-                  annotation_table[(annotation_table['partition'] == 'test') & annotation_table['annotation']]]
+                   annotation_table.get_mask_selection((annotation_table['partition'] == 'train') & annotation_table['annotation'])]
+    test_valid = [
+        x['idx']
+        for x
+        in annotation_table.get_mask_selection((annotation_table['partition'] == 'test') & annotation_table['annotation'])]
     rprint(f"Got {len(train_valid)} train datasets and {len(test_valid)} test datasets!")
 
     #
