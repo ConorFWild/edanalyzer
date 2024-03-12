@@ -58,10 +58,16 @@ class EventScoringDataset(Dataset):
         # event_map_idx = pose_data['event_map_sample_idx']
 
         pose_data_idx = z_map_sample_metadata['pose_data_idx']
+        rng = np.random.default_rng()
+        random_ligand = True
         if pose_data_idx != -1:
-            pose_data = self.pose_table[pose_data_idx]
+            random_ligand_sample = rng.rand()
+            if random_ligand_sample > 0.5:
+                random_ligand = False
+                pose_data = self.pose_table[pose_data_idx]
+            else:
+                pose_data = self.pose_table[rng.integers(0,len(self.pose_table))]
         else:
-            rng = np.random.default_rng()
             pose_data = self.pose_table[rng.integers(0,len(self.pose_table))]
         z_map_sample_data = self.z_map_sample_table[z_map_sample_idx]
         annotation = self.annotations[z_map_sample_metadata['event_idx']]
@@ -71,7 +77,6 @@ class EventScoringDataset(Dataset):
 
         # Subsample if training
         if annotation['partition'] == 'train':
-            rng = np.random.default_rng()
             translation = 3*(2*(rng.rand(3)-0.5))
             centroid = np.array([22.5,22.5,22.5]) + translation
 
@@ -145,10 +150,14 @@ class EventScoringDataset(Dataset):
         image_mol_float = image_mol.astype(np.float32)
 
         # Make the annotation
-        if annotation['annotation']:
+        if (pose_data_idx != -1) & (not random_ligand):
             hit = 1.0
-        else:
+        elif (pose_data_idx != -1) & (random_ligand):
             hit = 0.0
+        elif pose_data_idx == -1:
+            hit = 0.0
+        else:
+            raise Exception
 
         label = np.array(hit)
         label_float = label.astype(np.float32)
