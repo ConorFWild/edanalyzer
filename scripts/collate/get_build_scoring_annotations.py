@@ -42,7 +42,7 @@ def main(config_path):
 
     #
     # Open a file in "w"rite mode
-    fileh = tables.open_file("output/build_data_correlation.h5", mode="r+")
+    fileh = tables.open_file("output/build_data_correlation.h5", mode="r")
 
     # Get the HDF5 root group
     root = fileh.root

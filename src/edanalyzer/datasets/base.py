@@ -494,3 +494,35 @@ def _make_ligand_masked_dmap_layer(
     image_dmap = _sample_xmap_and_scale(masked_dmap, sample_transform, sample_array)
 
     return image_dmap
+
+
+def _get_res_from_arrays(positions, elements):
+    res = gemmi.Residue()
+    res.name = 'LIG'
+
+    for _pos, _element in zip(positions, elements):
+        if _element != 0:
+            pos = gemmi.Position(_pos[0], _pos[1], _pos[2])
+            if _element == 0:
+                continue
+
+            element = gemmi.Element(_element)
+            atom = gemmi.Atom()
+            atom.name = "CA"
+            atom.charge = 0
+            atom.pos = pos
+            atom.element = element
+            res.add_atom(atom)
+
+    return res
+
+def _get_grid_from_hdf5(event_map_data):
+    grid = gemmi.FloatGrid(90, 90, 90)
+    uc = gemmi.UnitCell(45.0, 45.0, 45.0, 90.0, 90.0, 90.0)
+    grid.set_unit_cell(uc)
+
+    grid_array = np.array(grid, copy=False)
+    grid_array[:, :, :] = (event_map_data['sample'])[:, :, :]
+
+    return grid
+
