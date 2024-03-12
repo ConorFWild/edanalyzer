@@ -10,8 +10,8 @@ import numpy as np
 import tables
 import zarr
 
-from edanalyzer.datasets.build_scoring import BuildScoringDatasetSyntheticCorrelationZarr
-from edanalyzer.models.build_scoring import LitBuildScoringCorrelation
+from edanalyzer.datasets.event_scoring import EventScoringDataset
+from edanalyzer.models.event_scoring import LitEventScoring
 from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 
 from lightning.pytorch.loggers import CSVLogger
@@ -32,9 +32,7 @@ def main(config_path, batch_size=12, num_workers=None):
     except Exception as e:
         print(f"Exception setting up database: {e}")
 
-    # fileh = tables.open_file("output/build_data_correlation.h5", mode="r")
-
-    zarr_path = 'output/build_data_correlation.zarr'
+    zarr_path = 'output/event_data.zarr'
     root = zarr.open(zarr_path, mode='r')
 
     # Get the HDF5 root group
@@ -55,7 +53,7 @@ def main(config_path, batch_size=12, num_workers=None):
             _x['event_map_table_idx']
             for _x
             in table_annotation.get_mask_selection(
-                (table_annotation['partition'] == b'train') & (table_annotation['annotation'])) #.where("""(partition == b'train') & (annotation)""")
+                (table_annotation['partition'] == b'train') & (table_annotation['annotation']))
         ])
         rprint(f'Getting idxs of valid test event maps...')
         test_event_table_idxs = set([

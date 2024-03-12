@@ -36,6 +36,7 @@ class EventScoringDataset(Dataset):
         self.pose_table = self.root['known_hit_pose']
         self.ligand_data_table = self.root['ligand_data']
         self.annotation_table = self.root['annotation']
+        self.annotations = {_x['event_map_table_idx']: _x for _x in self.annotation_table}
 
         self.sample_indexes = sample_indexes
 
@@ -47,63 +48,56 @@ class EventScoringDataset(Dataset):
         sample_idx = self.sample_indexes[idx]
 
         # Get the z map and pose
-        pose_data = self.pose_table[sample_idx[1]]
-        event_map_idx = pose_data['event_map_sample_idx']
-        mtz_map_data = self.mtz_map_table[event_map_idx]
-        annotation = self.annotation_table[event_map_idx]
+        z_map_sample_metadata = self.z_map_sample_metadata_table[sample_idx[1]]
+        z_map_sample_idx = z_map_sample_metadata['idx']
+        assert sample_idx == z_map_sample_idx
+        # event_map_idx = pose_data['event_map_sample_idx']
+
+        pose_data_idx = z_map_sample_metadata['known_hit_pose_idx']
+        if pose_data_idx != -1:
+            pose_data = self.pose_table[pose_data_idx]
+        else:
+            rng = np.random.default_rng()
+            pose_data = self.pose_table[rng.integers(0,len(self.pose_data_idx))]
+        z_map_sample_data = self.z_map_sample_table[z_map_sample_idx]
+        annotation = self.annotations[z_map_sample_idx]
 
         #
-        z_map = _get_grid_from_hdf5(mtz_map_data)
-
-        # Get the valid data
-        valid_mask = pose_data['elements'] != 0
-        valid_poss = pose_data['positions'][valid_mask]
-        valid_elements = pose_data['elements'][valid_mask]
+        z_map = _get_grid_from_hdf5(z_map_sample_data)
 
         # Subsample if training
         if annotation['partition'] == 'train':
             rng = np.random.default_rng()
-            num_centres = rng.integers(1, 5)
+            translation = 3*(2*(rng.rand(3)-0.5))
+            centroid = np.array([22.5,22.5,22.5]) + translation
 
-            # For each centre mask atoms close to it
-            total_mask = np.full(valid_elements.size, False)
-            for _centre in num_centres:
-                selected_atom = rng.integers(0, valid_elements.size)
-                poss_distances = valid_poss - valid_poss[selected_atom, :].reshape((1, 3))
-                close_mask = poss_distances[np.linalg.norm(poss_distances, axis=1) < 2.5]
-                total_mask[close_mask] = True
 
         else:
-            total_mask = np.full(valid_elements.size, True)
+            centroid = np.array([22.5,22.5,22.5])
 
-        residue = _get_res_from_arrays(valid_poss[total_mask], valid_elements[total_mask])
-
-        # residue = _get_res_from_hdf5(pose_data)
-
-        # Get the event from the database
-        # event = self.data[event_map_data['event_idx']]
-
-        # Get sampling transform for the event map
+        # Get sampling transform for the z map
         sample_array = np.zeros(
             (30, 30, 30),
             dtype=np.float32,
         )
         orientation = _get_random_orientation()
-        centroid = _get_centroid_from_res(residue)
         transform = _get_transform_from_orientation_centroid(
             orientation,
             centroid
         )
 
-        # Get the sampling transform for the reference event map
+        # Get the sampling transform for the ligand map
+        valid_mask = pose_data['elements'] != 0
+        valid_poss = pose_data['positions'][valid_mask]
+        valid_elements = pose_data['elements'][valid_mask]
         ligand_sample_array = np.zeros(
             (32, 32, 32),
             dtype=np.float32,
         )
         ligand_orientation = _get_random_orientation()
         transformed_residue = _get_res_from_arrays(
-            valid_poss[total_mask],
-            valid_elements[total_mask],
+            valid_poss,
+            valid_elements,
         )
 
         ligand_centroid = _get_centroid_from_res(transformed_residue)
@@ -155,4 +149,5 @@ class EventScoringDataset(Dataset):
         label = np.array(hit)
         label_float = label.astype(np.float32)
 
-        return sample_idx, torch.from_numpy(image_density_float), torch.from_numpy(image_mol_float), torch.from_numpy(label_float)
+        return sample_idx, torch.from_numpy(image_density_float), torch.from_numpy(image_mol_float), torch.from_numpy(
+            label_float)
