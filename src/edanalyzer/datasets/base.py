@@ -366,9 +366,9 @@ def _combine_transforms(new_transform, old_transform):
     return combined_transform
 
 
-def _get_transform_from_orientation_centroid(orientation, centroid):
+def _get_transform_from_orientation_centroid(orientation, centroid, n):
     sample_distance: float = 0.5
-    n: int = 30
+    # n: int = 30
     # translation: float):
 
     # Get basic sample grid transform

@@ -30,10 +30,14 @@ class LitBuildScoring(lt.LightningModule):
 class LitEventScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
-        self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
+        # self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
+        self.resnet = SimpleConvolutionalEncoder()
+
         self.mol_encoder = SimpleConvolutionalEncoder()
         self.mol_decoder = SimpleConvolutionalDecoder()
-        self.fc = nn.Linear(512 + 32, 1)
+        # self.fc = nn.Linear(512 + 32, 1)
+        self.fc = nn.Linear(32 + 32, 1)
+
         self.train_annotations = []
         self.test_annotations = []
         self.output = Path('./output/event_scoring')

@@ -92,19 +92,21 @@ class EventScoringDataset(Dataset):
 
         # Get sampling transform for the z map
         sample_array = np.zeros(
-            (30, 30, 30),
+            (32, 32, 32),
             dtype=np.float32,
         )
         orientation = _get_random_orientation()
         transform = _get_transform_from_orientation_centroid(
             orientation,
-            centroid
+            centroid,
+            n=32
         )
 
         # Get the sampling transform for the ligand map
         valid_mask = pose_data['elements'] != 0
         valid_poss = pose_data['positions'][valid_mask]
         valid_elements = pose_data['elements'][valid_mask]
+
         # Subsample if training
         if annotation['partition'] == 'train':
             rng = np.random.default_rng()
@@ -134,7 +136,8 @@ class EventScoringDataset(Dataset):
         ligand_centroid = _get_centroid_from_res(transformed_residue)
         ligand_map_transform = _get_transform_from_orientation_centroid(
             ligand_orientation,
-            ligand_centroid
+            ligand_centroid,
+            n=32
         )
 
         # Get sample images
