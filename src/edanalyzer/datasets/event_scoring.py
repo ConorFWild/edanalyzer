@@ -58,19 +58,21 @@ class EventScoringDataset(Dataset):
         # event_map_idx = pose_data['event_map_sample_idx']
 
         pose_data_idx = z_map_sample_metadata['pose_data_idx']
+
+        z_map_sample_data = self.z_map_sample_table[z_map_sample_idx]
+        annotation = self.annotations[z_map_sample_metadata['event_idx']]
+
         rng = np.random.default_rng()
         random_ligand = True
         if pose_data_idx != -1:
             random_ligand_sample = rng.random()
-            if random_ligand_sample > 0.5:
+            if (random_ligand_sample > 0.5) & (annotation['partition'] == 'train'):
                 random_ligand = False
                 pose_data = self.pose_table[pose_data_idx]
             else:
-                pose_data = self.pose_table[rng.integers(0,len(self.pose_table))]
+                pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
         else:
-            pose_data = self.pose_table[rng.integers(0,len(self.pose_table))]
-        z_map_sample_data = self.z_map_sample_table[z_map_sample_idx]
-        annotation = self.annotations[z_map_sample_metadata['event_idx']]
+            pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
 
         #
         z_map = _get_grid_from_hdf5(z_map_sample_data)
