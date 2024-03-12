@@ -50,8 +50,8 @@ class EventScoringDataset(Dataset):
         # Get the z map and pose
         z_map_sample_metadata = self.z_map_sample_metadata_table[sample_idx[1]]
         z_map_sample_idx = z_map_sample_metadata['idx']
-        print([sample_idx, z_map_sample_idx])
-        assert sample_idx == z_map_sample_idx
+        # print([sample_idx, z_map_sample_idx])
+        assert sample_idx[1] == z_map_sample_idx
         # event_map_idx = pose_data['event_map_sample_idx']
 
         pose_data_idx = z_map_sample_metadata['known_hit_pose_idx']
