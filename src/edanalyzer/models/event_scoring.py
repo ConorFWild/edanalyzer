@@ -61,7 +61,7 @@ class LitEventScoring(lt.LightningModule):
         mol_decoding = self.mol_decoder(mol_encoding)
         density_encoding = self.resnet(x)
         full_encoding = torch.cat([density_encoding, mol_encoding], dim=1)
-        score = self.fc(full_encoding)
+        score = F.sigmoid(self.fc(full_encoding))
         loss_1 = F.mse_loss(score, y)
         loss_2 = F.mse_loss(mol_decoding, m)
         total_loss = loss_1 + loss_2
@@ -87,7 +87,7 @@ class LitEventScoring(lt.LightningModule):
         mol_encoding = self.mol_encoder(m)
         density_encoding = self.resnet(x)
         full_encoding = torch.cat([density_encoding, mol_encoding], dim=1)
-        score = self.fc(full_encoding)
+        score = F.sigmoid(self.fc(full_encoding))
         loss = F.mse_loss(score, y)
         self.log('test_loss', loss)
 
