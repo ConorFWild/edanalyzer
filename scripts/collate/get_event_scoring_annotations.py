@@ -131,12 +131,14 @@ def main(config_path):
 
             # Update
             annotation_sample = np.array(
-                (
+                [
+                    (
                     annotation_idx,
                     z_map_sample_metadata['idx'],
                     annotation_bool,
                     partition
-                ),
+                    )
+                ],
                 dtype=annotation_dtype
             )
             annotation_table.append(annotation_sample)
