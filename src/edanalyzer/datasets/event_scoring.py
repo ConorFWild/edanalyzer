@@ -36,7 +36,7 @@ class EventScoringDataset(Dataset):
         self.pose_table = self.root['known_hit_pose']
         self.ligand_data_table = self.root['ligand_data']
         self.annotation_table = self.root['annotation']
-        self.annotations = {_x['event_map_table_idx']: _x for _x in self.annotation_table}
+        self.annotations = {_x['event_map_table_idx']['event_idx']: _x for _x in self.annotation_table}
 
         self.sample_indexes = sample_indexes
 
@@ -61,7 +61,7 @@ class EventScoringDataset(Dataset):
             rng = np.random.default_rng()
             pose_data = self.pose_table[rng.integers(0,len(self.pose_table))]
         z_map_sample_data = self.z_map_sample_table[z_map_sample_idx]
-        annotation = self.annotations[z_map_sample_idx]
+        annotation = self.annotations[z_map_sample_metadata['event_idx']]
 
         #
         z_map = _get_grid_from_hdf5(z_map_sample_data)
