@@ -138,7 +138,7 @@ class EventScoringDataset(Dataset):
 
         image_mol = np.stack(
             [
-                z_map_sample,
+                image_ligand_mask,
             ],
             axis=0
         )
