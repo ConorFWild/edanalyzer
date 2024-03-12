@@ -98,6 +98,13 @@ def main(config_path, batch_size=12, num_workers=None):
     rprint(f"Got {len(train_pose_idxs)} train samples")
     rprint(f"Got {len(test_pose_idxs)} test samples")
 
+    positive_train_pose_idxs = [_x for _x in train_pose_idxs if table_z_map_sample_metadata[_x[1]]['pose_data_idx'] != -1]
+    negative_train_pose_idxs = [_x for _x in train_pose_idxs if
+                                table_z_map_sample_metadata[_x[1]]['pose_data_idx'] == -1]
+
+    rprint(f"Got {len(positive_train_pose_idxs)} postivie train samples")
+    rprint(f"Got {len(negative_train_pose_idxs)} negative test samples")
+
 
     # Get the dataset
 
@@ -106,7 +113,7 @@ def main(config_path, batch_size=12, num_workers=None):
     dataset_train = DataLoader(
         EventScoringDataset(
             zarr_path,
-            train_pose_idxs
+            negative_train_pose_idxs + positive_train_pose_idxs * (int(len(negative_train_pose_idxs) / len(positive_train_pose_idxs)))
         ),
         batch_size=batch_size,
         shuffle=True,

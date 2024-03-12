@@ -62,17 +62,21 @@ class EventScoringDataset(Dataset):
         z_map_sample_data = self.z_map_sample_table[z_map_sample_idx]
         annotation = self.annotations[z_map_sample_metadata['event_idx']]
 
+        # If training replace with a random ligand
         rng = np.random.default_rng()
-        random_ligand = True
+        # random_ligand = True
         if pose_data_idx != -1:
-            random_ligand_sample = rng.random()
-            if (random_ligand_sample > 0.5) & (annotation['partition'] == 'train'):
-                random_ligand = False
-                pose_data = self.pose_table[pose_data_idx]
-            else:
-                pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
+            # random_ligand_sample = rng.random()
+            # if (random_ligand_sample > 0.5) & (annotation['partition'] == 'train'):
+            #     random_ligand = False
+            #     pose_data = self.pose_table[pose_data_idx]
+            # else:
+            #     pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
+            pose_data = self.pose_table[pose_data_idx]
         else:
             pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
+
+
 
         #
         z_map = _get_grid_from_hdf5(z_map_sample_data)
@@ -101,14 +105,30 @@ class EventScoringDataset(Dataset):
         valid_mask = pose_data['elements'] != 0
         valid_poss = pose_data['positions'][valid_mask]
         valid_elements = pose_data['elements'][valid_mask]
+        # Subsample if training
+        if annotation['partition'] == 'train':
+            rng = np.random.default_rng()
+            num_centres = rng.integers(1, 3)
+
+            # For each centre mask atoms close to it
+            total_mask = np.full(valid_elements.size, False)
+            for _centre in num_centres:
+                selected_atom = rng.integers(0, valid_elements.size)
+                poss_distances = valid_poss - valid_poss[selected_atom, :].reshape((1, 3))
+                close_mask = poss_distances[np.linalg.norm(poss_distances, axis=1) < 3.5]
+                total_mask[close_mask] = True
+
+        else:
+            total_mask = np.full(valid_elements.size, True)
+
         ligand_sample_array = np.zeros(
             (32, 32, 32),
             dtype=np.float32,
         )
         ligand_orientation = _get_random_orientation()
         transformed_residue = _get_res_from_arrays(
-            valid_poss,
-            valid_elements,
+            valid_poss[total_mask],
+            valid_elements[total_mask],
         )
 
         ligand_centroid = _get_centroid_from_res(transformed_residue)
@@ -152,10 +172,12 @@ class EventScoringDataset(Dataset):
         image_mol_float = image_mol.astype(np.float32)
 
         # Make the annotation
-        if (pose_data_idx != -1) & (not random_ligand):
+        # if (pose_data_idx != -1) & (not random_ligand):
+        #     hit = 1.0
+        # elif (pose_data_idx != -1) & (random_ligand):
+        #     hit = 0.0
+        if pose_data_idx != -1:
             hit = 1.0
-        elif (pose_data_idx != -1) & (random_ligand):
-            hit = 0.0
         elif pose_data_idx == -1:
             hit = 0.0
         else:
