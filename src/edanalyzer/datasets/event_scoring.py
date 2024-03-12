@@ -59,7 +59,7 @@ class EventScoringDataset(Dataset):
             pose_data = self.pose_table[pose_data_idx]
         else:
             rng = np.random.default_rng()
-            pose_data = self.pose_table[rng.integers(0,len(self.pose_data_idx))]
+            pose_data = self.pose_table[rng.integers(0,len(self.pose_table))]
         z_map_sample_data = self.z_map_sample_table[z_map_sample_idx]
         annotation = self.annotations[z_map_sample_idx]
 
