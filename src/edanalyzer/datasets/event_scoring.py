@@ -61,7 +61,7 @@ class EventScoringDataset(Dataset):
         rng = np.random.default_rng()
         random_ligand = True
         if pose_data_idx != -1:
-            random_ligand_sample = rng.rand()
+            random_ligand_sample = rng.random()
             if random_ligand_sample > 0.5:
                 random_ligand = False
                 pose_data = self.pose_table[pose_data_idx]
@@ -77,7 +77,7 @@ class EventScoringDataset(Dataset):
 
         # Subsample if training
         if annotation['partition'] == 'train':
-            translation = 3*(2*(rng.rand(3)-0.5))
+            translation = 3*(2*(rng.random(3)-0.5))
             centroid = np.array([22.5,22.5,22.5]) + translation
 
 
