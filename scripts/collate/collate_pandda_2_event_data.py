@@ -106,7 +106,7 @@ def main(config_path):
                 # Unpack the row information
                 dtag, event_idx, bdc, conf = _row['dtag'], _row['event_idx'], _row['1-BDC'], _row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
 
-                rprint(f'\tProcessing event: {dtag} {event_idx}')
+                rprint(f'\tProcessing event: {dtag} {event_idx} {conf}')
 
                 if conf == 'Medium':
                     rprint(f'\t\tAmbiguous event! Skipping!')
@@ -153,6 +153,7 @@ def main(config_path):
                     )
                     if not ligand_data_sample:
                         rprint(f'\t\tNO LIGAND DATA! SKIPPING!')
+                        continue
 
                 # Get the annotation data
                 annotation_sample = _get_annotation_sample_from_dataset_dir(
