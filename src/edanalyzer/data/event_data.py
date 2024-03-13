@@ -140,7 +140,7 @@ def _get_closest_hit(centroid, hits):
         distance = np.linalg.norm(centroid - res_centroid)
         distances[resid] = distance
 
-    closest_resid = min(distances, key=lambda _x: distance[_x])
+    closest_resid = min(distances, key=lambda _x: distances[_x])
     return closest_resid, distances[closest_resid]
 
 
