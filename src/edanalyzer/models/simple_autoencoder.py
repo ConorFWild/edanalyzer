@@ -87,11 +87,13 @@ class BlockTranspose(nn.Module):
 
 
 class SimpleConvolutionalDecoder(nn.Module):
-    def __init__(self):
+    def __init__(self, input_layers=32):
         super(SimpleConvolutionalDecoder, self).__init__()
 
+        self.input_layers = input_layers
+
         # Layers
-        self.layer1 = BlockTranspose(32, 16)
+        self.layer1 = BlockTranspose(input_layers, 16)
         self.layer2 = BlockTranspose(16, 8)
         self.layer3 = BlockTranspose(8, 4)
         self.layer4 = BlockTranspose(4, 2)
@@ -109,7 +111,7 @@ class SimpleConvolutionalDecoder(nn.Module):
 
     def forward(self, x):
         # for layer in self.layers:
-        x = x.view(-1, 32, 1, 1, 1)
+        x = x.view(-1, self.input_layers, 1, 1, 1)
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)

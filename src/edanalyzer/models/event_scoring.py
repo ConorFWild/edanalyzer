@@ -35,14 +35,15 @@ class LitEventScoring(lt.LightningModule):
 
         self.mol_encoder = SimpleConvolutionalEncoder()
         self.mol_decoder = SimpleConvolutionalDecoder()
+        self.density_decoder = SimpleConvolutionalDecoder(input_layers=64)
         # self.fc = nn.Linear(512 + 32, 1)
         self.fc = nn.Linear(32 + 32, 1)
 
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_small')
+        self.output = Path('./output/event_scoring_density_decode')
 
-    def forward(self, x, m):
+    def forward(self, x, m, d):
         mol_encoding = self.mol_encoder(m)
         density_encoding = self.resnet(x)
         full_encoding = torch.cat([density_encoding, mol_encoding], dim=1)
@@ -55,16 +56,18 @@ class LitEventScoring(lt.LightningModule):
         return optimizer
 
     def training_step(self, train_batch, batch_idx):
-        idx, x, m, y = train_batch
+        idx, x, m, d, y = train_batch
         y = y.view(y.size(0), -1)
         mol_encoding = self.mol_encoder(m)
-        mol_decoding = self.mol_decoder(mol_encoding)
+        mol_decoding = F.sigmoid( self.mol_decoder(mol_encoding))
         density_encoding = self.resnet(x)
         full_encoding = torch.cat([density_encoding, mol_encoding], dim=1)
+        density_decoding = F.sigmoid(self.density_decoder(full_encoding))
         score = F.sigmoid(self.fc(full_encoding))
         loss_1 = F.mse_loss(score, y)
         loss_2 = F.mse_loss(mol_decoding, m)
-        total_loss = loss_1 + loss_2
+        loss_3 = F.mse_loss(density_decoding, d)
+        total_loss = loss_1 + loss_2 + loss_3
 
         self.log('train_loss', loss_1)
 
@@ -82,7 +85,7 @@ class LitEventScoring(lt.LightningModule):
         return total_loss
 
     def validation_step(self, test_batch, batch_idx):
-        idx, x, m, y = test_batch
+        idx, x, m, d, y = test_batch
         y = y.view(y.size(0), -1)
         mol_encoding = self.mol_encoder(m)
         density_encoding = self.resnet(x)

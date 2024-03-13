@@ -86,7 +86,6 @@ class EventScoringDataset(Dataset):
             translation = 3*(2*(rng.random(3)-0.5))
             centroid = np.array([22.5,22.5,22.5]) + translation
 
-
         else:
             centroid = np.array([22.5,22.5,22.5])
 
@@ -140,6 +139,7 @@ class EventScoringDataset(Dataset):
             n=32
         )
 
+
         # Get sample images
         z_map_sample = _sample_xmap_and_scale(
             z_map,
@@ -156,6 +156,13 @@ class EventScoringDataset(Dataset):
 
         image_ligand_mask[image_ligand_mask < 0.9] = 0.0
         image_ligand_mask[image_ligand_mask >= 0.9] = 1.0
+
+        decoded_density_grid = _get_ligand_mask_float(z_map, transformed_residue)
+        image_decoded_density = _sample_xmap(
+            decoded_density_grid,
+            transform,
+            np.copy(sample_array)
+        )
 
         # Make the image
         image_density = np.stack(
@@ -174,6 +181,14 @@ class EventScoringDataset(Dataset):
         )
         image_mol_float = image_mol.astype(np.float32)
 
+        image_decoded_density = np.stack(
+            [
+                image_decoded_density,
+            ],
+            axis=0
+        )
+        image_decoded_density_float = image_decoded_density.astype(np.float32)
+
         # Make the annotation
         # if (pose_data_idx != -1) & (not random_ligand):
         #     hit = 1.0
@@ -189,5 +204,5 @@ class EventScoringDataset(Dataset):
         label = np.array(hit)
         label_float = label.astype(np.float32)
 
-        return sample_idx, torch.from_numpy(image_density_float), torch.from_numpy(image_mol_float), torch.from_numpy(
+        return sample_idx, torch.from_numpy(image_density_float), torch.from_numpy(image_mol_float), torch.from_numpy(image_decoded_density_float), torch.from_numpy(
             label_float)
