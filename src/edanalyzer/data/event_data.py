@@ -167,7 +167,7 @@ def _get_closest_res_from_dataset_dir(
     st_path = _get_most_recent_modelled_structure_from_dataset_dir(dataset_dir)
     st = _get_structure_from_path(st_path)
     hits = _get_st_hits(st)
-    closest_hit_resid, distance = _get_closest_hit(np.array(x, y, z), hits)
+    closest_hit_resid, distance = _get_closest_hit(np.array([x, y, z]), hits)
 
     return closest_hit_resid, hits[closest_hit_resid], distance
 
