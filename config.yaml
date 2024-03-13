@@ -52,7 +52,7 @@ test:
 #    - MRE11AA
 #    - SETDB1
 #    - NSP15_B
-#    - BAZ2BA
+    - BAZ2BA
 #    - PTP1B
 #    - JMJD2DA
 #    - BRD1A
