@@ -89,10 +89,13 @@ def main(config_path):
             # Skip if not a directory
             if not pandda_dir.is_dir():
                 continue
+            rprint(f'PanDDA dir is: {pandda_dir}')
 
             # Skip if no inspect table
             pandda_inspect_table = pandda_dir / 'analyses' / 'pandda_inspect_events.csv'
             if not pandda_inspect_table.exists():
+                rprint(f'\tNO INSPECT TABLE! SKIPPING!')
+
                 continue
 
             # Get the inspect table
@@ -102,6 +105,8 @@ def main(config_path):
             for _idx, _row in inspect_table.iterrows():
                 # Unpack the row information
                 dtag, event_idx, bdc, conf = _row['dtag'], _row['event_idx'], _row['1-BDC'], _row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
+
+                rprint(f'\tProcessing event: {dtag} {event_idx}')
 
                 if conf == 'Medium':
                     rprint(f'Ambiguous event! Skipping!')
