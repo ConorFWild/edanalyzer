@@ -85,7 +85,7 @@ def main(config_path):
         idx_pose = 0
         idx_ligand_data = 0
         annotation_idx = 0
-        for pandda_dir in Path('..').glob('*'):
+        for pandda_dir in Path('output/panddas_new_score').glob('*'):
             # Skip if not a directory
             if not pandda_dir.is_dir():
                 continue
