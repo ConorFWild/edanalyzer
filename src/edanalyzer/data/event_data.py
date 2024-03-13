@@ -147,6 +147,7 @@ def _get_closest_hit(centroid, hits):
 def _get_most_recent_modelled_structure_from_dataset_dir(dataset_dir):
     model_dir = dataset_dir / PANDDA_INSPECT_MODEL_DIR
     model_paths = {}
+    print(dataset_dir)
     for path in model_dir.glob('*'):
         fitted_model_regex = 'fitted-v([0-9]*).pdb'
         match = re.match(fitted_model_regex, path.name)
