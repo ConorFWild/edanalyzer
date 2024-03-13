@@ -479,7 +479,7 @@ def _get_known_hit_poses(
     return poses, [atom_array] * 6, [elements_array] * 6 * num_poses, rmsds
 
 def _get_lig_block_from_path(path):
-    cif = gemmi.cif.read(str(path))
+    cif = gemmi.cif.read(str(path.resolve()))
 
     key = "comp_LIG"
     try:
