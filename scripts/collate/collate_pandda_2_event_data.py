@@ -61,6 +61,10 @@ def main(config_path):
     root = zarr.open(zarr_path, mode='a')
 
     #
+    try:
+        del root['pandda_2']
+    except:
+        rprint(f'No PanDDA 2 group!')
     pandda_2_group = root.create_group('pandda_2')
 
     # Create 2 new tables in group1
