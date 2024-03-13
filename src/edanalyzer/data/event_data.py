@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 import gemmi
 from numcodecs import Blosc, Delta
@@ -143,7 +145,18 @@ def _get_closest_hit(centroid, hits):
 
 
 def _get_most_recent_modelled_structure_from_dataset_dir(dataset_dir):
-    ...
+    model_dir = ...
+    model_paths = {}
+    for path in model_dir.glob('*'):
+        fitted_model_regex = 'fitted-v([0-9]*).pdb'
+        match = re.match(fitted_model_regex, path.name)
+
+        if match:
+            model_paths[int(match[1])] = path
+        else:
+            model_paths[0] = path
+
+    return model_paths[max(model_paths)]
 
 
 def _get_closest_res_from_dataset_dir(
