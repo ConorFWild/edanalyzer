@@ -255,18 +255,20 @@ def _get_pose_sample_from_dataset_dir(
 
 def _get_ligand_data_sample_from_dataset_dir(dataset_dir, res, idx_ligand_data):
     compound_dir = dataset_dir / 'ligand_files'
-    print(f'COMPOUND DIR: {compound_dir}')
 
     # Get the associated ligand data
-    matched_cifs = _get_matched_cifs_from_dir(
-        res,
-        compound_dir,
+    try:
+        matched_cifs = _get_matched_cifs_from_dir(
+            res,
+            compound_dir,
 
-    )
+        )
+    except:
+        return None
 
     if len(matched_cifs) == 0:
         # rprint(f'NO MATCHED LIGAND DATA!!!!!!')
-        return
+        return None
 
     matched_cif = matched_cifs[0]
 

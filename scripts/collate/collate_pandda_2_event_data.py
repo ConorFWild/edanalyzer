@@ -151,6 +151,8 @@ def main(config_path):
                         res,
                         idx_ligand_data,
                     )
+                    if not ligand_data_sample:
+                        rprint(f'\t\tNO LIGAND DATA! SKIPPING!')
 
                 # Get the annotation data
                 annotation_sample = _get_annotation_sample_from_dataset_dir(
