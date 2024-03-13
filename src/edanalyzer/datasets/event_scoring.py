@@ -158,14 +158,15 @@ class EventScoringDataset(Dataset):
         image_ligand_mask[image_ligand_mask >= 0.9] = 1.0
 
         if pose_data_idx != -1:
-
             image_decoded_density = _sample_xmap(
                 ligand_mask_grid,
                 transform,
                 np.copy(sample_array)
             )
-        else:
+        elif pose_data_idx == -1:
             image_decoded_density = np.copy(sample_array)
+        else:
+            raise Exception
 
         # Make the image
         image_density = np.stack(
