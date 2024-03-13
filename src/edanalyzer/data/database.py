@@ -9,7 +9,6 @@ from scipy.spatial.transform import Rotation as R
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-
 from edanalyzer import constants
 
 
@@ -346,11 +345,11 @@ def _get_st_hits(structure):
                     hits[f"{chain.name}_{res.seqid.num}"] = res
     return hits
 
+
 def _get_known_hits(known_hit_structures):
     centroids = {}
     for structure_key, structure in known_hit_structures.items():
         centroids[structure_key] = _get_st_hits(structure)
-
 
     return centroids
 
@@ -478,6 +477,7 @@ def _get_known_hit_poses(
 
     return poses, [atom_array] * 6, [elements_array] * 6 * num_poses, rmsds
 
+
 def _get_lig_block_from_path(path):
     cif = gemmi.cif.read(str(path.resolve()))
 
@@ -496,7 +496,8 @@ def _get_lig_block_from_path(path):
                 rprint(path)
     return cif[key]
 
-def  _match_atoms(atom_name_array, block):
+
+def _match_atoms(atom_name_array, block):
     atom_id_loop = list(block.find_loop('_chem_comp_atom.atom_id'))
     atom_element_loop = list(block.find_loop('_chem_comp_atom.type_symbol'))
     # rprint(atom_id_loop)
@@ -517,23 +518,25 @@ def  _match_atoms(atom_name_array, block):
                 match[_j] = _k
 
     if len(match) != len(filtered_atom_id_loop):
-        rprint(f"Only partial match {len(match)} / {len(filtered_atom_id_loop)}! Skipping!" )
+        rprint(f"Only partial match {len(match)} / {len(filtered_atom_id_loop)}! Skipping!")
         return None
 
     else:
         return match
 
+
 def _get_cif_paths_from_dir(dtag_dir):
     cif_paths = [x for x in dtag_dir.glob('*.cif') if x.stem not in constants.LIGAND_IGNORE_REGEXES]
     return cif_paths
 
-def _get_event_cifs(event):
 
+def _get_event_cifs(event):
     dtag_dir = Path(event.pandda.path) / 'processed_datasets' / event.dtag / 'ligand_files'
     cif_paths = _get_cif_paths_from_dir(dtag_dir)
     # rprint(f'Got {len(cif_paths)} ligand cif paths!')
 
     return cif_paths
+
 
 def _get_matched_cifs(cif_paths, known_hit_residue):
     atom_name_array = [atom.name for atom in known_hit_residue.first_conformer() if atom.element.name != 'H']
@@ -546,29 +549,27 @@ def _get_matched_cifs(cif_paths, known_hit_residue):
             matched_paths.append((_cif_path, block, match))
     return matched_paths
 
-def _get_matched_cifs_from_event(
-            known_hit_residue,
-            event,
-    ):
 
+def _get_matched_cifs_from_event(
+        known_hit_residue,
+        event,
+):
     cif_paths = _get_event_cifs(event)
 
     matched_paths = _get_matched_cifs(cif_paths, known_hit_residue)
 
     return matched_paths
 
-def _get_matched_cifs_from_dir(
-            known_hit_residue,
-            compound_dir,
-    ):
 
+def _get_matched_cifs_from_dir(
+        known_hit_residue,
+        compound_dir,
+):
     cif_paths = _get_cif_paths_from_dir(compound_dir)
 
     matched_paths = _get_matched_cifs(cif_paths, known_hit_residue)
 
     return matched_paths
-
-
 
 
 bond_type_cif_to_rdkit = {
@@ -640,9 +641,6 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     aromatic_bond_loop = list(cif[key].find_loop('_chem_comp_bond.aromatic'))
     if not aromatic_bond_loop:
         aromatic_bond_loop = [None] * len(bond_1_id_loop)
-
-
-
 
     try:
         # Iteratively add the relevant bonds
@@ -759,16 +757,19 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
     # Chem.SanitizeMol(new_mol)
     return new_mol
 
+
 def _get_smiles(matched_cif):
     mol = get_fragment_mol_from_dataset_cif_path(matched_cif[0])
     smiles = Chem.MolToSmiles(mol)
     return smiles
 
+
 def _get_atom_ids(matched_cif):
     atom_ids = list(matched_cif[1].find_loop('_chem_comp_atom.atom_id'))
-    atom_types =  list(matched_cif[1].find_loop('_chem_comp_atom.type_symbol'))
+    atom_types = list(matched_cif[1].find_loop('_chem_comp_atom.type_symbol'))
 
     return [_x for _x, _y in zip(atom_ids, atom_types) if _y != 'H']
+
 
 def _get_connectivity(matched_cif):
     atom_id_array = _get_atom_ids(matched_cif)

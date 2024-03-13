@@ -109,7 +109,7 @@ def main(config_path):
                 rprint(f'\tProcessing event: {dtag} {event_idx}')
 
                 if conf == 'Medium':
-                    rprint(f'Ambiguous event! Skipping!')
+                    rprint(f'\t\tAmbiguous event! Skipping!')
                     continue
 
                 x, y, z = _row['x'], _row['y'], _row['z']
