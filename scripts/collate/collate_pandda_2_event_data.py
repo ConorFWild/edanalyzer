@@ -101,7 +101,7 @@ def main(config_path):
             # Iterate the inspect table
             for _idx, _row in inspect_table.iterrows():
                 # Unpack the row information
-                dtag, event_idx, bdc, conf = _row['dtag'], _row['event_idx'], _row['1-BDC'], _row['Hit Confidence']
+                dtag, event_idx, bdc, conf = _row['dtag'], _row['event_idx'], _row['1-BDC'], _row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
 
                 if conf == 'Medium':
                     rprint(f'Ambiguous event! Skipping!')
