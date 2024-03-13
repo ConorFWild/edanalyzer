@@ -337,15 +337,20 @@ def _get_known_hit_structures(
     return known_hit_structures
 
 
+def _get_st_hits(structure):
+    hits = {}
+    for model in structure:
+        for chain in model:
+            for res in chain.first_conformer():
+                if res.name in ["LIG", "XXX"]:
+                    hits[f"{chain.name}_{res.seqid.num}"] = res
+    return hits
+
 def _get_known_hits(known_hit_structures):
     centroids = {}
     for structure_key, structure in known_hit_structures.items():
-        centroids[structure_key] = {}
-        for model in structure:
-            for chain in model:
-                for res in chain.first_conformer():
-                    if res.name in ["LIG", "XXX"]:
-                        centroids[structure_key][f"{chain.name}_{res.seqid.num}"] = res
+        centroids[structure_key] = _get_st_hits(structure)
+
 
     return centroids
 
@@ -518,24 +523,20 @@ def  _match_atoms(atom_name_array, block):
     else:
         return match
 
-
+def _get_cif_paths_from_dir(dtag_dir):
+    cif_paths = [x for x in dtag_dir.glob('*.cif') if x.stem not in constants.LIGAND_IGNORE_REGEXES]
+    return cif_paths
 
 def _get_event_cifs(event):
 
     dtag_dir = Path(event.pandda.path) / 'processed_datasets' / event.dtag / 'ligand_files'
-    cif_paths = [x for x in dtag_dir.glob('*.cif') if x.stem not in constants.LIGAND_IGNORE_REGEXES]
-    rprint(f'Got {len(cif_paths)} ligand cif paths!')
+    cif_paths = _get_cif_paths_from_dir(dtag_dir)
+    # rprint(f'Got {len(cif_paths)} ligand cif paths!')
 
     return cif_paths
 
-def _get_matched_cifs(
-            known_hit_residue,
-            event,
-    ):
+def _get_matched_cifs(cif_paths, known_hit_residue):
     atom_name_array = [atom.name for atom in known_hit_residue.first_conformer() if atom.element.name != 'H']
-
-    cif_paths = _get_event_cifs(event)
-
     matched_paths = []
     for _cif_path in cif_paths:
         block = _get_lig_block_from_path(_cif_path)
@@ -543,8 +544,31 @@ def _get_matched_cifs(
 
         if match:
             matched_paths.append((_cif_path, block, match))
+    return matched_paths
+
+def _get_matched_cifs_from_event(
+            known_hit_residue,
+            event,
+    ):
+
+    cif_paths = _get_event_cifs(event)
+
+    matched_paths = _get_matched_cifs(cif_paths, known_hit_residue)
 
     return matched_paths
+
+def _get_matched_cifs_from_dir(
+            known_hit_residue,
+            compound_dir,
+    ):
+
+    cif_paths = _get_cif_paths_from_dir(compound_dir)
+
+    matched_paths = _get_matched_cifs(cif_paths, known_hit_residue)
+
+    return matched_paths
+
+
 
 
 bond_type_cif_to_rdkit = {

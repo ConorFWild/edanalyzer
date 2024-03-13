@@ -30,47 +30,14 @@ from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_syste
     _get_atom_ids, _get_connectivity
 from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM, AutobuildORM
+from edanalyzer.data.event_data import _get_close_events
 
 from pandda_gemmi.event_model.cluster import ClusterDensityDBSCAN
 from pandda_gemmi.alignment import Alignment, DFrame
 from pandda_gemmi.dataset import XRayDataset, StructureArray, Structure
 
 
-def _get_close_distances(known_hit_centroid,
-                         experiment_hit_results):
-    distances = {}
-    for j, res in enumerate(experiment_hit_results):
-        if not [x for x in res[0].annotations][0]:
-            continue
-        centroid = np.array([res[0].x, res[0].y, res[0].z])
 
-        distance = np.linalg.norm(centroid - known_hit_centroid)
-        distances[j] = distance
-    return distances
-
-
-def _get_close_events(
-        known_hit_centroid,
-        experiment_hit_results,
-        delta=5.0
-):
-    distances = _get_close_distances(known_hit_centroid, experiment_hit_results)
-    # rprint(distances)
-    close_events = []
-    for j, dist in distances.items():
-        if dist < delta:
-            close_events.append(experiment_hit_results[j])
-
-    return close_events
-
-
-def _get_closest_event(
-        known_hit_centroid,
-        experiment_hit_results
-):
-    distances = _get_close_distances(known_hit_centroid, experiment_hit_results)
-
-    return experiment_hit_results[min(distances, key=lambda _j: distances[_j])]
 
 
 def main(config_path):
