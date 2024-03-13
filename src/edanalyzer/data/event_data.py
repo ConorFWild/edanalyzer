@@ -7,7 +7,7 @@ from numcodecs import Blosc, Delta
 from .database import _get_st_hits, _res_to_array, _get_matched_cifs_from_dir, _get_smiles, \
     _get_atom_ids, _get_connectivity, _get_system_from_dtag
 from ..datasets.base import _get_structure_from_path, _load_xmap_from_path, _sample_xmap_and_scale
-from ..constants import PANDDA_ZMAP_TEMPLATE
+from ..constants import PANDDA_ZMAP_TEMPLATE, PANDDA_INSPECT_MODEL_DIR
 
 z_map_sample_metadata_dtype = [
     ('idx', '<i4'),
@@ -145,7 +145,7 @@ def _get_closest_hit(centroid, hits):
 
 
 def _get_most_recent_modelled_structure_from_dataset_dir(dataset_dir):
-    model_dir = ...
+    model_dir = dataset_dir / PANDDA_INSPECT_MODEL_DIR
     model_paths = {}
     for path in model_dir.glob('*'):
         fitted_model_regex = 'fitted-v([0-9]*).pdb'
