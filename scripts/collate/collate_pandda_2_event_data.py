@@ -125,9 +125,11 @@ def main(config_path):
                 if (conf == 'High') & (dist > 6.0):
                     rprint(
                         f'Could not match high confidence ligand {dtag} {event_idx} to a build!\n'
-                        f'Check model in {dataset_dir} is appropriate!'
+                        f'Check model in {dataset_dir} is appropriate!\n'
+                        'SKIPPING!'
                     )
-                    raise Exception
+                    # raise Exception
+                    continue
 
 
                 # Get the z map sample
