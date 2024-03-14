@@ -57,7 +57,7 @@ def main(config_path):
 
     #
     # Open a file in "w"rite mode
-    zarr_path = 'output/build_data_correlation.zarr'
+    zarr_path = 'output/event_data.zarr'
     root = zarr.open(zarr_path, mode='a')
 
     #
