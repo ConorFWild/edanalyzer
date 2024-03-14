@@ -37,16 +37,21 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the HDF5 root group
     # root = fileh.root
-    train_pose_idxs = []
-    test_pose_idxs = []
-    for table_type in ['normal', ]:
+    all_train_pose_idxs = []
+    all_test_pose_idxs = []
+
+    for table_type in ['normal', 'pandda_2']:
+        train_pose_idxs = []
+        test_pose_idxs = []
         if table_type == 'normal':
             table_annotation = root['annotation']
             table_poses = root['known_hit_pose']
             table_z_map_sample_metadata = root['z_map_sample_metadata']
         else:
-            table_annotation = root.pandda_2_annotation
-            table_poses = root.pandda_2_known_hit_pose
+            table_annotation = root['pandda_2']['annotation']
+            table_z_map_sample_metadata = root['pandda_2']['z_map_sample_metadata']
+
+            # table_poses = root.pandda_2_known_hit_pose
 
         # Get train and test event idxs
         rprint(f'Getting idxs of valid train event maps...')
@@ -95,15 +100,21 @@ def main(config_path, batch_size=12, num_workers=None):
                 test_pose_idxs.append((table_type, row['idx']))
         rprint(f"\tGot {len(train_pose_idxs)} train samples")
         rprint(f"\tGot {len(test_pose_idxs)} test samples")
-    rprint(f"Got {len(train_pose_idxs)} train samples")
-    rprint(f"Got {len(test_pose_idxs)} test samples")
 
-    positive_train_pose_idxs = [_x for _x in train_pose_idxs if table_z_map_sample_metadata[_x[1]]['pose_data_idx'] != -1]
-    negative_train_pose_idxs = [_x for _x in train_pose_idxs if
-                                table_z_map_sample_metadata[_x[1]]['pose_data_idx'] == -1]
+        positive_train_pose_idxs = [_x for _x in train_pose_idxs if
+                                    table_z_map_sample_metadata[_x[1]]['pose_data_idx'] != -1]
+        negative_train_pose_idxs = [_x for _x in train_pose_idxs if
+                                    table_z_map_sample_metadata[_x[1]]['pose_data_idx'] == -1]
 
-    rprint(f"Got {len(positive_train_pose_idxs)} postivie train samples")
-    rprint(f"Got {len(negative_train_pose_idxs)} negative test samples")
+        all_train_pose_idxs += negative_train_pose_idxs + (
+                    positive_train_pose_idxs * (int(len(negative_train_pose_idxs) / len(positive_train_pose_idxs))))
+        all_test_pose_idxs += test_pose_idxs
+        rprint(f"Got {len(positive_train_pose_idxs)} postivie train samples")
+        rprint(f"Got {len(negative_train_pose_idxs)} negative test samples")
+    rprint(f"Got {len(all_train_pose_idxs)} train samples")
+    rprint(f"Got {len(all_test_pose_idxs)} test samples")
+
+
 
 
     # Get the dataset
@@ -113,7 +124,7 @@ def main(config_path, batch_size=12, num_workers=None):
     dataset_train = DataLoader(
         EventScoringDataset(
             zarr_path,
-            negative_train_pose_idxs + (positive_train_pose_idxs * (int(len(negative_train_pose_idxs) / len(positive_train_pose_idxs))))
+            all_train_pose_idxs
         ),
         batch_size=batch_size,
         shuffle=True,
@@ -123,7 +134,7 @@ def main(config_path, batch_size=12, num_workers=None):
     dataset_test = DataLoader(
         EventScoringDataset(
             zarr_path,
-            test_pose_idxs
+            all_test_pose_idxs
         ),
         batch_size=batch_size,
         num_workers=19,
