@@ -47,57 +47,66 @@ def main(config_path, batch_size=12, num_workers=None):
             table_annotation = root['annotation']
             table_poses = root['known_hit_pose']
             table_z_map_sample_metadata = root['z_map_sample_metadata']
-        else:
-            table_annotation = root['pandda_2']['annotation']
-            table_z_map_sample_metadata = root['pandda_2']['z_map_sample_metadata']
+
 
             # table_poses = root.pandda_2_known_hit_pose
 
-        # Get train and test event idxs
-        rprint(f'Getting idxs of valid train event maps...')
-        train_event_table_idxs = set([
-            _x['event_map_table_idx']
-            for _x
-            in table_annotation.get_mask_selection(
-                (table_annotation['partition'] == b'train') & (table_annotation['annotation']))
-        ])
-        train_database_event_idxs = set(
-            [
-                table_z_map_sample_metadata[_x]['event_idx']
+            # Get train and test event idxs
+            rprint(f'Getting idxs of valid train event maps...')
+            train_event_table_idxs = set([
+                _x['event_map_table_idx']
                 for _x
-                in train_event_table_idxs
-            ]
-        )
-        rprint(f'Getting idxs of valid test event maps...')
-        test_event_table_idxs = set([
-            _x['event_map_table_idx']
-            for _x
-            in table_annotation.get_mask_selection(
-                (table_annotation['partition'] == b'test') & (table_annotation['annotation']))
-        ])
-        test_database_event_idxs = set(
-            [
-                table_z_map_sample_metadata[_x]['event_idx']
+                in table_annotation.get_mask_selection(
+                    (table_annotation['partition'] == b'train') & (table_annotation['annotation']))
+            ])
+            train_database_event_idxs = set(
+                [
+                    table_z_map_sample_metadata[_x]['event_idx']
+                    for _x
+                    in train_event_table_idxs
+                ]
+            )
+            rprint(f'Getting idxs of valid test event maps...')
+            test_event_table_idxs = set([
+                _x['event_map_table_idx']
                 for _x
-                in test_event_table_idxs
-            ]
-        )
-        exclude_idxs = set([
-            _x['event_map_table_idx']
-            for _x
-            in table_annotation.get_mask_selection(~table_annotation['annotation'])
-        ])
+                in table_annotation.get_mask_selection(
+                    (table_annotation['partition'] == b'test') & (table_annotation['annotation']))
+            ])
+            test_database_event_idxs = set(
+                [
+                    table_z_map_sample_metadata[_x]['event_idx']
+                    for _x
+                    in test_event_table_idxs
+                ]
+            )
+            exclude_idxs = set([
+                _x['event_map_table_idx']
+                for _x
+                in table_annotation.get_mask_selection(~table_annotation['annotation'])
+            ])
 
-        #
+            #
 
-        rprint(f"Filtering poses to those matching valid event maps...")
-        for row in table_z_map_sample_metadata:
-            # z_map_sample_metadata_idx = row['event_map_sample_idx']
-            database_event_idx = row['event_idx']
-            if database_event_idx in train_database_event_idxs:
-                train_pose_idxs.append((table_type, row['idx']))
-            elif database_event_idx in test_database_event_idxs:
-                test_pose_idxs.append((table_type, row['idx']))
+            rprint(f"Filtering poses to those matching valid event maps...")
+            for row in table_z_map_sample_metadata:
+                # z_map_sample_metadata_idx = row['event_map_sample_idx']
+                database_event_idx = row['event_idx']
+                if database_event_idx in train_database_event_idxs:
+                    train_pose_idxs.append((table_type, row['idx']))
+                elif database_event_idx in test_database_event_idxs:
+                    test_pose_idxs.append((table_type, row['idx']))
+        else:
+            table_annotation = root['pandda_2']['annotation']
+            table_z_map_sample_metadata = root['pandda_2']['z_map_sample_metadata']
+            for row in table_z_map_sample_metadata:
+                annotation = table_annotation[row['idx']]
+
+                if str(annotation['partition']) == "train":
+                    train_pose_idxs.append((table_type, row['idx']))
+                elif str(annotation['partition']) == "test":
+                    test_pose_idxs.append((table_type, row['idx']))
+
         rprint(f"\tGot {len(train_pose_idxs)} train samples")
         rprint(f"\tGot {len(test_pose_idxs)} test samples")
 
