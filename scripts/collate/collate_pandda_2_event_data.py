@@ -101,6 +101,11 @@ def main(config_path):
             # Get the inspect table
             inspect_table = pd.read_csv(pandda_inspect_table)
 
+            if not inspect_table[constants.PANDDA_INSPECT_VIEWED].all():
+                rprint(f'\tNOT FINISHED INSPECTING TABLE! SKIPPING!')
+
+                continue
+
             # Iterate the inspect table
             for _idx, _row in inspect_table.iterrows():
                 # Unpack the row information
