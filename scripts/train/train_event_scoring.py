@@ -102,9 +102,9 @@ def main(config_path, batch_size=12, num_workers=None):
             for row in table_z_map_sample_metadata:
                 annotation = table_annotation[row['idx']]
 
-                if str(annotation['partition']) == "train":
+                if annotation['partition'] == b"train":
                     train_pose_idxs.append((table_type, row['idx']))
-                elif str(annotation['partition']) == "test":
+                elif annotation['partition'] == b"test":
                     test_pose_idxs.append((table_type, row['idx']))
 
         rprint(f"\tGot {len(train_pose_idxs)} train samples")
