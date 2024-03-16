@@ -67,7 +67,7 @@ def main(config_path):
     test_systems = config['test']['test_systems']
 
     # Construct the data store
-    root = zarr.open('output/event_data.zarr', 'w')
+    root = zarr.open('output/event_data_with_mtzs.zarr', 'w')
 
     z_map_sample_metadata_dtype = [
         ('idx', '<i4'),
@@ -89,6 +89,15 @@ def main(config_path):
         shape=(0,),
         chunks=(1,),
         dtype=z_map_sample_dtype,
+        compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
+    )
+
+    xmap_sample_dtype = [('idx', '<i4'), ('sample', '<f4', (90, 90, 90))]
+    table_xmap_sample = root.create_dataset(
+        'z_map_sample',
+        shape=(0,),
+        chunks=(1,),
+        dtype=xmap_sample_dtype,
         compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
     )
     # z_map_sample_dtype = '<f4'
@@ -286,6 +295,7 @@ def main(config_path):
 
                 # 2. Get the blobs for each zmap
                 zmaps = {}
+                xmaps = {}
                 zblobs = {}
                 for _event_id, event in close_event_dict.items():
                     dataset = XRayDataset.from_paths(
@@ -295,6 +305,10 @@ def main(config_path):
                     )
                     zmap = _load_xmap_from_path(event[0].z_map)
                     zmap_array = np.array(zmap, copy=False)
+
+                    xmap = _load_xmap_from_mtz_path(event[0].initial_reflections)
+                    xmaps[event[0].id] = xmap
+
                     # Resample the zmap to the reference frame
 
                     reference_frame = DFrame(
@@ -463,6 +477,12 @@ def main(config_path):
                         transform,
                         np.zeros((90, 90, 90), dtype=np.float32),
                     )
+                    xmap_sample_array = _sample_xmap_and_scale(
+                        xmaps[_non_hit_idx[0]],
+                        transform,
+                        np.zeros((90, 90, 90), dtype=np.float32),
+                    )
+
                     # rprint([(
                     #         idx_z_map,
                     #         _non_hit_idx[0],
@@ -493,6 +513,17 @@ def main(config_path):
                     # z_map_sample = z_map_sample_array[np.newaxis, :]
                     table_z_map_sample.append(
                         z_map_sample
+                    )
+
+                    xmap_sample = np.array(
+                        [(
+                            idx_z_map,
+                            xmap_sample_array
+                        )],
+                        dtype=xmap_sample_dtype
+                    )
+                    table_xmap_sample.append(
+                        xmap_sample
                     )
 
                     # ligand_mask = ligand_masks[(_row['_known_hit_residue'], _non_hit_idx[0])]
@@ -561,6 +592,12 @@ def main(config_path):
                         transform,
                         np.zeros((90, 90, 90), dtype=np.float32))
 
+                    xmap_sample_array = _sample_xmap_and_scale(
+                        xmaps[_event_id],
+                        transform,
+                        np.zeros((90, 90, 90), dtype=np.float32),
+                    )
+
                     z_map_sample_metadata = np.array(
                         [(
                             idx_z_map,
@@ -584,6 +621,19 @@ def main(config_path):
                     )
                     table_z_map_sample.append(
                         z_map_sample
+                    )
+
+
+
+                    xmap_sample = np.array(
+                        [(
+                            idx_z_map,
+                            xmap_sample_array
+                        )],
+                        dtype=xmap_sample_dtype
+                    )
+                    table_xmap_sample.append(
+                        xmap_sample
                     )
 
                     # Sample the ligand mask
