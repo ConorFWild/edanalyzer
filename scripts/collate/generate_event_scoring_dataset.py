@@ -33,6 +33,7 @@ from edanalyzer.data.event_data import (
     _get_close_events,
     z_map_sample_metadata_dtype,
     z_map_sample_dtype,
+    xmap_sample_dtype,
     ligand_data_dtype,
     known_hit_pose_sample_dtype,
     annotation_dtype
@@ -127,8 +128,6 @@ def main(config_path):
     for _row in annotation_store_annotation_table:
         metadata_idx = _row['event_map_table_idx']
         metadata_row = annotation_store_metadata_table[metadata_idx]
-        # database_event = metadata_row['event_idx']
-        # annotation_mapping[database_event] = _row
         annotation_sample = np.array(
             [
                 (

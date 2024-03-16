@@ -19,6 +19,8 @@ z_map_sample_metadata_dtype = [
 
 z_map_sample_dtype = [('idx', '<i4'), ('sample', '<f4', (90, 90, 90))]
 
+xmap_sample_dtype = [('idx', '<i4'), ('sample', '<f4', (90, 90, 90))]
+
 ligand_data_dtype = [
     ('idx', 'i8'),
     ('num_heavy_atoms', 'i8'),
