@@ -25,7 +25,7 @@ from edanalyzer import constants
 from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale, \
     _get_ligand_mask_float
 from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_system_from_dtag, _get_known_hit_structures, \
-    _get_known_hits, _get_known_hit_centroids, _res_to_array, _get_known_hit_poses, _get_matched_cifs, _get_smiles, \
+    _get_known_hits, _get_known_hit_centroids, _res_to_array, _get_known_hit_poses, _get_matched_cifs_from_event, _get_smiles, \
     _get_atom_ids, _get_connectivity
 from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM, AutobuildORM
@@ -248,7 +248,7 @@ def main(config_path):
                         if _resid != known_hit_residue:
                             continue
                         # Get the associated ligand data
-                        matched_cifs += _get_matched_cifs(
+                        matched_cifs += _get_matched_cifs_from_event(
                             known_hits[known_hit_dataset][known_hit_residue],
                             _event[0],
                         )
