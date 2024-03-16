@@ -96,7 +96,7 @@ def main(config_path):
     )
 
     table_xmap_sample = root.create_dataset(
-        'z_map_sample',
+        'xmap_sample',
         shape=(0,),
         chunks=(1,),
         dtype=xmap_sample_dtype,
