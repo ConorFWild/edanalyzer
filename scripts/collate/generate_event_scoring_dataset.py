@@ -21,7 +21,6 @@ from numcodecs import Blosc, Delta
 from scipy.ndimage import map_coordinates
 from scipy.interpolate import RegularGridInterpolator
 
-
 from edanalyzer import constants
 from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale, \
     _get_ligand_mask_float
@@ -30,14 +29,18 @@ from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_syste
     _get_atom_ids, _get_connectivity
 from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
     ExperimentORM, LigandORM, AutobuildORM
-from edanalyzer.data.event_data import _get_close_events
+from edanalyzer.data.event_data import (
+    _get_close_events,
+    z_map_sample_metadata_dtype,
+    z_map_sample_dtype,
+    ligand_data_dtype,
+    known_hit_pose_sample_dtype,
+    annotation_dtype
+)
 
 from pandda_gemmi.event_model.cluster import ClusterDensityDBSCAN
 from pandda_gemmi.alignment import Alignment, DFrame
 from pandda_gemmi.dataset import XRayDataset, StructureArray, Structure
-
-
-
 
 
 def main(config_path):
@@ -66,16 +69,16 @@ def main(config_path):
     pandda_key = config['panddas']['pandda_key'],
     test_systems = config['test']['test_systems']
 
+    # Get the annotation store
+    annotation_store_root = zarr.open('output/event_data.zarr', 'r')
+    annotation_store_annotation_table = annotation_store_root['annotation']
+    annotation_store_metadata_table = annotation_store_root['z_map_sample_metadata']
+    # annotation_mapping = {}
+
+
     # Construct the data store
     root = zarr.open('output/event_data_with_mtzs.zarr', 'w')
 
-    z_map_sample_metadata_dtype = [
-        ('idx', '<i4'),
-        ('event_idx', '<i4'),
-        ('res_id', '<U32'),
-        ('ligand_data_idx', 'i8'),
-        ('pose_data_idx', 'i8')
-    ]
     table_z_map_sample_metadata = root.create_dataset(
         'z_map_sample_metadata',
         shape=(0,),
@@ -83,7 +86,6 @@ def main(config_path):
         dtype=z_map_sample_metadata_dtype
     )
 
-    z_map_sample_dtype = [('idx', '<i4'), ('sample', '<f4', (90, 90, 90))]
     table_z_map_sample = root.create_dataset(
         'z_map_sample',
         shape=(0,),
@@ -92,7 +94,6 @@ def main(config_path):
         compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
     )
 
-    xmap_sample_dtype = [('idx', '<i4'), ('sample', '<f4', (90, 90, 90))]
     table_xmap_sample = root.create_dataset(
         'z_map_sample',
         shape=(0,),
@@ -100,23 +101,7 @@ def main(config_path):
         dtype=xmap_sample_dtype,
         compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
     )
-    # z_map_sample_dtype = '<f4'
-    # table_z_map_sample = root.create_dataset(
-    #     'z_map_sample',
-    #     shape=(0,90,90,90),
-    #     chunks=(1,None, None, None),
-    #     dtype=z_map_sample_dtype,
-    #     compressor=Blosc(cname='zlib', clevel=9, shuffle=Blosc.SHUFFLE),
-    #     filters=[Delta(dtype=z_map_sample_dtype)]
-    # )
 
-    ligand_data_dtype = [
-        ('idx', 'i8'),
-        ('num_heavy_atoms', 'i8'),
-        ('canonical_smiles', '<U300'),
-        ('atom_ids', '<U5', (100,)),
-        ('connectivity', '?', (100, 100,))
-    ]
     ligand_data_table = root.create_dataset(
         'ligand_data',
         shape=(0,),
@@ -124,19 +109,39 @@ def main(config_path):
         dtype=ligand_data_dtype
     )
 
-    known_hit_pose_sample_dtype = [
-        ('idx', '<i8'),
-        ('positions', '<f4', (100, 3)),
-        ('atoms', '<U5', (100,)),
-        ('elements', '<i4', (100,)),
-        # ('rmsd', '<f4')
-    ]
     table_known_hit_pose_sample = root.create_dataset(
         'known_hit_pose',
         shape=(0,),
         chunks=(1,),
         dtype=known_hit_pose_sample_dtype
     )
+
+    table_annotation_sample = root.create_dataset(
+        'annotation',
+        shape=(0,),
+        chunks=(1,),
+        dtype=annotation_dtype
+    )
+
+
+    for _row in annotation_store_annotation_table:
+        metadata_idx = _row['event_map_table_idx']
+        metadata_row = annotation_store_metadata_table[metadata_idx]
+        # database_event = metadata_row['event_idx']
+        # annotation_mapping[database_event] = _row
+        annotation_sample = np.array(
+            [
+                (
+                    _row['idx'],
+                    _row['event_map_table_idx'],
+                    metadata_row['event_idx'],
+                    _row['annotation'],
+                    _row['partition']
+                )
+            ],
+            annotation_dtype
+        )
+        table_annotation_sample.append(annotation_sample)
 
     #
     rprint(f"Querying events...")
@@ -235,7 +240,6 @@ def main(config_path):
 
                 # Get the base event
 
-
                 # Get the ligand data for each of the events found
                 ligand_data = {}
                 tmp_idx_ligand_data = idx_ligand_data
@@ -282,7 +286,6 @@ def main(config_path):
 
                     # rprint(ligand_data_sample)
 
-
                 if len(ligand_data) == len(known_hits[known_hit_dataset]):
                     for known_hit_residue, ligand_data_sample in ligand_data.items():
                         ligand_data_table.append(
@@ -290,7 +293,7 @@ def main(config_path):
                         )
                         idx_ligand_data += 1
                 else:
-                    rprint(f'Couldnt get cifs for all dataset hit residues! Skipping!' )
+                    rprint(f'Couldnt get cifs for all dataset hit residues! Skipping!')
                     continue
 
                 # 2. Get the blobs for each zmap
@@ -316,10 +319,10 @@ def main(config_path):
                         None,
                     )
                     all_coords = np.argwhere(np.ones(reference_frame.spacing))
-                    coordinate_array = all_coords / ((np.array(reference_frame.spacing)-1) / (np.array(zmap_array.shape)-1)).reshape(1,
-                                                                                                                   -1)
+                    coordinate_array = all_coords / (
+                                (np.array(reference_frame.spacing) - 1) / (np.array(zmap_array.shape) - 1)).reshape(1,
+                                                                                                                    -1)
                     rprint(coordinate_array.shape)
-
 
                     x, y, z = np.arange(zmap_array.shape[0]), np.arange(zmap_array.shape[1]), np.arange(
                         zmap_array.shape[2]),
@@ -330,8 +333,8 @@ def main(config_path):
 
                     clipped_coords = np.clip(
                         coordinate_array,
-                        np.array([0,0,0]).reshape(1,3),
-                        np.array([x[-1], y[-1], z[-1]]).reshape(1,3),
+                        np.array([0, 0, 0]).reshape(1, 3),
+                        np.array([x[-1], y[-1], z[-1]]).reshape(1, 3),
                     )
                     rprint(np.min(clipped_coords, axis=0))
                     rprint(np.max(clipped_coords, axis=0))
@@ -469,8 +472,6 @@ def main(config_path):
                     transform.mat.fromlist((np.eye(3) * 0.5).tolist())
                     transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
 
-
-
                     # Record the 2fofc map sample
                     z_map_sample_array = _sample_xmap_and_scale(
                         zmaps[_non_hit_idx[0]],
@@ -543,7 +544,6 @@ def main(config_path):
                     # rprint(np.sum(ligand_mask_array))
 
                     idx_z_map += 1
-
 
                 # For each hit residue/event pair, add a hit sample to the store
                 rprint(f'Have {len(ligand_masks)} hits to add to store!')
@@ -623,8 +623,6 @@ def main(config_path):
                         z_map_sample
                     )
 
-
-
                     xmap_sample = np.array(
                         [(
                             idx_z_map,
@@ -648,7 +646,8 @@ def main(config_path):
                     rprint(f'Ligand com: {com} : event com: {centroid}')
                     rprint(f'Ligand size: {lig_selection[0].size}')
                     rprint(f'Selected zs high: {_resid}, {_event_id} : {np.mean(selected_zs[selected_zs > 0.0])} ')
-                    rprint(f'Zmap high: {_resid}, {_event_id} : {np.mean(z_map_sample_array[z_map_sample_array > 0.0])} ')
+                    rprint(
+                        f'Zmap high: {_resid}, {_event_id} : {np.mean(z_map_sample_array[z_map_sample_array > 0.0])} ')
 
                     idx_pose += 1
                     idx_z_map += 1

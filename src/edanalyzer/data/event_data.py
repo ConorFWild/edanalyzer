@@ -38,6 +38,7 @@ known_hit_pose_sample_dtype = [
 annotation_dtype = [
     ('idx', '<i4'),
     ('event_map_table_idx', '<i4'),
+    ('event_idx', '<i4'),
     ('annotation', '?'),
     ('partition', 'S32')]
 
