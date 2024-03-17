@@ -227,10 +227,12 @@ class LitEventScoring(lt.LightningModule):
         z_encoding = F.sigmoid(self.resnet(z))
         z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         z_decoding = F.sigmoid(self.density_decoder(z_mol_encoding))
+        mask = torch.zeros(z_decoding.shape)
+        mask[z_decoding > 0.5] = 1.0
         full_density = torch.cat(
             [
                 z,
-                x * torch.heaviside(z_decoding.detach() - 0.5, 0.0)
+                x * mask
             ],
             dim=1,
         )
@@ -266,10 +268,12 @@ class LitEventScoring(lt.LightningModule):
         z_encoding = F.sigmoid(self.resnet(z))
         z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         z_decoding = F.sigmoid(self.density_decoder(z_mol_encoding))
+        mask = torch.zeros(z_decoding.shape)
+        mask[z_decoding > 0.5] = 1.0
         full_density = torch.cat(
             [
                 z,
-                x * torch.heaviside(z_decoding.detach() - 0.5, 0.0)
+                x * mask
             ],
             dim=1,
         )
