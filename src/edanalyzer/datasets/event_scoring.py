@@ -37,10 +37,16 @@ class EventScoringDataset(Dataset):
         self.pose_table = self.root['known_hit_pose']
         self.ligand_data_table = self.root['ligand_data']
         self.annotation_table = self.root['annotation']
+        # self.annotations = {
+        #     self.z_map_sample_metadata_table[_x['event_map_table_idx']]['event_idx']: _x
+        #     for _x
+        #     in self.annotation_table
+        # }
         self.annotations = {
-            self.z_map_sample_metadata_table[_x['event_map_table_idx']]['event_idx']: _x
+            _x['event_idx']: _x
             for _x
-            in self.annotation_table}
+            in self.annotation_table
+        }
 
         self.sample_indexes = sample_indexes
 
