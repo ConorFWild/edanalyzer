@@ -110,15 +110,18 @@ def main(config_path, batch_size=12, num_workers=None):
                 elif database_event_idx in test_database_event_idxs:
                     test_pose_idxs.append((table_type, row['idx']))
         else:
-            table_annotation = root['pandda_2']['annotation']
-            table_z_map_sample_metadata = root['pandda_2']['z_map_sample_metadata']
-            for row in table_z_map_sample_metadata:
-                annotation = table_annotation[row['idx']]
+            try:
+                table_annotation = root['pandda_2']['annotation']
+                table_z_map_sample_metadata = root['pandda_2']['z_map_sample_metadata']
+                for row in table_z_map_sample_metadata:
+                    annotation = table_annotation[row['idx']]
 
-                if annotation['partition'] == b"train":
-                    train_pose_idxs.append((table_type, row['idx']))
-                elif annotation['partition'] == b"test":
-                    test_pose_idxs.append((table_type, row['idx']))
+                    if annotation['partition'] == b"train":
+                        train_pose_idxs.append((table_type, row['idx']))
+                    elif annotation['partition'] == b"test":
+                        test_pose_idxs.append((table_type, row['idx']))
+            except:
+                continue
 
         rprint(f"\tGot {len(train_pose_idxs)} train samples")
         rprint(f"\tGot {len(test_pose_idxs)} test samples")
