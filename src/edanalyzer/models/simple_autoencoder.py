@@ -27,12 +27,13 @@ class Block(nn.Module):
 
 
 class SimpleConvolutionalEncoder(nn.Module):
-    def __init__(self):
+    def __init__(self, input_layers=1):
         super(SimpleConvolutionalEncoder, self).__init__()
 
         # Layers
         # Layers
-        self.layer1 = Block(1, 2)
+        self.input_layers = input_layers
+        self.layer1 = Block(input_layers, 2)
         self.layer2 = Block(2, 4)
         self.layer3 = Block(4, 8)
         self.layer4 = Block(8, 16)

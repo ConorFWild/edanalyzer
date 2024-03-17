@@ -32,6 +32,7 @@ class EventScoringDataset(Dataset):
         self.root = zarr.open(zarr_path, mode='r')
 
         self.z_map_sample_metadata_table = self.root['z_map_sample_metadata']
+        self.xmap_sample_table = self.root['xmap_sample']
         self.z_map_sample_table = self.root['z_map_sample']
         self.pose_table = self.root['known_hit_pose']
         self.ligand_data_table = self.root['ligand_data']
@@ -59,6 +60,7 @@ class EventScoringDataset(Dataset):
 
         pose_data_idx = z_map_sample_metadata['pose_data_idx']
 
+        xmap_sample_data = self.xmap_sample_table[z_map_sample_idx]
         z_map_sample_data = self.z_map_sample_table[z_map_sample_idx]
         annotation = self.annotations[z_map_sample_metadata['event_idx']]
 
@@ -79,6 +81,7 @@ class EventScoringDataset(Dataset):
 
 
         #
+        xmap = _get_grid_from_hdf5(xmap_sample_data)
         z_map = _get_grid_from_hdf5(z_map_sample_data)
 
         # Subsample if training
@@ -141,6 +144,11 @@ class EventScoringDataset(Dataset):
 
 
         # Get sample images
+        xmap_sample = _sample_xmap_and_scale(
+            xmap,
+            transform,
+            np.copy(sample_array)
+        )
         z_map_sample = _sample_xmap_and_scale(
             z_map,
             transform,
@@ -171,11 +179,19 @@ class EventScoringDataset(Dataset):
         # Make the image
         image_density = np.stack(
             [
-                z_map_sample,
+                xmap_sample,
             ],
             axis=0
         )
         image_density_float = image_density.astype(np.float32)
+
+        image_z = np.stack(
+            [
+                z_map_sample,
+            ],
+            axis=0
+        )
+        image_z_float = image_z.astype(np.float32)
 
         image_mol = np.stack(
             [
@@ -208,5 +224,11 @@ class EventScoringDataset(Dataset):
         label = np.array(hit)
         label_float = label.astype(np.float32)
 
-        return sample_idx, torch.from_numpy(image_density_float), torch.from_numpy(image_mol_float), torch.from_numpy(image_decoded_density_float), torch.from_numpy(
-            label_float)
+        return (
+            sample_idx,
+            torch.from_numpy(image_density_float),
+            torch.from_numpy(image_z_float),
+            torch.from_numpy(image_mol_float),
+            torch.from_numpy(image_decoded_density_float),
+            torch.from_numpy(label_float)
+        )
