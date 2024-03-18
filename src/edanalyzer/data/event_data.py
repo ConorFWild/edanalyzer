@@ -318,6 +318,7 @@ def _get_annotation_sample_from_dataset_dir(dataset_dir, annotation, test_system
             (
                 annotation_idx,
                 z_map_sample_metadata_idx,
+                z_map_sample_metadata_idx,
                 annotation_bool,
                 partition
             )
