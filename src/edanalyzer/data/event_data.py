@@ -6,8 +6,8 @@ from numcodecs import Blosc, Delta
 
 from .database import _get_st_hits, _res_to_array, _get_matched_cifs_from_dir, _get_smiles, \
     _get_atom_ids, _get_connectivity, _get_system_from_dtag
-from ..datasets.base import _get_structure_from_path, _load_xmap_from_path, _sample_xmap_and_scale
-from ..constants import PANDDA_ZMAP_TEMPLATE, PANDDA_INSPECT_MODEL_DIR
+from ..datasets.base import _get_structure_from_path, _load_xmap_from_path, _sample_xmap_and_scale, _load_xmap_from_mtz_path
+from ..constants import PANDDA_ZMAP_TEMPLATE, PANDDA_INSPECT_MODEL_DIR, PANDDA_INITIAL_MTZ_TEMPLATE
 
 z_map_sample_metadata_dtype = [
     ('idx', '<i4'),
@@ -65,6 +65,16 @@ def _make_z_map_sample_table(group):
     )
 
     return table_z_map_sample
+
+def _make_xmap_sample_table(group):
+    table_xmap_sample = group.create_dataset(
+        'xmap_sample',
+        shape=(0,),
+        chunks=(1,),
+        dtype=xmap_sample_dtype,
+        compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
+    )
+    return table_xmap_sample
 
 
 def _make_ligand_data_table(group):
@@ -201,6 +211,33 @@ def _get_z_map_sample_from_dataset_dir(dataset_dir, x, y, z, idx_z_map):
         dtype=z_map_sample_dtype
     )
     return z_map_sample
+
+def _get_xmap_sample_from_dataset_dir(dataset_dir, x, y, z, idx_z_map):
+    # Get the zmap
+    xmap_path = dataset_dir / PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dataset_dir.name)
+    xmap = _load_xmap_from_mtz_path(xmap_path)
+
+    # Get the transform
+    centroid = np.array([x, y, z])
+    transform = gemmi.Transform()
+    transform.mat.fromlist((np.eye(3) * 0.5).tolist())
+    transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
+
+    # Record the 2fofc map sample
+    xmap_sample_array = _sample_xmap_and_scale(
+        xmap,
+        transform,
+        np.zeros((90, 90, 90), dtype=np.float32),
+    )
+
+    xmap_sample = np.array(
+        [(
+            idx_z_map,
+            xmap_sample_array
+        )],
+        dtype=xmap_sample_dtype
+    )
+    return xmap_sample
 
 
 def _get_z_map_metadata_sample_from_dataset_dir(

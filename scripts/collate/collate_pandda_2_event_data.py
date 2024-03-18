@@ -33,7 +33,9 @@ from edanalyzer.data.event_data import (
     _get_pose_sample_from_dataset_dir,
     _get_ligand_data_sample_from_dataset_dir,
     _get_annotation_sample_from_dataset_dir,
-    _get_z_map_metadata_sample_from_dataset_dir
+    _get_z_map_metadata_sample_from_dataset_dir,
+    _make_xmap_sample_table,
+    _get_xmap_sample_from_dataset_dir
 )
 
 
@@ -70,6 +72,7 @@ def main(config_path):
     # Create 2 new tables in group1
     z_map_sample_metadata_table = _make_z_map_sample_metadata_table(pandda_2_group)
     z_map_sample_table = _make_z_map_sample_table(pandda_2_group)
+    xmap_sample_table = _make_xmap_sample_table(pandda_2_group)
     ligand_data_table = _make_ligand_data_table(pandda_2_group)
     known_hit_pose_table = _make_known_hit_pose_table(pandda_2_group)
     annotation_table = _make_annotation_table(pandda_2_group)
@@ -109,7 +112,8 @@ def main(config_path):
             # Iterate the inspect table
             for _idx, _row in inspect_table.iterrows():
                 # Unpack the row information
-                dtag, event_idx, bdc, conf = _row['dtag'], _row['event_idx'], _row['1-BDC'], _row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
+                dtag, event_idx, bdc, conf = _row['dtag'], _row['event_idx'], _row['1-BDC'], _row[
+                    constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
 
                 rprint(f'\tProcessing event: {dtag} {event_idx} {conf}')
 
@@ -136,9 +140,13 @@ def main(config_path):
                     # raise Exception
                     continue
 
-
                 # Get the z map sample
                 z_map_sample = _get_z_map_sample_from_dataset_dir(
+                    dataset_dir,
+                    x, y, z,
+                    z_map_sample_metadata_idx,
+                )
+                xmap_sample = _get_xmap_sample_from_dataset_dir(
                     dataset_dir,
                     x, y, z,
                     z_map_sample_metadata_idx,
@@ -188,6 +196,7 @@ def main(config_path):
 
                 z_map_sample_metadata_table.append(z_map_metadata_sample)
                 z_map_sample_table.append(z_map_sample)
+                xmap_sample_table.append(xmap_sample)
                 if conf == 'High':
                     ligand_data_table.append(ligand_data_sample)
                     known_hit_pose_table.append(pose_sample)
