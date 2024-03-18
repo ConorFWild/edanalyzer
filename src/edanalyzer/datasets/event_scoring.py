@@ -37,6 +37,14 @@ class EventScoringDataset(Dataset):
         self.pose_table = self.root['known_hit_pose']
         self.ligand_data_table = self.root['ligand_data']
         self.annotation_table = self.root['annotation']
+
+        self.pandda_2_z_map_sample_metadata_table = self.root['pandda_2']['z_map_sample_metadata']
+        self.pandda_2_xmap_sample_table = self.root['pandda_2']['xmap_sample']
+        self.pandda_2_z_map_sample_table = self.root['pandda_2']['z_map_sample']
+        self.pandda_2_pose_table = self.root['pandda_2']['known_hit_pose']
+        self.pandda_2_ligand_data_table = self.root['pandda_2']['ligand_data']
+        self.pandda_2_annotation_table = self.root['pandda_2']['annotation']
+
         # self.annotations = {
         #     self.z_map_sample_metadata_table[_x['event_map_table_idx']]['event_idx']: _x
         #     for _x
@@ -46,6 +54,11 @@ class EventScoringDataset(Dataset):
             _x['event_idx']: _x
             for _x
             in self.annotation_table
+        }
+        self.pandda_2_annotations = {
+            _x['event_idx']: _x
+            for _x
+            in self.pandda_2_annotations
         }
 
         self.sample_indexes = sample_indexes
@@ -58,17 +71,25 @@ class EventScoringDataset(Dataset):
         sample_idx = self.sample_indexes[idx]
 
         # Get the z map and pose
-        z_map_sample_metadata = self.z_map_sample_metadata_table[sample_idx[1]]
+        if sample_idx[0] == 'normal':
+            z_map_sample_metadata = self.z_map_sample_metadata_table[sample_idx[1]]
+        else:
+            z_map_sample_metadata = self.pandda_2_z_map_sample_metadata_table[sample_idx[1]]
         z_map_sample_idx = z_map_sample_metadata['idx']
         # print([sample_idx, z_map_sample_idx])
         assert sample_idx[1] == z_map_sample_idx
         # event_map_idx = pose_data['event_map_sample_idx']
 
         pose_data_idx = z_map_sample_metadata['pose_data_idx']
+        if sample_idx[0] == 'normal':
 
-        xmap_sample_data = self.xmap_sample_table[z_map_sample_idx]
-        z_map_sample_data = self.z_map_sample_table[z_map_sample_idx]
-        annotation = self.annotations[z_map_sample_metadata['event_idx']]
+            xmap_sample_data = self.xmap_sample_table[z_map_sample_idx]
+            z_map_sample_data = self.z_map_sample_table[z_map_sample_idx]
+            annotation = self.annotations[z_map_sample_metadata['event_idx']]
+        else:
+            xmap_sample_data = self.pandda_2_xmap_sample_table[z_map_sample_idx]
+            z_map_sample_data = self.pandda_2_z_map_sample_table[z_map_sample_idx]
+            annotation = self.pandda_2_annotations[z_map_sample_metadata['event_idx']]
 
         # If training replace with a random ligand
         rng = np.random.default_rng()
@@ -80,9 +101,17 @@ class EventScoringDataset(Dataset):
             #     pose_data = self.pose_table[pose_data_idx]
             # else:
             #     pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
-            pose_data = self.pose_table[pose_data_idx]
+            if sample_idx[0] == 'normal':
+
+                pose_data = self.pose_table[pose_data_idx]
+            else:
+                pose_data = self.pandda_2_pose_table[pose_data_idx]
         else:
-            pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
+            if sample_idx[0] == 'normal':
+
+                pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
+            else:
+                pose_data = self.pandda_2_pose_table[rng.integers(0, len(self.pandda_2_pose_table))]
 
 
 
