@@ -40,7 +40,9 @@ def main(config_path, batch_size=12, num_workers=None):
     all_train_pose_idxs = []
     all_test_pose_idxs = []
 
-    for table_type in ['normal', 'pandda_2']:
+    # for table_type in ['normal', 'pandda_2']:
+    for table_type in ['pandda_2']:
+
         train_pose_idxs = []
         test_pose_idxs = []
         if table_type == 'normal':
@@ -102,7 +104,7 @@ def main(config_path, batch_size=12, num_workers=None):
             #
 
             rprint(f"Filtering poses to those matching valid event maps...")
-            for row in table_z_map_sample_metadata:
+            for row in table_z_map_sample_metadata[:]:
                 # z_map_sample_metadata_idx = row['event_map_sample_idx']
                 database_event_idx = row['event_idx']
                 if database_event_idx in train_database_event_idxs:
@@ -113,7 +115,7 @@ def main(config_path, batch_size=12, num_workers=None):
             try:
                 table_annotation = root['pandda_2']['annotation']
                 table_z_map_sample_metadata = root['pandda_2']['z_map_sample_metadata']
-                for row in table_z_map_sample_metadata:
+                for row in table_z_map_sample_metadata[:]:
                     annotation = table_annotation[row['idx']]
 
                     if annotation['partition'] == b"train":
