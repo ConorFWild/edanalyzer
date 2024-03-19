@@ -203,9 +203,9 @@ class LitEventScoring(lt.LightningModule):
         full_density = torch.cat(
             [
                 z,
-                x * z_decoding
+                # x * z_decoding
                 # x
-                # x * mask
+                x * mask
             ],
             dim=1,
         )
@@ -234,9 +234,9 @@ class LitEventScoring(lt.LightningModule):
         full_density = torch.cat(
             [
                 z,
-                x * z_decoding
+                # x * z_decoding
                 # x,
-                # x * mask
+                x * mask
             ],
             dim=1,
         )
@@ -277,9 +277,9 @@ class LitEventScoring(lt.LightningModule):
         full_density = torch.cat(
             [
                 z,
-                x * z_decoding
+                # x * z_decoding
                 # x,
-                # x * mask
+                x * mask
             ],
             dim=1,
         )
