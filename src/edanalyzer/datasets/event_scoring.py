@@ -193,7 +193,8 @@ class EventScoringDataset(Dataset):
         ligand_mask_grid = _get_ligand_mask_float(z_map, transformed_residue)
         image_ligand_mask = _sample_xmap(
             ligand_mask_grid,
-            ligand_map_transform,
+            # ligand_map_transform,
+            transform,
             np.copy(ligand_sample_array)
         )
 
