@@ -104,18 +104,22 @@ def main(config_path):
             # Get the inspect table
             inspect_table = pd.read_csv(pandda_inspect_table)
 
-            if not inspect_table[constants.PANDDA_INSPECT_VIEWED].all():
-                rprint(f'\tNOT FINISHED INSPECTING TABLE! SKIPPING!')
-
-                continue
+            # if not inspect_table[constants.PANDDA_INSPECT_VIEWED].all():
+            #     rprint(f'\tNOT FINISHED INSPECTING TABLE! SKIPPING!')
+            #
+            #     continue
 
             # Iterate the inspect table
             for _idx, _row in inspect_table.iterrows():
                 # Unpack the row information
-                dtag, event_idx, bdc, conf = _row['dtag'], _row['event_idx'], _row['1-BDC'], _row[
-                    constants.PANDDA_INSPECT_HIT_CONDFIDENCE]
+                dtag, event_idx, bdc, conf, viewed = _row['dtag'], _row['event_idx'], _row['1-BDC'], _row[
+                    constants.PANDDA_INSPECT_HIT_CONDFIDENCE], _row[constants.PANDDA_INSPECT_VIEWED]
 
                 rprint(f'\tProcessing event: {dtag} {event_idx} {conf}')
+
+                if not viewed:
+                    rprint('\t\tNot Viewed! Skipping!')
+                    continue
 
                 if conf == 'Medium':
                     rprint(f'\t\tAmbiguous event! Skipping!')
