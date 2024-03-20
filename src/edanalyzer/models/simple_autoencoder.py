@@ -94,11 +94,11 @@ class SimpleConvolutionalDecoder(nn.Module):
         self.input_layers = input_layers
 
         # Layers
-        self.layer1 = BlockTranspose(input_layers, 16)
-        self.layer2 = BlockTranspose(16, 8)
-        self.layer3 = BlockTranspose(8, 4)
-        self.layer4 = BlockTranspose(4, 2)
-        self.layer5 = BlockTranspose(2, 1)
+        self.layer1 = BlockTranspose(input_layers, input_layers / 2)
+        self.layer2 = BlockTranspose(input_layers / 2, input_layers / 4)
+        self.layer3 = BlockTranspose(input_layers / 4, input_layers / 8)
+        self.layer4 = BlockTranspose(input_layers / 8, input_layers / 16)
+        self.layer5 = BlockTranspose(input_layers / 16, input_layers / 32)
 
         self.avgpool = nn.AdaptiveAvgPool3d((32, 32, 32))
 
