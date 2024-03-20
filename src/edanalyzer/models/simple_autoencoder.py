@@ -100,7 +100,7 @@ class SimpleConvolutionalDecoder(nn.Module):
         self.layer4 = BlockTranspose(4, 2)
         self.layer5 = BlockTranspose(2, 1)
 
-        self.avgpool = nn.AdaptiveAvgPool3d((32, 32, 32))
+        self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
 
         for m in self.modules():
             print(m)
@@ -112,7 +112,8 @@ class SimpleConvolutionalDecoder(nn.Module):
 
     def forward(self, x):
         # for layer in self.layers:
-        x = x.view(-1, self.input_layers, 1, 1, 1)
+        # x = x.view(-1, self.input_layers, 1, 1, 1)
+        x = self.avgpool(x)
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
