@@ -104,7 +104,7 @@ class LitMolAutoencoder(lt.LightningModule):
             print(f'{unselected_density}')
             print(f'{torch.mean(unselected_density)}')
             print(f'{torch.sum(selected_density)} : {torch.sum(unselected_density)}')
-            mask = torch.zeros(mol_decoding[0].shape).to(mol_decoding[0].dev)
+            mask = torch.zeros(mol_decoding[0].shape).to(mol_decoding[0].device)
             mask[mol_decoding[0] > 0.5] = 1.0
 
             print(f'Mask size: {torch.sum(mask)}; Mask correct: {torch.sum(mask[m[0] != 0])}')
