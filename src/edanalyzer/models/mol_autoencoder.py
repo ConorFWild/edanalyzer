@@ -56,6 +56,8 @@ class LitMolAutoencoder(lt.LightningModule):
         mol_decoding = F.sigmoid(self.mol_decoder(mol_encoding))
 
         if batch_idx == 1:
+            print(f'Original mol batch shape')
+            print(d.shape)
             print(f'Original Mol')
             print(d[0])
             print(d[0][d[0] != 0.0])
