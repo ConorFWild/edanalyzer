@@ -39,7 +39,7 @@ class SimpleConvolutionalEncoder(nn.Module):
         self.layer4 = Block(8, 16)
         self.layer5 = Block(16, 32, last=True)
 
-        self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
+        # self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
 
         for m in self.modules():
             print(m)
