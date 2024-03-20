@@ -58,6 +58,7 @@ class LitMolAutoencoder(lt.LightningModule):
         if batch_idx == 1:
             print(f'Original Mol')
             print(d[0])
+            print(d[0][d[0] != 0.0])
             print(f'Mol Encoding')
             print(mol_encoding[0])
             print(f'Mol Decoding')
