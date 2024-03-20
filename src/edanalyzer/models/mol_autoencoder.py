@@ -58,28 +58,7 @@ class LitMolAutoencoder(lt.LightningModule):
         # mol_decoding = torch.heaviside(mol_decoding, torch.tensor([0.0]).to(mol_decoding.device))
         mol_decoding = F.hardtanh(mol_decoding, min_val=0.0, max_val=1.0,)
 
-        if batch_idx == 1:
-            print(f'Original Mol')
-            print(m[0])
-            print(m[0][m[0] != 0.0])
-            print(f'Mol Encoding')
-            print(mol_encoding[0])
-            print(f'Mol Decoding')
-            print(mol_decoding[0])
-            print(f'Statistics')
-            selected_density = mol_decoding[0][m[0] != 0]
-            unselected_density = mol_decoding[0][m[0] == 0]
-            print(f'{selected_density}')
-            print(f'{torch.mean(selected_density)}')
-            print(f'{unselected_density}')
-            print(f'{torch.mean(unselected_density)}')
-            print(f'{torch.sum(selected_density)} : {torch.sum(unselected_density)}')
-            print(f'Original Mol sum: {torch.sum(m[0])}')
-            print(f'Mol encoding sum: {torch.sum(mol_encoding[0])}')
-            print(f'Decoded Mol sum: {torch.sum(mol_decoding[0])}')
-            print(f'Original mol shape: {m.shape}')
-            print(f'Mol encoding shape: {mol_encoding.shape}')
-            print(f'Mol decoding shape: {mol_decoding.shape}')
+
 
         loss_2 = F.mse_loss(mol_decoding, m)
         total_loss =  loss_2
@@ -103,11 +82,34 @@ class LitMolAutoencoder(lt.LightningModule):
         idx, x, z, m, d, y = test_batch
         y = y.view(y.size(0), -1)
 
-        mol_encoding = F.sigmoid(self.mol_encoder(m))
-        mol_decoding = F.sigmoid(self.mol_decoder(mol_encoding))
+        mol_encoding = self.mol_encoder(m)
+        mol_decoding = F.hardtanh(self.mol_decoder(mol_encoding), min_val=0.0, max_val=1.0,)
 
         loss_2 = F.mse_loss(mol_decoding, m)
         total_loss = loss_2
+
+        if batch_idx == 1:
+            print(f'Original Mol')
+            print(m[0])
+            print(m[0][m[0] != 0.0])
+            print(f'Mol Encoding')
+            print(mol_encoding[0])
+            print(f'Mol Decoding')
+            print(mol_decoding[0])
+            print(f'Statistics')
+            selected_density = mol_decoding[0][m[0] != 0]
+            unselected_density = mol_decoding[0][m[0] == 0]
+            print(f'{selected_density}')
+            print(f'{torch.mean(selected_density)}')
+            print(f'{unselected_density}')
+            print(f'{torch.mean(unselected_density)}')
+            print(f'{torch.sum(selected_density)} : {torch.sum(unselected_density)}')
+            print(f'Original Mol sum: {torch.sum(m[0])}')
+            print(f'Mol encoding sum: {torch.sum(mol_encoding[0])}')
+            print(f'Decoded Mol sum: {torch.sum(mol_decoding[0])}')
+            print(f'Original mol shape: {m.shape}')
+            print(f'Mol encoding shape: {mol_encoding.shape}')
+            print(f'Mol decoding shape: {mol_decoding.shape}')
 
         # loss = F.mse_loss(score, y)
         self.log('test_loss', total_loss)
