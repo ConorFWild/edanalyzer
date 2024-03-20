@@ -54,6 +54,18 @@ class LitMolAutoencoder(lt.LightningModule):
         mol_encoding = F.sigmoid(self.mol_encoder(m))
         mol_decoding = F.sigmoid(self.mol_decoder(mol_encoding))
 
+        if batch_idx == 1:
+            print(f'Original Mol')
+            print(d[0])
+            print(f'Mol Encoding')
+            print(mol_encoding[0])
+            print(f'Mol Decoding')
+            print(mol_decoding[0])
+            print(f'Statistics')
+            print(f'Original Mol sum: {torch.sum(d[0])}')
+            print(f'Mol encoding sum: {torch.sum(mol_encoding[0])}')
+            print(f'Decoded Mol sum: {torch.sum(d[0])}')
+
         loss_2 = F.mse_loss(mol_decoding, m)
         total_loss =  loss_2
 
