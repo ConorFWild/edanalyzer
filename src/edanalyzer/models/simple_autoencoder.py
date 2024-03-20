@@ -33,11 +33,11 @@ class SimpleConvolutionalEncoder(nn.Module):
         # Layers
         # Layers
         self.input_layers = input_layers
-        self.layer1 = Block(input_layers, 2)
-        self.layer2 = Block(2, 4)
-        self.layer3 = Block(4, 8)
-        self.layer4 = Block(8, 16)
-        self.layer5 = Block(16, 32, last=True)
+        self.layer1 = Block(input_layers, 4)
+        self.layer2 = Block(4, 8)
+        self.layer3 = Block(8, 16)
+        self.layer4 = Block(16, 32)
+        self.layer5 = Block(32, 64, last=True)
         self.drop = nn.Dropout()
 
         # self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
@@ -90,18 +90,18 @@ class BlockTranspose(nn.Module):
 
 
 class SimpleConvolutionalDecoder(nn.Module):
-    def __init__(self, input_layers=32):
+    def __init__(self, input_layers=64):
         super(SimpleConvolutionalDecoder, self).__init__()
 
         self.input_layers = input_layers
 
         # Layers
         self.drop = nn.Dropout()
-        self.layer1 = BlockTranspose(input_layers, 16)
-        self.layer2 = BlockTranspose(16, 8)
-        self.layer3 = BlockTranspose(8, 4)
-        self.layer4 = BlockTranspose(4, 2)
-        self.layer5 = BlockTranspose(2, 1)
+        self.layer1 = BlockTranspose(input_layers, 32)
+        self.layer2 = BlockTranspose(32, 16)
+        self.layer3 = BlockTranspose(16, 8)
+        self.layer4 = BlockTranspose(8, 4)
+        self.layer5 = BlockTranspose(4, 1)
 
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
 
