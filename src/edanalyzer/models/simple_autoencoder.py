@@ -117,7 +117,7 @@ class SimpleConvolutionalDecoder(nn.Module):
         # for layer in self.layers:
         x = x.view(-1, self.input_layers, 1, 1, 1)
         x = self.avgpool(x)
-        x = self.drop(x)
+        # x = self.drop(x)
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
