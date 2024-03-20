@@ -56,7 +56,7 @@ class LitMolAutoencoder(lt.LightningModule):
         # mol_encoding = F.sigmoid(self.resnet(m))
         mol_decoding =  self.mol_decoder(mol_encoding)
         # mol_decoding = torch.heaviside(mol_decoding, torch.tensor([0.0]).to(mol_decoding.device))
-        mol_decoding = F.sigmoid(mol_decoding - 20)
+        mol_decoding = F.hardtanh(mol_decoding, min_val=0.0, max_val=1.0, inplace=True,)
 
         if batch_idx == 1:
             print(f'Original Mol')
