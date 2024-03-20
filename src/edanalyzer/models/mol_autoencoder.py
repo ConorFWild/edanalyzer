@@ -64,7 +64,7 @@ class LitMolAutoencoder(lt.LightningModule):
             print(f'Statistics')
             print(f'Original Mol sum: {torch.sum(d[0])}')
             print(f'Mol encoding sum: {torch.sum(mol_encoding[0])}')
-            print(f'Decoded Mol sum: {torch.sum(d[0])}')
+            print(f'Decoded Mol sum: {torch.sum(mol_decoding[0])}')
 
         loss_2 = F.mse_loss(mol_decoding, m)
         total_loss =  loss_2
