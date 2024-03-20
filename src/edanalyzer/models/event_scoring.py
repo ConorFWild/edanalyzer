@@ -185,31 +185,31 @@ class LitEventScoring(lt.LightningModule):
         self.density_encoder = SimpleConvolutionalEncoder(input_layers=2)
         self.mol_encoder = SimpleConvolutionalEncoder()
         self.mol_decoder = SimpleConvolutionalDecoder()
-        self.density_decoder = SimpleConvolutionalDecoder(input_layers=64)
+        self.density_decoder = SimpleConvolutionalDecoder(input_layers=128)
         # self.fc = nn.Linear(512 + 32, 1)
-        self.fc = nn.Linear(32 + 32, 1)
+        self.fc = nn.Linear(64 + 64, 1)
 
         self.train_annotations = []
         self.test_annotations = []
         self.output = Path('./output/event_scoring_with_mtzs')
 
     def forward(self, x, z, m, d):
-        mol_encoding = F.sigmoid(self.mol_encoder(m))
-        z_encoding = F.sigmoid(self.resnet(z))
+        mol_encoding = self.mol_encoder(m)
+        z_encoding = self.resnet(z)
         z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
-        z_decoding = F.sigmoid(self.density_decoder(z_mol_encoding))
+        z_decoding = F.hardtanh(self.density_decoder(z_mol_encoding), min_val=0.0, max_val=1.0,)
         mask = torch.zeros(z_decoding.shape).to(z_decoding.device)
         mask[z_decoding > 0.5] = 1.0
         full_density = torch.cat(
             [
                 z,
                 # x * z_decoding
-                x
-                # x * mask
+                # x
+                x * mask
             ],
             dim=1,
         )
-        density_encoding = F.sigmoid(self.density_encoder(full_density))
+        density_encoding = self.density_encoder(full_density)
         full_encoding = torch.cat([density_encoding, mol_encoding], dim=1)
 
         score = F.sigmoid(self.fc(full_encoding))
@@ -224,23 +224,23 @@ class LitEventScoring(lt.LightningModule):
         idx, x, z, m, d, y = train_batch
         y = y.view(y.size(0), -1)
 
-        mol_encoding = F.sigmoid(self.mol_encoder(m))
-        mol_decoding = F.sigmoid(self.mol_decoder(mol_encoding))
-        z_encoding = F.sigmoid(self.resnet(z))
+        mol_encoding = self.mol_encoder(m)
+        mol_decoding = F.hardtanh(self.mol_decoder(mol_encoding), min_val=0.0, max_val=1.0,)
+        z_encoding = self.resnet(z)
         z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
-        z_decoding = F.sigmoid(self.density_decoder(z_mol_encoding))
+        z_decoding = F.hardtanh(self.density_decoder(z_mol_encoding), min_val=0.0, max_val=1.0,)
         mask = torch.zeros(z_decoding.shape).to(z_decoding.device)
         mask[z_decoding > 0.5] = 1.0
         full_density = torch.cat(
             [
                 z,
                 # x * z_decoding
-                x,
-                # x * mask
+                # x,
+                x * mask
             ],
             dim=1,
         )
-        density_encoding = F.sigmoid(self.density_encoder(full_density))
+        density_encoding = self.density_encoder(full_density)
         full_encoding = torch.cat([density_encoding, mol_encoding], dim=1)
 
         score = F.sigmoid(self.fc(full_encoding))
@@ -270,22 +270,22 @@ class LitEventScoring(lt.LightningModule):
         idx, x, z, m, d, y = test_batch
         y = y.view(y.size(0), -1)
 
-        mol_encoding = F.sigmoid(self.mol_encoder(m))
-        z_encoding = F.sigmoid(self.resnet(z))
+        mol_encoding = self.mol_encoder(m)
+        z_encoding = self.resnet(z)
         z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
-        z_decoding = F.sigmoid(self.density_decoder(z_mol_encoding))
+        z_decoding = F.hardtanh(self.density_decoder(z_mol_encoding), min_val=0.0, max_val=1.0,)
         mask = torch.zeros(z_decoding.shape).to(z_decoding.device)
         mask[z_decoding > 0.5] = 1.0
         full_density = torch.cat(
             [
                 z,
                 # x * z_decoding
-                x,
-                # x * mask
+                # x,
+                x * mask
             ],
             dim=1,
         )
-        density_encoding = F.sigmoid(self.density_encoder(full_density))
+        density_encoding = self.density_encoder(full_density)
         full_encoding = torch.cat([density_encoding, mol_encoding], dim=1)
 
         score = F.sigmoid(self.fc(full_encoding))
