@@ -65,7 +65,11 @@ class LitMolAutoencoder(lt.LightningModule):
             print(f'Mol Decoding')
             print(mol_decoding[0])
             print(f'Statistics')
-            print(f'{mol_decoding[0][m[0] != 0]}')
+            selected_density = mol_decoding[0][m[0] != 0]
+            unselected_density = mol_decoding[0][m[0] == 0]
+            print(f'{selected_density}')
+            print(f'{unselected_density}')
+            print(f'{torch.sum(selected_density)} : {torch.sum(unselected_density)}')
             print(f'Original Mol sum: {torch.sum(m[0])}')
             print(f'Mol encoding sum: {torch.sum(mol_encoding[0])}')
             print(f'Decoded Mol sum: {torch.sum(mol_decoding[0])}')
