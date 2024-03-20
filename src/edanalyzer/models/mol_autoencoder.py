@@ -24,8 +24,8 @@ class Annotation(tables.IsDescription):
 class LitMolAutoencoder(lt.LightningModule):
     def __init__(self):
         super().__init__()
-        # self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
-        self.resnet = SimpleConvolutionalEncoder()
+        self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
+        # self.resnet = SimpleConvolutionalEncoder()
         self.density_encoder = SimpleConvolutionalEncoder(input_layers=2)
         self.mol_encoder = SimpleConvolutionalEncoder()
         self.mol_decoder = SimpleConvolutionalDecoder()
@@ -51,7 +51,8 @@ class LitMolAutoencoder(lt.LightningModule):
         idx, x, z, m, d, y = train_batch
         y = y.view(y.size(0), -1)
 
-        mol_encoding = F.sigmoid(self.mol_encoder(m))
+        # mol_encoding = F.sigmoid(self.mol_encoder(m))
+        mol_encoding = F.sigmoid(self.resnet(m))
         mol_decoding = F.sigmoid(self.mol_decoder(mol_encoding))
 
         if batch_idx == 1:

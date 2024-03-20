@@ -19,8 +19,8 @@ class Block(nn.Module):
 
     def forward(self, x):
         x = self.conv(x)
-        # if not self.last:
-        x = self.bn(x)
+        if not self.last:
+            x = self.bn(x)
         x = self.relu(x)
         # x = self.drop(x)
         return x
