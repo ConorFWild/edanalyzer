@@ -204,8 +204,8 @@ class LitEventScoring(lt.LightningModule):
             [
                 z,
                 # x * z_decoding
-                # x
-                x * mask
+                x
+                # x * mask
             ],
             dim=1,
         )
@@ -235,8 +235,8 @@ class LitEventScoring(lt.LightningModule):
             [
                 z,
                 # x * z_decoding
-                # x,
-                x * mask
+                x,
+                # x * mask
             ],
             dim=1,
         )
@@ -250,6 +250,8 @@ class LitEventScoring(lt.LightningModule):
         total_loss = loss_1 + loss_2 + loss_3
 
         self.log('train_loss', loss_1)
+        self.log('mol_decode_loss', loss_2)
+        self.log('z_decode_loss', loss_3)
 
         for j in range(len(idx[0])):
             self.train_annotations.append(
@@ -278,8 +280,8 @@ class LitEventScoring(lt.LightningModule):
             [
                 z,
                 # x * z_decoding
-                # x,
-                x * mask
+                x,
+                # x * mask
             ],
             dim=1,
         )
