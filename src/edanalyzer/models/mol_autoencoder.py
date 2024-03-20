@@ -51,13 +51,12 @@ class LitMolAutoencoder(lt.LightningModule):
         idx, x, z, m, d, y = train_batch
         y = y.view(y.size(0), -1)
 
+
         mol_encoding = F.sigmoid(self.mol_encoder(m))
         # mol_encoding = F.sigmoid(self.resnet(m))
         mol_decoding = F.sigmoid(self.mol_decoder(mol_encoding))
 
         if batch_idx == 1:
-            print(f'Original mol batch shape')
-            print(m.shape)
             print(f'Original Mol')
             print(m[0])
             print(m[0][m[0] != 0.0])
@@ -69,6 +68,9 @@ class LitMolAutoencoder(lt.LightningModule):
             print(f'Original Mol sum: {torch.sum(m[0])}')
             print(f'Mol encoding sum: {torch.sum(mol_encoding[0])}')
             print(f'Decoded Mol sum: {torch.sum(mol_decoding[0])}')
+            print(f'Original mol shape: {m.shape}')
+            print(f'Mol encoding shape: {mol_encoding.shape}')
+            print(f'Mol decoding shape: {mol_decoding.shape}')
 
         loss_2 = F.mse_loss(mol_decoding, m)
         total_loss =  loss_2
