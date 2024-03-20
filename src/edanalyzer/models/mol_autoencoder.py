@@ -51,8 +51,8 @@ class LitMolAutoencoder(lt.LightningModule):
         idx, x, z, m, d, y = train_batch
         y = y.view(y.size(0), -1)
 
-        # mol_encoding = F.sigmoid(self.mol_encoder(m))
-        mol_encoding = F.sigmoid(self.resnet(m))
+        mol_encoding = F.sigmoid(self.mol_encoder(m))
+        # mol_encoding = F.sigmoid(self.resnet(m))
         mol_decoding = F.sigmoid(self.mol_decoder(mol_encoding))
 
         if batch_idx == 1:
