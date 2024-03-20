@@ -57,16 +57,16 @@ class LitMolAutoencoder(lt.LightningModule):
 
         if batch_idx == 1:
             print(f'Original mol batch shape')
-            print(d.shape)
+            print(m.shape)
             print(f'Original Mol')
-            print(d[0])
-            print(d[0][d[0] != 0.0])
+            print(m[0])
+            print(m[0][m[0] != 0.0])
             print(f'Mol Encoding')
             print(mol_encoding[0])
             print(f'Mol Decoding')
             print(mol_decoding[0])
             print(f'Statistics')
-            print(f'Original Mol sum: {torch.sum(d[0])}')
+            print(f'Original Mol sum: {torch.sum(m[0])}')
             print(f'Mol encoding sum: {torch.sum(mol_encoding[0])}')
             print(f'Decoded Mol sum: {torch.sum(mol_decoding[0])}')
 
