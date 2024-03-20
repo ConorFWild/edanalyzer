@@ -14,7 +14,7 @@ class Block(nn.Module):
         self.conv = conv3x3(inplanes, outplanes, 2)
         self.bn = nn.BatchNorm3d(outplanes)
         self.relu = nn.ReLU(inplace=True)
-        # self.drop = nn.Dropout()
+        self.drop = nn.Dropout()
         self.last = last
 
     def forward(self, x):
@@ -22,7 +22,7 @@ class Block(nn.Module):
         if not self.last:
             x = self.bn(x)
         x = self.relu(x)
-        # x = self.drop(x)
+        x = self.drop(x)
         return x
 
 
@@ -76,14 +76,14 @@ class BlockTranspose(nn.Module):
         self.conv = convtranspose3x3(inplanes, outplanes, stride=2)
         self.bn = nn.BatchNorm3d(outplanes)
         self.relu = nn.ReLU(inplace=True)
-        # self.drop = nn.Dropout()
+        self.drop = nn.Dropout()
 
     def forward(self, x):
         x = self.conv(x)
         # print(x.shape)
         x = self.bn(x)
         x = self.relu(x)
-        # x = self.drop(x)
+        x = self.drop(x)
         return x
 
 
