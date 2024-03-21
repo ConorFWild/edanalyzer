@@ -40,8 +40,8 @@ def main(config_path, batch_size=12, num_workers=None):
     all_train_pose_idxs = []
     all_test_pose_idxs = []
 
-    # for table_type in ['normal', 'pandda_2']:
-    for table_type in ['pandda_2']:
+    for table_type in ['normal', 'pandda_2']:
+    # for table_type in ['pandda_2']:
 
         train_pose_idxs = []
         test_pose_idxs = []
@@ -172,8 +172,8 @@ def main(config_path, batch_size=12, num_workers=None):
     model = LitEventScoring()
 
     # Train
-    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_with_mtzs')
-    logger = CSVLogger("output/event_scoring_with_mtzs/logs")
+    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_with_mtzs_2')
+    logger = CSVLogger("output/event_scoring_with_mtzs_2/logs")
     trainer = lt.Trainer(accelerator='gpu', logger=logger, callbacks=[checkpoint_callback],
                          enable_progress_bar=False
                          )
