@@ -172,8 +172,8 @@ def main(config_path, batch_size=12, num_workers=None):
     model = LitEventScoring()
 
     # Train
-    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_with_mtzs_xtra_data')
-    logger = CSVLogger("output/event_scoring_with_mtzs_xtra_data/logs")
+    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_wide')
+    logger = CSVLogger("output/event_scoring_wide/logs")
     trainer = lt.Trainer(accelerator='gpu', logger=logger, callbacks=[checkpoint_callback],
                          enable_progress_bar=False
                          )

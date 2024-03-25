@@ -185,13 +185,13 @@ class LitEventScoring(lt.LightningModule):
         self.density_encoder = SimpleConvolutionalEncoder(input_layers=2)
         self.mol_encoder = SimpleConvolutionalEncoder()
         self.mol_decoder = SimpleConvolutionalDecoder()
-        self.density_decoder = SimpleConvolutionalDecoder(input_layers=128)
+        self.density_decoder = SimpleConvolutionalDecoder(input_layers=256)
         # self.fc = nn.Linear(512 + 32, 1)
-        self.fc = nn.Linear(64 + 64, 1)
+        self.fc = nn.Linear(256, 1)
 
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_with_mtzs_xtra_data')
+        self.output = Path('./output/event_scoring_wide')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
