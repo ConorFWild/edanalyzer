@@ -12,4 +12,9 @@ def _get_event_map(event_map_sample):
 
     return grid
 
-
+def _write_event_map(event_map, path):
+    # Write the event map
+    ccp4 = gemmi.Ccp4Map()
+    ccp4.grid = event_map
+    ccp4.update_ccp4_header()
+    ccp4.write_ccp4_map(str(path))

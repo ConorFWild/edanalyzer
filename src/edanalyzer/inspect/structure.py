@@ -27,3 +27,6 @@ def _get_model(closest_pose):
     model.add_chain(chain)
     st.add_model(model)
     return st
+
+def _write_structure(st, path):
+    st.write_pdb(str(path))
