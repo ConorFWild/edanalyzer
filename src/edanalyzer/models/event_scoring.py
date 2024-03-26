@@ -187,30 +187,30 @@ class LitEventScoring(lt.LightningModule):
         self.mol_decoder = SimpleConvolutionalDecoder()
         self.density_decoder = SimpleConvolutionalDecoder(input_layers=256)
         # self.fc = nn.Linear(512 + 32, 1)
-        self.fc = nn.Linear(256, 1)
+        self.fc = nn.Linear(128, 1)
 
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_wide')
+        self.output = Path('./output/event_scoring_wide_only_z')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
         z_encoding = self.resnet(z)
-        z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
-        z_decoding = F.hardtanh(self.density_decoder(z_mol_encoding), min_val=0.0, max_val=1.0,)
-        mask = torch.zeros(z_decoding.shape).to(z_decoding.device)
-        mask[z_decoding > 0.5] = 1.0
-        full_density = torch.cat(
-            [
-                z,
-                # x * z_decoding
-                # x
-                x * mask
-            ],
-            dim=1,
-        )
-        density_encoding = self.density_encoder(full_density)
-        full_encoding = torch.cat([density_encoding, mol_encoding], dim=1)
+        # z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
+        # z_decoding = F.hardtanh(self.density_decoder(z_mol_encoding), min_val=0.0, max_val=1.0,)
+        # mask = torch.zeros(z_decoding.shape).to(z_decoding.device)
+        # mask[z_decoding > 0.5] = 1.0
+        # full_density = torch.cat(
+        #     [
+        #         z,
+        #         # x * z_decoding
+        #         # x
+        #         # x * mask
+        #     ],
+        #     dim=1,
+        # )
+        # density_encoding = self.density_encoder(full_density)
+        full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
 
         score = F.sigmoid(self.fc(full_encoding))
 
@@ -229,19 +229,19 @@ class LitEventScoring(lt.LightningModule):
         z_encoding = self.resnet(z)
         z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         z_decoding = F.hardtanh(self.density_decoder(z_mol_encoding), min_val=0.0, max_val=1.0,)
-        mask = torch.zeros(z_decoding.shape).to(z_decoding.device)
-        mask[z_decoding > 0.5] = 1.0
-        full_density = torch.cat(
-            [
-                z,
-                # x * z_decoding
-                # x,
-                x * mask
-            ],
-            dim=1,
-        )
-        density_encoding = self.density_encoder(full_density)
-        full_encoding = torch.cat([density_encoding, mol_encoding], dim=1)
+        # mask = torch.zeros(z_decoding.shape).to(z_decoding.device)
+        # mask[z_decoding > 0.5] = 1.0
+        # full_density = torch.cat(
+        #     [
+        #         z,
+        #         # x * z_decoding
+        #         # x,
+        #         # x * mask
+        #     ],
+        #     dim=1,
+        # )
+        # density_encoding = self.density_encoder(full_density)
+        full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
 
         score = F.sigmoid(self.fc(full_encoding))
         loss_1 = F.mse_loss(score, y)
@@ -272,21 +272,22 @@ class LitEventScoring(lt.LightningModule):
 
         mol_encoding = self.mol_encoder(m)
         z_encoding = self.resnet(z)
-        z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
-        z_decoding = F.hardtanh(self.density_decoder(z_mol_encoding), min_val=0.0, max_val=1.0,)
-        mask = torch.zeros(z_decoding.shape).to(z_decoding.device)
-        mask[z_decoding > 0.5] = 1.0
-        full_density = torch.cat(
-            [
-                z,
-                # x * z_decoding
-                # x,
-                x * mask
-            ],
-            dim=1,
-        )
-        density_encoding = self.density_encoder(full_density)
-        full_encoding = torch.cat([density_encoding, mol_encoding], dim=1)
+        # z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
+        # z_decoding = F.hardtanh(self.density_decoder(z_mol_encoding), min_val=0.0, max_val=1.0,)
+        # mask = torch.zeros(z_decoding.shape).to(z_decoding.device)
+        # mask[z_decoding > 0.5] = 1.0
+        # full_density = torch.cat(
+        #     [
+        #         z,
+        #         # x * z_decoding
+        #         # x,
+        #         # x * mask
+        #     ],
+        #     dim=1,
+        # )
+        # full_density = z
+        # density_encoding = self.density_encoder(full_density)
+        full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
 
         score = F.sigmoid(self.fc(full_encoding))
         loss = F.mse_loss(score, y)
