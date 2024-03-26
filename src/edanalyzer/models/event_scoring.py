@@ -187,7 +187,7 @@ class LitEventScoring(lt.LightningModule):
         self.mol_decoder = SimpleConvolutionalDecoder()
         self.density_decoder = SimpleConvolutionalDecoder(input_layers=256)
         # self.fc = nn.Linear(512 + 32, 1)
-        self.fc = nn.Linear(128, 1)
+        self.fc = nn.Linear(256, 1)
 
         self.train_annotations = []
         self.test_annotations = []
