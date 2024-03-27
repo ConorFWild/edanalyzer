@@ -20,6 +20,8 @@ class Block(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         if drop:
             self.drop = nn.Dropout()
+        else:
+            self.drop=None
         self.last = last
 
     def forward(self, x):
@@ -91,6 +93,8 @@ class BlockTranspose(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         if drop:
             self.drop = nn.Dropout()
+        else:
+            self.drop=None
 
     def forward(self, x):
         x = self.conv(x)
