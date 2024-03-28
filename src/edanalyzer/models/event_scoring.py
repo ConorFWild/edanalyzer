@@ -10,6 +10,7 @@ import tables
 
 from .resnet import resnet18, resnet10
 from .simple_autoencoder import SimpleConvolutionalEncoder, SimpleConvolutionalDecoder
+from edanalyzer.losses import categorical_loss
 
 
 class Annotation(tables.IsDescription):
@@ -187,11 +188,11 @@ class LitEventScoring(lt.LightningModule):
         self.mol_decoder = SimpleConvolutionalDecoder()
         self.density_decoder = SimpleConvolutionalDecoder(input_layers=256)
         # self.fc = nn.Linear(512 + 32, 1)
-        self.fc = nn.Linear(256, 1)
+        self.fc = nn.Linear(256, 2)
 
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_7x7_1_drop')
+        self.output = Path('./output/event_scoring_cat')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
@@ -243,8 +244,11 @@ class LitEventScoring(lt.LightningModule):
         # density_encoding = self.density_encoder(full_density)
         full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
 
-        score = F.sigmoid(self.fc(full_encoding))
-        loss_1 = F.mse_loss(score, y)
+        # score = F.sigmoid(self.fc(full_encoding))
+        score = F.softmax(self.fc(full_encoding))
+
+        # loss_1 = F.mse_loss(score, y)
+        loss_1 = categorical_loss(score, y)
         loss_2 = F.mse_loss(mol_decoding, m)
         loss_3 = F.mse_loss(z_decoding, d)
         total_loss = loss_1 + loss_2 + loss_3
@@ -258,8 +262,10 @@ class LitEventScoring(lt.LightningModule):
                 {
                     "idx": int(idx[1][j].to(torch.device("cpu")).detach().numpy()),
                     'table': str(idx[0][j]),
-                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][0],
-                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
+                    # "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][0],
+                    # "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
+                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][1],
+                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][1],
                     'set': 0
                 }
             )
@@ -289,8 +295,11 @@ class LitEventScoring(lt.LightningModule):
         # density_encoding = self.density_encoder(full_density)
         full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
 
-        score = F.sigmoid(self.fc(full_encoding))
-        loss = F.mse_loss(score, y)
+        # score = F.sigmoid(self.fc(full_encoding))
+        score = F.softmax(self.fc(full_encoding))
+
+        loss = categorical_loss(score, y)
+        # loss = F.mse_loss(score, y)
         self.log('test_loss', loss)
 
         for j in range(len(idx[0])):
@@ -298,8 +307,10 @@ class LitEventScoring(lt.LightningModule):
                 {
                     "idx": int(idx[1][j].to(torch.device("cpu")).detach().numpy()),
                     'table': str(idx[0][j]),
-                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][0],
-                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
+                    # "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][0],
+                    # "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
+                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][1],
+                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][1],
                     'set': 1
                 }
             )

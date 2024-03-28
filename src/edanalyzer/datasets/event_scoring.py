@@ -269,10 +269,16 @@ class EventScoringDataset(Dataset):
         #     hit = 1.0
         # elif (pose_data_idx != -1) & (random_ligand):
         #     hit = 0.0
+        # if pose_data_idx != -1:
+        #     hit = 1.0
+        # elif pose_data_idx == -1:
+        #     hit = 0.0
+        # else:
+        #     raise Exception
         if pose_data_idx != -1:
-            hit = 1.0
+            hit = [0.0, 1.0]
         elif pose_data_idx == -1:
-            hit = 0.0
+            hit = [1.0, 0.0]
         else:
             raise Exception
 
