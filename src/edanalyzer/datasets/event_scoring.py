@@ -148,7 +148,7 @@ class EventScoringDataset(Dataset):
         # Subsample if training
         if annotation['partition'] == 'train':
             rng = np.random.default_rng()
-            num_centres = rng.integers(1, 3)
+            num_centres = rng.integers(1, 5)
 
             # For each centre mask atoms close to it
             total_mask = np.full(valid_elements.size, False)
