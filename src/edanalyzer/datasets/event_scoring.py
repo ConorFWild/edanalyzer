@@ -258,7 +258,7 @@ class EventScoringDataset(Dataset):
             grid_array = np.array(grid, copy=False)
             grid_array[:,:,:] = image_z_float[:,:,:]
             rsg = gemmi.transform_map_to_f_phi(grid)
-            dmin = 1 + (2*rng.random())
+            dmin = 1 + (1.0*rng.random())
             data = rsg.prepare_asu_data(dmin=float(dmin))
             grid_low_res = data.transform_f_phi_to_map(exact_size=[32, 32, 32])
             grid_low_res_array = np.array(grid_low_res, copy=False)
