@@ -183,16 +183,16 @@ class LitEventScoring(lt.LightningModule):
         super().__init__()
         # self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
         self.resnet = SimpleConvolutionalEncoder()
-        self.density_encoder = SimpleConvolutionalEncoder(input_layers=2)
+        # self.density_encoder = SimpleConvolutionalEncoder(input_layers=1)
         self.mol_encoder = SimpleConvolutionalEncoder()
         self.mol_decoder = SimpleConvolutionalDecoder()
-        self.density_decoder = SimpleConvolutionalDecoder(input_layers=256)
+        self.density_decoder = SimpleConvolutionalDecoder(input_layers=512)
         # self.fc = nn.Linear(512 + 32, 1)
-        self.fc = nn.Linear(256, 2)
+        self.fc = nn.Linear(512, 2)
 
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_cat')
+        self.output = Path('./output/event_scoring_cat_wider')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
@@ -213,7 +213,7 @@ class LitEventScoring(lt.LightningModule):
         # density_encoding = self.density_encoder(full_density)
         full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
 
-        score = F.sigmoid(self.fc(full_encoding))
+        score = F.softmax(self.fc(full_encoding))
 
         return score
 

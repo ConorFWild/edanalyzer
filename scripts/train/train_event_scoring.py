@@ -173,7 +173,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Train
     checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_7x7_1_drop')
-    logger = CSVLogger("output/event_scoring_cat/logs")
+    logger = CSVLogger("output/event_scoring_cat_wider/logs")
     trainer = lt.Trainer(accelerator='gpu', logger=logger, callbacks=[checkpoint_callback],
                          enable_progress_bar=False
                          )
