@@ -19,7 +19,7 @@ class Block(nn.Module):
         self.bn = nn.BatchNorm3d(outplanes)
         self.relu = nn.ReLU(inplace=True)
         if drop:
-            self.drop = nn.Dropout(p=0.05)
+            self.drop = nn.Dropout(p=0.5)
         else:
             self.drop=None
         self.last = last
@@ -92,7 +92,7 @@ class BlockTranspose(nn.Module):
         self.bn = nn.BatchNorm3d(outplanes)
         self.relu = nn.ReLU(inplace=True)
         if drop:
-            self.drop = nn.Dropout(p=0.05)
+            self.drop = nn.Dropout(p=0.5)
         else:
             self.drop=None
 
