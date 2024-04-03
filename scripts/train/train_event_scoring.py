@@ -15,7 +15,7 @@ from edanalyzer.models.event_scoring import LitEventScoring
 from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 
 from lightning.pytorch.loggers import CSVLogger
-from lightning.pytorch.callbacks import ModelCheckpoint
+from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveraging
 
 
 def main(config_path, batch_size=12, num_workers=None):
@@ -174,8 +174,14 @@ def main(config_path, batch_size=12, num_workers=None):
     # Train
     checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_7x7_1_drop')
     logger = CSVLogger("output/event_scoring_cat_wider/logs")
-    trainer = lt.Trainer(accelerator='gpu', logger=logger, callbacks=[checkpoint_callback],
-                         enable_progress_bar=False
+    trainer = lt.Trainer(accelerator='gpu', logger=logger,
+                         callbacks=[
+                             checkpoint_callback,
+                             StochasticWeightAveraging(swa_lrs=1e-2)
+                         ],
+                         enable_progress_bar=False,
+                         gradient_clip_val=1.0,
+
                          )
     trainer.fit(model, dataset_train, dataset_test)
 
