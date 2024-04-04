@@ -47,6 +47,7 @@ def _run_panddas(config_path, num_cpus=36):
                 [x for x in Path(_experiment.model_dir).glob("*")])
             except Exception as e:
                 rprint(f'Dataset {_experiment.model_dir} no longer available! Skipping!')
+                rprint(e)
                 continue
             if not _experiment_system_name in system_experiments:
                 system_experiments[_experiment_system_name] = {}
