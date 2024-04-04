@@ -43,10 +43,13 @@ def _run_panddas(config_path, num_cpus=36):
             if not _experiment_system_name in system_experiments:
                 system_experiments[_experiment_system_name] = {}
 
-            num_datasets = len(
+            try:
+                num_datasets = len(
                 [x for x in Path(_experiment.model_dir).glob("*")])
+            except Exception as e:
+                rprint(f'Dataset {_experiment.model_dir} no longer available! Skipping!')
+                continue
             if num_datasets > 0:
-
                 system_experiments[_experiment_system_name][_experiment.path] = num_datasets
 
         rprint(f"System Experiments:")
