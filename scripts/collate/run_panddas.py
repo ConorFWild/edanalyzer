@@ -40,8 +40,7 @@ def _run_panddas(config_path, num_cpus=36):
         system_experiments = {}
         for _experiment in query.values():
             _experiment_system_name = _experiment.system.name
-            if not _experiment_system_name in system_experiments:
-                system_experiments[_experiment_system_name] = {}
+
 
             try:
                 num_datasets = len(
@@ -49,6 +48,8 @@ def _run_panddas(config_path, num_cpus=36):
             except Exception as e:
                 rprint(f'Dataset {_experiment.model_dir} no longer available! Skipping!')
                 continue
+            if not _experiment_system_name in system_experiments:
+                system_experiments[_experiment_system_name] = {}
             if num_datasets > 0:
                 system_experiments[_experiment_system_name][_experiment.path] = num_datasets
 
