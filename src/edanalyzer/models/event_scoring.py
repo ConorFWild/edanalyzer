@@ -233,11 +233,11 @@ class LitEventScoring(lt.LightningModule):
 
         z_encoding = self.z_encoder(z)
         z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
-        z_decoding = 10*F.hardtanh(self.z_decoder(z_mol_encoding), min_val=-10.0, max_val=10.0)
+        z_decoding = F.hardtanh(self.z_decoder(z_mol_encoding), min_val=-10.0, max_val=10.0)
 
         x_encoding = self.x_encoder(x)
         x_mol_encoding = torch.cat([x_encoding, mol_encoding], dim=1)
-        x_decoding = 10*F.hardtanh(self.x_decoder(x_mol_encoding), min_val=-10.0, max_val=10.0)
+        x_decoding = F.hardtanh(self.x_decoder(x_mol_encoding), min_val=-10.0, max_val=10.0)
 
 
 
