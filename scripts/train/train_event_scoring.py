@@ -224,7 +224,7 @@ def main(config_path, batch_size=12, num_workers=None):
         EventScoringDataset(
             zarr_path,
             all_test_pose_idxs,
-            None
+            pos_train_pose_samples
         ),
         batch_size=batch_size,
         num_workers=19,
