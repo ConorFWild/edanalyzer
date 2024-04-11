@@ -84,14 +84,14 @@ def main(config_path, batch_size=12, num_workers=None):
             f'Got {len(corresponding_test_event_annotations)} test annotations, of which {len(pos_test_annotations)} positive')
 
         # Get the pos and neg train samples
-        if len(corresponding_train_event_annotations) > 0:
+        if len(pos_train_annotations) > 0:
             pos_train_samples = pos_train_annotations.sample(50, replace=True)
             neg_train_samples = negative_train_samples.sample(50)
             all_train_pose_idxs += [(table_type, x) for x in pos_train_samples['idx']]
             all_train_pose_idxs += [(table_type, x) for x in neg_train_samples['idx']]
 
         # Get the pos and neg test samples
-        if len(corresponding_test_event_annotations) > 0:
+        if len(pos_test_annotations) > 0:
             pos_test_samples = pos_test_annotations
             # neg_test_samples = negative_test_samples
             all_test_pose_idxs += [(table_type, x) for x in pos_test_samples['idx']]
