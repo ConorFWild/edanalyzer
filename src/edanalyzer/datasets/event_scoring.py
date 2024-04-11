@@ -111,7 +111,9 @@ class EventScoringDataset(Dataset):
         else:
             if sample_idx[0] == 'normal':
 
-                pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
+                # pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
+                selected_pose_idx = rng.integers(0, len(self.pos_train_pose_samples))
+                pose_data = self.pandda_2_pose_table[self.pos_train_pose_samples[selected_pose_idx]]
             else:
                 selected_pose_idx = rng.integers(0, len(self.pos_train_pose_samples))
                 pose_data = self.pandda_2_pose_table[self.pos_train_pose_samples[selected_pose_idx]]
