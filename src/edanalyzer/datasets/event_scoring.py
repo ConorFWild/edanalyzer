@@ -27,7 +27,7 @@ from .base import (
 
 class EventScoringDataset(Dataset):
 
-    def __init__(self, zarr_path, sample_indexes):
+    def __init__(self, zarr_path, sample_indexes, pos_train_pose_samples):
         # self.data = data
         self.root = zarr.open(zarr_path, mode='r')
 
@@ -62,6 +62,8 @@ class EventScoringDataset(Dataset):
         }
 
         self.sample_indexes = sample_indexes
+
+        self.pos_train_pose_samples = pos_train_pose_samples
 
     def __len__(self):
         return len(self.sample_indexes)
@@ -111,7 +113,8 @@ class EventScoringDataset(Dataset):
 
                 pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
             else:
-                pose_data = self.pandda_2_pose_table[rng.integers(0, len(self.pandda_2_pose_table))]
+                selected_pose_idx = rng.integers(0, self.pos_train_pose_samples)
+                pose_data = self.pandda_2_pose_table[self.pos_train_pose_samples[selected_pose_idx]]
 
 
 

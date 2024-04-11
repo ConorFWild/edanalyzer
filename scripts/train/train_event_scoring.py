@@ -62,6 +62,8 @@ def main(config_path, batch_size=12, num_workers=None):
     unique_smiles = ligand_idx_smiles_df['canonical_smiles'].unique()
     print(f'Number of unique smiles: {len(unique_smiles)}')
 
+    pos_train_pose_samples = []
+
     for smiles in unique_smiles:
         print(f'{smiles}')
         ligand_idx_df = ligand_idx_smiles_df[ligand_idx_smiles_df['canonical_smiles'] == smiles]
@@ -89,6 +91,7 @@ def main(config_path, batch_size=12, num_workers=None):
             neg_train_samples = negative_train_samples.sample(50)
             all_train_pose_idxs += [(table_type, x) for x in pos_train_samples['idx']]
             all_train_pose_idxs += [(table_type, x) for x in neg_train_samples['idx']]
+            pos_train_pose_samples += [x for x in corresponding_samples[corresponding_samples['idx'].isin(pos_train_annotations['idx'])].sample(50, replace=True)['pose_data_idx']]
 
         # Get the pos and neg test samples
         if len(pos_test_annotations) > 0:
@@ -209,7 +212,8 @@ def main(config_path, batch_size=12, num_workers=None):
     dataset_train = DataLoader(
         EventScoringDataset(
             zarr_path,
-            all_train_pose_idxs
+            all_train_pose_idxs,
+            pos_train_pose_samples
         ),
         batch_size=batch_size,
         shuffle=True,
@@ -219,7 +223,8 @@ def main(config_path, batch_size=12, num_workers=None):
     dataset_test = DataLoader(
         EventScoringDataset(
             zarr_path,
-            all_test_pose_idxs
+            all_test_pose_idxs,
+            None
         ),
         batch_size=batch_size,
         num_workers=19,
