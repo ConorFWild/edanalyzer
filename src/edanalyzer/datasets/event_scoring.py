@@ -250,19 +250,19 @@ class EventScoringDataset(Dataset):
         image_decoded_density_float = image_decoded_density.astype(np.float32)
 
         # res mask
-        if annotation['partition'] == 'train':
-            grid = gemmi.FloatGrid(32, 32, 32)
-            grid.spacegroup = gemmi.SpaceGroup('P1')
-            uc = gemmi.UnitCell(16.0, 16.0, 16.0, 90.0, 90.0, 90.0)
-            grid.set_unit_cell(uc)
-            grid_array = np.array(grid, copy=False)
-            grid_array[:,:,:] = image_z_float[:,:,:]
-            rsg = gemmi.transform_map_to_f_phi(grid)
-            dmin = 1 + (1.0*rng.random())
-            data = rsg.prepare_asu_data(dmin=float(dmin))
-            grid_low_res = data.transform_f_phi_to_map(exact_size=[32, 32, 32])
-            grid_low_res_array = np.array(grid_low_res, copy=False)
-            image_z_float[:, :, :] = grid_low_res_array[:,:,:]
+        # if annotation['partition'] == 'train':
+        #     grid = gemmi.FloatGrid(32, 32, 32)
+        #     grid.spacegroup = gemmi.SpaceGroup('P1')
+        #     uc = gemmi.UnitCell(16.0, 16.0, 16.0, 90.0, 90.0, 90.0)
+        #     grid.set_unit_cell(uc)
+        #     grid_array = np.array(grid, copy=False)
+        #     grid_array[:,:,:] = image_z_float[:,:,:]
+        #     rsg = gemmi.transform_map_to_f_phi(grid)
+        #     dmin = 1 + (1.0*rng.random())
+        #     data = rsg.prepare_asu_data(dmin=float(dmin))
+        #     grid_low_res = data.transform_f_phi_to_map(exact_size=[32, 32, 32])
+        #     grid_low_res_array = np.array(grid_low_res, copy=False)
+        #     image_z_float[:, :, :] = grid_low_res_array[:,:,:]
 
         # Make the annotation
         # if (pose_data_idx != -1) & (not random_ligand):

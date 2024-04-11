@@ -41,6 +41,39 @@ def main(config_path, batch_size=12, num_workers=None):
     all_test_pose_idxs = []
 
     for table_type in ['normal', 'pandda_2']:
+
+        # Get the tables
+        table_annotation = root['pandda_2']['annotation']
+        table_z_map_sample_metadata = root['pandda_2']['z_map_sample_metadata']
+        table_ligand_data = root['pandda_2']['ligand_data']
+
+        #
+        metadata_df = pd.DataFrame(root['z_map_sample_metadata'][:])
+
+
+        # Get the compressed ligand smiles table
+        ligand_idx_smiles_df = pd.DataFrame(table_ligand_data.get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
+
+        # Get the unique smiles table
+        unique_smiles = ligand_idx_smiles_df['canonical_smiles'].unique()
+
+        # Get the train and test tables
+
+
+        # Iterate over unique smiles, selecting an equal number of examples of each unique ligand
+        # that has both positives and negatives, and an equal number of each
+        for smiles in unique_smiles:
+            # Get the corresponding ligands
+            ligand_idx_df = ligand_idx_smiles_df[ligand_idx_smiles_df['canonical_smiles'] == smiles]
+
+            # Get corresponding map sample metadata
+            corresponding_samples = metadata_df[metadata_df['ligand_data_idx'].isin(ligand_idx_df['idx'])]
+
+            #
+
+
+
+    for table_type in ['normal', 'pandda_2']:
     # for table_type in ['pandda_2']:
 
         train_pose_idxs = []
