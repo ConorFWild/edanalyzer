@@ -189,8 +189,11 @@ class LitEventScoring(lt.LightningModule):
         self.x_decoder = SimpleConvolutionalDecoder(input_layers=512)
         self.z_decoder = SimpleConvolutionalDecoder(input_layers=512)
         # self.fc = nn.Linear(512 + 32, 1)
-        self.fc = nn.Linear(768, 2)
-
+        self.fc = nn.Sequential(
+            nn.Linear(768, 512),
+            nn.Linear(512, 256),
+            nn.Linear(256, 2),
+        )
         self.train_annotations = []
         self.test_annotations = []
         self.output = Path('./output/event_scoring_cat_x')
