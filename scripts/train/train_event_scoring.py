@@ -243,7 +243,7 @@ def main(config_path, batch_size=12, num_workers=None):
                              StochasticWeightAveraging(swa_lrs=1e-2)
                          ],
                          enable_progress_bar=False,
-                         gradient_clip_val=0.5,
+                         gradient_clip_val=0.1,
 
                          )
     trainer.fit(model, dataset_train, dataset_test)
