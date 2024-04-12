@@ -266,8 +266,8 @@ class LitEventScoring(lt.LightningModule):
         loss_2 = F.mse_loss(mol_decoding, m)
         loss_3 = F.mse_loss(z_decoding, d)
         loss_4 = F.mse_loss(x_decoding, x)
-        # total_loss = loss_1 + loss_2 + loss_3
-        total_loss = loss_1 * loss_2 * loss_3 * loss_4
+        total_loss = loss_1 + loss_2 + loss_3 + loss_4
+        # total_loss = loss_1 * loss_2 * loss_3 * loss_4
 
         self.log('train_loss', loss_1)
         self.log('mol_decode_loss', loss_2)
