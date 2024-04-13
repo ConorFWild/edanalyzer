@@ -50,11 +50,11 @@ class EventScoringDataset(Dataset):
         #     for _x
         #     in self.annotation_table
         # }
-        self.annotations = {
-            _x['event_idx']: _x
-            for _x
-            in self.annotation_table
-        }
+        # self.annotations = {
+        #     _x['event_idx']: _x
+        #     for _x
+        #     in self.annotation_table
+        # }
         self.pandda_2_annotations = {
             _x['event_idx']: _x
             for _x
