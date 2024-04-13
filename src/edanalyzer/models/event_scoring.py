@@ -198,7 +198,7 @@ class LitEventScoring(lt.LightningModule):
         )
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_balanced_2')
+        self.output = Path('./output/event_scoring_balanced_no_decode')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
@@ -234,15 +234,15 @@ class LitEventScoring(lt.LightningModule):
         y = y.view(y.size(0), -1)
 
         mol_encoding = self.mol_encoder(m)
-        mol_decoding = F.hardtanh(self.mol_decoder(mol_encoding), min_val=0.0, max_val=1.0,)
+        # mol_decoding = F.hardtanh(self.mol_decoder(mol_encoding), min_val=0.0, max_val=1.0,)
 
         z_encoding = self.z_encoder(z)
-        z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
-        z_decoding = F.hardtanh(self.z_decoder(z_mol_encoding), min_val=0.0, max_val=1.0)
+        # z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
+        # z_decoding = F.hardtanh(self.z_decoder(z_mol_encoding), min_val=0.0, max_val=1.0)
 
         x_encoding = self.x_encoder(x)
-        x_mol_encoding = torch.cat([x_encoding, mol_encoding], dim=1)
-        x_decoding = F.hardtanh(self.x_decoder(x_mol_encoding), min_val=0.0, max_val=1.0)
+        # x_mol_encoding = torch.cat([x_encoding, mol_encoding], dim=1)
+        # x_decoding = F.hardtanh(self.x_decoder(x_mol_encoding), min_val=0.0, max_val=1.0)
 
 
 
@@ -265,16 +265,16 @@ class LitEventScoring(lt.LightningModule):
 
         # loss_1 = F.mse_loss(score, y)
         loss_1 = categorical_loss(score, y)
-        loss_2 = F.mse_loss(mol_decoding, m)
-        loss_3 = F.mse_loss(z_decoding, d)
-        loss_4 = F.mse_loss(x_decoding, d)
-        total_loss = loss_1 + loss_2 + loss_3 + loss_4
+        # loss_2 = F.mse_loss(mol_decoding, m)
+        # loss_3 = F.mse_loss(z_decoding, d)
+        # loss_4 = F.mse_loss(x_decoding, d)
+        total_loss = loss_1 #+ loss_2 + loss_3 + loss_4
         # total_loss = loss_1 * loss_2 * loss_3 * loss_4
 
         self.log('train_loss', loss_1)
-        self.log('mol_decode_loss', loss_2)
-        self.log('z_decode_loss', loss_3)
-        self.log('x_decode_loss', loss_4)
+        # self.log('mol_decode_loss', loss_2)
+        # self.log('z_decode_loss', loss_3)
+        # self.log('x_decode_loss', loss_4)
 
         for j in range(len(idx[0])):
             self.train_annotations.append(
