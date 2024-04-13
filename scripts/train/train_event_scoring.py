@@ -33,7 +33,7 @@ def main(config_path, batch_size=12, num_workers=None):
     except Exception as e:
         print(f"Exception setting up database: {e}")
 
-    zarr_path = 'output/event_data_with_mtzs.zarr'
+    zarr_path = 'output/event_data_with_mtzs_2.zarr'
     root = zarr.open(zarr_path, mode='r')
 
     # Get the HDF5 root group
