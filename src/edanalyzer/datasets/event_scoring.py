@@ -31,12 +31,12 @@ class EventScoringDataset(Dataset):
         # self.data = data
         self.root = zarr.open(zarr_path, mode='r')
 
-        self.z_map_sample_metadata_table = self.root['z_map_sample_metadata']
-        self.xmap_sample_table = self.root['xmap_sample']
-        self.z_map_sample_table = self.root['z_map_sample']
-        self.pose_table = self.root['known_hit_pose']
-        self.ligand_data_table = self.root['ligand_data']
-        self.annotation_table = self.root['annotation']
+        # self.z_map_sample_metadata_table = self.root['z_map_sample_metadata']
+        # self.xmap_sample_table = self.root['xmap_sample']
+        # self.z_map_sample_table = self.root['z_map_sample']
+        # self.pose_table = self.root['known_hit_pose']
+        # self.ligand_data_table = self.root['ligand_data']
+        # self.annotation_table = self.root['annotation']
 
         self.pandda_2_z_map_sample_metadata_table = self.root['pandda_2']['z_map_sample_metadata']
         self.pandda_2_xmap_sample_table = self.root['pandda_2']['xmap_sample']
