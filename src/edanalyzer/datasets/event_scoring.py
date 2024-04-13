@@ -185,11 +185,12 @@ class EventScoringDataset(Dataset):
 
 
         # Get sample images
-        xmap_sample = _sample_xmap_and_scale(
-            xmap,
-            transform,
-            np.copy(sample_array)
-        )
+        # xmap_sample = _sample_xmap_and_scale(
+        #     xmap,
+        #     transform,
+        #     np.copy(sample_array)
+        # )
+        xmap_sample = np.copy(sample_array)
         z_map_sample = _sample_xmap_and_scale(
             z_map,
             transform,
