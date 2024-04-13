@@ -59,7 +59,7 @@ def main(config_path):
 
     #
     # Open a file in "w"rite mode
-    zarr_path = 'output/event_data_with_mtzs.zarr'
+    zarr_path = 'output/event_data_with_mtzs_2.zarr'
     root = zarr.open(zarr_path, mode='a')
 
     #
