@@ -19,7 +19,7 @@ class Block(nn.Module):
         self.bn = nn.BatchNorm3d(outplanes)
         self.relu = nn.ReLU(inplace=True)
         if drop:
-            self.drop = nn.Dropout(p=0.5)
+            self.drop = nn.Dropout(p=0.25)
         else:
             self.drop=None
         self.last = last
@@ -41,10 +41,10 @@ class SimpleConvolutionalEncoder(nn.Module):
         # Layers
         # Layers
         self.input_layers = input_layers
-        self.layer1 = Block(input_layers, 16, drop=False, conv=conv7x7)
-        self.layer2 = Block(16, 32, drop=False)
-        self.layer3 = Block(32, 64, drop=False)
-        self.layer4 = Block(64, 128, drop=False)
+        self.layer1 = Block(input_layers, 16, drop=True, conv=conv7x7)
+        self.layer2 = Block(16, 32, drop=True)
+        self.layer3 = Block(32, 64, drop=True)
+        self.layer4 = Block(64, 128, drop=True)
         self.layer5 = Block(128, 256, last=True, drop=False)
         self.drop = nn.Dropout()
 
@@ -66,7 +66,7 @@ class SimpleConvolutionalEncoder(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
         x = self.layer5(x)
-        x = self.drop(x)
+        # x = self.drop(x)
 
         # x = self.avgpool(x)
         x = x.view(-1, x.shape[1] * x.shape[2] * x.shape[3] * x.shape[4])
@@ -92,7 +92,7 @@ class BlockTranspose(nn.Module):
         self.bn = nn.BatchNorm3d(outplanes)
         self.relu = nn.ReLU(inplace=True)
         if drop:
-            self.drop = nn.Dropout(p=0.5)
+            self.drop = nn.Dropout(p=0.25)
         else:
             self.drop=None
 
@@ -114,10 +114,10 @@ class SimpleConvolutionalDecoder(nn.Module):
 
         # Layers
         self.drop = nn.Dropout()
-        self.layer1 = BlockTranspose(input_layers, 128, drop=False )
-        self.layer2 = BlockTranspose(128, 64, drop=False )
-        self.layer3 = BlockTranspose(64, 32, drop=False)
-        self.layer4 = BlockTranspose(32, 16, drop=False )
+        self.layer1 = BlockTranspose(input_layers, 128, drop=True )
+        self.layer2 = BlockTranspose(128, 64, drop=True )
+        self.layer3 = BlockTranspose(64, 32, drop=True)
+        self.layer4 = BlockTranspose(32, 16, drop=True )
         self.layer5 = BlockTranspose(16, 1, drop=False, conv=convtranspose7x7)
 
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
