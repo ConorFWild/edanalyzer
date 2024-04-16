@@ -222,13 +222,15 @@ def _get_train_test_idxs(root):
 
 
 def main(config_path, batch_size=12, num_workers=None):
-    rprint(f'Running collate_database from config file: {config_path}')
+    rprint(f'Running train event scoring from config file: {config_path}')
     # Load config
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
 
     # Get the Database
     database_path = Path(config['working_directory']) / "database.db"
+    rprint(f'loading database from: {database_path}')
+
     try:
         db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
         db.generate_mapping(create_tables=True)
@@ -445,6 +447,7 @@ def main(config_path, batch_size=12, num_workers=None):
     #     rprint(f"Got {len(positive_train_pose_idxs)} postivie train samples")
     #     rprint(f"Got {len(negative_train_pose_idxs)} negative test samples")
 
+    rprint(f'Getting train/test data...')
     all_train_pose_idxs, all_test_pose_idxs = _get_train_test_idxs(root)
     rprint(f"Got {len(all_train_pose_idxs)} train samples")
     rprint(f"Got {len(all_test_pose_idxs)} test samples")
@@ -453,6 +456,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # with pony.orm.db_session:
     #     query = [_x for _x in pony.orm.select(_y for _y in EventORM)]
+    rprint(f'Constructing train and test dataloaders...')
     dataset_train = DataLoader(
         EventScoringDataset(
             zarr_path,
@@ -478,9 +482,11 @@ def main(config_path, batch_size=12, num_workers=None):
     rprint(f"Got {len(dataset_test)} test samples")
 
     # Get the model
+    rprint('Constructing model...')
     model = LitEventScoring()
 
     # Train
+    rprint('Constructing trainer...')
     checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_frag')
     logger = CSVLogger("output/event_scoring_frag/logs")
     trainer = lt.Trainer(accelerator='gpu', logger=logger,
@@ -492,6 +498,7 @@ def main(config_path, batch_size=12, num_workers=None):
                          gradient_clip_val=0.1,
 
                          )
+    rprint(f'Training...')
     trainer.fit(model, dataset_train, dataset_test)
 
 

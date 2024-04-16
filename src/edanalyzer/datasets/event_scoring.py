@@ -44,6 +44,7 @@ class EventScoringDataset(Dataset):
         self.pandda_2_pose_table = self.root['pandda_2']['known_hit_pose']
         self.pandda_2_ligand_data_table = self.root['pandda_2']['ligand_data']
         self.pandda_2_annotation_table = self.root['pandda_2']['annotation']
+        self.pandda_2_frag_table = self.root['pandda_2']['ligand_fragments']
 
         # self.annotations = {
         #     self.z_map_sample_metadata_table[_x['event_map_table_idx']]['event_idx']: _x
