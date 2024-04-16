@@ -160,6 +160,8 @@ class EventScoringDataset(Dataset):
         valid_poss = frag_data['positions'][valid_mask]
         valid_elements = frag_data['elements'][valid_mask]
 
+        valid_poss = valid_poss - np.mean(valid_poss, axis=0)
+
         # # Subsample if training
         # if annotation['partition'] == 'train':
         #     rng = np.random.default_rng()
