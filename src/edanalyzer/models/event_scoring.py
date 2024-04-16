@@ -324,6 +324,8 @@ class LitEventScoring(lt.LightningModule):
 
         # score = F.sigmoid(self.fc(full_encoding))
         score = F.softmax(self.fc(full_encoding))
+        print(f'Score: {mol_encoding[0,:]}')
+
 
         loss = categorical_loss(score, y)
         # loss = F.mse_loss(score, y)
