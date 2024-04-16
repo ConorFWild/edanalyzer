@@ -249,6 +249,7 @@ class EventScoringDataset(Dataset):
         image_z = np.stack(
             [
                 z_map_sample,
+                xmap_sample
             ],
             axis=0
         )

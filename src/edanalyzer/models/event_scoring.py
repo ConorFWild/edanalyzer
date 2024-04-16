@@ -182,7 +182,7 @@ class LitEventScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
         # self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
-        self.z_encoder = SimpleConvolutionalEncoder(input_layers=1)
+        self.z_encoder = SimpleConvolutionalEncoder(input_layers=2)
         self.x_encoder = SimpleConvolutionalEncoder(input_layers=1)
         self.mol_encoder = SimpleConvolutionalEncoder(input_layers=1)
         self.mol_decoder = SimpleConvolutionalDecoder()
@@ -190,7 +190,7 @@ class LitEventScoring(lt.LightningModule):
         self.z_decoder = SimpleConvolutionalDecoder(input_layers=512)
         # self.fc = nn.Linear(512 + 32, 1)
         self.fc = nn.Sequential(
-            nn.Linear(768, 2),
+            nn.Linear(256, 2),
             # nn.Dropout(),
             # nn.Linear(512, 256),
             # nn.Dropout(),
@@ -203,7 +203,7 @@ class LitEventScoring(lt.LightningModule):
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
         z_encoding = self.z_encoder(z)
-        x_encoding = self.x_encoder(x)
+        # x_encoding = self.x_encoder(x)
 
         # z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         # z_decoding = F.hardtanh(self.density_decoder(z_mol_encoding), min_val=0.0, max_val=1.0,)
@@ -219,7 +219,8 @@ class LitEventScoring(lt.LightningModule):
         #     dim=1,
         # )
         # density_encoding = self.density_encoder(full_density)
-        full_encoding = torch.cat([x_encoding, z_encoding, mol_encoding], dim=1)
+        # full_encoding = torch.cat([x_encoding, z_encoding, mol_encoding], dim=1)
+        full_encoding = z_encoding * mol_encoding
 
         score = F.softmax(self.fc(full_encoding))
 
@@ -233,14 +234,14 @@ class LitEventScoring(lt.LightningModule):
         idx, x, z, m, d, y = train_batch
         y = y.view(y.size(0), -1)
 
-        mol_encoding = self.mol_encoder(m)
+        mol_encoding = F.sigmoid( self.mol_encoder(m))
         # mol_decoding = F.hardtanh(self.mol_decoder(mol_encoding), min_val=0.0, max_val=1.0,)
 
-        z_encoding = self.z_encoder(z)
+        z_encoding =F.sigmoid( self.z_encoder(z))
         # z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         # z_decoding = F.hardtanh(self.z_decoder(z_mol_encoding), min_val=0.0, max_val=1.0)
 
-        x_encoding = self.x_encoder(x)
+        # x_encoding = F.sigmoid(self.x_encoder(x))
         # x_mol_encoding = torch.cat([x_encoding, mol_encoding], dim=1)
         # x_decoding = F.hardtanh(self.x_decoder(x_mol_encoding), min_val=0.0, max_val=1.0)
 
@@ -258,7 +259,9 @@ class LitEventScoring(lt.LightningModule):
         #     dim=1,
         # )
         # density_encoding = self.density_encoder(full_density)
-        full_encoding = torch.cat([x_encoding, z_encoding, mol_encoding], dim=1)
+        # full_encoding = torch.cat([x_encoding, z_encoding, mol_encoding], dim=1)
+        full_encoding = z_encoding * mol_encoding
+
 
         # score = F.sigmoid(self.fc(full_encoding))
         score = F.softmax(self.fc(full_encoding))
@@ -295,9 +298,9 @@ class LitEventScoring(lt.LightningModule):
         idx, x, z, m, d, y = test_batch
         y = y.view(y.size(0), -1)
 
-        mol_encoding = self.mol_encoder(m)
-        z_encoding = self.z_encoder(z)
-        x_encoding = self.x_encoder(x)
+        mol_encoding = F.sigmoid( self.mol_encoder(m))
+        z_encoding = F.sigmoid( self.z_encoder(z))
+        # x_encoding = F.sigmoid( self.x_encoder(x))
         # z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         # z_decoding = F.hardtanh(self.density_decoder(z_mol_encoding), min_val=0.0, max_val=1.0,)
         # mask = torch.zeros(z_decoding.shape).to(z_decoding.device)
@@ -313,8 +316,8 @@ class LitEventScoring(lt.LightningModule):
         # )
         # full_density = z
         # density_encoding = self.density_encoder(full_density)
-        full_encoding = torch.cat([x_encoding, z_encoding, mol_encoding], dim=1)
-
+        # full_encoding = torch.cat([x_encoding, z_encoding, mol_encoding], dim=1)
+        full_encoding =  z_encoding * mol_encoding
 
         # score = F.sigmoid(self.fc(full_encoding))
         score = F.softmax(self.fc(full_encoding))
