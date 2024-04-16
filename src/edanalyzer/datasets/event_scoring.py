@@ -70,20 +70,23 @@ class EventScoringDataset(Dataset):
 
     def __getitem__(self, idx: int):
         # Get the sample idx
-        sample_idx = self.sample_indexes[idx]
+        sample_data = self.sample_indexes[idx]
+        _table, _z, _f, _t = sample_data['table'], sample_data['z'], sample_data['f'], sample_data['t']
 
         # Get the z map and pose
-        if sample_idx[0] == 'normal':
-            z_map_sample_metadata = self.z_map_sample_metadata_table[sample_idx[1]]
+        if _table == 'normal':
+            z_map_sample_metadata = self.z_map_sample_metadata_table[_z]
         else:
-            z_map_sample_metadata = self.pandda_2_z_map_sample_metadata_table[sample_idx[1]]
+            z_map_sample_metadata = self.pandda_2_z_map_sample_metadata_table[_z]
         z_map_sample_idx = z_map_sample_metadata['idx']
         # print([sample_idx, z_map_sample_idx])
-        assert sample_idx[1] == z_map_sample_idx
+        assert _z == z_map_sample_idx
         # event_map_idx = pose_data['event_map_sample_idx']
+        ligand_data_idx = z_map_sample_metadata['ligand_data_idx']
+        ligand_data = self.pandda_2_ligand_data_table[ligand_data_idx]
 
         pose_data_idx = z_map_sample_metadata['pose_data_idx']
-        if sample_idx[0] == 'normal':
+        if _table == 'normal':
 
             xmap_sample_data = self.xmap_sample_table[z_map_sample_idx]
             z_map_sample_data = self.z_map_sample_table[z_map_sample_idx]
@@ -96,29 +99,32 @@ class EventScoringDataset(Dataset):
         # If training replace with a random ligand
         rng = np.random.default_rng()
         # random_ligand = True
-        if pose_data_idx != -1:
-            # random_ligand_sample = rng.random()
-            # if (random_ligand_sample > 0.5) & (annotation['partition'] == 'train'):
-            #     random_ligand = False
-            #     pose_data = self.pose_table[pose_data_idx]
-            # else:
-            #     pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
-            if sample_idx[0] == 'normal':
+        # if pose_data_idx != -1:
+        #     # random_ligand_sample = rng.random()
+        #     # if (random_ligand_sample > 0.5) & (annotation['partition'] == 'train'):
+        #     #     random_ligand = False
+        #     #     pose_data = self.pose_table[pose_data_idx]
+        #     # else:
+        #     #     pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
+        #     if sample_idx[0] == 'normal':
+        #
+        #         pose_data = self.pose_table[pose_data_idx]
+        #     else:
+        #         pose_data = self.pandda_2_pose_table[pose_data_idx]
+        # else:
+        #     if sample_idx[0] == 'normal':
+        #
+        #         # pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
+        #         selected_pose_idx = rng.integers(0, len(self.pos_train_pose_samples))
+        #         pose_data = self.pandda_2_pose_table[self.pos_train_pose_samples[selected_pose_idx]]
+        #     else:
+        #         selected_pose_idx = rng.integers(0, len(self.pos_train_pose_samples))
+        #         pose_data = self.pandda_2_pose_table[self.pos_train_pose_samples[selected_pose_idx]]
+        # if pose_data_idx != -1:
+        #     frag_data = self.pandda_2_frag_table[ligand_data['idx']]
 
-                pose_data = self.pose_table[pose_data_idx]
-            else:
-                pose_data = self.pandda_2_pose_table[pose_data_idx]
-        else:
-            if sample_idx[0] == 'normal':
-
-                # pose_data = self.pose_table[rng.integers(0, len(self.pose_table))]
-                selected_pose_idx = rng.integers(0, len(self.pos_train_pose_samples))
-                pose_data = self.pandda_2_pose_table[self.pos_train_pose_samples[selected_pose_idx]]
-            else:
-                selected_pose_idx = rng.integers(0, len(self.pos_train_pose_samples))
-                pose_data = self.pandda_2_pose_table[self.pos_train_pose_samples[selected_pose_idx]]
-
-
+        # else:
+        frag_data = self.pandda_2_frag_table[_f]
 
         #
         xmap = _get_grid_from_hdf5(xmap_sample_data)
@@ -146,34 +152,41 @@ class EventScoringDataset(Dataset):
         )
 
         # Get the sampling transform for the ligand map
-        valid_mask = pose_data['elements'] != 0
-        valid_poss = pose_data['positions'][valid_mask]
-        valid_elements = pose_data['elements'][valid_mask]
+        # valid_mask = pose_data['elements'] != 0
+        # valid_poss = pose_data['positions'][valid_mask]
+        # valid_elements = pose_data['elements'][valid_mask]
+        valid_mask = frag_data['elements'] != 0
+        valid_poss = frag_data['positions'][valid_mask]
+        valid_elements = frag_data['elements'][valid_mask]
 
-        # Subsample if training
-        if annotation['partition'] == 'train':
-            rng = np.random.default_rng()
-            num_centres = rng.integers(1, 5)
-
-            # For each centre mask atoms close to it
-            total_mask = np.full(valid_elements.size, False)
-            for _centre in num_centres:
-                selected_atom = rng.integers(0, valid_elements.size)
-                poss_distances = valid_poss - valid_poss[selected_atom, :].reshape((1, 3))
-                close_mask = poss_distances[np.linalg.norm(poss_distances, axis=1) < 3.5]
-                total_mask[close_mask] = True
-
-        else:
-            total_mask = np.full(valid_elements.size, True)
+        # # Subsample if training
+        # if annotation['partition'] == 'train':
+        #     rng = np.random.default_rng()
+        #     num_centres = rng.integers(1, 5)
+        #
+        #     # For each centre mask atoms close to it
+        #     total_mask = np.full(valid_elements.size, False)
+        #     for _centre in num_centres:
+        #         selected_atom = rng.integers(0, valid_elements.size)
+        #         poss_distances = valid_poss - valid_poss[selected_atom, :].reshape((1, 3))
+        #         close_mask = poss_distances[np.linalg.norm(poss_distances, axis=1) < 3.5]
+        #         total_mask[close_mask] = True
+        #
+        # else:
+        #     total_mask = np.full(valid_elements.size, True)
 
         ligand_sample_array = np.zeros(
             (32, 32, 32),
             dtype=np.float32,
         )
         ligand_orientation = _get_random_orientation()
+        # transformed_residue = _get_res_from_arrays(
+        #     valid_poss[total_mask],
+        #     valid_elements[total_mask],
+        # )
         transformed_residue = _get_res_from_arrays(
-            valid_poss[total_mask],
-            valid_elements[total_mask],
+            valid_poss,
+            valid_elements,
         )
 
         ligand_centroid = _get_centroid_from_res(transformed_residue)
@@ -183,14 +196,13 @@ class EventScoringDataset(Dataset):
             n=32
         )
 
-
         # Get sample images
-        # xmap_sample = _sample_xmap_and_scale(
-        #     xmap,
-        #     transform,
-        #     np.copy(sample_array)
-        # )
-        xmap_sample = np.copy(sample_array)
+        xmap_sample = _sample_xmap_and_scale(
+            xmap,
+            transform,
+            np.copy(sample_array)
+        )
+        # xmap_sample = np.copy(sample_array)
         z_map_sample = _sample_xmap_and_scale(
             z_map,
             transform,
@@ -210,18 +222,19 @@ class EventScoringDataset(Dataset):
 
         image_ligand_mask[image_ligand_mask < 0.9] = 0.0
         image_ligand_mask[image_ligand_mask >= 0.9] = 1.0
-        image_ligand_mask = np.copy(sample_array)
+        # image_ligand_mask = np.copy(sample_array)
 
-        if pose_data_idx != -1:
-            image_decoded_density = _sample_xmap(
-                ligand_mask_grid,
-                transform,
-                np.copy(sample_array)
-            )
-        elif pose_data_idx == -1:
-            image_decoded_density = np.copy(sample_array)
-        else:
-            raise Exception
+        # if pose_data_idx != -1:
+        #     image_decoded_density = _sample_xmap(
+        #         ligand_mask_grid,
+        #         transform,
+        #         np.copy(sample_array)
+        #     )
+        # elif pose_data_idx == -1:
+        #     image_decoded_density = np.copy(sample_array)
+        # else:
+        #     raise Exception
+        image_decoded_density = np.copy(sample_array)
 
         # Make the image
         image_density = np.stack(
@@ -282,9 +295,16 @@ class EventScoringDataset(Dataset):
         #     hit = 0.0
         # else:
         #     raise Exception
-        if pose_data_idx != -1:
+        # if pose_data_idx != -1:
+        #     hit = [0.0, 1.0]
+        # elif pose_data_idx == -1:
+        #     hit = [1.0, 0.0]
+        # else:
+        #     raise Exception
+
+        if _t:
             hit = [0.0, 1.0]
-        elif pose_data_idx == -1:
+        elif not _t:
             hit = [1.0, 0.0]
         else:
             raise Exception
@@ -293,7 +313,7 @@ class EventScoringDataset(Dataset):
         label_float = label.astype(np.float32)
 
         return (
-            sample_idx,
+            _z,
             torch.from_numpy(image_density_float),
             torch.from_numpy(image_z_float),
             torch.from_numpy(image_mol_float),

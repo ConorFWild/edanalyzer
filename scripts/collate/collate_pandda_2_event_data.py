@@ -213,6 +213,90 @@ def main(config_path):
                 ...
             ...
 
+    # Generate fragment embeddings
+    # 1. Create a zarr group for fragment embeddings
+    # 1. Iterate over collected canonical smiles,
+    # 2. a. creating the assoicated molecular graph, and
+    # 2. b. Then collect the rotatable bonds and
+    # 2. c. producing n embeddings of it.
+    # 2. d. fragment the molecular graph on them.
+    # 2. e. for each fragment
+    # 2. e. 1. collect the associated embeddings of each fragment > size 3
+    # 2. e. 2. for each embedding
+    # 2. e. 2. a. create a record for the embedding
+    # 2. e. 2. b. save a record in the zarr group for them
+
+    # 1.
+    ligand_fragment_dtype = [
+        ('idx', 'i8'),
+        ('ligand_data_idx', 'i8'),
+        ('num_heavy_atoms', 'i8'),
+        ('fragment_canonical_smiles', '<U300'),
+        ('ligand_canonical_smiles', '<U300'),
+        ('positions', '<f4', (30, 3))
+    ]
+
+    def _make_mol_frag_group(pandda_2_group):
+        ...
+
+    mol_frag_group = _make_mol_frag_group(pandda_2_group)
+
+    # 2.
+    mol_frag_idx = 0
+    for _ligand_data in ligand_data_table:
+        # 2.a.
+        smiles = _ligand_data['canonical_smiles']
+        m = Chem.MolFromSmiles(smiles)
+
+        # 2.b.
+        rot_bonds = rot_atom_pairs = m.GetSubstructMatches(RotatableBondSmarts)
+        print(rot_bonds)
+        rot_bond_set = set([m.GetBondBetweenAtoms(*ap).GetIdx() for ap in rot_atom_pairs])
+        print(rot_bond_set)
+        for _atom in m_frag.GetAtoms():
+            if _atom.GetIsotope() != 0:
+                _atom.SetIsotope(0)
+
+        # 2.c.
+        m2 = Chem.AddHs(m)
+        cids = AllChem.EmbedMultipleConfs(m2, num_confs=50)
+
+        # 2.d.
+        fragment_atom_idx_sets = []
+        frags = Chem.GetMolFrags(Chem.FragmentOnBonds(m, rot_bond_set), asMols=True,
+                                 fragsMolAtomMapping=fragment_atom_idx_sets)
+
+        # 2.e.
+        for _frag, _fragment_atom_idx_set in zip(frags, fragment_atom_idx_sets):
+            # 2.e.1.
+            heavy_atoms = [_x for _x in _fragment_atom_idx_set if m.GetAtomWithIdx(_x).GetAtomicNum() != 1]
+            if len(heavy_atoms) <= 3:
+                continue
+
+            # 2.e.2
+            for embedding in [_conf.GetPositions()[_fragment_atom_idx_set, :] for _conf in m2.GetConformers()]:
+                # 2.e.2.a.
+                fragment_smiles = Chem.MolToSmiles(_frag)
+
+                #
+                poss = np.zeros((30, 3))
+                poss[:embedding.shape[0], :] = embedding[:, :]
+
+                # 2. e. 2. b.
+                record = np.array([(
+                    mol_frag_idx,
+                    _ligand_data['idx'],
+                    len(heavy_atoms),
+                    fragment_smiles,
+                    smiles,
+                    embedding
+                )],
+                    dtype=ligand_fragment_dtype)
+
+                # 2.e.2.c.
+
+                mol_frag_idx += 1
+
 
 if __name__ == "__main__":
     fire.Fire(main)
