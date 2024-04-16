@@ -319,6 +319,9 @@ class LitEventScoring(lt.LightningModule):
         # full_encoding = torch.cat([x_encoding, z_encoding, mol_encoding], dim=1)
         full_encoding =  z_encoding * mol_encoding
 
+        print(f'Z Encoding: {z_encoding[0,:10]}')
+        print(f'Mol Encoding: {mol_encoding[0,:10]}')
+
         # score = F.sigmoid(self.fc(full_encoding))
         score = F.softmax(self.fc(full_encoding))
 
