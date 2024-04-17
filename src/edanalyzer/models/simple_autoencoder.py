@@ -19,7 +19,7 @@ class Block(nn.Module):
         self.bn = nn.BatchNorm3d(outplanes)
         self.relu = nn.ReLU(inplace=True)
         if drop:
-            self.drop = nn.Dropout(p=0.125)
+            self.drop = nn.Dropout(p=0.25)
         else:
             self.drop=None
         self.last = last
@@ -41,12 +41,12 @@ class SimpleConvolutionalEncoder(nn.Module):
         # Layers
         # Layers
         self.input_layers = input_layers
-        self.layer1 = Block(input_layers, 16, drop=True, conv=conv7x7)
-        self.layer2 = Block(16, 32, drop=True)
-        self.layer3 = Block(32, 64, drop=True)
-        self.layer4 = Block(64, 128, drop=True)
-        self.layer5 = Block(128, 256, last=True, drop=False)
-        self.drop = nn.Dropout()
+        self.layer1 = Block(input_layers, 32, drop=True, conv=conv7x7)
+        self.layer2 = Block(32, 64, drop=True)
+        self.layer3 = Block(64, 128, drop=True)
+        self.layer4 = Block(128, 256, drop=True)
+        self.layer5 = Block(256, 512, last=True, drop=False)
+        # self.drop = nn.Dropout()
 
         # self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
 
