@@ -239,10 +239,10 @@ class LitEventScoring(lt.LightningModule):
         idx, x, z, m, d, y = train_batch
         y = y.view(y.size(0), -1)
 
-        mol_encoding = F.sigmoid( self.mol_encoder(m))
+        mol_encoding = self.mol_encoder(m)
         # mol_decoding = F.hardtanh(self.mol_decoder(mol_encoding), min_val=0.0, max_val=1.0,)
 
-        z_encoding =F.sigmoid( self.z_encoder(z))
+        z_encoding = self.z_encoder(z)
         # z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         # z_decoding = F.hardtanh(self.z_decoder(z_mol_encoding), min_val=0.0, max_val=1.0)
 
@@ -303,8 +303,8 @@ class LitEventScoring(lt.LightningModule):
         idx, x, z, m, d, y = test_batch
         y = y.view(y.size(0), -1)
 
-        mol_encoding = F.sigmoid( self.mol_encoder(m))
-        z_encoding = F.sigmoid( self.z_encoder(z))
+        mol_encoding = self.mol_encoder(m)
+        z_encoding =  self.z_encoder(z)
         # x_encoding = F.sigmoid( self.x_encoder(x))
         # z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         # z_decoding = F.hardtanh(self.density_decoder(z_mol_encoding), min_val=0.0, max_val=1.0,)
