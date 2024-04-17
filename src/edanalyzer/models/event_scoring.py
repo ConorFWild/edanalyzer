@@ -303,6 +303,8 @@ class LitEventScoring(lt.LightningModule):
         idx, x, z, m, d, y = test_batch
         y = y.view(y.size(0), -1)
 
+        print(f'Mol Sum Density: {torch.sum(m[0,:,:,:])}')
+
         mol_encoding = self.mol_encoder(m)
         z_encoding =  self.z_encoder(z)
         # x_encoding = F.sigmoid( self.x_encoder(x))
@@ -329,7 +331,7 @@ class LitEventScoring(lt.LightningModule):
 
         # score = F.sigmoid(self.fc(full_encoding))
         score = F.softmax(self.fc(full_encoding))
-        print(f'Score: {mol_encoding[0,:]}')
+        print(f'Score: {score[0,:]}')
         print('#####################################')
 
 
