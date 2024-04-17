@@ -192,10 +192,10 @@ class LitEventScoring(lt.LightningModule):
         self.fc = nn.Sequential(
             nn.Linear(512, 256),
             nn.ReLU(inplace=True),
-            nn.Linear(256, 2),
+            nn.Linear(256, 128),
             # nn.Linear(256,128),
-            # nn.ReLU(inplace=True),
-            # nn.Linear(128,2)
+            nn.ReLU(inplace=True),
+            nn.Linear(128,2)
             # nn.Dropout(),
             # nn.Linear(512, 256),
             # nn.Dropout(),
