@@ -190,7 +190,7 @@ class LitEventScoring(lt.LightningModule):
         self.z_decoder = SimpleConvolutionalDecoder(input_layers=512)
         # self.fc = nn.Linear(512 + 32, 1)
         self.fc = nn.Sequential(
-            nn.Linear(1028, 256),
+            nn.Linear(1024, 256),
             nn.ReLU(inplace=True),
             nn.Linear(256, 128),
             # nn.Linear(256,128),
