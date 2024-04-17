@@ -190,10 +190,12 @@ class LitEventScoring(lt.LightningModule):
         self.z_decoder = SimpleConvolutionalDecoder(input_layers=512)
         # self.fc = nn.Linear(512 + 32, 1)
         self.fc = nn.Sequential(
-            # nn.Linear(256, 2),
-            nn.Linear(256,128),
+            nn.Linear(512, 256),
             nn.ReLU(inplace=True),
-            nn.Linear(128,2)
+            nn.Linear(256, 2),
+            # nn.Linear(256,128),
+            # nn.ReLU(inplace=True),
+            # nn.Linear(128,2)
             # nn.Dropout(),
             # nn.Linear(512, 256),
             # nn.Dropout(),
@@ -201,7 +203,7 @@ class LitEventScoring(lt.LightningModule):
         )
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_frag_2')
+        self.output = Path('./output/event_scoring_frag_3')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
@@ -222,8 +224,8 @@ class LitEventScoring(lt.LightningModule):
         #     dim=1,
         # )
         # density_encoding = self.density_encoder(full_density)
-        # full_encoding = torch.cat([x_encoding, z_encoding, mol_encoding], dim=1)
-        full_encoding = z_encoding * mol_encoding
+        full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
+        # full_encoding = z_encoding * mol_encoding
 
         score = F.softmax(self.fc(full_encoding))
 
@@ -262,8 +264,8 @@ class LitEventScoring(lt.LightningModule):
         #     dim=1,
         # )
         # density_encoding = self.density_encoder(full_density)
-        # full_encoding = torch.cat([x_encoding, z_encoding, mol_encoding], dim=1)
-        full_encoding = z_encoding * mol_encoding
+        full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
+        # full_encoding = z_encoding * mol_encoding
 
 
         # score = F.sigmoid(self.fc(full_encoding))
@@ -319,8 +321,8 @@ class LitEventScoring(lt.LightningModule):
         # )
         # full_density = z
         # density_encoding = self.density_encoder(full_density)
-        # full_encoding = torch.cat([x_encoding, z_encoding, mol_encoding], dim=1)
-        full_encoding =  z_encoding * mol_encoding
+        full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
+        # full_encoding =  z_encoding * mol_encoding
 
         print(f'Z Encoding: {z_encoding[0,:10]}')
         print(f'Mol Encoding: {mol_encoding[0,:10]}')
