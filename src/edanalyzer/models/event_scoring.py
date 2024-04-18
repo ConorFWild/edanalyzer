@@ -191,12 +191,14 @@ class LitEventScoring(lt.LightningModule):
         # self.fc = nn.Linear(512 + 32, 1)
         self.fc = nn.Sequential(
             nn.Linear(1024, 32),
-            nn.Dropout(),
+            nn.BatchNorm1d(32),
             nn.ReLU(inplace=True),
-            nn.Linear(32, 16),
             nn.Dropout(),
+            nn.Linear(32, 16),
+            nn.BatchNorm1d(16),
             # nn.Linear(256,128),
             nn.ReLU(inplace=True),
+            nn.Dropout(),
             nn.Linear(16,2)
             # nn.Dropout(),
             # nn.Linear(512, 256),
@@ -234,7 +236,8 @@ class LitEventScoring(lt.LightningModule):
         return score
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-5)
+        # optimizer = torch.optim.Adam(self.parameters(), lr=1e-5)
+        optimizer = torch.optim.SGD(self.parameters(), lr=1e-5)
         return optimizer
 
     def training_step(self, train_batch, batch_idx):
