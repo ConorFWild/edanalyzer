@@ -181,6 +181,7 @@ class LitBuildScoring(lt.LightningModule):
 class LitEventScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
+        self.automatic_optimization = False
         # self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
         self.z_encoder = SimpleConvolutionalEncoder(input_layers=2)
         self.x_encoder = SimpleConvolutionalEncoder(input_layers=1)
@@ -237,8 +238,9 @@ class LitEventScoring(lt.LightningModule):
 
     def configure_optimizers(self):
         # optimizer = torch.optim.Adam(self.parameters(), lr=1e-5)
-        optimizer = torch.optim.SGD(self.parameters(), lr=1e-2)
-        return optimizer
+        optimizer = torch.optim.SGD(self.parameters(), lr=1e-1)
+        lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
+        return [optimizer], [lr_scheduler]
 
     def training_step(self, train_batch, batch_idx):
         idx, x, z, m, d, y = train_batch
@@ -427,3 +429,10 @@ class LitEventScoring(lt.LightningModule):
         fileh.close()
 
         self.test_annotations.clear()
+
+        sch = self.lr_schedulers()
+
+        # If the selected scheduler is a ReduceLROnPlateau scheduler.
+        if isinstance(sch, torch.optim.lr_scheduler.ReduceLROnPlateau):
+            sch.step(self.trainer.callback_metrics["test_loss"])
+
