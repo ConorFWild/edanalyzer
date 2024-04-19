@@ -181,7 +181,7 @@ class LitBuildScoring(lt.LightningModule):
 class LitEventScoring(lt.LightningModule):
     def __init__(self):
         super().__init__()
-        self.automatic_optimization = False
+        # self.automatic_optimization = False
         # self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
         self.z_encoder = SimpleConvolutionalEncoder(input_layers=2)
         self.x_encoder = SimpleConvolutionalEncoder(input_layers=1)
