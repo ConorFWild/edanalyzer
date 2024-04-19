@@ -240,7 +240,17 @@ class LitEventScoring(lt.LightningModule):
         # optimizer = torch.optim.Adam(self.parameters(), lr=1e-5)
         optimizer = torch.optim.SGD(self.parameters(), lr=1e-1)
         lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
-        return [optimizer], [lr_scheduler]
+        # return [optimizer], [lr_scheduler]
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": lr_scheduler,
+                "monitor": "test_loss",
+                "interval": "epoch",
+                "frequency": 1,
+                "strict": False,
+            },
+        }
 
     def training_step(self, train_batch, batch_idx):
         idx, x, z, m, d, y = train_batch
@@ -433,6 +443,6 @@ class LitEventScoring(lt.LightningModule):
         sch = self.lr_schedulers()
 
         # If the selected scheduler is a ReduceLROnPlateau scheduler.
-        if isinstance(sch, torch.optim.lr_scheduler.ReduceLROnPlateau):
-            sch.step(self.trainer.callback_metrics["test_loss"])
+        # if isinstance(sch, torch.optim.lr_scheduler.ReduceLROnPlateau):
+        #     sch.step(self.trainer.callback_metrics["test_loss"])
 
