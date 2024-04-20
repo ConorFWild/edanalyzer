@@ -191,16 +191,16 @@ class LitEventScoring(lt.LightningModule):
         self.z_decoder = SimpleConvolutionalDecoder(input_layers=512)
         # self.fc = nn.Linear(512 + 32, 1)
         self.fc = nn.Sequential(
-            nn.Linear(1024, 32),
-            nn.BatchNorm1d(32),
+            nn.Linear(1024, 256),
+            nn.BatchNorm1d(256),
             nn.ReLU(inplace=True),
             nn.Dropout(),
-            nn.Linear(32, 16),
-            nn.BatchNorm1d(16),
+            nn.Linear(256, 32),
+            nn.BatchNorm1d(32),
             # nn.Linear(256,128),
             nn.ReLU(inplace=True),
             nn.Dropout(),
-            nn.Linear(16,2)
+            nn.Linear(32,2)
             # nn.Dropout(),
             # nn.Linear(512, 256),
             # nn.Dropout(),
@@ -208,7 +208,7 @@ class LitEventScoring(lt.LightningModule):
         )
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_frag_6')
+        self.output = Path('./output/event_scoring_frag_deep')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
