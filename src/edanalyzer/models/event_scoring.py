@@ -209,7 +209,7 @@ class LitEventScoring(lt.LightningModule):
         )
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_frag_attention')
+        self.output = Path('./output/event_scoring_frag_attention_2')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
@@ -397,6 +397,8 @@ class LitEventScoring(lt.LightningModule):
         for _annotation in self.train_annotations:
             annotation['epoch'] = int(self.trainer.current_epoch)
             annotation['idx'] = int(_annotation['idx'])
+            annotation['f'] = int(_annotation['f'])
+
             annotation['table'] = str(_annotation['table'])
             annotation['y'] = float(_annotation['y'])
             annotation['y_hat'] = float(_annotation['y_hat'])
@@ -433,6 +435,7 @@ class LitEventScoring(lt.LightningModule):
         for _annotation in self.test_annotations:
             annotation['epoch'] = int(self.trainer.current_epoch)
             annotation['idx'] = int(_annotation['idx'])
+            annotation['f'] = int(_annotation['f'])
             annotation['table'] = str(_annotation['table'])
             annotation['y'] = float(_annotation['y'])
             annotation['y_hat'] = float(_annotation['y_hat'])
