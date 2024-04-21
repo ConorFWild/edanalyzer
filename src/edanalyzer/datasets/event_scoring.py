@@ -317,7 +317,7 @@ class EventScoringDataset(Dataset):
         label_float = label.astype(np.float32)
 
         return (
-            [_table, _z],
+            [_table, _z, _f,],
             torch.from_numpy(image_density_float),
             torch.from_numpy(image_z_float),
             torch.from_numpy(image_mol_float),

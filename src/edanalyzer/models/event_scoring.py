@@ -16,6 +16,7 @@ from edanalyzer.losses import categorical_loss
 class Annotation(tables.IsDescription):
     epoch = tables.Int32Col()
     idx = tables.Int32Col()
+    f = tables.Int32Col()
     table = tables.StringCol(32)
     y = tables.Float32Col()
     y_hat = tables.Float32Col()
@@ -305,6 +306,7 @@ class LitEventScoring(lt.LightningModule):
             self.train_annotations.append(
                 {
                     "idx": int(idx[1][j].to(torch.device("cpu")).detach().numpy()),
+                    "f": int(idx[2][j].to(torch.device("cpu")).detach().numpy()),
                     'table': str(idx[0][j]),
                     # "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][0],
                     # "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
@@ -360,6 +362,7 @@ class LitEventScoring(lt.LightningModule):
             self.test_annotations.append(
                 {
                     "idx": int(idx[1][j].to(torch.device("cpu")).detach().numpy()),
+                    "f": int(idx[2][j].to(torch.device("cpu")).detach().numpy()),
                     'table': str(idx[0][j]),
                     # "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][0],
                     # "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
