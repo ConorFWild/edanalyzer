@@ -432,7 +432,7 @@ def _get_ligand_mask(dmap, res, radius=2.5):
     return mask
 
 
-def _get_ligand_mask_float(dmap, res, radius=2.5):
+def _get_ligand_mask_float(dmap, res, radius=1.0):
     mask = gemmi.FloatGrid(dmap.nu, dmap.nv, dmap.nw)
     mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
     mask.set_unit_cell(dmap.unit_cell)
