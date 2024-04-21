@@ -223,8 +223,8 @@ class EventScoringDataset(Dataset):
             np.copy(ligand_sample_array)
         )
 
-        image_ligand_mask[image_ligand_mask < 0.9] = 0.0
-        image_ligand_mask[image_ligand_mask >= 0.9] = 1.0
+        # image_ligand_mask[image_ligand_mask < 0.9] = 0.0
+        # image_ligand_mask[image_ligand_mask >= 0.9] = 1.0
         # image_ligand_mask = np.copy(sample_array)
 
         # if pose_data_idx != -1:
