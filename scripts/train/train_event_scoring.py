@@ -125,7 +125,7 @@ def _get_train_test_idxs(root):
             continue
 
         # Neg samples
-        fragment_sizes = [fragment_to_sizes[_fragment] for _fragment in fragments]
+        fragment_sizes = [fragment_to_sizes[_fragment] for _fragment in fragments] + [fragment_to_sizes[_fragment]-1 for _fragment in fragments] + [fragment_to_sizes[_fragment]+1 for _fragment in fragments]
         fragments_of_other_sizes = []
         for _size, _fragments_of_size in size_to_fragments.items():
             if _size in fragment_sizes:
