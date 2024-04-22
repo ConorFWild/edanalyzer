@@ -184,9 +184,11 @@ class LitEventScoring(lt.LightningModule):
         super().__init__()
         # self.automatic_optimization = False
         # self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
-        self.z_encoder = SimpleConvolutionalEncoder(input_layers=2)
+        # self.z_encoder = SimpleConvolutionalEncoder(input_layers=2)
+        self.z_encoder = resnet10(num_classes=2, num_input=1, headless=True).float()
         self.x_encoder = SimpleConvolutionalEncoder(input_layers=1)
-        self.mol_encoder = SimpleConvolutionalEncoder(input_layers=1)
+        # self.mol_encoder = SimpleConvolutionalEncoder(input_layers=1)
+        self.mol_encoder = resnet10(num_classes=2, num_input=1, headless=True).float()
         self.mol_decoder = SimpleConvolutionalDecoder()
         self.x_decoder = SimpleConvolutionalDecoder(input_layers=512)
         self.z_decoder = SimpleConvolutionalDecoder(input_layers=512)
@@ -209,7 +211,7 @@ class LitEventScoring(lt.LightningModule):
         )
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_frag_attention_adam_ht')
+        self.output = Path('./output/event_scoring_frag_resnet')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
