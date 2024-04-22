@@ -211,7 +211,7 @@ class LitEventScoring(lt.LightningModule):
         )
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_frag_resnet')
+        self.output = Path('./output/event_scoring_frag_resnet_sgd')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
@@ -240,15 +240,15 @@ class LitEventScoring(lt.LightningModule):
         return score
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
-        # optimizer = torch.optim.SGD(self.parameters(), lr=1e-1)
+        # optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        optimizer = torch.optim.SGD(self.parameters(), lr=1e-1)
         lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
         # return [optimizer], [lr_scheduler]
         return {
             "optimizer": optimizer,
             "lr_scheduler": {
                 "scheduler": lr_scheduler,
-                "monitor": "test_loss",
+                "monitor": "train_loss",
                 "interval": "epoch",
                 "frequency": 1,
                 "strict": False,
