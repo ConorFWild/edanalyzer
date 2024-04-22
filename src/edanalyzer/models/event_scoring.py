@@ -322,7 +322,7 @@ class LitEventScoring(lt.LightningModule):
         idx, x, z, m, d, y = test_batch
         y = y.view(y.size(0), -1)
 
-        print(f'Mol Sum Density: {torch.sum(m[0,:,:,:])}')
+        # print(f'Mol Sum Density: {torch.sum(m[0,:,:,:])}')
 
         mol_encoding = self.mol_encoder(m)
         z_encoding =  self.z_encoder(z)
@@ -345,13 +345,13 @@ class LitEventScoring(lt.LightningModule):
         # full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         full_encoding =  z_encoding * F.softmax(mol_encoding)
 
-        print(f'Z Encoding: {z_encoding[0,:10]}')
-        print(f'Mol Encoding: {mol_encoding[0,:10]}')
+        # print(f'Z Encoding: {z_encoding[0,:10]}')
+        # print(f'Mol Encoding: {mol_encoding[0,:10]}')
 
         # score = F.sigmoid(self.fc(full_encoding))
         score = F.softmax(self.fc(full_encoding))
-        print(f'Score: {score[0,:]}')
-        print('#####################################')
+        # print(f'Score: {score[0,:]}')
+        # print('#####################################')
 
 
         loss = categorical_loss(score, y)
@@ -375,9 +375,9 @@ class LitEventScoring(lt.LightningModule):
     def on_train_epoch_end(self):
         # Log the predictions
         predictions = self.train_annotations
-        rprint(f"Epoch: {self.trainer.current_epoch}")
-        rprint(predictions)
-        rprint(self.trainer.train_dataloader)
+        # rprint(f"Epoch: {self.trainer.current_epoch}")
+        # rprint(predictions)
+        # rprint(self.trainer.train_dataloader)
 
         # Load the table
         table_file = self.output / 'annotations.h5'
@@ -413,8 +413,8 @@ class LitEventScoring(lt.LightningModule):
     def on_validation_epoch_end(self):
         # Log the predictions
         predictions = self.test_annotations
-        rprint(f"Epoch: {self.trainer.current_epoch}")
-        rprint(predictions)
+        # rprint(f"Epoch: {self.trainer.current_epoch}")
+        # rprint(predictions)
         # rprint(self.trainer.test_dataloader)
 
         # Load the table
