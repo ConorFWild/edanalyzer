@@ -15,7 +15,7 @@ def conv7x7(in_planes, out_planes, stride=1, groups=1, dilation=1):
 class Block(nn.Module):
     def __init__(self, inplanes, outplanes, last=False, drop=True, conv=conv3x3):
         super(Block, self).__init__()
-        self.conv = conv(inplanes, outplanes, 2)
+        self.conv = conv(inplanes, outplanes, 1)
         self.bn = nn.BatchNorm3d(outplanes)
         self.relu = nn.ReLU(inplace=True)
         if drop:
@@ -58,7 +58,10 @@ class SimpleConvolutionalEncoder(nn.Module):
         self.layer5 = Block(32, 32, last=False, drop=False)
         # self.drop = nn.Dropout()
 
-        # self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
+        self.layer6 = Block(32, 32, last=False, drop=False)
+
+
+        self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
 
         for m in self.modules():
             print(m)
@@ -76,9 +79,11 @@ class SimpleConvolutionalEncoder(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
         x = self.layer5(x)
+        x = self.layer6(x)
+
         # x = self.drop(x)
 
-        # x = self.avgpool(x)
+        x = self.avgpool(x)
         x = x.view(-1, x.shape[1] * x.shape[2] * x.shape[3] * x.shape[4])
 
         return x
