@@ -122,13 +122,13 @@ def _get_train_test_idxs(root):
         #     continue
 
         # Pos samples
-        fragment_smiles_samples = sample(fragments, 50, replace=True, weights=None)
+        fragment_smiles_samples = sample(fragments, 10, replace=True, weights=None)
         fragment_conf_samples = []
         for _fragment in fragment_smiles_samples:
             positive_fragment_sample_distribution[_fragment] += 1
             fragment_conf_samples.append(frag_smiles_to_conf[_fragment].sample(1)['idx'].iloc[0])
         pos_fragment_samples += fragment_conf_samples
-        pos_z_samples += [z['idx'] for _j in range(50)]
+        pos_z_samples += [z['idx'] for _j in range(10)]
 
     print(f'Got {len(pos_fragment_samples)} pos samples!')
 
@@ -162,7 +162,7 @@ def _get_train_test_idxs(root):
 
         num_neg_samples = 0
         fragment_smiles_samples = []
-        while num_neg_samples < 51:
+        while num_neg_samples < 11:
             fragment_of_other_sizes_counts = {
                 k: v / positive_fragment_sample_distribution[k]
                 for k, v
@@ -181,7 +181,7 @@ def _get_train_test_idxs(root):
             fragment_conf_samples.append(frag_smiles_to_conf[_fragment].sample(1)['idx'].iloc[0])
 
         neg_fragment_samples += fragment_conf_samples
-        neg_z_samples += [z['idx'] for _j in range(50)]
+        neg_z_samples += [z['idx'] for _j in range(10)]
 
     print(f'Got {len(pos_fragment_samples)} neg decoy samples!')
 
