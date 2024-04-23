@@ -192,6 +192,8 @@ class LitEventScoring(lt.LightningModule):
         self.mol_decoder = SimpleConvolutionalDecoder()
         self.x_decoder = SimpleConvolutionalDecoder(input_layers=512)
         self.z_decoder = SimpleConvolutionalDecoder(input_layers=512)
+        self.mol_to_weight = nn.Linear(512, 512)
+        self.bn = nn.BatchNorm1d(512)
         # self.fc = nn.Linear(512 + 32, 1)
         self.fc = nn.Sequential(
             # nn.Linear(1024, 256),
@@ -211,7 +213,7 @@ class LitEventScoring(lt.LightningModule):
         )
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_frag_no_neg')
+        self.output = Path('./output/event_scoring_frag_no_neg_m2w')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
@@ -233,7 +235,7 @@ class LitEventScoring(lt.LightningModule):
         # )
         # density_encoding = self.density_encoder(full_density)
         # full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
-        full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
+        full_encoding = z_encoding * F.hardtanh(self.bn( self.mol_to_weight(mol_encoding)), min_val=-1.0, max_val=1.0)
 
         score = F.softmax(self.fc(full_encoding))
 
@@ -286,7 +288,7 @@ class LitEventScoring(lt.LightningModule):
         # )
         # density_encoding = self.density_encoder(full_density)
         # full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
-        full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
+        full_encoding = z_encoding * F.hardtanh(self.bn( self.mol_to_weight(mol_encoding)), min_val=-1.0, max_val=1.0)
 
 
         # score = F.sigmoid(self.fc(full_encoding))
@@ -346,7 +348,7 @@ class LitEventScoring(lt.LightningModule):
         # full_density = z
         # density_encoding = self.density_encoder(full_density)
         # full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
-        full_encoding =  z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
+        full_encoding =  z_encoding * F.hardtanh(self.bn( self.mol_to_weight(mol_encoding)), min_val=-1.0, max_val=1.0)
 
         # print(f'Z Encoding: {z_encoding[0,:10]}')
         # print(f'Mol Encoding: {mol_encoding[0,:10]}')
