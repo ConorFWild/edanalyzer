@@ -519,7 +519,7 @@ def main(config_path, batch_size=12, num_workers=None):
     trainer = lt.Trainer(accelerator='gpu', logger=logger,
                          callbacks=[
                              checkpoint_callback,
-                             StochasticWeightAveraging(swa_lrs=5e-3)
+                             StochasticWeightAveraging(swa_lrs=5e-4)
                          ],
                          enable_progress_bar=False,
                          gradient_clip_val=0.1,
