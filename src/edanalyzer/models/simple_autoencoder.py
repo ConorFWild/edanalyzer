@@ -13,9 +13,9 @@ def conv7x7(in_planes, out_planes, stride=1, groups=1, dilation=1):
                      padding=3, groups=groups, bias=False, dilation=dilation)
 
 class Block(nn.Module):
-    def __init__(self, inplanes, outplanes, last=False, drop=True, conv=conv3x3):
+    def __init__(self, inplanes, outplanes, stride, last=False, drop=True, conv=conv3x3):
         super(Block, self).__init__()
-        self.conv = conv(inplanes, outplanes, 1)
+        self.conv = conv(inplanes, outplanes, stride)
         self.bn = nn.BatchNorm3d(outplanes)
         self.relu = nn.ReLU(inplace=True)
         if drop:
@@ -43,22 +43,22 @@ class SimpleConvolutionalEncoder(nn.Module):
         self.input_layers = input_layers
 
         # self.mp1 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = Block(input_layers, 32, drop=False, conv=conv3x3)
+        self.layer1 = Block(input_layers, 32, 1, drop=False, conv=conv3x3)
 
         # self.mp2 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.layer2 = Block(32, 32, drop=False)
+        self.layer2 = Block(32, 32, 1,  drop=False)
 
         # self.mp3 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.layer3 = Block(32, 32, drop=False)
+        self.layer3 = Block(32, 32, 1, drop=False)
 
         # self.mp4 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.layer4 = Block(32, 32, drop=False)
+        self.layer4 = Block(32, 32, 1, drop=False)
 
         # self.mp5 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.layer5 = Block(32, 32, last=False, drop=False)
+        self.layer5 = Block(32, 32, 1, last=False, drop=False)
         # self.drop = nn.Dropout()
 
-        self.layer6 = Block(32, 32, last=False, drop=False)
+        self.layer6 = Block(32, 32, 1, last=False, drop=False)
 
 
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
