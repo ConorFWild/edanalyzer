@@ -145,17 +145,6 @@ def _get_train_test_idxs(root):
 
         size_to_sample = min(size_freq, key=lambda _k: size_freq[_k])
 
-        # fragment_sizes = [fragment_to_sizes[_fragment] for _fragment in fragments] + [fragment_to_sizes[_fragment]-1 for _fragment in fragments] + [fragment_to_sizes[_fragment]+1 for _fragment in fragments]+ [fragment_to_sizes[_fragment]-2 for _fragment in fragments] + [fragment_to_sizes[_fragment]+2 for _fragment in fragments]
-        #     fragments_of_other_sizes = []
-        #     for _size, _fragments_of_size in size_to_fragments.items():
-        #         if _size in fragment_sizes:
-        #             continue
-
-        #         for _fragment in _fragments_of_size:
-        #             if positive_fragment_sample_distribution[_fragment] > 0:
-        #                 fragments_of_other_sizes.append(_fragment)
-
-        #     other_possible_fragments = {k: v for k, v in negative_fragment_sample_distribution.items() if k in fragments_of_other_sizes}
         possible_fragments = [_f for _f in size_to_fragments[size_to_sample] if
                               positive_fragment_sample_distribution[_f] > 0]
         possible_fragment_counts = {
