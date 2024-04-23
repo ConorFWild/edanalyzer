@@ -116,72 +116,133 @@ def _get_train_test_idxs(root):
 
     print(f'Got {len(pos_fragment_samples)} pos samples!')
 
-    # Loop over the z samples adding negative samples for each z map
-    for _idx, z in train_samples.iterrows():
+    # Loop over the z samples adding the inherent negative samples
+    for _idx, z in train_samples[train_samples['ligand_data_idx'] == -1].sample(len(pos_fragment_samples),
+                                                                                replace=False).iterrows():
         ligand_data_idx = z['ligand_data_idx']
-        if ligand_data_idx == -1:
-            continue
-        ligand_data = root[table_type]['ligand_data'][ligand_data_idx]
-        ligand_canonical_smiles = ligand_data['canonical_smiles']
-        if ligand_canonical_smiles not in ligand_to_fragments:
-            continue
-        fragments = ligand_to_fragments[ligand_canonical_smiles]
-        if len(fragments) == 0:
+        if ligand_data_idx != -1:
             continue
 
-        # Neg samples
-        fragment_sizes = [fragment_to_sizes[_fragment] for _fragment in fragments]
-        legal_sizes = [j for j in size_to_fragments if all([j not in [y, ] for y in fragment_sizes])]
-
-        if len(legal_sizes) == 0:
-            continue
-
-        size_freq = {
-            k: v / pos_frag_size_samples[k]
+        # Select a uniform random fragment
+        fragment_freq = {
+            k: v / positive_fragment_sample_distribution[k]
             for k, v
-            in neg_frag_size_samples.items()
-            if k in legal_sizes
+            in negative_fragment_sample_distribution.items()
+            if positive_fragment_sample_distribution[k] > 0
         }
 
-        size_to_sample = min(size_freq, key=lambda _k: size_freq[_k])
+        fragment = min(fragment_freq, key=lambda _k: fragment_freq[_k])
+        negative_fragment_sample_distribution[fragment] += 1
+        neg_frag_size_samples[fragment_to_sizes[fragment]] += 1
 
-        possible_fragments = [_f for _f in size_to_fragments[size_to_sample] if
-                              positive_fragment_sample_distribution[_f] > 0]
-        possible_fragment_counts = {
-            _fragment: positive_fragment_sample_distribution[_fragment]
-            for _fragment
-            in possible_fragments
-            if positive_fragment_sample_distribution[_fragment] > 0
-        }
+        fragment_conf_sample = frag_smiles_to_conf[fragment].sample(1)['idx'].iloc[0]
 
-        if len(possible_fragment_counts) == 0:
-            continue
-
-        num_neg_samples = 0
-        fragment_smiles_samples = []
-        while num_neg_samples < 11:
-            fragment_of_other_sizes_counts = {
-                k: v / positive_fragment_sample_distribution[k]
-                for k, v
-                in negative_fragment_sample_distribution.items()
-                if k in possible_fragments
-            }
-            next_sample = min(fragment_of_other_sizes_counts, key=lambda _x: fragment_of_other_sizes_counts[_x])
-            fragment_smiles_samples.append(next_sample)
-
-            negative_fragment_sample_distribution[next_sample] += 1
-
-            num_neg_samples += 1
-
-        fragment_conf_samples = []
-        for _fragment in fragment_smiles_samples:
-            fragment_conf_samples.append(frag_smiles_to_conf[_fragment].sample(1)['idx'].iloc[0])
-            neg_frag_size_samples[fragment_to_sizes[_fragment]] += 1
-
-        neg_fragment_samples += fragment_conf_samples
-        neg_z_samples += [z['idx'] for _j in range(10)]
+        neg_fragment_samples += [fragment_conf_sample, ]
+        neg_z_samples += [z['idx'], ]
 
     print(f'Got {len(pos_fragment_samples)} neg decoy samples!')
+
+    # pos_z_samples = []
+    # neg_z_samples = []
+    # pos_fragment_samples = []
+    # neg_fragment_samples = []
+    # positive_fragment_sample_distribution = {_fragment: 0 for _fragment in fragment_to_sizes}
+    # negative_fragment_sample_distribution = {_fragment: 0 for _fragment in fragment_to_sizes}
+    #
+    # pos_frag_size_samples = {_j: 0 for _j in size_to_fragments}
+    # neg_frag_size_samples = {_j: 0 for _j in size_to_fragments}
+    #
+    # # Loop over the z samples adding positive samples for each
+    # for _idx, z in train_samples.iterrows():
+    #     ligand_data_idx = z['ligand_data_idx']
+    #     if ligand_data_idx == -1:
+    #         continue
+    #     ligand_data = root[table_type]['ligand_data'][ligand_data_idx]
+    #     ligand_canonical_smiles = ligand_data['canonical_smiles']
+    #     if ligand_canonical_smiles not in ligand_to_fragments:
+    #         continue
+    #     fragments = ligand_to_fragments[ligand_canonical_smiles]
+    #     if len(fragments) == 0:
+    #         continue
+    #
+    #     # Pos samples
+    #     fragment_smiles_samples = sample(fragments, 10, replace=True, weights=None)
+    #     fragment_conf_samples = []
+    #     for _fragment in fragment_smiles_samples:
+    #         positive_fragment_sample_distribution[_fragment] += 1
+    #         fragment_conf_samples.append(frag_smiles_to_conf[_fragment].sample(1)['idx'].iloc[0])
+    #         pos_frag_size_samples[fragment_to_sizes[_fragment]] += 1
+    #     pos_fragment_samples += fragment_conf_samples
+    #     pos_z_samples += [z['idx'] for _j in range(10)]
+    #
+    # print(f'Got {len(pos_fragment_samples)} pos samples!')
+    #
+    # # Loop over the z samples adding negative samples for each z map
+    # for _idx, z in train_samples.iterrows():
+    #     ligand_data_idx = z['ligand_data_idx']
+    #     if ligand_data_idx == -1:
+    #         continue
+    #     ligand_data = root[table_type]['ligand_data'][ligand_data_idx]
+    #     ligand_canonical_smiles = ligand_data['canonical_smiles']
+    #     if ligand_canonical_smiles not in ligand_to_fragments:
+    #         continue
+    #     fragments = ligand_to_fragments[ligand_canonical_smiles]
+    #     if len(fragments) == 0:
+    #         continue
+    #
+    #     # Neg samples
+    #     fragment_sizes = [fragment_to_sizes[_fragment] for _fragment in fragments]
+    #     legal_sizes = [j for j in size_to_fragments if all([j not in [y, ] for y in fragment_sizes])]
+    #
+    #     if len(legal_sizes) == 0:
+    #         continue
+    #
+    #     size_freq = {
+    #         k: v / pos_frag_size_samples[k]
+    #         for k, v
+    #         in neg_frag_size_samples.items()
+    #         if k in legal_sizes
+    #     }
+    #
+    #     size_to_sample = min(size_freq, key=lambda _k: size_freq[_k])
+    #
+    #     possible_fragments = [_f for _f in size_to_fragments[size_to_sample] if
+    #                           positive_fragment_sample_distribution[_f] > 0]
+    #     possible_fragment_counts = {
+    #         _fragment: positive_fragment_sample_distribution[_fragment]
+    #         for _fragment
+    #         in possible_fragments
+    #         if positive_fragment_sample_distribution[_fragment] > 0
+    #     }
+    #
+    #     if len(possible_fragment_counts) == 0:
+    #         continue
+    #
+    #     num_neg_samples = 0
+    #     fragment_smiles_samples = []
+    #     while num_neg_samples < 11:
+    #         fragment_of_other_sizes_counts = {
+    #             k: v / positive_fragment_sample_distribution[k]
+    #             for k, v
+    #             in negative_fragment_sample_distribution.items()
+    #             if k in possible_fragments
+    #         }
+    #         next_sample = min(fragment_of_other_sizes_counts, key=lambda _x: fragment_of_other_sizes_counts[_x])
+    #         fragment_smiles_samples.append(next_sample)
+    #
+    #         negative_fragment_sample_distribution[next_sample] += 1
+    #
+    #         num_neg_samples += 1
+    #
+    #     fragment_conf_samples = []
+    #     for _fragment in fragment_smiles_samples:
+    #         fragment_conf_samples.append(frag_smiles_to_conf[_fragment].sample(1)['idx'].iloc[0])
+    #         neg_frag_size_samples[fragment_to_sizes[_fragment]] += 1
+    #
+    #     neg_fragment_samples += fragment_conf_samples
+    #     neg_z_samples += [z['idx'] for _j in range(10)]
+    #
+    # print(f'Got {len(pos_fragment_samples)} neg decoy samples!')
 
     #
     # pos_z_samples = []
