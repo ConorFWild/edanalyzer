@@ -42,19 +42,19 @@ class SimpleConvolutionalEncoder(nn.Module):
         # Layers
         self.input_layers = input_layers
 
-        self.mp1 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
+        # self.mp1 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
         self.layer1 = Block(input_layers, 32, drop=False, conv=conv3x3)
 
-        self.mp2 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
+        # self.mp2 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
         self.layer2 = Block(32, 32, drop=False)
 
-        self.mp3 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
+        # self.mp3 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
         self.layer3 = Block(32, 32, drop=False)
 
-        self.mp4 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
+        # self.mp4 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
         self.layer4 = Block(32, 32, drop=False)
 
-        self.mp5 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
+        # self.mp5 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
         self.layer5 = Block(32, 32, last=False, drop=False)
         # self.drop = nn.Dropout()
 
@@ -71,11 +71,11 @@ class SimpleConvolutionalEncoder(nn.Module):
     def forward(self, x):
         # for layer in self.layers:
         #     x = layer(x)
-        x = self.mp1(x) + self.layer1(x)
-        x = self.mp2(x) +self.layer2(x)
-        x = self.mp3(x) +self.layer3(x)
-        x = self.mp4(x) +self.layer4(x)
-        x = self.mp5(x) +self.layer5(x)
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.layer5(x)
         # x = self.drop(x)
 
         # x = self.avgpool(x)
