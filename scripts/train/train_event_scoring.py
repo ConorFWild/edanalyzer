@@ -496,6 +496,7 @@ def main(config_path, batch_size=12, num_workers=None):
                          ],
                          enable_progress_bar=False,
                          gradient_clip_val=0.1,
+                         max_epochs=100
                          )
     rprint(f'Training...')
     trainer.fit(model, dataset_train, dataset_test)
