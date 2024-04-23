@@ -51,19 +51,19 @@ class SimpleConvolutionalEncoder(nn.Module):
         self.input_layers = input_layers
 
         # self.mp1 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = Block(input_layers, 32, 2, drop=False, conv=conv3x3)
+        self.layer1 = Block(input_layers, 16, 2, drop=False, conv=conv3x3)
 
         # self.mp2 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.layer2 = Block(32, 32, 2,  drop=False)
+        self.layer2 = Block(16, 16, 2,  drop=False)
 
         # self.mp3 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.layer3 = Block(32, 32, 2, drop=False)
+        self.layer3 = Block(16, 16, 2, drop=False)
 
         # self.mp4 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.layer4 = Block(32, 32, 2, drop=False)
+        self.layer4 = Block(16, 16, 2, drop=False)
 
         # self.mp5 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.layer5 = Block(32, 32, 2, last=False, drop=False)
+        self.layer5 = Block(16, 16, 2, last=False, drop=False)
         # self.drop = nn.Dropout()
 
         # self.layer6 = Block(32, 32, 1, last=False, drop=False)
