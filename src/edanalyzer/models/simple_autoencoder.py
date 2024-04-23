@@ -41,11 +41,11 @@ class SimpleConvolutionalEncoder(nn.Module):
         # Layers
         # Layers
         self.input_layers = input_layers
-        self.layer1 = Block(input_layers, 32, drop=True, conv=conv7x7)
-        self.layer2 = Block(32, 64, drop=True)
-        self.layer3 = Block(64, 128, drop=True)
-        self.layer4 = Block(128, 256, drop=True)
-        self.layer5 = Block(256, 32, last=True, drop=False)
+        self.layer1 = Block(input_layers, 32, drop=False, conv=conv3x3)
+        self.layer2 = Block(32, 32, drop=False)
+        self.layer3 = Block(32, 32, drop=False)
+        self.layer4 = Block(32, 32, drop=False)
+        self.layer5 = Block(32, 32, last=False, drop=False)
         # self.drop = nn.Dropout()
 
         # self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
