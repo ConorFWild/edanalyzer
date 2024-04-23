@@ -63,7 +63,7 @@ class SimpleConvolutionalEncoder(nn.Module):
         self.layer4 = Block(4, 4, 2, drop=False)
 
         # self.mp5 = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.layer5 = Block(4, 4, 2, last=False, drop=False)
+        self.layer5 = Block(4, 12, 2, last=False, drop=False)
         # self.drop = nn.Dropout()
 
         # self.layer6 = Block(32, 32, 1, last=False, drop=False)
