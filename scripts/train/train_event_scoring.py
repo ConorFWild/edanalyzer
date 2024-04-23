@@ -185,21 +185,21 @@ def _get_train_test_idxs(root):
 
     print(f'Got {len(pos_fragment_samples)} neg decoy samples!')
 
-    # Loop over the z samples adding the inherent negative samples
-    for _idx, z in train_samples[train_samples['ligand_data_idx'] == -1].sample(len(pos_fragment_samples),
-                                                                                replace=True).iterrows():
-        ligand_data_idx = z['ligand_data_idx']
-        if ligand_data_idx != -1:
-            continue
-
-        # Select a uniform random fragment
-        fragment = \
-        sample([_x for _x in fragment_to_sizes if positive_fragment_sample_distribution[_x] > 0], 1, False, None)[0]
-
-        fragment_conf_sample = frag_smiles_to_conf[fragment].sample(1)['idx'].iloc[0]
-
-        neg_fragment_samples += [fragment_conf_sample, ]
-        neg_z_samples += [z['idx'], ]
+    # # Loop over the z samples adding the inherent negative samples
+    # for _idx, z in train_samples[train_samples['ligand_data_idx'] == -1].sample(len(pos_fragment_samples),
+    #                                                                             replace=True).iterrows():
+    #     ligand_data_idx = z['ligand_data_idx']
+    #     if ligand_data_idx != -1:
+    #         continue
+    #
+    #     # Select a uniform random fragment
+    #     fragment = \
+    #     sample([_x for _x in fragment_to_sizes if positive_fragment_sample_distribution[_x] > 0], 1, False, None)[0]
+    #
+    #     fragment_conf_sample = frag_smiles_to_conf[fragment].sample(1)['idx'].iloc[0]
+    #
+    #     neg_fragment_samples += [fragment_conf_sample, ]
+    #     neg_z_samples += [z['idx'], ]
 
     test_pos_z_samples = []
     test_neg_z_samples = []
@@ -514,8 +514,8 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Train
     rprint('Constructing trainer...')
-    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_frag_resnet_adam')
-    logger = CSVLogger("output/event_scoring_frag_resnet_adam/logs")
+    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_frag_no_neg')
+    logger = CSVLogger("output/event_scoring_frag_no_neg/logs")
     trainer = lt.Trainer(accelerator='gpu', logger=logger,
                          callbacks=[
                              checkpoint_callback,
