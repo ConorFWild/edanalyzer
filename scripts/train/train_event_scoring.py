@@ -102,6 +102,25 @@ def _get_train_test_idxs(root):
         if len(fragments) == 0:
             continue
 
+        fragment_sizes = [fragment_to_sizes[_fragment] for _fragment in fragments] + [
+            fragment_to_sizes[_fragment] - 1 for _fragment in fragments] + [fragment_to_sizes[_fragment] + 1 for
+                                                                            _fragment in fragments] + [
+                             fragment_to_sizes[_fragment] - 2 for _fragment in fragments] + [
+                             fragment_to_sizes[_fragment] + 2 for _fragment in fragments]
+        fragments_of_other_sizes = []
+        for _size, _fragments_of_size in size_to_fragments.items():
+            if _size in fragment_sizes:
+                continue
+
+            for _fragment in _fragments_of_size:
+                if positive_fragment_sample_distribution[_fragment] > 0:
+                    fragments_of_other_sizes.append(_fragment)
+
+        other_possible_fragments = {k: v for k, v in negative_fragment_sample_distribution.items() if
+                                    k in fragments_of_other_sizes}
+        if len(other_possible_fragments) == 0:
+            continue
+
         # Pos samples
         fragment_smiles_samples = sample(fragments, 50, replace=True, weights=None)
         fragment_conf_samples = []
@@ -134,6 +153,10 @@ def _get_train_test_idxs(root):
             for _fragment in _fragments_of_size:
                 if positive_fragment_sample_distribution[_fragment] > 0:
                     fragments_of_other_sizes.append(_fragment)
+
+        other_possible_fragments = {k: v for k, v in negative_fragment_sample_distribution.items() if k in fragments_of_other_sizes}
+        if len(other_possible_fragments) == 0:
+            continue
 
         num_neg_samples = 0
         fragment_smiles_samples = []
