@@ -14,6 +14,10 @@ import networkx.algorithms.isomorphism as iso
 import numpy as np
 import tables
 import zarr
+from rdkit import Chem
+from rdkit.Chem import Draw
+from rdkit.Chem.Lipinski import RotatableBondSmarts
+from rdkit.Chem import AllChem
 
 from edanalyzer import constants
 from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale
@@ -227,75 +231,109 @@ def main(config_path):
     # 2. e. 2. b. save a record in the zarr group for them
 
     # 1.
+    del root['pandda_2']['ligand_fragments']
     ligand_fragment_dtype = [
         ('idx', 'i8'),
         ('ligand_data_idx', 'i8'),
         ('num_heavy_atoms', 'i8'),
         ('fragment_canonical_smiles', '<U300'),
         ('ligand_canonical_smiles', '<U300'),
-        ('positions', '<f4', (30, 3))
-    ]
-
-    def _make_mol_frag_group(pandda_2_group):
-        ...
-
-    mol_frag_group = _make_mol_frag_group(pandda_2_group)
+        ('positions', '<f4', (30, 3)),
+        ('elements', '<i4', (30,))]
+    mol_frag_group = root['pandda_2'].create_dataset(
+        'ligand_fragments',
+        shape=(0,),
+        chunks=(1,),
+        dtype=ligand_fragment_dtype
+    )
 
     # 2.
     mol_frag_idx = 0
+
     for _ligand_data in ligand_data_table:
-        # 2.a.
-        smiles = _ligand_data['canonical_smiles']
-        m = Chem.MolFromSmiles(smiles)
+
+        m = Chem.MolFromSmiles(_ligand_data['canonical_smiles'])
 
         # 2.b.
         rot_bonds = rot_atom_pairs = m.GetSubstructMatches(RotatableBondSmarts)
-        print(rot_bonds)
+        # print(rot_bonds)
         rot_bond_set = set([m.GetBondBetweenAtoms(*ap).GetIdx() for ap in rot_atom_pairs])
-        print(rot_bond_set)
-        for _atom in m_frag.GetAtoms():
-            if _atom.GetIsotope() != 0:
-                _atom.SetIsotope(0)
+        # print(rot_bond_set)
 
         # 2.c.
         m2 = Chem.AddHs(m)
-        cids = AllChem.EmbedMultipleConfs(m2, num_confs=50)
+        cids = AllChem.EmbedMultipleConfs(m2, numConfs=50)
+        # print(f'Got {len(cids)} embeddings')
 
-        # 2.d.
-        fragment_atom_idx_sets = []
-        frags = Chem.GetMolFrags(Chem.FragmentOnBonds(m, rot_bond_set), asMols=True,
-                                 fragsMolAtomMapping=fragment_atom_idx_sets)
+        if len(rot_bond_set) == 0:
+            fragment_atom_idx_sets = [[_atom.GetIdx() for _atom in m.GetAtoms()], ]
 
-        # 2.e.
-        for _frag, _fragment_atom_idx_set in zip(frags, fragment_atom_idx_sets):
-            # 2.e.1.
-            heavy_atoms = [_x for _x in _fragment_atom_idx_set if m.GetAtomWithIdx(_x).GetAtomicNum() != 1]
-            if len(heavy_atoms) <= 3:
-                continue
+            frags = [m, ]
 
-            # 2.e.2
-            for embedding in [_conf.GetPositions()[_fragment_atom_idx_set, :] for _conf in m2.GetConformers()]:
-                # 2.e.2.a.
-                fragment_smiles = Chem.MolToSmiles(_frag)
+        else:
+
+            # 2.d.
+            fragment_atom_idx_sets = []
+            frags = Chem.GetMolFrags(
+                Chem.FragmentOnBonds(m, rot_bond_set),
+                asMols=True,
+                fragsMolAtomMapping=fragment_atom_idx_sets,
+            )
+            # print(f'Got {len(frags)} fragments!')
+            # print(fragment_atom_idx_sets)
+
+            # 2.e.
+            for _frag, _fragment_atom_idx_set in zip(frags, fragment_atom_idx_sets):
+                # print(f'Fragment atom idxs: {_fragment_atom_idx_set}')
+
+                # 2.e.1.
+                real_atoms_idx_set = tuple(_y for _y in _fragment_atom_idx_set if _y < m.GetNumAtoms())
+                heavy_atoms = [_x for _x in real_atoms_idx_set if m.GetAtomWithIdx(_x).GetAtomicNum() != 1]
+                # print(f'Fragment Num Heavy Atoms: {len(heavy_atoms)}')
+                if len(heavy_atoms) <= 3:
+                    # print(f'Fragment too small at {len(heavy_atoms)}! Skipping!')
+                    continue
+
+                frag_periphery = tuple(_atom.GetIsotope() for _atom in _frag.GetAtoms() if _atom.GetIsotope() != 0)
+                # print(frag_periphery)
 
                 #
-                poss = np.zeros((30, 3))
-                poss[:embedding.shape[0], :] = embedding[:, :]
+                for _atom in _frag.GetAtoms():
+                    if _atom.GetIsotope() != 0:
+                        _atom.SetIsotope(0)
 
-                # 2. e. 2. b.
-                record = np.array([(
-                    mol_frag_idx,
-                    _ligand_data['idx'],
-                    len(heavy_atoms),
-                    fragment_smiles,
-                    smiles,
-                    embedding
-                )],
-                    dtype=ligand_fragment_dtype)
+                # 2.e.2
+                for embedding in [_conf.GetPositions()[real_atoms_idx_set + frag_periphery, :] for _conf in
+                                  m2.GetConformers()]:
+                    # 2.e.2.a.
+                    fragment_smiles = Chem.MolToSmiles(_frag)
+                    # print(f'Fragment Smiles: {fragment_smiles}')
 
-                # 2.e.2.c.
+                    #
+                    # print(f'Embedding Size: {embedding.shape[0]}')
+                    poss = np.zeros((30, 3))
+                    poss[:embedding.shape[0], :] = embedding[:, :]
+                    mol_els = np.array([m.GetAtomWithIdx(_atom_idx).GetAtomicNum() for _atom_idx in
+                                        real_atoms_idx_set + frag_periphery])
+                    els = np.zeros(30)
+                    els[:len(mol_els)] = mol_els[:]
 
-                mol_frag_idx += 1
+                    # 2. e. 2. b.
+                    record = np.array([(
+                        mol_frag_idx,
+                        _ligand_data['idx'],
+                        len(heavy_atoms),
+                        fragment_smiles,
+                        _ligand_data['canonical_smiles'],
+                        poss,
+                        els
+                    )],
+                        dtype=ligand_fragment_dtype)
+                    # print(record)
+
+                    #
+                    mol_frag_group.append(record)
+                    mol_frag_idx += 1
 
 
 if __name__ == "__main__":
