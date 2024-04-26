@@ -47,11 +47,12 @@ def submit_script(
         err_path=submit_dir / f"{script_name}.err",
         script_path=job_script_path
     )
+    print(submit_command)
 
-    p = subprocess.Popen(
-        submit_command,
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    p.communicate()
+    # p = subprocess.Popen(
+    #     submit_command,
+    #     shell=True,
+    #     stdout=subprocess.PIPE,
+    #     stderr=subprocess.PIPE
+    # )
+    # p.communicate()
