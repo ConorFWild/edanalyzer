@@ -120,11 +120,11 @@ def _run_panddas(config_path, num_cpus=36):
             # exit()
 
             # Create the submission command
-            # submit_script(
-            #     job_script,
-            #     result_dir,
-            #     script_name=f"{system_name}",
-            # )
+            submit_script(
+                job_script,
+                result_dir,
+                script_name=f"{system_name}",
+            )
 
             # Submit the job
 
