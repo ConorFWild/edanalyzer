@@ -28,6 +28,7 @@ def _run_panddas(config_path, num_cpus=36):
     except Exception as e:
         print(e)
 
+    n_submitted = 0
     with pony.orm.db_session:
         query_events = pony.orm.select(
             (event, event.annotations, event.pandda, event.pandda.experiment, event.pandda.system) for
@@ -87,6 +88,8 @@ def _run_panddas(config_path, num_cpus=36):
 
         for system_name, experiment in sorted_systems.items():
 
+            if n_submitted
+
             rprint(f"{system_name}: {experiment.system.name} : {experiment.path}")
             # continue
 
@@ -117,11 +120,11 @@ def _run_panddas(config_path, num_cpus=36):
             # exit()
 
             # Create the submission command
-            submit_script(
-                job_script,
-                result_dir,
-                script_name=f"{system_name}",
-            )
+            # submit_script(
+            #     job_script,
+            #     result_dir,
+            #     script_name=f"{system_name}",
+            # )
 
             # Submit the job
 
