@@ -48,7 +48,7 @@ patches = [
 
 def get_mask_array():
     rng = np.random.default_rng()
-    mask_array = np.ones((32, 32, 32), )
+    mask_array = np.ones((32, 32, 32), dtype=np.float32)
     for patch in patches:
         if rng.random() > 0.5:
             mask_array[patch] = 0.0
@@ -234,7 +234,7 @@ class EventScoringDataset(Dataset):
         if annotation['partition'] == 'train':
             mask = get_mask_array()
         else:
-            mask = np.ones((32,32,32), )
+            mask = np.ones((32,32,32), dtype=np.float32)
 
         # Get sample images
         xmap_sample = _sample_xmap_and_scale(
