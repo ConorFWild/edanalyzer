@@ -88,7 +88,7 @@ def _run_panddas(config_path, num_cpus=36):
 
         for system_name, experiment in sorted_systems.items():
 
-            if n_submitted
+            # if n_submitted
 
             rprint(f"{system_name}: {experiment.system.name} : {experiment.path}")
             # continue
