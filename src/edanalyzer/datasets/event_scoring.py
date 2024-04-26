@@ -1,4 +1,5 @@
 import dataclasses
+import itertools
 
 import numpy as np
 import torch
@@ -23,6 +24,36 @@ from .base import (
     _get_res_from_arrays,
     _get_grid_from_hdf5
 )
+
+patch_lower = [x for x in range(8)]
+patch_upper = [x for x in range(24,32)]
+patch_set = [patch_lower, patch_upper]
+
+# print(patch_set)
+
+patch_arrays = [
+    np.array([[x, y, z] for x, y, z in itertools.product(xs, ys, zs)])
+    for xs, ys, zs
+    in itertools.product(patch_set, patch_set, patch_set)
+]
+
+# print(patch_arrays[0])
+
+patches = [
+    (patch[:, 0].flatten(), patch[:,1].flatten(), patch[:,2].flatten(), )
+    for patch
+    in patch_arrays
+]
+# print(patches[0])
+
+def get_mask_array():
+    rng = np.random.default_rng()
+    mask_array = np.ones((32, 32, 32), dtype=bool)
+    for patch in patches:
+        if rng.random() > 0.5:
+            mask_array[patch] = False
+
+    return mask_array
 
 
 class EventScoringDataset(Dataset):
