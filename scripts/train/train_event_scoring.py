@@ -686,7 +686,7 @@ def main(config_path, batch_size=12, num_workers=None):
                              StochasticWeightAveraging(swa_lrs=1e-1, swa_epoch_start=0.5)
                          ],
                          enable_progress_bar=False,
-                         gradient_clip_val=0.1,
+                         gradient_clip_val=0.3,
                          max_epochs=200
                          )
     rprint(f'Training...')
