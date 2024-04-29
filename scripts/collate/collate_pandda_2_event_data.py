@@ -231,7 +231,7 @@ def main(config_path):
     # 2. e. 2. b. save a record in the zarr group for them
 
     # 1.
-    del root['pandda_2']['ligand_fragments']
+    # del root['pandda_2']['ligand_fragments']
     ligand_fragment_dtype = [
         ('idx', 'i8'),
         ('ligand_data_idx', 'i8'),
