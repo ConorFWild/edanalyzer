@@ -118,7 +118,7 @@ def _get_train_test_idxs(root):
 
     # Loop over the z samples adding the inherent negative samples
     for _idx, z in train_samples[train_samples['ligand_data_idx'] == -1].sample(len(pos_fragment_samples),
-                                                                                replace=False).iterrows():
+                                                                                replace=True).iterrows():
         ligand_data_idx = z['ligand_data_idx']
         if ligand_data_idx != -1:
             continue
