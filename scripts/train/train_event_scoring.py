@@ -817,15 +817,15 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Train
     rprint('Constructing trainer...')
-    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_lig_noised')
-    logger = CSVLogger("output/event_scoring_lig_noised/logs")
+    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_lig_noised_unclipped')
+    logger = CSVLogger("output/event_scoring_lig_noised_unclipped/logs")
     trainer = lt.Trainer(accelerator='gpu', logger=logger,
                          callbacks=[
                              checkpoint_callback,
                              StochasticWeightAveraging(swa_lrs=2e-1, swa_epoch_start=0.6)
                          ],
                          enable_progress_bar=False,
-                         gradient_clip_val=0.3,
+                         gradient_clip_val=2.0,
                          max_epochs=500
                          )
     rprint(f'Training...')
