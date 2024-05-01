@@ -248,9 +248,9 @@ class EventScoringDataset(Dataset):
             transform,
             np.copy(sample_array)
         )
-        u_s = rng.uniform(0.0, 0.75).astype(np.float32)
-        noise = rng.normal(size=(32,32,32)).astype(np.float32) * u_s
-        z_map_sample += noise
+        u_s = rng.uniform(0.0, 0.75)
+        noise = rng.normal(size=(32,32,32)) * u_s
+        z_map_sample += noise.astype(np.float32)
 
         ligand_mask_grid = _get_ligand_mask_float(
             z_map,
