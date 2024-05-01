@@ -248,6 +248,9 @@ class EventScoringDataset(Dataset):
             transform,
             np.copy(sample_array)
         )
+        u_s = rng.uniform(0.0, 0.75).astype(np.float32)
+        noise = rng.normal(size=(32,32,32)).astype(np.float32) * u_s
+        z_map_sample += noise
 
         ligand_mask_grid = _get_ligand_mask_float(
             z_map,
@@ -285,6 +288,7 @@ class EventScoringDataset(Dataset):
         )
         image_density_float = image_density.astype(np.float32) * mask
 
+
         image_z = np.stack(
             [
                 z_map_sample,
@@ -292,7 +296,7 @@ class EventScoringDataset(Dataset):
             ],
             axis=0
         )
-        image_z_float = image_z.astype(np.float32) * mask
+        image_z_float = image_z.astype(np.float32)  * mask
 
         image_mol = np.stack(
             [

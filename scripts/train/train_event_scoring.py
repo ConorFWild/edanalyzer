@@ -817,8 +817,8 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Train
     rprint('Constructing trainer...')
-    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_lig')
-    logger = CSVLogger("output/event_scoring_lig/logs")
+    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_lig_noised')
+    logger = CSVLogger("output/event_scoring_lig_noised/logs")
     trainer = lt.Trainer(accelerator='gpu', logger=logger,
                          callbacks=[
                              checkpoint_callback,
