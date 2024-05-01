@@ -678,16 +678,16 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Train
     rprint('Constructing trainer...')
-    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_frag_xxl_z_long')
-    logger = CSVLogger("output/event_scoring_frag_xxl_z_long/logs")
+    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_frag_xxl_z_slong')
+    logger = CSVLogger("output/event_scoring_frag_xxl_z_slong/logs")
     trainer = lt.Trainer(accelerator='gpu', logger=logger,
                          callbacks=[
                              checkpoint_callback,
-                             StochasticWeightAveraging(swa_lrs=5e-1, swa_epoch_start=0.75)
+                             StochasticWeightAveraging(swa_lrs=2e-1, swa_epoch_start=0.6)
                          ],
                          enable_progress_bar=False,
                          gradient_clip_val=0.3,
-                         max_epochs=400
+                         max_epochs=500
                          )
     rprint(f'Training...')
     trainer.fit(model, dataset_train, dataset_test)
