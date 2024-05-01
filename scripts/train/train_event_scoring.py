@@ -438,8 +438,8 @@ def _get_train_test_idxs_full_conf(root):
         root[table_type]['ligand_data'].get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
     ligand_conf_df = pd.DataFrame(
         root[table_type]['ligand_confs'].get_basic_selection(slice(None), fields=['idx', 'num_heavy_atoms',
-                                                                                      'fragment_canonical_smiles',
-                                                                                      'ligand_canonical_smiles']))
+                                                                                  'fragment_canonical_smiles',
+                                                                                  'ligand_canonical_smiles']))
 
     train_samples = metadata_table[annotation_df['partition'] == b'train']
     test_samples = metadata_table[annotation_df['partition'] == b'test']
@@ -450,46 +450,12 @@ def _get_train_test_idxs_full_conf(root):
         in ligand_conf_df['ligand_canonical_smiles'].unique()
     }
 
-    # fragment_to_sizes = {}
-    # # size_to_fragments = {}
-    # for smiles in fragment_df['fragment_canonical_smiles'].unique():
-    #     corresponding_sizes = fragment_df[fragment_df['fragment_canonical_smiles'] == smiles][
-    #         'num_heavy_atoms'].unique()
-    #     fragment_to_sizes[smiles] = [_x for _x in corresponding_sizes][0]
-
-    # size_to_fragments = {}
-    # for size in fragment_df['num_heavy_atoms'].unique():
-    #     corresponding_fragments = fragment_df[fragment_df['num_heavy_atoms'] == size][
-    #         'fragment_canonical_smiles'].unique()
-    #     size_to_fragments[size] = [_x for _x in corresponding_fragments]
-
-    # fragments_to_ligands = {}
-    # for smiles in fragment_df['fragment_canonical_smiles'].unique():
-    #     corresponding_ligands = fragment_df[fragment_df['fragment_canonical_smiles'] == smiles][
-    #         'ligand_canonical_smiles'].unique()
-    #     fragments_to_ligands[smiles] = [x for x in corresponding_ligands]
-
-    # ligand_to_fragments = {}
-    # for smiles in fragment_df['ligand_canonical_smiles'].unique():
-    #     corresponding_fragments = fragment_df[fragment_df['ligand_canonical_smiles'] == smiles][
-    #         'fragment_canonical_smiles'].unique()
-    #     ligand_to_fragments[smiles] = [x for x in corresponding_fragments]
-
-    # smiles_to_conf = {
-    #     _fragment: fragment_df[fragment_df['fragment_canonical_smiles'] == _fragment]
-    #     for _fragment
-    #     in fragment_df['fragment_canonical_smiles'].unique()
-    # }
-
     pos_z_samples = []
     neg_z_samples = []
     pos_conf_samples = []
     neg_conf_samples = []
     positive_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
     negative_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
-
-    # pos_lig_size_samples = {_j: 0 for _j in size_to_fragments}
-    # neg_frag_size_samples = {_j: 0 for _j in size_to_fragments}
 
     # Loop over the z samples adding positive samples for each
     for _idx, z in train_samples.iterrows():
@@ -505,12 +471,10 @@ def _get_train_test_idxs_full_conf(root):
             continue
 
         # Pos samples
-        # ligand_smiles_samples = sample(fragments, 10, replace=True, weights=None)
         ligand_conf_samples = []
         for x in range(10):
             positive_ligand_sample_distribution[ligand_canonical_smiles] += 1
             ligand_conf_samples.append(ligand_smiles_to_conf[ligand_canonical_smiles].sample(1)['idx'].iloc[0])
-            # pos_frag_size_samples[fragment_to_sizes[_fragment]] += 1
         pos_conf_samples += ligand_conf_samples
         pos_z_samples += [z['idx'] for _j in range(10)]
 
@@ -525,7 +489,7 @@ def _get_train_test_idxs_full_conf(root):
 
         # Select a uniform random fragment
         ligand_freq = {
-            k: v / negative_ligand_sample_distribution[k]
+            k: v / positive_ligand_sample_distribution[k]
             for k, v
             in negative_ligand_sample_distribution.items()
             if positive_ligand_sample_distribution[k] > 0
@@ -533,7 +497,6 @@ def _get_train_test_idxs_full_conf(root):
 
         ligand_smiles = min(ligand_freq, key=lambda _k: ligand_freq[_k])
         negative_ligand_sample_distribution[ligand_smiles] += 1
-        # neg_frag_size_samples[fragment_to_sizes[fragment]] += 1
 
         lig_conf_sample = ligand_smiles_to_conf[ligand_smiles].sample(1)['idx'].iloc[0]
 
@@ -541,7 +504,6 @@ def _get_train_test_idxs_full_conf(root):
         neg_z_samples += [z['idx'], ]
 
     print(f'Got {len(neg_conf_samples)} neg decoy samples!')
-
 
     test_pos_z_samples = []
     test_neg_z_samples = []
@@ -558,7 +520,6 @@ def _get_train_test_idxs_full_conf(root):
             if ligand_canonical_smiles not in ligand_smiles_to_conf:
                 continue
 
-
             lig_conf_sample = ligand_smiles_to_conf[ligand_canonical_smiles].sample(1)['idx'].iloc[0]
             test_pos_conf_samples.append(lig_conf_sample)
             test_pos_z_samples.append(z['idx'])
@@ -566,8 +527,10 @@ def _get_train_test_idxs_full_conf(root):
 
         else:
             fragment = \
-                sample([_x for _x in positive_ligand_sample_distribution if positive_ligand_sample_distribution[_x] > 0], 1, False,
-                       None)[0]
+                sample(
+                    [_x for _x in positive_ligand_sample_distribution if positive_ligand_sample_distribution[_x] > 0],
+                    1, False,
+                    None)[0]
             lig_conf_sample = ligand_smiles_to_conf[fragment].sample(1)['idx'].iloc[0]
 
             test_neg_conf_samples.append(lig_conf_sample)
@@ -583,7 +546,6 @@ def _get_train_test_idxs_full_conf(root):
             ([True] * len(test_pos_conf_samples)) + ([False] * len(test_neg_conf_samples))
         )
                  ]
-
     return train_idxs, test_idxs
 
 
@@ -814,7 +776,9 @@ def main(config_path, batch_size=12, num_workers=None):
     #     rprint(f"Got {len(negative_train_pose_idxs)} negative test samples")
 
     rprint(f'Getting train/test data...')
-    all_train_pose_idxs, all_test_pose_idxs = _get_train_test_idxs(root)
+    # all_train_pose_idxs, all_test_pose_idxs = _get_train_test_idxs(root)
+    all_train_pose_idxs, all_test_pose_idxs = _get_train_test_idxs_full_conf(root)
+
     rprint(f"Got {len(all_train_pose_idxs)} train samples")
     rprint(f"Got {len(all_test_pose_idxs)} test samples")
 
