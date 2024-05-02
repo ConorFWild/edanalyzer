@@ -248,9 +248,10 @@ class EventScoringDataset(Dataset):
             transform,
             np.copy(sample_array)
         )
-        u_s = rng.uniform(0.0, 0.75)
-        noise = rng.normal(size=(32,32,32)) * u_s
-        z_map_sample += noise.astype(np.float32)
+        if annotation['partition'] == 'train':
+            u_s = rng.uniform(0.0, 0.75)
+            noise = rng.normal(size=(32,32,32)) * u_s
+            z_map_sample += noise.astype(np.float32)
 
         ligand_mask_grid = _get_ligand_mask_float(
             z_map,

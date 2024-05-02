@@ -119,6 +119,8 @@ def main(config_path):
                 dtag, event_idx, bdc, conf, viewed = _row['dtag'], _row['event_idx'], _row['1-BDC'], _row[
                     constants.PANDDA_INSPECT_HIT_CONDFIDENCE], _row[constants.PANDDA_INSPECT_VIEWED]
 
+                system = _get_system_from_dtag(dtag)
+
                 rprint(f'\tProcessing event: {dtag} {event_idx} {conf}')
 
                 if not viewed:
@@ -199,7 +201,10 @@ def main(config_path):
                     event_idx,
                     resid,
                     tmp_idx_ligand_data,
-                    tmp_idx_pose
+                    tmp_idx_pose,
+                    system,
+                    dtag,
+                    event_idx
                 )
 
                 z_map_sample_metadata_table.append(z_map_metadata_sample)

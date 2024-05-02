@@ -14,7 +14,10 @@ z_map_sample_metadata_dtype = [
     ('event_idx', '<i4'),
     ('res_id', '<U32'),
     ('ligand_data_idx', 'i8'),
-    ('pose_data_idx', 'i8')
+    ('pose_data_idx', 'i8'),
+    ('system', '<U32'),
+    ('dtag', '<U32'),
+    ('event_num', 'i8')
 ]
 
 z_map_sample_dtype = [('idx', '<i4'), ('sample', '<f4', (90, 90, 90))]
@@ -245,7 +248,10 @@ def _get_z_map_metadata_sample_from_dataset_dir(
         event_idx,
         resid,
         ligand_data_idx,
-        pose_data_idx
+        pose_data_idx,
+        system,
+        dtag,
+        event_num
 ):
     z_map_sample_metadata = np.array(
         [(
@@ -253,7 +259,10 @@ def _get_z_map_metadata_sample_from_dataset_dir(
             event_idx,
             resid,
             ligand_data_idx,
-            pose_data_idx
+            pose_data_idx,
+system,
+        dtag,
+        event_num
         )],
         dtype=z_map_sample_metadata_dtype
     )
