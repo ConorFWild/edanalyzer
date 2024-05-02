@@ -1301,7 +1301,7 @@ class ResNet(nn.Module):
                                        dilate=replace_stride_with_dilation[2])
         self.drop5 = nn.Dropout()
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
-        # self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.fc = nn.Linear(512 * block.expansion, num_classes)
 
         # self.act = nn.Softmax()
 
