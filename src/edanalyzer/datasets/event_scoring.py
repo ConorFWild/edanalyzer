@@ -359,7 +359,14 @@ class EventScoringDataset(Dataset):
         label_float = label.astype(np.float32)
 
         return (
-            [_table, _z, _f,],
+            [
+                _table,
+                _z,
+                _f,
+                self.pandda_2_z_map_sample_metadata_table['system'],
+                self.pandda_2_z_map_sample_metadata_table['dtag'],
+                self.pandda_2_z_map_sample_metadata_table['event_num'],
+             ],
             torch.from_numpy(image_density_float),
             torch.from_numpy(image_z_float),
             torch.from_numpy(image_mol_float),

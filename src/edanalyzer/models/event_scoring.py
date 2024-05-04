@@ -6,21 +6,39 @@ from torch import nn
 from torch.nn import functional as F
 import lightning as lt
 import yaml
-import tables
+import numpy as np
+# import tables
+import zarr
+from numcodecs import Blosc, Delta
+
 
 from .resnet import resnet18, resnet10
 from .simple_autoencoder import SimpleConvolutionalEncoder, SimpleConvolutionalDecoder
 from edanalyzer.losses import categorical_loss
 
 
-class Annotation(tables.IsDescription):
-    epoch = tables.Int32Col()
-    idx = tables.Int32Col()
-    f = tables.Int32Col()
-    table = tables.StringCol(32)
-    y = tables.Float32Col()
-    y_hat = tables.Float32Col()
-    set = tables.Int32Col()
+# class Annotation(tables.IsDescription):
+#     epoch = tables.Int32Col()
+#     idx = tables.Int32Col()
+#     f = tables.Int32Col()
+#     table = tables.StringCol(32)
+#     y = tables.Float32Col()
+#     y_hat = tables.Float32Col()
+#     set = tables.Int32Col()
+
+
+annotation_dtype = [
+    ('epoch', '<i4'),
+    ('idx', '<i4'),
+    ('f', '<i4'),
+    ('table', '<U32'),
+    ('y', '<f4'),
+    ('y_hat', '<f4>'),
+    ('system', '<U32'),
+    ('dtag', '<U32'),
+    ('event_num', 'i8')
+]
+
 
 
 class LitBuildScoring(lt.LightningModule):
@@ -322,7 +340,10 @@ class LitEventScoring(lt.LightningModule):
                     # "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
                     "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][1],
                     "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][1],
-                    'set': 0
+                    'set': 0,
+                    "system": str(idx[3][j]),
+                    "dtag": str(idx[4][j]),
+                    "event_num": int(idx[5][j])
                 }
             )
         # self.annotations[]
@@ -379,7 +400,10 @@ class LitEventScoring(lt.LightningModule):
                     # "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
                     "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][1],
                     "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][1],
-                    'set': 1
+                    'set': 1,
+                    "system": str(idx[3][j]),
+                    "dtag": str(idx[4][j]),
+                    "event_num": int(idx[5][j])
                 }
             )
 
@@ -391,33 +415,80 @@ class LitEventScoring(lt.LightningModule):
         # rprint(self.trainer.train_dataloader)
 
         # Load the table
-        table_file = self.output / 'annotations.h5'
-        if not table_file.exists():
-            fileh = tables.open_file(table_file, mode="w")
-            root = fileh.root
-            fileh.create_table(root, "train_annotations", Annotation)
-            fileh.create_table(root, "test_annotations", Annotation)
+        # table_file = self.output / 'annotations.h5'
+        # if not table_file.exists():
+        #     fileh = tables.open_file(table_file, mode="w")
+        #     root = fileh.root
+        #     fileh.create_table(root, "train_annotations", Annotation)
+        #     fileh.create_table(root, "test_annotations", Annotation)
+        #
+        # else:
+        #     fileh = tables.open_file(table_file, mode="a")
+        #     root = fileh.root
+        #
+        #
+        #
+        # table = root.train_annotations
+        #
+        # annotation = table.row
+        # for _annotation in self.train_annotations:
+        #     annotation['epoch'] = int(self.trainer.current_epoch)
+        #     annotation['idx'] = int(_annotation['idx'])
+        #     annotation['f'] = int(_annotation['f'])
+        #
+        #     annotation['table'] = str(_annotation['table'])
+        #     annotation['y'] = float(_annotation['y'])
+        #     annotation['y_hat'] = float(_annotation['y_hat'])
+        #     annotation['set'] = int(_annotation['set'])
+        #
+        #     annotation.append()
+        # table.flush()
+        # fileh.close()
 
+        # Get the table file
+        store_file = self.output / 'anotations.zarr'
+
+        # If store: Load the store and group
+        if store_file.exists():
+            root = zarr.open(store_file, mode='r')
+            train_annotation_table = root['train_annotations']
+
+        # Else: Create store and create groups
         else:
-            fileh = tables.open_file(table_file, mode="a")
-            root = fileh.root
+            root = zarr.open(store_file, mode='a')
+            train_annotation_table = root.create_dataset(
+                'train_annotations',
+                shape=(0,),
+                chunks=(1,),
+                dtype=annotation_dtype,
+                compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
+            )
+            test_annotation_table = root.create_dataset(
+                'test_annotations',
+                shape=(0,),
+                chunks=(1,),
+                dtype=annotation_dtype,
+                compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
+            )
 
-        table = root.train_annotations
-
-        annotation = table.row
+        # Append annotations
         for _annotation in self.train_annotations:
-            annotation['epoch'] = int(self.trainer.current_epoch)
-            annotation['idx'] = int(_annotation['idx'])
-            annotation['f'] = int(_annotation['f'])
-
-            annotation['table'] = str(_annotation['table'])
-            annotation['y'] = float(_annotation['y'])
-            annotation['y_hat'] = float(_annotation['y_hat'])
-            annotation['set'] = int(_annotation['set'])
-
-            annotation.append()
-        table.flush()
-        fileh.close()
+            annotation = np.array(
+                [
+                    (
+                        int(self.trainer.current_epoch),
+                        int(_annotation['idx']),
+                        int(_annotation['f']),
+                        str(_annotation['table']),
+                        float(_annotation['y']),
+                        float(_annotation['y_hat']),
+                        str(_annotation['system']),
+                        str(_annotation['dtag']),
+                        int(_annotation['event_num'])
+                    )
+                ]
+            )
+            train_annotation_table.append(annotation)
 
         self.train_annotations.clear()
 
@@ -428,32 +499,77 @@ class LitEventScoring(lt.LightningModule):
         # rprint(predictions)
         # rprint(self.trainer.test_dataloader)
 
-        # Load the table
-        table_file = self.output / 'annotations.h5'
-        if not table_file.exists():
-            fileh = tables.open_file(table_file, mode="w")
-            root = fileh.root
-            fileh.create_table(root, "train_annotations", Annotation)
-            fileh.create_table(root, "test_annotations", Annotation)
+        ## Load the table
+        # table_file = self.output / 'annotations.h5'
+        # if not table_file.exists():
+        #     fileh = tables.open_file(table_file, mode="w")
+        #     root = fileh.root
+        #     fileh.create_table(root, "train_annotations", Annotation)
+        #     fileh.create_table(root, "test_annotations", Annotation)
+        #
+        # else:
+        #     fileh = tables.open_file(table_file, mode="a")
+        #     root = fileh.root
+        #
+        # table = root.test_annotations
+        #
+        # annotation = table.row
+        # for _annotation in self.test_annotations:
+        #     annotation['epoch'] = int(self.trainer.current_epoch)
+        #     annotation['idx'] = int(_annotation['idx'])
+        #     annotation['f'] = int(_annotation['f'])
+        #     annotation['table'] = str(_annotation['table'])
+        #     annotation['y'] = float(_annotation['y'])
+        #     annotation['y_hat'] = float(_annotation['y_hat'])
+        #     annotation['set'] = int(_annotation['set'])
+        #     annotation.append()
+        # table.flush()
+        # fileh.close()
 
+        # Get the table file
+        store_file = self.output / 'anotations.zarr'
+
+        # If store: Load the store and group
+        if store_file.exists():
+            root = zarr.open(store_file, mode='r')
+            test_annotation_table = root['test_annotations']
+
+        # Else: Create store and create groups
         else:
-            fileh = tables.open_file(table_file, mode="a")
-            root = fileh.root
+            root = zarr.open(store_file, mode='a')
+            train_annotation_table = root.create_dataset(
+                'train_annotations',
+                shape=(0,),
+                chunks=(1,),
+                dtype=annotation_dtype,
+                compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
+            )
+            test_annotation_table = root.create_dataset(
+                'test_annotations',
+                shape=(0,),
+                chunks=(1,),
+                dtype=annotation_dtype,
+                compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
+            )
 
-        table = root.test_annotations
-
-        annotation = table.row
+        # Append annotations
         for _annotation in self.test_annotations:
-            annotation['epoch'] = int(self.trainer.current_epoch)
-            annotation['idx'] = int(_annotation['idx'])
-            annotation['f'] = int(_annotation['f'])
-            annotation['table'] = str(_annotation['table'])
-            annotation['y'] = float(_annotation['y'])
-            annotation['y_hat'] = float(_annotation['y_hat'])
-            annotation['set'] = int(_annotation['set'])
-            annotation.append()
-        table.flush()
-        fileh.close()
+            annotation = np.array(
+                [
+                    (
+                        int(self.trainer.current_epoch),
+                        int(_annotation['idx']),
+                        int(_annotation['f']),
+                        str(_annotation['table']),
+                        float(_annotation['y']),
+                        float(_annotation['y_hat']),
+                        str(_annotation['system']),
+                        str(_annotation['dtag']),
+                        int(_annotation['event_num'])
+                    )
+                ]
+            )
+            test_annotation_table.append(annotation)
 
         self.test_annotations.clear()
 
