@@ -33,7 +33,7 @@ annotation_dtype = [
     ('f', '<i4'),
     ('table', '<U32'),
     ('y', '<f4'),
-    ('y_hat', '<f4>'),
+    ('y_hat', '<f4'),
     ('system', '<U32'),
     ('dtag', '<U32'),
     ('event_num', 'i8')
