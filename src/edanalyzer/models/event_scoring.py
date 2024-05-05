@@ -450,7 +450,7 @@ class LitEventScoring(lt.LightningModule):
 
         # If store: Load the store and group
         if store_file.exists():
-            root = zarr.open(store_file, mode='r')
+            root = zarr.open(store_file, mode='a')
             train_annotation_table = root['train_annotations']
 
         # Else: Create store and create groups
