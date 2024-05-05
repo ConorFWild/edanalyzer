@@ -486,7 +486,8 @@ class LitEventScoring(lt.LightningModule):
                         str(_annotation['dtag']),
                         int(_annotation['event_num'])
                     )
-                ]
+                ],
+                dtype=annotation_dtype
             )
             train_annotation_table.append(annotation)
 
@@ -567,7 +568,8 @@ class LitEventScoring(lt.LightningModule):
                         str(_annotation['dtag']),
                         int(_annotation['event_num'])
                     )
-                ]
+                ],
+                dtype=annotation_dtype
             )
             test_annotation_table.append(annotation)
 

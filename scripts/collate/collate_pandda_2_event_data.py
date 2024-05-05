@@ -324,7 +324,9 @@ def main(config_path):
                     els[:len(mol_els)] = mol_els[:]
 
                     # 2. e. 2. b.
-                    record = np.array([(
+                    record = np.array(
+                        [
+                            (
                         mol_frag_idx,
                         _ligand_data['idx'],
                         len(heavy_atoms),
@@ -332,7 +334,8 @@ def main(config_path):
                         _ligand_data['canonical_smiles'],
                         poss,
                         els
-                    )],
+                    )]
+                        ,
                         dtype=ligand_fragment_dtype)
                     # print(record)
 
