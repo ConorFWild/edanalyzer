@@ -234,7 +234,7 @@ class LitEventScoring(lt.LightningModule):
         )
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_lig_annotations')
+        self.output = Path('./output/event_scoring_lig_annotations_2')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
@@ -459,14 +459,14 @@ class LitEventScoring(lt.LightningModule):
             train_annotation_table = root.create_dataset(
                 'train_annotations',
                 shape=(0,),
-                chunks=(100,),
+                chunks=(1000,),
                 dtype=annotation_dtype,
                 compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
             )
             test_annotation_table = root.create_dataset(
                 'test_annotations',
                 shape=(0,),
-                chunks=(100,),
+                chunks=(1000,),
                 dtype=annotation_dtype,
                 compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
             )
@@ -541,14 +541,14 @@ class LitEventScoring(lt.LightningModule):
             train_annotation_table = root.create_dataset(
                 'train_annotations',
                 shape=(0,),
-                chunks=(100,),
+                chunks=(1000,),
                 dtype=annotation_dtype,
                 compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
             )
             test_annotation_table = root.create_dataset(
                 'test_annotations',
                 shape=(0,),
-                chunks=(100,),
+                chunks=(1000,),
                 dtype=annotation_dtype,
                 compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
             )
