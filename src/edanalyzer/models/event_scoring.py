@@ -459,14 +459,14 @@ class LitEventScoring(lt.LightningModule):
             train_annotation_table = root.create_dataset(
                 'train_annotations',
                 shape=(0,),
-                chunks=(1,),
+                chunks=(100,),
                 dtype=annotation_dtype,
                 compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
             )
             test_annotation_table = root.create_dataset(
                 'test_annotations',
                 shape=(0,),
-                chunks=(1,),
+                chunks=(100,),
                 dtype=annotation_dtype,
                 compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
             )
@@ -541,14 +541,14 @@ class LitEventScoring(lt.LightningModule):
             train_annotation_table = root.create_dataset(
                 'train_annotations',
                 shape=(0,),
-                chunks=(1,),
+                chunks=(100,),
                 dtype=annotation_dtype,
                 compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
             )
             test_annotation_table = root.create_dataset(
                 'test_annotations',
                 shape=(0,),
-                chunks=(1,),
+                chunks=(100,),
                 dtype=annotation_dtype,
                 compressor=Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE)
             )
