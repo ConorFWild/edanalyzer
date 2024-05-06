@@ -472,8 +472,8 @@ class LitEventScoring(lt.LightningModule):
             )
 
         # Append annotations
-        for _annotation in self.train_annotations:
-            annotation = np.array(
+
+        annotations = np.array(
                 [
                     (
                         int(self.trainer.current_epoch),
@@ -486,10 +486,11 @@ class LitEventScoring(lt.LightningModule):
                         str(_annotation['dtag']),
                         int(_annotation['event_num'])
                     )
+                    for _annotation in self.train_annotations
                 ],
                 dtype=annotation_dtype
             )
-            train_annotation_table.append(annotation)
+        train_annotation_table.append(annotations)
 
         self.train_annotations.clear()
 
@@ -554,8 +555,8 @@ class LitEventScoring(lt.LightningModule):
             )
 
         # Append annotations
-        for _annotation in self.test_annotations:
-            annotation = np.array(
+
+        annotations = np.array(
                 [
                     (
                         int(self.trainer.current_epoch),
@@ -568,10 +569,11 @@ class LitEventScoring(lt.LightningModule):
                         str(_annotation['dtag']),
                         int(_annotation['event_num'])
                     )
+                    for _annotation in self.test_annotations
                 ],
                 dtype=annotation_dtype
             )
-            test_annotation_table.append(annotation)
+        test_annotation_table.append(annotations)
 
         self.test_annotations.clear()
 
