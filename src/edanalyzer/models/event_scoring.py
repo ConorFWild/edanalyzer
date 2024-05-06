@@ -446,7 +446,7 @@ class LitEventScoring(lt.LightningModule):
         # fileh.close()
 
         # Get the table file
-        store_file = self.output / 'anotations.zarr'
+        store_file = self.output / 'annotations.zarr'
 
         # If store: Load the store and group
         if store_file.exists():
@@ -529,7 +529,7 @@ class LitEventScoring(lt.LightningModule):
         # fileh.close()
 
         # Get the table file
-        store_file = self.output / 'anotations.zarr'
+        store_file = self.output / 'annotations.zarr'
 
         # If store: Load the store and group
         if store_file.exists():
