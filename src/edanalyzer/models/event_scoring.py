@@ -234,7 +234,7 @@ class LitEventScoring(lt.LightningModule):
         )
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_lig_annotations_mslow')
+        self.output = Path('./output/event_scoring_lig_annotations_fast')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
@@ -265,7 +265,7 @@ class LitEventScoring(lt.LightningModule):
 
     def configure_optimizers(self):
         # optimizer = torch.optim.Adam(self.parameters(), lr=1e-6)
-        optimizer = torch.optim.SGD(self.parameters(), lr=1e-2)
+        optimizer = torch.optim.SGD(self.parameters(), lr=1e-1)
         # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
         # return [optimizer], [lr_scheduler]
         # return {
