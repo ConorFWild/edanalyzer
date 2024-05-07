@@ -822,11 +822,11 @@ def main(config_path, batch_size=12, num_workers=None):
     trainer = lt.Trainer(accelerator='gpu', logger=logger,
                          callbacks=[
                              checkpoint_callback,
-                             StochasticWeightAveraging(swa_lrs=5e-2, swa_epoch_start=0.66)
+                             StochasticWeightAveraging(swa_lrs=3e-2, swa_epoch_start=0.66)
                          ],
                          enable_progress_bar=False,
                          gradient_clip_val=2.0,
-                         max_epochs=150
+                         max_epochs=225
                          )
     rprint(f'Training...')
     trainer.fit(model, dataset_train, dataset_test)
