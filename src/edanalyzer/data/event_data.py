@@ -6,7 +6,8 @@ from numcodecs import Blosc, Delta
 
 from .database import _get_st_hits, _res_to_array, _get_matched_cifs_from_dir, _get_smiles, \
     _get_atom_ids, _get_connectivity, _get_system_from_dtag
-from ..datasets.base import _get_structure_from_path, _load_xmap_from_path, _sample_xmap_and_scale, _load_xmap_from_mtz_path
+from ..datasets.base import _get_structure_from_path, _load_xmap_from_path, _sample_xmap_and_scale, \
+    _load_xmap_from_mtz_path
 from ..constants import PANDDA_ZMAP_TEMPLATE, PANDDA_INSPECT_MODEL_DIR, PANDDA_INITIAL_MTZ_TEMPLATE
 
 z_map_sample_metadata_dtype = [
@@ -17,7 +18,8 @@ z_map_sample_metadata_dtype = [
     ('pose_data_idx', 'i8'),
     ('system', '<U32'),
     ('dtag', '<U32'),
-    ('event_num', 'i8')
+    ('event_num', 'i8'),
+    ('Confidence', '<U32')
 ]
 
 z_map_sample_dtype = [('idx', '<i4'), ('sample', '<f4', (90, 90, 90))]
@@ -68,6 +70,7 @@ def _make_z_map_sample_table(group):
     )
 
     return table_z_map_sample
+
 
 def _make_xmap_sample_table(group):
     table_xmap_sample = group.create_dataset(
@@ -215,6 +218,7 @@ def _get_z_map_sample_from_dataset_dir(dataset_dir, x, y, z, idx_z_map):
     )
     return z_map_sample
 
+
 def _get_xmap_sample_from_dataset_dir(dataset_dir, x, y, z, idx_z_map):
     # Get the zmap
     xmap_path = dataset_dir / PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dataset_dir.name)
@@ -251,7 +255,8 @@ def _get_z_map_metadata_sample_from_dataset_dir(
         pose_data_idx,
         system,
         dtag,
-        event_num
+        event_num,
+        conf
 ):
     z_map_sample_metadata = np.array(
         [(
@@ -260,9 +265,10 @@ def _get_z_map_metadata_sample_from_dataset_dir(
             resid,
             ligand_data_idx,
             pose_data_idx,
-system,
-        dtag,
-        event_num
+            system,
+            dtag,
+            event_num,
+            conf
         )],
         dtype=z_map_sample_metadata_dtype
     )
