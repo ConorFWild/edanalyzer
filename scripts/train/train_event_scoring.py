@@ -522,7 +522,7 @@ def _get_train_test_idxs_full_conf(root):
     # Loop over the z samples adding the test samples
     for _idx, z in test_samples.iterrows():
         #
-        # ligand_data_idx = z['ligand_data_idx']
+        ligand_data_idx = z['ligand_data_idx']
         # if ligand_data_idx != -1:
         if z['Confidence'] == 'High':
             ligand_data = root[table_type]['ligand_data'][ligand_data_idx]
@@ -548,6 +548,14 @@ def _get_train_test_idxs_full_conf(root):
 
         test_conf.append(z['Confidence'])
 
+
+    rprint({
+        'pos_z_samples len': len(pos_z_samples),
+        'neg_z_samples len': len(neg_z_samples),
+        'pos_conf_samples len': len(pos_conf_samples),
+        'neg_conf_samples len': len(neg_conf_samples),
+        'train_conf len': len(train_conf),
+    })
     train_idxs = [
         {'table': table_type, 'z': z, 'f': f, 't': t}
         for z, f, t
@@ -558,6 +566,13 @@ def _get_train_test_idxs_full_conf(root):
         )
         # ([True] * len(pos_z_samples)) + ([False] * len(neg_z_samples)))]
     ]
+    rprint({
+        'test_pos_z_samples len': len(test_pos_z_samples),
+        'test_neg_z_samples len': len(test_neg_z_samples),
+        'test_pos_conf_samples len': len(test_pos_conf_samples),
+        'test_neg_conf_samples len': len(test_neg_conf_samples),
+        'train_conf len': len(test_conf),
+    })
     test_idxs = [{'table': table_type, 'z': z, 'f': f, 't': t} for z, f, t
                  in zip(
             test_pos_z_samples + test_neg_z_samples,
