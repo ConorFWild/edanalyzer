@@ -457,7 +457,8 @@ def _get_train_test_idxs_full_conf(root):
     neg_conf_samples = []
     positive_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
     negative_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
-    train_conf = []
+    train_pos_conf = []
+    train_neg_conf = []
 
     # Loop over the z samples adding positive samples for each
     for _idx, z in train_samples.iterrows():
@@ -481,7 +482,7 @@ def _get_train_test_idxs_full_conf(root):
             ligand_conf_samples.append(ligand_smiles_to_conf[ligand_canonical_smiles].sample(1)['idx'].iloc[0])
         pos_conf_samples += ligand_conf_samples
         pos_z_samples += [z['idx'] for _j in range(10)]
-        train_conf += [z['Confidence'] for _j in range(10)]
+        train_pos_conf += [z['Confidence'] for _j in range(10)]
 
     print(f'Got {len(pos_conf_samples)} pos samples!')
 
@@ -509,7 +510,7 @@ def _get_train_test_idxs_full_conf(root):
 
         neg_conf_samples += [lig_conf_sample, ]
         neg_z_samples += [z['idx'], ]
-        train_conf += [z['Confidence'], ]
+        train_neg_conf += [z['Confidence'], ]
 
     print(f'Got {len(neg_conf_samples)} neg decoy samples!')
 
@@ -517,7 +518,8 @@ def _get_train_test_idxs_full_conf(root):
     test_neg_z_samples = []
     test_pos_conf_samples = []
     test_neg_conf_samples = []
-    test_conf = []
+    test_pos_conf = []
+    test_neg_conf = []
 
     # Loop over the z samples adding the test samples
     for _idx, z in test_samples.iterrows():
@@ -531,9 +533,10 @@ def _get_train_test_idxs_full_conf(root):
                 continue
 
             lig_conf_sample = ligand_smiles_to_conf[ligand_canonical_smiles].sample(1)['idx'].iloc[0]
+
             test_pos_conf_samples.append(lig_conf_sample)
             test_pos_z_samples.append(z['idx'])
-
+            test_pos_conf.append(z['Confidence'])
 
         else:
             fragment = \
@@ -545,8 +548,8 @@ def _get_train_test_idxs_full_conf(root):
 
             test_neg_conf_samples.append(lig_conf_sample)
             test_neg_z_samples.append(z['idx'])
+            test_neg_conf.append(z['Confidence'])
 
-        test_conf.append(z['Confidence'])
 
 
     rprint({
@@ -554,7 +557,9 @@ def _get_train_test_idxs_full_conf(root):
         'neg_z_samples len': len(neg_z_samples),
         'pos_conf_samples len': len(pos_conf_samples),
         'neg_conf_samples len': len(neg_conf_samples),
-        'train_conf len': len(train_conf),
+        'train_pos_conf len': len(train_pos_conf),
+        'train_neg_conf len': len(train_neg_conf),
+
     })
     train_idxs = [
         {'table': table_type, 'z': z, 'f': f, 't': t}
@@ -562,7 +567,7 @@ def _get_train_test_idxs_full_conf(root):
         in zip(
             pos_z_samples + neg_z_samples,
             pos_conf_samples + neg_conf_samples,
-            train_conf
+            train_pos_conf + train_neg_conf
         )
         # ([True] * len(pos_z_samples)) + ([False] * len(neg_z_samples)))]
     ]
@@ -571,14 +576,15 @@ def _get_train_test_idxs_full_conf(root):
         'test_neg_z_samples len': len(test_neg_z_samples),
         'test_pos_conf_samples len': len(test_pos_conf_samples),
         'test_neg_conf_samples len': len(test_neg_conf_samples),
-        'train_conf len': len(test_conf),
+        'train_pos_conf len': len(test_pos_conf),
+        'train_neg_conf len': len(test_pos_conf),
     })
     test_idxs = [{'table': table_type, 'z': z, 'f': f, 't': t} for z, f, t
                  in zip(
             test_pos_z_samples + test_neg_z_samples,
             test_pos_conf_samples + test_neg_conf_samples,
             # ([True] * len(test_pos_conf_samples)) + ([False] * len(test_neg_conf_samples))
-            test_conf
+            test_pos_conf + train_neg_conf
         )
                  ]
     return train_idxs, test_idxs

@@ -289,7 +289,6 @@ class EventScoringDataset(Dataset):
         )
         image_density_float = image_density.astype(np.float32) * mask
 
-
         image_z = np.stack(
             [
                 z_map_sample,
