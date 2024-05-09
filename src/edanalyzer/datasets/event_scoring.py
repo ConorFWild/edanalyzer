@@ -348,14 +348,25 @@ class EventScoringDataset(Dataset):
         # else:
         #     raise Exception
 
-        if _t == 'High':
-            hit = [0.0, 1.0]
-        elif _t == 'Medium':
-            hit = [0.5, 0.5]
-        elif _t == 'Low':
-            hit = [1.0, 0.0]
+
+        if annotation['partition'] == 'train':
+            if _t == 'High':
+                hit = [0.025, 0.975]
+            elif _t == 'Medium':
+                hit = [0.5, 0.5]
+            elif _t == 'Low':
+                hit = [0.975, 0.025]
+            else:
+                raise Exception
         else:
-            raise Exception
+            if _t == 'High':
+                hit = [0.0, 1.0]
+            elif _t == 'Medium':
+                hit = [0.5, 0.5]
+            elif _t == 'Low':
+                hit = [1.0, 0.0]
+            else:
+                raise Exception
 
         label = np.array(hit)
         label_float = label.astype(np.float32)
