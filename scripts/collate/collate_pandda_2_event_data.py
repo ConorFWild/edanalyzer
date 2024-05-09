@@ -117,8 +117,8 @@ def main(config_path):
                 # Iterate the inspect table
                 for _idx, _row in inspect_table.iterrows():
                     # Unpack the row information
-                    dtag, event_idx, bdc, conf, viewed = _row['dtag'], _row['event_idx'], _row['1-BDC'], _row[
-                        constants.PANDDA_INSPECT_HIT_CONDFIDENCE], _row[constants.PANDDA_INSPECT_VIEWED]
+                    dtag, event_idx, bdc, conf, viewed, size = _row['dtag'], _row['event_idx'], _row['1-BDC'], _row[
+                        constants.PANDDA_INSPECT_HIT_CONDFIDENCE], _row[constants.PANDDA_INSPECT_VIEWED], _row[constants.PANDDA_INSPECT_CLUSTER_SIZE]
 
                     system = _get_system_from_dtag(dtag)
 
@@ -206,7 +206,8 @@ def main(config_path):
                         system,
                         dtag,
                         event_idx,
-                        conf
+                        conf,
+                        size
                     )
 
                     z_map_sample_metadata_table.append(z_map_metadata_sample)

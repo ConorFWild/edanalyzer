@@ -19,7 +19,8 @@ z_map_sample_metadata_dtype = [
     ('system', '<U32'),
     ('dtag', '<U32'),
     ('event_num', 'i8'),
-    ('Confidence', '<U32')
+    ('Confidence', '<U32'),
+    ('size', '<f4')
 ]
 
 z_map_sample_dtype = [('idx', '<i4'), ('sample', '<f4', (90, 90, 90))]
@@ -256,7 +257,8 @@ def _get_z_map_metadata_sample_from_dataset_dir(
         system,
         dtag,
         event_num,
-        conf
+        conf,
+        size
 ):
     z_map_sample_metadata = np.array(
         [(
@@ -268,7 +270,8 @@ def _get_z_map_metadata_sample_from_dataset_dir(
             system,
             dtag,
             event_num,
-            conf
+            conf,
+            size
         )],
         dtype=z_map_sample_metadata_dtype
     )
