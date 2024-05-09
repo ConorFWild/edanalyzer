@@ -348,9 +348,11 @@ class EventScoringDataset(Dataset):
         # else:
         #     raise Exception
 
-        if _t:
+        if _t == 'High':
             hit = [0.0, 1.0]
-        elif not _t:
+        elif _t == 'Medium':
+            hit = [0.5, 0.5]
+        elif _t == 'Low':
             hit = [1.0, 0.0]
         else:
             raise Exception

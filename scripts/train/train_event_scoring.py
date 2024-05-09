@@ -18,6 +18,7 @@ from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 from lightning.pytorch.loggers import CSVLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveraging
 
+
 def sample(iterable, num, replace, weights):
     df = pd.Series(iterable)
     return [_x for _x in df.sample(num, replace=replace, weights=weights)]
@@ -456,11 +457,14 @@ def _get_train_test_idxs_full_conf(root):
     neg_conf_samples = []
     positive_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
     negative_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
+    train_conf = []
 
     # Loop over the z samples adding positive samples for each
     for _idx, z in train_samples.iterrows():
         ligand_data_idx = z['ligand_data_idx']
-        if ligand_data_idx == -1:
+        # if ligand_data_idx == -1:
+        #     continue
+        if z['Confidence'] != 'High':
             continue
         ligand_data = root[table_type]['ligand_data'][ligand_data_idx]
         ligand_canonical_smiles = ligand_data['canonical_smiles']
@@ -477,14 +481,17 @@ def _get_train_test_idxs_full_conf(root):
             ligand_conf_samples.append(ligand_smiles_to_conf[ligand_canonical_smiles].sample(1)['idx'].iloc[0])
         pos_conf_samples += ligand_conf_samples
         pos_z_samples += [z['idx'] for _j in range(10)]
+        train_conf += [z['Confidence'] for _j in range(10)]
 
     print(f'Got {len(pos_conf_samples)} pos samples!')
 
     # Loop over the z samples adding the inherent negative samples
-    for _idx, z in train_samples[train_samples['ligand_data_idx'] == -1].sample(len(pos_conf_samples),
-                                                                                replace=True).iterrows():
-        ligand_data_idx = z['ligand_data_idx']
-        if ligand_data_idx != -1:
+    for _idx, z in train_samples[train_samples['Confidence'] == 'Low'].sample(len(pos_conf_samples),
+                                                                              replace=True).iterrows():
+        # ligand_data_idx = z['ligand_data_idx']
+        # if ligand_data_idx != -1:
+        #     continue
+        if z['Confidence'] != 'Low':
             continue
 
         # Select a uniform random fragment
@@ -502,6 +509,7 @@ def _get_train_test_idxs_full_conf(root):
 
         neg_conf_samples += [lig_conf_sample, ]
         neg_z_samples += [z['idx'], ]
+        train_conf += [z['Confidence'], ]
 
     print(f'Got {len(neg_conf_samples)} neg decoy samples!')
 
@@ -509,12 +517,14 @@ def _get_train_test_idxs_full_conf(root):
     test_neg_z_samples = []
     test_pos_conf_samples = []
     test_neg_conf_samples = []
+    test_conf = []
 
     # Loop over the z samples adding the test samples
     for _idx, z in test_samples.iterrows():
         #
-        ligand_data_idx = z['ligand_data_idx']
-        if ligand_data_idx != -1:
+        # ligand_data_idx = z['ligand_data_idx']
+        # if ligand_data_idx != -1:
+        if z['Confidence'] == 'High':
             ligand_data = root[table_type]['ligand_data'][ligand_data_idx]
             ligand_canonical_smiles = ligand_data['canonical_smiles']
             if ligand_canonical_smiles not in ligand_smiles_to_conf:
@@ -536,14 +546,24 @@ def _get_train_test_idxs_full_conf(root):
             test_neg_conf_samples.append(lig_conf_sample)
             test_neg_z_samples.append(z['idx'])
 
-    train_idxs = [{'table': table_type, 'z': z, 'f': f, 't': t} for z, f, t in
-                  zip(pos_z_samples + neg_z_samples, pos_conf_samples + neg_conf_samples,
-                      ([True] * len(pos_z_samples)) + ([False] * len(neg_z_samples)))]
+        test_conf.append(z['Confidence'])
+
+    train_idxs = [
+        {'table': table_type, 'z': z, 'f': f, 't': t}
+        for z, f, t
+        in zip(
+            pos_z_samples + neg_z_samples,
+            pos_conf_samples + neg_conf_samples,
+            train_conf
+        )
+        # ([True] * len(pos_z_samples)) + ([False] * len(neg_z_samples)))]
+    ]
     test_idxs = [{'table': table_type, 'z': z, 'f': f, 't': t} for z, f, t
                  in zip(
             test_pos_z_samples + test_neg_z_samples,
             test_pos_conf_samples + test_neg_conf_samples,
-            ([True] * len(test_pos_conf_samples)) + ([False] * len(test_neg_conf_samples))
+            # ([True] * len(test_pos_conf_samples)) + ([False] * len(test_neg_conf_samples))
+            test_conf
         )
                  ]
     return train_idxs, test_idxs
@@ -591,7 +611,7 @@ def main(config_path, batch_size=12, num_workers=None):
     #     (metadata_table['pose_data_idx'] == -1) & (annotation_df['partition'] == b'train')]
     # print(f'Got {len(negative_train_samples)} negative train samples')
     # negative_test_samples = metadata_table[
-        # (metadata_table['pose_data_idx'] == -1) & (annotation_df['partition'] == b'test')]
+    # (metadata_table['pose_data_idx'] == -1) & (annotation_df['partition'] == b'test')]
     # print(f'Got {len(negative_test_samples)} negative test samples')
 
     # unique_smiles = ligand_idx_smiles_df['canonical_smiles'].unique()
