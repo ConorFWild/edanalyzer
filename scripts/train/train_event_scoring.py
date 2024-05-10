@@ -835,7 +835,7 @@ def main(config_path, batch_size=12, num_workers=None):
             # pos_train_pose_samples
             None
         ),
-        batch_size=batch_size,
+        batch_size=128,#batch_size,
         shuffle=True,
         num_workers=19,
     )
