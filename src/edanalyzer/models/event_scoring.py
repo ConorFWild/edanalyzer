@@ -267,7 +267,7 @@ class LitEventScoring(lt.LightningModule):
     def configure_optimizers(self):
         # optimizer = torch.optim.Adam(self.parameters(), lr=1e-3, weight_decay=1e-2)
         optimizer = torch.optim.SGD(self.parameters(), lr=1e-1, weight_decay=1e-5)
-        lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5)
+        lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, cooldown=5)
         # return [optimizer], [lr_scheduler]
         return {
             "optimizer": optimizer,
@@ -616,8 +616,9 @@ class LitEventScoring(lt.LightningModule):
         pr_df = pd.DataFrame(pr)
         best_fpr_99 = pr_df[pr_df['Recall'] > 0.99]['False Positive Rate'].min()
         best_fpr_95 = pr_df[pr_df['Recall'] > 0.95]['False Positive Rate'].min()
-        self.log('fpr95', round(best_fpr_95))
+        self.log('fpr95', round(best_fpr_95, 4))
         self.log('fpr99', round(best_fpr_99, 4))
+        # self.log('lr', )
 
         self.test_annotations.clear()
 
