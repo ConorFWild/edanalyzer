@@ -10,6 +10,7 @@ import numpy as np
 # import tables
 import zarr
 from numcodecs import Blosc, Delta
+import pandas as pd
 
 
 from .resnet import resnet18, resnet10
@@ -203,7 +204,7 @@ class LitEventScoring(lt.LightningModule):
         # self.automatic_optimization = False
         self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
         # self.z_encoder = SimpleConvolutionalEncoder(input_layers=2)
-        self.z_encoder = resnet10(num_classes=2, num_input=2, headless=True).float()
+        self.z_encoder = resnet10(num_classes=1, num_input=2, headless=True).float()
         self.x_encoder = SimpleConvolutionalEncoder(input_layers=1)
         # self.mol_encoder = SimpleConvolutionalEncoder(input_layers=1)
         self.mol_encoder = resnet10(num_classes=2, num_input=1, headless=True).float()
@@ -234,7 +235,7 @@ class LitEventScoring(lt.LightningModule):
         )
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_opt=sgd_ls=2.5e-2_bs=12_lr=e-1_wd=e-5_x=T')
+        self.output = Path('./output/event_scoring_opt=sgd_ls=2.5e-2_bs=12_lr=e-1_wd=e-5_sch=pl')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
@@ -266,19 +267,19 @@ class LitEventScoring(lt.LightningModule):
     def configure_optimizers(self):
         # optimizer = torch.optim.Adam(self.parameters(), lr=1e-3, weight_decay=1e-2)
         optimizer = torch.optim.SGD(self.parameters(), lr=1e-1, weight_decay=1e-5)
-        # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
+        lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5)
         # return [optimizer], [lr_scheduler]
-        # return {
-        #     "optimizer": optimizer,
-        #     "lr_scheduler": {
-        #         "scheduler": lr_scheduler,
-        #         "monitor": "train_loss",
-        #         "interval": "epoch",
-        #         "frequency": 1,
-        #         "strict": False,
-        #     },
-        # }
-        return optimizer
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": lr_scheduler,
+                "monitor": "fpr95",
+                "interval": "epoch",
+                "frequency": 1,
+                "strict": False,
+            },
+        }
+        # return optimizer
 
     def training_step(self, train_batch, batch_idx):
         idx, x, z, m, d, y = train_batch
@@ -575,9 +576,52 @@ class LitEventScoring(lt.LightningModule):
             )
         test_annotation_table.append(annotations)
 
+        #
+        # _epoch = epoch
+        # best_df = df[(df['epoch'] == _epoch)]
+        best_df = pd.DataFrame.from_records(annotations)
+        pr = []
+        for cutoff in np.linspace(0.0, 1.0, num=1000):
+            true_hit_best_df = best_df[best_df['y'] > 0.9]
+            negative_best_df = best_df[best_df['y'] <= 0.1]
+            true_hit_df = true_hit_best_df[true_hit_best_df['y_hat'] > cutoff]
+            false_hit_df = negative_best_df[negative_best_df['y_hat'] > cutoff]
+            true_negative_df = negative_best_df[negative_best_df['y_hat'] <= cutoff]
+            false_negative_df = true_hit_best_df[true_hit_best_df['y_hat'] <= cutoff]
+            tp = len(true_hit_df)
+            fp = len(false_hit_df)
+            tn = len(true_negative_df)
+            fn = len(false_negative_df)
+
+            if tp + fp == 0:
+                prec = 0.0
+            else:
+                prec = tp / (tp + fp)
+            if tp + fn == 0:
+                recall = 0.0
+            else:
+                recall = tp / (tp + fn)
+            if (fp + tn) == 0:
+                fpr = 0.0
+            else:
+                fpr = fp / (fp + tn)
+            pr.append(
+                {
+                    'Cutoff': cutoff,
+                    'Precision': prec,
+                    'Recall': recall,
+                    'False Positive Rate': fpr
+                }
+            )
+        pr_df = pd.DataFrame(pr)
+        best_fpr_99 = pr_df[pr_df['Recall'] > 0.99]['False Positive Rate'].min()
+        best_fpr_95 = pr_df[pr_df['Recall'] > 0.95]['False Positive Rate'].min()
+        self.log('fpr95', round(best_fpr_95))
+        self.log('fpr99', round(best_fpr_99, 4))
+
         self.test_annotations.clear()
 
-        sch = self.lr_schedulers()
+        # sch = self.lr_schedulers()
 
         # If the selected scheduler is a ReduceLROnPlateau scheduler.
         # if isinstance(sch, torch.optim.lr_scheduler.ReduceLROnPlateau):

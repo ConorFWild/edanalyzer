@@ -237,12 +237,12 @@ class EventScoringDataset(Dataset):
             mask = np.ones((32,32,32), dtype=np.float32)
 
         # Get sample images
-        xmap_sample = _sample_xmap_and_scale(
-            xmap,
-            transform,
-            np.copy(sample_array)
-        )
-        # xmap_sample = np.copy(sample_array)
+        # xmap_sample = _sample_xmap_and_scale(
+        #     xmap,
+        #     transform,
+        #     np.copy(sample_array)
+        # )
+        xmap_sample = np.copy(sample_array)
         z_map_sample = _sample_xmap_and_scale(
             z_map,
             transform,
@@ -292,7 +292,7 @@ class EventScoringDataset(Dataset):
         image_z = np.stack(
             [
                 z_map_sample,
-                xmap_sample
+                # xmap_sample
             ],
             axis=0
         )
