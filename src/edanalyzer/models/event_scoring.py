@@ -264,8 +264,8 @@ class LitEventScoring(lt.LightningModule):
         return score
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3, weight_decay=1e-2)
-        # optimizer = torch.optim.SGD(self.parameters(), lr=1e-1, weight_decay=1e-4)
+        # optimizer = torch.optim.Adam(self.parameters(), lr=1e-3, weight_decay=1e-2)
+        optimizer = torch.optim.SGD(self.parameters(), lr=1e-1, weight_decay=1e-3)
         # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
         # return [optimizer], [lr_scheduler]
         # return {
