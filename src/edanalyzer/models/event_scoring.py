@@ -234,7 +234,7 @@ class LitEventScoring(lt.LightningModule):
         )
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_lig_annotations_sgd_ls_slb_hr')
+        self.output = Path('./output/event_scoring_lig_annotations_sgd_ls_sb_hr')
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)

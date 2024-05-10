@@ -590,7 +590,7 @@ def _get_train_test_idxs_full_conf(root):
     return train_idxs, test_idxs
 
 
-def main(config_path, batch_size=128, num_workers=None):
+def main(config_path, batch_size=12, num_workers=None):
     rprint(f'Running train event scoring from config file: {config_path}')
     # Load config
     with open(config_path, 'r') as f:
@@ -858,8 +858,8 @@ def main(config_path, batch_size=128, num_workers=None):
 
     # Train
     rprint('Constructing trainer...')
-    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_lig_annotations_sgd_ls_slb_hr')
-    logger = CSVLogger("output/event_scoring_lig_annotations_sgd_ls_slb_hr/logs")
+    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_lig_annotations_sgd_ls_sb_hr')
+    logger = CSVLogger("output/event_scoring_lig_annotations_sgd_ls_sb_hr/logs")
     trainer = lt.Trainer(accelerator='gpu', logger=logger,
                          callbacks=[
                              checkpoint_callback,
