@@ -584,7 +584,7 @@ def _get_train_test_idxs_full_conf(root):
             test_pos_z_samples + test_neg_z_samples,
             test_pos_conf_samples + test_neg_conf_samples,
             # ([True] * len(test_pos_conf_samples)) + ([False] * len(test_neg_conf_samples))
-            test_pos_conf + train_neg_conf
+            test_pos_conf + test_neg_conf
         )
                  ]
     return train_idxs, test_idxs

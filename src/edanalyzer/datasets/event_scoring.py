@@ -347,7 +347,6 @@ class EventScoringDataset(Dataset):
         # else:
         #     raise Exception
 
-
         if annotation['partition'] == 'train':
             if _t == 'High':
                 hit = [0.025, 0.975]
