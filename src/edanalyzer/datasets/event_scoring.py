@@ -188,6 +188,13 @@ class EventScoringDataset(Dataset):
         # valid_poss = pose_data['positions'][valid_mask]
         # valid_elements = pose_data['elements'][valid_mask]
         valid_mask = frag_data['elements'] != 0
+        if annotation['partition'] == 'train':
+            do_drop = rng.random()
+            if do_drop > 0.5:
+                valid_indicies = np.nonzero(valid_mask)
+                random_drop_index = rng.integers(0, len(valid_indicies))
+                drop_index = valid_indicies[random_drop_index]
+                valid_mask[drop_index] = False
         valid_poss = frag_data['positions'][valid_mask]
         valid_elements = frag_data['elements'][valid_mask]
 
