@@ -22,7 +22,8 @@ from .base import (
     _get_res_from_structure_chain_res,
     _get_structure_from_path,
     _get_res_from_arrays,
-    _get_grid_from_hdf5
+    _get_grid_from_hdf5,
+    _get_ed_mask_float
 )
 
 patch_lower = [x for x in range(8)]
@@ -54,6 +55,7 @@ def get_mask_array():
             mask_array[patch] = 0.0
 
     return mask_array
+
 
 
 class EventScoringDataset(Dataset):
@@ -243,13 +245,15 @@ class EventScoringDataset(Dataset):
         else:
             mask = np.ones((32,32,32), dtype=np.float32)
 
+        xmap_mask_float = _get_ed_mask_float()
+
         # Get sample images
-        # xmap_sample = _sample_xmap_and_scale(
-        #     xmap,
-        #     transform,
-        #     np.copy(sample_array)
-        # )
-        xmap_sample = np.copy(sample_array)
+        xmap_sample = _sample_xmap_and_scale(
+            xmap,
+            transform,
+            np.copy(sample_array)
+        )
+        # xmap_sample = np.copy(sample_array)
         z_map_sample = _sample_xmap_and_scale(
             z_map,
             transform,
@@ -259,6 +263,10 @@ class EventScoringDataset(Dataset):
             u_s = rng.uniform(0.0, 1.25)
             noise = rng.normal(size=(32,32,32)) * u_s
             z_map_sample += noise.astype(np.float32)
+
+            u_s = rng.uniform(0.0, 1.0)
+            noise = rng.normal(size=(32,32,32)) * u_s
+            xmap_sample += noise.astype(np.float32)
 
         ligand_mask_grid = _get_ligand_mask_float(
             z_map,
@@ -299,7 +307,7 @@ class EventScoringDataset(Dataset):
         image_z = np.stack(
             [
                 z_map_sample,
-                # xmap_sample
+                xmap_sample * xmap_mask_float
             ],
             axis=0
         )
