@@ -451,7 +451,7 @@ def _get_ligand_mask_float(dmap, res, radius=1.0):
 def _get_ed_mask_float( radius=3.0):
     mask = gemmi.FloatGrid(32,32,32)
     mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
-    mask.set_unit_cell(gemmi.UnitCell())
+    mask.set_unit_cell(gemmi.UnitCell(16.0,16.0,16.0,90.0,90.0,90.0))
 
     # Get the mask
     # for atom in res:
