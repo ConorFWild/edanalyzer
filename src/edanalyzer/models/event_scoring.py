@@ -614,10 +614,10 @@ class LitEventScoring(lt.LightningModule):
                 }
             )
         pr_df = pd.DataFrame(pr)
-        best_fpr_10 = pr_df[pr_df['Recall'] > 0.9999999]['False Positive Rate'].min()
+        best_fpr_10 = pr_df[pr_df['Recall'] > 0.999999999]['False Positive Rate'].min()
         best_fpr_99 = pr_df[pr_df['Recall'] > 0.99]['False Positive Rate'].min()
         best_fpr_95 = pr_df[pr_df['Recall'] > 0.95]['False Positive Rate'].min()
-        self.log('fpr19', best_fpr_10, 4)
+        self.log('fpr10', best_fpr_10, 4)
         self.log('fpr95', best_fpr_95, 4)
         self.log('fpr99', best_fpr_99, 4)
         # self.log('lr', )
