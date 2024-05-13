@@ -96,6 +96,9 @@ def main():
     # Parse Args
     path, smile_source_file_pattern, smile_pattern, compound_dir_pattern, dep_pattern, output_pattern, dry = _parse_args()
 
+    rprint(dry)
+    rprint(type(dry))
+
     # Walk Tree
     for dataset_dir in path.glob('*'):
         rprint(f'Processing dataset dir: {dataset_dir}')
