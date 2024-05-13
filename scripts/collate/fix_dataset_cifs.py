@@ -22,7 +22,7 @@ def _parse_args():
     args = parser.parse_args()
 
     return (
-        args.path,
+        pathlib.Path(args.path),
         args.smile_source_file_pattern,
         args.smile_pattern,
         args.compound_dir_pattern,
