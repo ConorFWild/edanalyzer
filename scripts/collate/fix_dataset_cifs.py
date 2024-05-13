@@ -17,7 +17,7 @@ def _parse_args():
     parser.add_argument('--compound_dir_pattern', default='compound', required=False)
     parser.add_argument('--dep_pattern', default='_dep', required=False)
     parser.add_argument('--output_pattern', default='compound', required=False)
-    parser.add_argument('--dry', default=False, required=False)
+    parser.add_argument('--dry', default=True, required=False)
 
     args = parser.parse_args()
 
