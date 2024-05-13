@@ -17,7 +17,7 @@ def _parse_args():
     parser.add_argument('--compound_dir_pattern', default='compound', required=False)
     parser.add_argument('--dep_pattern', default='_dep', required=False)
     parser.add_argument('--output_pattern', default='compound', required=False)
-    parser.add_argument('--dry', default=True, required=False)
+    parser.add_argument('--dry', default=False, required=False)
 
     args = parser.parse_args()
 
@@ -95,9 +95,6 @@ def main():
 
     # Parse Args
     path, smile_source_file_pattern, smile_pattern, compound_dir_pattern, dep_pattern, output_pattern, dry = _parse_args()
-
-    rprint(dry)
-    rprint(type(dry))
 
     # Walk Tree
     for dataset_dir in path.glob('*'):
