@@ -12,12 +12,12 @@ from rich import print as rprint
 def _parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('path', )
-    parser.add_argument('smile_source_file_pattern', default='/compound/dep/[a-zA-Z0-9]+.cif')
-    parser.add_argument('smile_pattern', default='#   SMILES string: ([^\n])')
-    parser.add_argument('compound_dir_pattern', default='compound')
-    parser.add_argument('dep_pattern', default='_dep')
-    parser.add_argument('output_pattern', default='compound')
-    parser.add_argument('dry', default=True)
+    parser.add_argument('smile_source_file_pattern', default='/compound/dep/[a-zA-Z0-9]+.cif', required=False)
+    parser.add_argument('smile_pattern', default='#   SMILES string: ([^\n])', required=False)
+    parser.add_argument('compound_dir_pattern', default='compound', required=False)
+    parser.add_argument('dep_pattern', default='_dep', required=False)
+    parser.add_argument('output_pattern', default='compound', required=False)
+    parser.add_argument('dry', default=True, required=False)
 
     args = parser.parse_args()
 
