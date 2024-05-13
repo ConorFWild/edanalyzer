@@ -80,7 +80,8 @@ def _generate_ligand_files(smiles, output_pattern, dry):
     rprint(f'Grade runscript is: {grade_runscript}')
 
     # Run
-    _run_script(grade_runscript)
+    if not dry:
+        _run_script(grade_runscript)
 
     ...
 
