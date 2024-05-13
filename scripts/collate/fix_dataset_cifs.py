@@ -72,6 +72,7 @@ def _generate_ligand_files(smiles, output_pattern, dry):
 
     # Generate script to run
     grade_runscript = _get_grade_runscript(output_pattern, smiles_output_path, )
+    rprint(f'Grade runscript is: {grade_runscript}')
 
     # Run
     run_script(grade_runscript)
