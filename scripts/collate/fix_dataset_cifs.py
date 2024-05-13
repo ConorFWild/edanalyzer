@@ -94,7 +94,7 @@ def main():
         rprint(f'Processing dataset dir: {dataset_dir}')
 
         # Get smiles
-        smiles = _parse_file_for_smiles([x for x in dataset_dir.glob(smile_source_file_pattern)][0], smile_pattern)
+        smiles = _parse_file_for_smiles([x for x in dataset_dir.glob('*') if re.match(smile_source_file_pattern, x.name)][0], smile_pattern)
         rprint(f'Found smiles: {smiles}')
 
         # Clean folder
