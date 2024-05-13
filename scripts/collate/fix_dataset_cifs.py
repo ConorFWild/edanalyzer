@@ -58,6 +58,11 @@ def _get_grade_runscript(output_pattern, smiles_output_path, ):
     return runscript
 
 
+def _run_script(script):
+    p = subprocess.Popen(script, shell=True, )
+    p.communicate()
+
+
 def _generate_ligand_files(smiles, output_pattern, dry):
     # Create output dir
     if not dry:
@@ -75,7 +80,7 @@ def _generate_ligand_files(smiles, output_pattern, dry):
     rprint(f'Grade runscript is: {grade_runscript}')
 
     # Run
-    run_script(grade_runscript)
+    _run_script(grade_runscript)
 
     ...
 
@@ -96,7 +101,8 @@ def main():
 
         # Get smiles
         # rprint([x for x in dataset_dir.rglob('*')])
-        smiles_files = [x for x in dataset_dir.rglob('*') if re.match(smile_source_file_pattern, str(x.relative_to(dataset_dir)))]
+        smiles_files = [x for x in dataset_dir.rglob('*') if
+                        re.match(smile_source_file_pattern, str(x.relative_to(dataset_dir)))]
         if len(smiles_files) == 0:
             rprint(f'Skipping dir: no smiles files!')
             continue
