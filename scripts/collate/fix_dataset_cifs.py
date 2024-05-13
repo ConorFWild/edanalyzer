@@ -97,6 +97,7 @@ def main():
         smiles_files = [x for x in dataset_dir.glob('*') if re.match(smile_source_file_pattern, str(x.relative_to(dataset_dir)))]
         if len(smiles_files) == 0:
             rprint(f'Skipping dir: no smiles files!')
+            continue
         smiles = _parse_file_for_smiles(smiles_files[0], smile_pattern)
         rprint(f'Found smiles: {smiles}')
 
