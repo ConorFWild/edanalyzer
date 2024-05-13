@@ -38,7 +38,7 @@ def _parse_file_for_smiles(smile_source_file_pattern, smile_pattern):
         text = f.read()
 
     # Parse with RE
-    match = re.search(smile_pattern, smile_source_file_pattern)
+    match = re.search(smile_pattern, text)
     return match.group(1)
 
 
@@ -94,7 +94,7 @@ def main():
         rprint(f'Processing dataset dir: {dataset_dir}')
 
         # Get smiles
-        rprint([x for x in dataset_dir.rglob('*')])
+        # rprint([x for x in dataset_dir.rglob('*')])
         smiles_files = [x for x in dataset_dir.rglob('*') if re.match(smile_source_file_pattern, str(x.relative_to(dataset_dir)))]
         if len(smiles_files) == 0:
             rprint(f'Skipping dir: no smiles files!')
