@@ -7,6 +7,7 @@ import argparse
 import re
 
 from rich import print as rprint
+from joblib import Parallel, delayed
 
 
 def _parse_args():
@@ -83,7 +84,30 @@ def _generate_ligand_files(smiles, output_pattern, dry):
     if not dry:
         _run_script(grade_runscript)
 
-    ...
+
+def process_dataset(dataset_dir, smile_source_file_pattern, smile_pattern, compound_dir_pattern, dep_pattern,
+                    output_pattern, dry):
+    rprint(f'Processing dataset dir: {dataset_dir}')
+
+    if (dataset_dir / dep_pattern).exists():
+        return
+
+    # Get smiles
+    # rprint([x for x in dataset_dir.rglob('*')])
+    smiles_files = [x for x in dataset_dir.rglob('*') if
+                    re.match(smile_source_file_pattern, str(x.relative_to(dataset_dir)))]
+    if len(smiles_files) == 0:
+        rprint(f'Skipping dir: no smiles files!')
+        return
+    smiles = _parse_file_for_smiles(smiles_files[0], smile_pattern)
+    rprint(f'Found smiles: {smiles}')
+
+    # Clean folder
+    _clean_folder(dataset_dir / compound_dir_pattern, dataset_dir / dep_pattern, dry)
+    rprint(f'Moved {dataset_dir / compound_dir_pattern} to {dataset_dir / dep_pattern}')
+
+    # Generate new cifs
+    _generate_ligand_files(smiles, dataset_dir / output_pattern, dry)
 
 
 def main():
@@ -97,25 +121,19 @@ def main():
     path, smile_source_file_pattern, smile_pattern, compound_dir_pattern, dep_pattern, output_pattern, dry = _parse_args()
 
     # Walk Tree
-    for dataset_dir in path.glob('*'):
-        rprint(f'Processing dataset dir: {dataset_dir}')
-
-        # Get smiles
-        # rprint([x for x in dataset_dir.rglob('*')])
-        smiles_files = [x for x in dataset_dir.rglob('*') if
-                        re.match(smile_source_file_pattern, str(x.relative_to(dataset_dir)))]
-        if len(smiles_files) == 0:
-            rprint(f'Skipping dir: no smiles files!')
-            continue
-        smiles = _parse_file_for_smiles(smiles_files[0], smile_pattern)
-        rprint(f'Found smiles: {smiles}')
-
-        # Clean folder
-        _clean_folder(dataset_dir / compound_dir_pattern, dataset_dir / dep_pattern, dry)
-        rprint(f'Moved {dataset_dir / compound_dir_pattern} to {dataset_dir / dep_pattern}')
-
-        # Generate new cifs
-        _generate_ligand_files(smiles, dataset_dir / output_pattern, dry)
+    Parallel(n_jobs=36)(
+        delayed(process_dataset)(
+            dataset_dir,
+            smile_source_file_pattern,
+            smile_pattern,
+            compound_dir_pattern,
+            dep_pattern,
+            output_pattern,
+            dry,
+        )
+        for dataset_dir
+        in path.glob('*')
+    )
 
 
 if __name__ == "__main__":
