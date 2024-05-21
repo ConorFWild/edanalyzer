@@ -599,7 +599,7 @@ def get_fragment_mol_from_dataset_cif_path(dataset_cif_path: Path):
         cif['comp_LIG']
     except:
         try:
-            key = "data_comp_XXX"
+            key = "comp_XXX"
             cif[key]
         except:
             try:
