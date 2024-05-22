@@ -606,8 +606,10 @@ def main(config_path, batch_size=12, num_workers=None):
     except Exception as e:
         print(f"Exception setting up database: {e}")
 
-    zarr_path = 'output/event_data_with_mtzs_2.zarr'
-    root = zarr.open(zarr_path, mode='r')
+    output_dir = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output')
+
+    zarr_path = output_dir / 'event_data_with_mtzs_2.zarr'
+    root = zarr.open(str(zarr_path), mode='r')
 
     # Get the HDF5 root group
     # root = fileh.root
@@ -854,12 +856,13 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    model = LitEventScoring()
+    output = output_dir / 'event_scoring_opt=sgd_ls=2.5e-2_bs=128_lr=e-1_wd=5e-2_sch=pl_cd=10'
+    model = LitEventScoring(output)
 
     # Train
     rprint('Constructing trainer...')
-    checkpoint_callback = ModelCheckpoint(dirpath='output/event_scoring_opt=sgd_ls=2.5e-2_bs=128_lr=e-1_wd=5e-2_sch=pl_cd=10')
-    logger = CSVLogger("output/event_scoring_opt=sgd_ls=2.5e-2_bs=128_lr=e-1_wd=5e-2_sch=pl_cd=10/logs")
+    checkpoint_callback = ModelCheckpoint(dirpath=str(output ))
+    logger = CSVLogger(str( output / 'logs'))
     trainer = lt.Trainer(accelerator='gpu', logger=logger,
                          callbacks=[
                              checkpoint_callback,

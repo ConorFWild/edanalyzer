@@ -199,7 +199,7 @@ class LitBuildScoring(lt.LightningModule):
 
 
 class LitEventScoring(lt.LightningModule):
-    def __init__(self):
+    def __init__(self, output_dir):
         super().__init__()
         # self.automatic_optimization = False
         self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
@@ -235,7 +235,8 @@ class LitEventScoring(lt.LightningModule):
         )
         self.train_annotations = []
         self.test_annotations = []
-        self.output = Path('./output/event_scoring_opt=sgd_ls=2.5e-2_bs=128_lr=e-1_wd=e-2_sch=pl_cd=10')
+
+        self.output = output_dir
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
