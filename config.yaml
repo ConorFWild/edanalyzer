@@ -64,6 +64,9 @@ test:
     - AURA
     - A71EV2A
     - SETDB1
+    - JMJD2DA
+    - PTP1B
+    - BRD1A
 custom_annotations:
   databases:
   - /dls/science/groups/i04-1/conor_dev/edanalyzer/test/database.db
