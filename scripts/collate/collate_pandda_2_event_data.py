@@ -98,8 +98,8 @@ def main(config_path):
             if pandda_dir.name == 'TcCS':
                 continue
 
-            if pandda_dir.name != 'PTP1B':
-                continue
+            # if pandda_dir.name != 'PTP1B':
+            #     continue
 
             # Skip if not a directory
             if not pandda_dir.is_dir():
