@@ -486,7 +486,7 @@ def _get_lig_block_from_path(path):
         cif['comp_LIG']
     except:
         try:
-            key = "data_comp_XXX"
+            key = "comp_XXX"
             cif[key]
         except:
             try:
