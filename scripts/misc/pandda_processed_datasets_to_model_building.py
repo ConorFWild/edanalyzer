@@ -63,7 +63,10 @@ def process_dataset(system_name, experiment_dir):
     data_dir = DATA_DIRS / system_name
     if not data_dir.exists():
         rprint(f'Making data dir: {data_dir}')
-        os.mkdir(data_dir)
+        try:
+            os.mkdir(data_dir)
+        except Exception as e:
+            print(e)
     else:
         rprint(f'Already made: {data_dir}')
 
@@ -77,7 +80,10 @@ def process_dataset(system_name, experiment_dir):
         output_dataset_dir = data_dir / dtag
         if not output_dataset_dir.exists():
             rprint(f'Making data dataset dir: {output_dataset_dir}')
-            os.mkdir(output_dataset_dir)
+            try:
+                os.mkdir(output_dataset_dir)
+            except Exception as e:
+                print(e)
         else:
             rprint(f'Already made dataset dir: {output_dataset_dir}')
 
@@ -86,7 +92,10 @@ def process_dataset(system_name, experiment_dir):
         data_pdb = output_dataset_dir / 'dimple.pdb'
         if (not data_pdb.exists()) & (pandda_pdb.exists()):
             rprint(f'Copying pandda pdb {pandda_pdb} -> {data_pdb}')
-            shutil.copy(pandda_pdb, data_pdb, follow_symlinks=True)
+            try:
+                shutil.copy(pandda_pdb, data_pdb, follow_symlinks=True)
+            except Exception as e:
+                print(e)
         else:
             rprint(f'Already copied {data_pdb}')
 
@@ -95,7 +104,10 @@ def process_dataset(system_name, experiment_dir):
         data_mtz = output_dataset_dir / 'dimple.mtz'
         rprint(f'Copying pandda mtz {pandda_mtz} -> {data_mtz}')
         if (not data_mtz.exists()) & (pandda_mtz.exists()):
-            shutil.copy(pandda_mtz, data_mtz, follow_symlinks=True)
+            try:
+                shutil.copy(pandda_mtz, data_mtz, follow_symlinks=True)
+            except Exception as e:
+                print(e)
         else:
             rprint(f'Already copied {data_mtz}')
 
@@ -104,7 +116,10 @@ def process_dataset(system_name, experiment_dir):
         data_compound_dir = output_dataset_dir / 'compound'
         if (not data_compound_dir.exists()) & (pandda_compound_dir.exists()):
             rprint(f'Copying pandda compound dir {pandda_compound_dir} -> {data_compound_dir}')
-            shutil.copytree(pandda_compound_dir, data_compound_dir, symlinks=False)
+            try:
+                shutil.copytree(pandda_compound_dir, data_compound_dir, symlinks=False)
+            except Exception as e:
+                print(e)
         else:
             rprint(f'Already copied {data_mtz}')
 
