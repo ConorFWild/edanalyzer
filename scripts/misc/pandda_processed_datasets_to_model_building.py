@@ -61,7 +61,9 @@ def main():
         new_systems.append(system_name)
 
 
-    print([system for system in np.unique(new_systems) if system not in CURRENT_SYSTEMS])
+    unique_new_systems = [system for system in np.unique(new_systems) if system not in CURRENT_SYSTEMS]
+    print(unique_new_systems)
+    print(len(unique_new_systems))
 
 if __name__ == '__main__':
     fire.Fire(main)
