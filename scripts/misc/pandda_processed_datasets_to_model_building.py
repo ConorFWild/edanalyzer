@@ -53,7 +53,7 @@ CURRENT_SYSTEMS = [
 ]
 
 def main():
-    new_systems = []
+    new_systems = {}
     for experiment_dir in OLD_SYSTEMS_PATH.glob('*'):
         if not experiment_dir.is_dir():
             continue
@@ -64,6 +64,7 @@ def main():
 
         system_name = match.group(1)
         project = match.group(2)
+        new_systems[project] = system_name
         if system_name == 'refmac-from-coot-refmac-for':
             continue
         if system_name in CURRENT_SYSTEMS:
@@ -126,6 +127,8 @@ def main():
     # print(len(unique_new_systems))
     # for system in unique_new_systems:
     #     print(system)
+    for project, system in new_systems:
+        print(f'{project} : {system}')
 
 if __name__ == '__main__':
     fire.Fire(main)
