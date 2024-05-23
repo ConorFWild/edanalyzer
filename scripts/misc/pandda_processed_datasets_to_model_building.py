@@ -93,7 +93,7 @@ def main():
             # Find and copy pdb
             pandda_pdb = dataset_dir / f'{dtag}-pandda-input.pdb'
             data_pdb = output_dataset_dir / 'dimple.pdb'
-            if not data_pdb.exists():
+            if (not data_pdb.exists()) & (pandda_pdb.exists()):
                 rprint(f'Copying pandda pdb {pandda_pdb} -> {data_pdb}')
                 shutil.copy(pandda_pdb, data_pdb, follow_symlinks=True)
             else:
@@ -103,15 +103,15 @@ def main():
             pandda_mtz = dataset_dir / f'{dtag}-pandda-input.mtz'
             data_mtz = output_dataset_dir / 'dimple.mtz'
             rprint(f'Copying pandda mtz {pandda_mtz} -> {data_mtz}')
-            if not data_pdb.exists():
+            if (not data_pdb.exists()) & (pandda_mtz.exists()):
                 shutil.copy(pandda_mtz, data_mtz, follow_symlinks=True)
             else:
                 rprint(f'Already copied {data_mtz}')
 
             # Find and copy ligand files
             pandda_compound_dir = dataset_dir / f'ligand_files'
-            data_compound_dir =output_dataset_dir / 'compound'
-            if not data_compound_dir.exists():
+            data_compound_dir = output_dataset_dir / 'compound'
+            if (not data_compound_dir.exists()) & (pandda_compound_dir.exists()):
                 rprint(f'Copying pandda compound dir {pandda_compound_dir} -> {data_compound_dir}')
                 shutil.copytree(pandda_compound_dir, data_compound_dir, symlinks=False)
             else:
