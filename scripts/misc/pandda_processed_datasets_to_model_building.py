@@ -127,7 +127,7 @@ def main():
     # print(len(unique_new_systems))
     # for system in unique_new_systems:
     #     print(system)
-    for project, system in new_systems:
+    for project, system in new_systems.items():
         print(f'{project} : {system}')
 
 if __name__ == '__main__':
