@@ -58,6 +58,8 @@ def main():
             continue
 
         system_name = match.group(1)
+        if system_name == 'refmac-from-coot-refmac-for':
+            continue
         new_systems.append(system_name)
 
 
