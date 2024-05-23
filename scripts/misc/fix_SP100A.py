@@ -10,13 +10,22 @@ def main():
 
     for dataset_dir in path.glob('*'):
         compound_dir = path / 'compound'
-        os.mkdir(compound_dir)
-        cif_src = dataset_dir / 'ligand.cif'
-        cif_dst = compound_dir / 'ligand.cif'
-        shutil.move(cif_src, cif_dst)
-        pdb_src = dataset_dir / 'ligand.pdb'
-        pdb_dst = compound_dir / 'ligand.pdb'
-        shutil.move(pdb_src, pdb_dst)
+        try:
+            os.mkdir(compound_dir)
+        except Exception as e:
+            print(e)
+        try:
+            cif_src = dataset_dir / 'ligand.cif'
+            cif_dst = compound_dir / 'ligand.cif'
+            shutil.move(cif_src, cif_dst)
+        except Exception as e:
+            print(e)
+        try:
+            pdb_src = dataset_dir / 'ligand.pdb'
+            pdb_dst = compound_dir / 'ligand.pdb'
+            shutil.move(pdb_src, pdb_dst)
+        except Exception as e:
+            print(e)
 
 
 if __name__ == "__main__":
