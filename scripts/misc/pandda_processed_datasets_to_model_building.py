@@ -58,64 +58,65 @@ def main():
         if not experiment_dir.is_dir():
             continue
 
-        match = re.match('system_(.*)_project', experiment_dir.name)
+        match = re.match('system_(.*)_project_(.*)', experiment_dir.name)
         if not match:
             continue
 
         system_name = match.group(1)
+        project = match.group(2)
         if system_name == 'refmac-from-coot-refmac-for':
             continue
         if system_name in CURRENT_SYSTEMS:
             continue
 
-        # Make output data dir
-        data_dir = DATA_DIRS / system_name
-        if not data_dir.exists():
-            rprint(f'Making data dir: {data_dir}')
-            os.mkdir(data_dir)
-        else:
-            rprint(f'Already made: {data_dir}')
-
-        # Iterate pandda processed datasets
-        processed_datasets = experiment_dir / 'processed_datasets'
-        for dataset_dir in processed_datasets.glob('*'):
-            # Get dtag
-            dtag = dataset_dir.name
-
-            # Get the output data dataset dir
-            output_dataset_dir = data_dir / dtag
-            if not output_dataset_dir.exists():
-                rprint(f'Making data dataset dir: {output_dataset_dir}')
-                os.mkdir(output_dataset_dir)
-            else:
-                rprint(f'Already made dataset dir: {output_dataset_dir}')
-
-            # Find and copy pdb
-            pandda_pdb = dataset_dir / f'{dtag}-pandda-input.pdb'
-            data_pdb = output_dataset_dir / 'dimple.pdb'
-            if (not data_pdb.exists()) & (pandda_pdb.exists()):
-                rprint(f'Copying pandda pdb {pandda_pdb} -> {data_pdb}')
-                shutil.copy(pandda_pdb, data_pdb, follow_symlinks=True)
-            else:
-                rprint(f'Already copied {data_pdb}')
-
-            # Find and copy mtz
-            pandda_mtz = dataset_dir / f'{dtag}-pandda-input.mtz'
-            data_mtz = output_dataset_dir / 'dimple.mtz'
-            rprint(f'Copying pandda mtz {pandda_mtz} -> {data_mtz}')
-            if (not data_pdb.exists()) & (pandda_mtz.exists()):
-                shutil.copy(pandda_mtz, data_mtz, follow_symlinks=True)
-            else:
-                rprint(f'Already copied {data_mtz}')
-
-            # Find and copy ligand files
-            pandda_compound_dir = dataset_dir / f'ligand_files'
-            data_compound_dir = output_dataset_dir / 'compound'
-            if (not data_compound_dir.exists()) & (pandda_compound_dir.exists()):
-                rprint(f'Copying pandda compound dir {pandda_compound_dir} -> {data_compound_dir}')
-                shutil.copytree(pandda_compound_dir, data_compound_dir, symlinks=False)
-            else:
-                rprint(f'Already copied {data_mtz}')
+        # # Make output data dir
+        # data_dir = DATA_DIRS / system_name
+        # if not data_dir.exists():
+        #     rprint(f'Making data dir: {data_dir}')
+        #     os.mkdir(data_dir)
+        # else:
+        #     rprint(f'Already made: {data_dir}')
+        #
+        # # Iterate pandda processed datasets
+        # processed_datasets = experiment_dir / 'processed_datasets'
+        # for dataset_dir in processed_datasets.glob('*'):
+        #     # Get dtag
+        #     dtag = dataset_dir.name
+        #
+        #     # Get the output data dataset dir
+        #     output_dataset_dir = data_dir / dtag
+        #     if not output_dataset_dir.exists():
+        #         rprint(f'Making data dataset dir: {output_dataset_dir}')
+        #         os.mkdir(output_dataset_dir)
+        #     else:
+        #         rprint(f'Already made dataset dir: {output_dataset_dir}')
+        #
+        #     # Find and copy pdb
+        #     pandda_pdb = dataset_dir / f'{dtag}-pandda-input.pdb'
+        #     data_pdb = output_dataset_dir / 'dimple.pdb'
+        #     if (not data_pdb.exists()) & (pandda_pdb.exists()):
+        #         rprint(f'Copying pandda pdb {pandda_pdb} -> {data_pdb}')
+        #         shutil.copy(pandda_pdb, data_pdb, follow_symlinks=True)
+        #     else:
+        #         rprint(f'Already copied {data_pdb}')
+        #
+        #     # Find and copy mtz
+        #     pandda_mtz = dataset_dir / f'{dtag}-pandda-input.mtz'
+        #     data_mtz = output_dataset_dir / 'dimple.mtz'
+        #     rprint(f'Copying pandda mtz {pandda_mtz} -> {data_mtz}')
+        #     if (not data_pdb.exists()) & (pandda_mtz.exists()):
+        #         shutil.copy(pandda_mtz, data_mtz, follow_symlinks=True)
+        #     else:
+        #         rprint(f'Already copied {data_mtz}')
+        #
+        #     # Find and copy ligand files
+        #     pandda_compound_dir = dataset_dir / f'ligand_files'
+        #     data_compound_dir = output_dataset_dir / 'compound'
+        #     if (not data_compound_dir.exists()) & (pandda_compound_dir.exists()):
+        #         rprint(f'Copying pandda compound dir {pandda_compound_dir} -> {data_compound_dir}')
+        #         shutil.copytree(pandda_compound_dir, data_compound_dir, symlinks=False)
+        #     else:
+        #         rprint(f'Already copied {data_mtz}')
 
         # new_systems.append(system_name)
 
