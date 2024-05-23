@@ -9,7 +9,7 @@ def main():
     path = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/downloads/SP100A/data')
 
     for dataset_dir in path.glob('*'):
-        compound_dir = path / 'compound'
+        compound_dir = dataset_dir / 'compound'
         try:
             os.mkdir(compound_dir)
         except Exception as e:
