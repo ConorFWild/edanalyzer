@@ -94,7 +94,7 @@ def process_dataset(system_name, experiment_dir):
         pandda_mtz = dataset_dir / f'{dtag}-pandda-input.mtz'
         data_mtz = output_dataset_dir / 'dimple.mtz'
         rprint(f'Copying pandda mtz {pandda_mtz} -> {data_mtz}')
-        if (not data_pdb.exists()) & (pandda_mtz.exists()):
+        if (not data_mtz.exists()) & (pandda_mtz.exists()):
             shutil.copy(pandda_mtz, data_mtz, follow_symlinks=True)
         else:
             rprint(f'Already copied {data_mtz}')
