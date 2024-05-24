@@ -6,7 +6,7 @@ import fire
 from rich import print as rprint
 
 DATA_DIRS = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/data')
-OUTPUT_DIR = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/data')
+OUTPUT_DIR = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score')
 JOB_SCRIPT_TEMPLATE = (
     '#!/bin/bash\n'
     '#SBATCH --nodes=1\n'
