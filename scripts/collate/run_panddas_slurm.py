@@ -12,8 +12,8 @@ JOB_SCRIPT_TEMPLATE = (
     '#SBATCH --nodes=1\n'
     '#SBATCH --cpus-per-task=20\n'
     '#SBATCH --mem-per-cpu=5120\n'
-    '#SBATCH --output=SP100A.o\n'
-    '#SBATCH --error=SP100A.e\n'
+    '#SBATCH --output={output}.o\n'
+    '#SBATCH --error={error}.e\n'
     '#SBATCH --partition=cs04r\n'
 
     'source act_conconda activate pandda2_ray python -u /dls/science/groups/i04-1/conor_dev/pandda_2_gemmi/scripts/pandda.py --local_cpus=20 --data_dirs={data_dirs} --out_dir={out_dir}'
@@ -30,6 +30,8 @@ def _get_data_dir_stats(data_dir):
 
 def _make_job_script(data_dir, ):
     job_script = JOB_SCRIPT_TEMPLATE.format(
+        output=OUTPUT_DIR / f'{data_dir.name}.o',
+        error=OUTPUT_DIR / f'{data_dir.name}.e',
         data_dirs=data_dir,
         out_dir=OUTPUT_DIR / data_dir.name
     )
