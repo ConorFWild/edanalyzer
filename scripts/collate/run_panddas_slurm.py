@@ -41,7 +41,7 @@ def _save_job_script(job_script, name):
     with open(job_script_path, 'w') as f:
         f.write(job_script)
 
-    return job_script
+    return job_script_path
 
 
 def _chmod_job_script(job_script_path):
@@ -75,7 +75,7 @@ def main():
 
         # Generate a job script
         job_script = _make_job_script(data_dir, )
-        rprint(f'Jobscript is:')
+        rprint(f'Jobscript is:\n')
         rprint(job_script)
 
         # Save the job script
