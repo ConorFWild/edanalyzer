@@ -62,7 +62,7 @@ def _submit_job_script(job_script_path):
 def main():
     # Iterate over data dirs
     job_script_paths = []
-    for data_dir in DATA_DIRS.glob('*'):
+    for data_dir in sorted(DATA_DIRS.glob('*')):
         rprint(f'Dataset dir is: {data_dir.name}')
 
         # Check Integrity
