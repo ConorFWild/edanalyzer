@@ -12,11 +12,13 @@ JOB_SCRIPT_TEMPLATE = (
     '#SBATCH --nodes=1\n'
     '#SBATCH --cpus-per-task=20\n'
     '#SBATCH --mem-per-cpu=5120\n'
-    '#SBATCH --output={output}.o\n'
-    '#SBATCH --error={error}.e\n'
+    '#SBATCH --output={output}\n'
+    '#SBATCH --error={error}\n'
     '#SBATCH --partition=cs04r\n'
 
-    'source act_conconda activate pandda2_ray python -u /dls/science/groups/i04-1/conor_dev/pandda_2_gemmi/scripts/pandda.py --local_cpus=20 --data_dirs={data_dirs} --out_dir={out_dir}'
+    'source act_conconda\n'
+    'activate pandda2_ray\n' 
+    'python -u /dls/science/groups/i04-1/conor_dev/pandda_2_gemmi/scripts/pandda.py --local_cpus=20 --data_dirs={data_dirs} --out_dir={out_dir}'
 )
 
 
