@@ -71,6 +71,11 @@ def main():
 
         # Skip if too few datasets
         if data_dir_stats['num_datasets'] < 60:
+            rprint(f'### Too few datasets! Skipping!')
+            continue
+
+        if (OUTPUT_DIR / data_dir.name).exists():
+            rprint(f'### Already processed! Skipping!')
             continue
 
         # Generate a job script
