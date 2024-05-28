@@ -94,7 +94,7 @@ def main(config_path):
         idx_pose = 0
         idx_ligand_data = 0
         annotation_idx = 0
-        for pandda_dir in Path('output/panddas_new_score').glob('*'):
+        for pandda_dir in Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score/').glob('*'):
             if pandda_dir.name == 'TcCS':
                 continue
 
