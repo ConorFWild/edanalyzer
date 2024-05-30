@@ -16,7 +16,8 @@ JOB_SCRIPT_TEMPLATE = (
     '#SBATCH --error={error}\n'
     '#SBATCH --partition=cs05r\n'
 
-    'source act_con\n'
+    # 'source act_con\n'
+    'source /dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/act\n'
     'conda activate pandda2_ray\n' 
     'python -u /dls/science/groups/i04-1/conor_dev/pandda_2_gemmi/scripts/pandda.py --local_cpus=20 --data_dirs={data_dirs} --out_dir={out_dir}'
 )
