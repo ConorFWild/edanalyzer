@@ -14,7 +14,7 @@ JOB_SCRIPT_TEMPLATE = (
     '#SBATCH --mem-per-cpu=5120\n'
     '#SBATCH --output={output}\n'
     '#SBATCH --error={error}\n'
-    '#SBATCH --partition=cs04r\n'
+    '#SBATCH --partition=cs05r\n'
 
     'source act_con\n'
     'conda activate pandda2_ray\n' 
