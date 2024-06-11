@@ -260,11 +260,11 @@ class EventScoringDataset(Dataset):
             np.copy(sample_array)
         )
         if annotation['partition'] == 'train':
-            u_s = rng.uniform(0.0, 1.25)
+            u_s = rng.uniform(0.0, 0.5)
             noise = rng.normal(size=(32,32,32)) * u_s
             z_map_sample += noise.astype(np.float32)
 
-            u_s = rng.uniform(0.0, 1.0)
+            u_s = rng.uniform(0.0, 0.5)
             noise = rng.normal(size=(32,32,32)) * u_s
             xmap_sample += noise.astype(np.float32)
 
