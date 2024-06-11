@@ -856,7 +856,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'event_scoring_nsys=82_opt=adam_ls=2.5e-2_bs=128_lr=e-1_wd=5e-2_sch=pl_cd=10_wn=0.5_r=5.5'
+    output = output_dir / 'event_scoring_nsys=82_opt=adamw_ls=2.5e-2_bs=128_lr=e-1_wd=5e-2_sch=pl_cd=10_wn=0.5_r=5.5'
     model = LitEventScoring(output)
 
     # Train
