@@ -31,8 +31,8 @@ ligand_data_dtype = [
     ('idx', 'i8'),
     ('num_heavy_atoms', 'i8'),
     ('canonical_smiles', '<U300'),
-    ('atom_ids', '<U5', (100,)),
-    ('connectivity', '?', (100, 100,))
+    ('atom_ids', '<U5', (150,)),
+    ('connectivity', '?', (150, 150,))
 ]
 
 known_hit_pose_sample_dtype = [
@@ -331,11 +331,11 @@ def _get_ligand_data_sample_from_dataset_dir(dataset_dir, res, idx_ligand_data):
     matched_cif = matched_cifs[0]
 
     smiles = _get_smiles(matched_cif)
-    atom_ids_array = np.zeros((100,), dtype='<U5')
+    atom_ids_array = np.zeros((150,), dtype='<U5')
     atom_ids = _get_atom_ids(matched_cif)
     atom_ids_array[:len(atom_ids)] = atom_ids[:len(atom_ids)]
     num_heavy_atoms = len(atom_ids)
-    connectivity_array = np.zeros((100, 100), dtype='?')
+    connectivity_array = np.zeros((150, 150), dtype='?')
     connectivity = _get_connectivity(matched_cif)
     connectivity_array[:connectivity.shape[0], :connectivity.shape[1]] = connectivity[
                                                                          :connectivity.shape[0],
