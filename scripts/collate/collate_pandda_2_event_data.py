@@ -178,15 +178,15 @@ def main(config_path):
                         idx_pose
                     )
 
-                    # Get the ligand data
-                    ligand_data_sample = _get_ligand_data_sample_from_dataset_dir(
-                        dataset_dir,
-                        res,
-                        idx_ligand_data,
-                    )
-                    if not ligand_data_sample:
-                        rprint(f'\t\tNO LIGAND DATA! SKIPPING!')
-                        continue
+                # Get the ligand data
+                ligand_data_sample = _get_ligand_data_sample_from_dataset_dir(
+                    dataset_dir,
+                    res,
+                    idx_ligand_data,
+                )
+                if not ligand_data_sample:
+                    rprint(f'\t\tNO LIGAND DATA! SKIPPING!')
+                    continue
 
                 # Get the annotation data
                 annotation_sample = _get_annotation_sample_from_dataset_dir(
@@ -199,11 +199,12 @@ def main(config_path):
 
                 # Get the z map metadata sample
                 if conf == 'High':
-                    tmp_idx_ligand_data = idx_ligand_data
                     tmp_idx_pose = idx_pose
                 else:
-                    tmp_idx_ligand_data = -1
+                    # tmp_idx_ligand_data = -1
                     tmp_idx_pose = -1
+                tmp_idx_ligand_data = idx_ligand_data
+
                 z_map_metadata_sample = _get_z_map_metadata_sample_from_dataset_dir(
                     z_map_sample_metadata_idx,
                     event_idx,
@@ -220,11 +221,11 @@ def main(config_path):
                 z_map_sample_metadata_table.append(z_map_metadata_sample)
                 z_map_sample_table.append(z_map_sample)
                 xmap_sample_table.append(xmap_sample)
+                ligand_data_table.append(ligand_data_sample)
                 if conf == 'High':
-                    ligand_data_table.append(ligand_data_sample)
                     known_hit_pose_table.append(pose_sample)
                     idx_pose += 1
-                    idx_ligand_data += 1
+                idx_ligand_data += 1
                 annotation_table.append(annotation_sample)
                 z_map_sample_metadata_idx += 1
                 annotation_idx += 1

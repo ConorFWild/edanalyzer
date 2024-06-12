@@ -67,6 +67,9 @@ test:
     - JMJD2DA
     - PTP1B
     - BRD1A
+    - PP1
+    - PWWP_C64S
+    - NS3Hel
 custom_annotations:
   databases:
   - /dls/science/groups/i04-1/conor_dev/edanalyzer/test/database.db
