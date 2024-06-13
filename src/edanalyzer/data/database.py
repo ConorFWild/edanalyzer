@@ -780,8 +780,8 @@ def _get_connectivity(matched_cif):
         id_to_idx[atom_id] = j
     bond_matrix = np.zeros(
         (
-            100,
-            100
+            150,
+            150
         ),
         dtype='?')
     bond_1_id_loop = list(block.find_loop('_chem_comp_bond.atom_id_1'))
