@@ -379,8 +379,11 @@ def main(config_path):
 
     # for _ligand_data in ligand_data_table:
     z_map_sample_metadata_table = root['pandda_2']['z_map_sample_metadata']
-    for _z_map_sample_metadata in z_map_sample_metadata_table:
 
+    high_conf = z_map_sample_metadata_table.get_mask_selection(z_map_sample_metadata_table['Confidence'] == ['High'])
+    num = len(high_conf)
+    for j, _z_map_sample_metadata in enumerate(high_conf):
+        print(f'{j} / {num}')
         if _z_map_sample_metadata['Confidence'] != 'High':
             continue
 
