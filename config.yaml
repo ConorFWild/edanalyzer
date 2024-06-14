@@ -70,6 +70,7 @@ test:
     - PP1
     - PWWP_C64S
     - NS3Hel
+    - NSP16
 custom_annotations:
   databases:
   - /dls/science/groups/i04-1/conor_dev/edanalyzer/test/database.db
