@@ -331,6 +331,8 @@ def _get_ligand_data_sample_from_dataset_dir(dataset_dir, res, idx_ligand_data):
     matched_cif = matched_cifs[0]
 
     smiles = _get_smiles(matched_cif)
+    # m = Chem.MolFromSmiles(smiles)
+    # m2 = m.AddHs()
     atom_ids_array = np.zeros((150,), dtype='<U5')
     atom_ids = _get_atom_ids(matched_cif)
     atom_ids_array[:len(atom_ids)] = atom_ids[:len(atom_ids)]
