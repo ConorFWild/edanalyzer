@@ -380,6 +380,7 @@ def main(config_path):
     # for _ligand_data in ligand_data_table:
     z_map_sample_metadata_table = root['pandda_2']['z_map_sample_metadata']
     for _z_map_sample_metadata in z_map_sample_metadata_table:
+
         if _z_map_sample_metadata['Confidence'] != 'High':
             continue
 
