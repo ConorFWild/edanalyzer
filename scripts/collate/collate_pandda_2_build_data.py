@@ -333,7 +333,9 @@ def main(config_path):
             decoy_pose_samples = []
             delta_samples = []
             tmp_pose_idx = pose_idx
-            for build_path in _get_event_autobuilds_paths(dataset_dir, event_idx):
+            auotbuild_paths = _get_event_autobuilds_paths(dataset_dir, event_idx)
+            rprint(f'Got {len(auotbuild_paths)} autobuild paths!')
+            for build_path in auotbuild_paths:
                 pose, atom, element, rmsd = _get_build_data(
                     build_path,
                     pose_sample['positions'][pose_sample['elements'] != 0],
