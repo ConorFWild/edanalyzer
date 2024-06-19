@@ -100,7 +100,7 @@ def _get_event_autobuilds_paths(dataset_dir, event_idx):
 def _get_build_data(build_path, pose_sample):
     st = gemmi.read_structure(str(build_path))
     poss, atom, elements = _res_to_array(st[0][0][0], )
-    rprint(f'{pose_sample.shape} vs {poss.shape}')
+    rprint(f'RMSD: {pose_sample.shape} vs {poss.shape}')
     rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(pose_sample - poss, axis=1))) / poss.shape[0])
     return poss, atom, elements, rmsd
 
