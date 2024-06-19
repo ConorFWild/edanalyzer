@@ -206,15 +206,17 @@ def main(config_path):
     # Iterate over annotated pandda 2 datasets
     meta_idx = 0
     pose_idx = 0
-    tmp_pose_idx = 0
+    # tmp_pose_idx = 0
     for pandda_dir in Path(
             '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score/').glob(
         '*'):
+        rprint(f'########### Processing system: {pandda_dir.name} ###############')
         if pandda_dir.name == 'TcCS':
             continue
 
         # Skip if not a directory
         if not pandda_dir.is_dir():
+            rprint(f'Skipping Directory!')
             continue
         rprint(f'PanDDA dir is: {pandda_dir}')
 
@@ -222,7 +224,6 @@ def main(config_path):
         pandda_inspect_table = pandda_dir / 'analyses' / 'pandda_inspect_events.csv'
         if not pandda_inspect_table.exists():
             rprint(f'\tNO INSPECT TABLE! SKIPPING!')
-
             continue
 
         # Get the inspect table
@@ -352,6 +353,7 @@ def main(config_path):
                 ],
                 dtype=meta_sample_dtype
             )
+            rprint(meta_sample)
 
             # Add items to store
             table_meta_sample.append(meta_sample)
@@ -359,7 +361,7 @@ def main(config_path):
             table_z_map_sample.append(z_map_sample)
             table_known_hit_pos_sample.append(pose_sample)
             # annotation_table.append()
-            ligand_data_table.append()
+            ligand_data_table.append(ligand_data_sample)
 
             for decoy_pose_sample, delta_sample in zip(decoy_pose_samples, delta_samples):
                 table_decoy_pose_sample.append(
