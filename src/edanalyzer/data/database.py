@@ -504,8 +504,8 @@ def _match_atoms(atom_name_array, block):
     # rprint(atom_name_array)
 
     filtered_atom_id_loop = [_x for _x, _el in zip(atom_id_loop, atom_element_loop) if _el != 'H']
-    rprint(filtered_atom_id_loop)
-    rprint(atom_name_array)
+    # rprint(filtered_atom_id_loop)
+    # rprint(atom_name_array)
 
     if len(filtered_atom_id_loop) != len(atom_name_array):
         rprint(f"Different number of atoms! No Match!!")
