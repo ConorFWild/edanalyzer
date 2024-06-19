@@ -268,6 +268,9 @@ def main(config_path):
                 constants.PANDDA_INSPECT_HIT_CONDFIDENCE], _row[constants.PANDDA_INSPECT_VIEWED], _row[
                 constants.PANDDA_INSPECT_CLUSTER_SIZE]
 
+            if conf != 'High':
+                continue
+
             system = _get_system_from_dtag(dtag)
 
             x, y, z = _row['x'], _row['y'], _row['z']
