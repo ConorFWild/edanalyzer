@@ -102,6 +102,7 @@ def _get_build_data(build_path, pose_sample):
     poss, atom, elements = _res_to_array(st[0][0][0], )
     rprint(f'RMSD: {pose_sample.shape} vs {poss.shape}')
     rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(pose_sample - poss, axis=1))) / poss.shape[0])
+    rprint(f'Mean diff: {np.mean(np.linalg.norm(pose_sample - poss, axis=1))}')
     return poss, atom, elements, rmsd
 
 
