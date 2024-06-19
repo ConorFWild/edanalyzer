@@ -105,7 +105,7 @@ def _get_build_data(build_path, pose_sample):
 
 
 def setup_store(zarr_path):
-    root = zarr.open(zarr_path, mode='a')
+    root = zarr.open(zarr_path, mode='w')
 
     table_meta_sample = root.create_dataset(
         'meta_sample',
