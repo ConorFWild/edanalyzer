@@ -374,7 +374,7 @@ def main(config_path):
 
             # Make the metadata sample
             meta_sample = np.array(
-                [
+                [(
                     meta_idx,
                     # event_idx,
                     resid,
@@ -383,7 +383,7 @@ def main(config_path):
                     event_idx,
                     conf,
                     size
-                ],
+                )],
                 dtype=meta_sample_dtype
             )
             rprint(meta_sample)
