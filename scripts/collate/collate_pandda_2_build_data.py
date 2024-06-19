@@ -106,6 +106,7 @@ def _get_build_data(build_path, pose_sample):
 
 def setup_store(zarr_path):
     root = zarr.open(zarr_path, mode='a')
+
     table_meta_sample = root.create_dataset(
         'meta_sample',
         shape=(0,),
@@ -194,14 +195,14 @@ def main(config_path):
     zarr_path = '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/build_data.zarr'
 
     root = setup_store(zarr_path)
-    table_meta_sample = root['pandda_2']['meta_sample']
-    table_xmap_sample = root['pandda_2']['xmap_sample']
-    table_z_map_sample = root['pandda_2']['z_map_sample']
-    table_known_hit_pos_sample = root['pandda_2']['known_hit_pose']
-    table_decoy_pose_sample = root['pandda_2']['decoy_pose_sample']
-    delta_table = root['pandda_2']['delta']
-    annotation_table = root['pandda_2']['annotation']
-    ligand_data_table = root['pandda_2']['ligand_data']
+    table_meta_sample = root['meta_sample']
+    table_xmap_sample = root['xmap_sample']
+    table_z_map_sample = root['z_map_sample']
+    table_known_hit_pos_sample = root['known_hit_pose']
+    table_decoy_pose_sample = root['decoy_pose_sample']
+    delta_table = root['delta']
+    annotation_table = root['annotation']
+    ligand_data_table = root['ligand_data']
 
     # Iterate over annotated pandda 2 datasets
     meta_idx = 0
