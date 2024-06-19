@@ -107,9 +107,9 @@ def _get_build_data(build_path, pose_sample, x, y, z):
     _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape(
         (1, 3)) + event_to_lig_com
 
-    rprint(f'RMSD: {pose_sample.shape} vs {_rmsd_target.shape}')
+    # rprint(f'RMSD: {pose_sample.shape} vs {_rmsd_target.shape}')
     rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(pose_sample - _rmsd_target, axis=1))) / _rmsd_target.shape[0])
-    rprint(f'Mean diff: {np.mean(np.linalg.norm(pose_sample - _rmsd_target, axis=1))}')
+    # rprint(f'Mean diff: {np.mean(np.linalg.norm(pose_sample - _rmsd_target, axis=1))}')
     return _rmsd_target, atom, elements, rmsd
 
 
