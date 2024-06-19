@@ -309,6 +309,7 @@ def main(config_path):
                 x, y, z,
                 meta_idx
             )
+            pose_elements = pose_sample["elements"][pose_sample["elements"] != 0]
 
             # Get the ligand data
             ligand_data_sample = _get_ligand_data_sample_from_dataset_dir(
@@ -334,8 +335,9 @@ def main(config_path):
                     build_path,
                     pose_sample['positions'][pose_sample['elements'] != 0],
                 )
-                if not np.array_equal(element, ):
-                    rprint(f'Ligand doesn\'t match! Skipping! {element} vs {pose_sample["elements"][pose_sample["elements"] != 0]}')
+
+                if not np.array_equal(element, pose_elements):
+                    rprint(f'Ligand doesn\'t match! Skipping! {element} vs {pose_elements}')
                     continue
 
                 atom_array = np.zeros(150, dtype='<U5')
