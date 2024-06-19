@@ -97,13 +97,20 @@ def _get_event_autobuilds_paths(dataset_dir, event_idx):
     return autobuild_paths
 
 
-def _get_build_data(build_path, pose_sample):
+def _get_build_data(build_path, pose_sample, x, y, z):
+    centroid = np.array([x, y, z]).reshape((1, 3))
     st = gemmi.read_structure(str(build_path))
     poss, atom, elements = _res_to_array(st[0][0][0], )
-    rprint(f'RMSD: {pose_sample.shape} vs {poss.shape}')
-    rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(pose_sample - poss, axis=1))) / poss.shape[0])
-    rprint(f'Mean diff: {np.mean(np.linalg.norm(pose_sample - poss, axis=1))}')
-    return poss, atom, elements, rmsd
+    com = np.mean(poss, axis=0).reshape((1, 3))
+    event_to_lig_com = com - centroid.reshape((1, 3))
+    _poss_centered = poss - com
+    _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape(
+        (1, 3)) + event_to_lig_com
+
+    rprint(f'RMSD: {pose_sample.shape} vs {_rmsd_target.shape}')
+    rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(pose_sample - _rmsd_target, axis=1))) / _rmsd_target.shape[0])
+    rprint(f'Mean diff: {np.mean(np.linalg.norm(pose_sample - _rmsd_target, axis=1))}')
+    return _rmsd_target, atom, elements, rmsd
 
 
 def _get_pose_sample_from_res(
