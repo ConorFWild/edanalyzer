@@ -309,7 +309,7 @@ def main(config_path):
                 x, y, z,
                 meta_idx
             )
-            pose_elements = pose_sample["elements"][pose_sample["elements"] != 0][0]
+            pose_elements = pose_sample["elements"][pose_sample["elements"] != 0]
 
             # Get the ligand data
             ligand_data_sample = _get_ligand_data_sample_from_dataset_dir(
