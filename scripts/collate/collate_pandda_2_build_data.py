@@ -364,6 +364,7 @@ def main(config_path):
                 )
                 decoy_pose_samples.append(known_hit_pos_sample)
 
+                rprint(f"{pose_sample['positions'].shape} vs {known_hit_pos_sample['positions'].shape}")
                 _delta_vecs = pose_sample['positions'] - known_hit_pos_sample['positions']
                 _delta = np.linalg.norm(_delta_vecs, axis=1)
                 rprint(_delta.shape)
