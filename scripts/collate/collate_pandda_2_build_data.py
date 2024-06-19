@@ -251,7 +251,7 @@ def main(config_path):
             )
 
             # Process hits only
-            if not ((conf == 'High') & (dist > 6.0)):
+            if not ((conf == 'High') & (dist < 6.0)):
                 rprint(
                     f'Could not match high confidence ligand {dtag} {event_idx} to a build!\n'
                     f'Check model in {dataset_dir} is appropriate!\n'
