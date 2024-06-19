@@ -69,7 +69,10 @@ decoy_pose_sample_dtype = [
     ('positions', '<f4', (150, 3)),
     ('atoms', '<U5', (150,)),
     ('elements', '<i4', (150,)),
-    ('rmsd', '<f4')]
+    ('rmsd', '<f4'),
+    ('overlap_score', '<f4'),
+
+]
 delta_dtype = [
     ('idx', '<i4'),
     ('pose_idx', '<i4'),
@@ -398,6 +401,7 @@ def main(config_path):
                     pose,
                     pose_poss,
                 )
+                rprint(f'Score: {score} vs rmsd: {rmsd}')
                 known_hit_pos_sample = np.array(
                     [
                         (
@@ -406,7 +410,8 @@ def main(config_path):
                             pose_array,
                             atom_array,
                             elements_array,
-                            rmsd
+                            rmsd,
+                            score
                         )
                     ],
                     dtype=decoy_pose_sample_dtype
