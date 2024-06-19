@@ -44,7 +44,7 @@ from edanalyzer.data.event_data import (
 
 meta_sample_dtype = [
     ('idx', '<i4'),
-    ('event_idx', '<i4'),
+    # ('event_idx', '<i4'),
     ('res_id', '<U32'),
     ('system', '<U32'),
     ('dtag', '<U32'),
@@ -376,7 +376,7 @@ def main(config_path):
             meta_sample = np.array(
                 [
                     meta_idx,
-                    event_idx,
+                    # event_idx,
                     resid,
                     system,
                     dtag,
