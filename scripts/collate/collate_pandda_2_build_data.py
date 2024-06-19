@@ -338,7 +338,7 @@ def main(config_path):
                 atom_array = np.zeros(150, dtype='<U5')
                 elements_array = np.zeros(150, dtype=np.int32)
                 pose_array = np.zeros((150, 3))
-                num_atoms = elements_array.size
+                num_atoms = element.size
                 pose_array[:num_atoms, :] = pose[:num_atoms, :]
                 atom_array[:num_atoms] = atom[:num_atoms]
                 elements_array[:num_atoms] = element[:num_atoms]
