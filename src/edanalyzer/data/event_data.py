@@ -292,10 +292,10 @@ def _get_pose_sample_from_dataset_dir(
     _poss_centered = poss - com
     _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape(
         (1, 3)) + event_to_lig_com
-    size = min(100, _rmsd_target.shape[0])
-    atom_array = np.zeros(100, dtype='<U5')
-    elements_array = np.zeros(100, dtype=np.int32)
-    pose_array = np.zeros((100, 3))
+    size = min(150, _rmsd_target.shape[0])
+    atom_array = np.zeros(150, dtype='<U5')
+    elements_array = np.zeros(150, dtype=np.int32)
+    pose_array = np.zeros((150, 3))
     pose_array[:size, :] = _rmsd_target[:size, :]
     atom_array[:size] = atom[:size]
     elements_array[:size] = elements[:size]
