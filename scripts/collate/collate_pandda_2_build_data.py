@@ -171,7 +171,7 @@ def overlap_score(decoy, pose):
 
     num_missed = grid_array[grid_array == 1]
     num_total = grid_array[grid_array == 2]
-    overlap = (num_total-num_missed) / num_total
+    overlap = (num_total.size-num_missed.size) / num_total.size
     return overlap
 
 
