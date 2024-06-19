@@ -334,6 +334,9 @@ def main(config_path):
                     build_path,
                     pose_sample['positions'][pose_sample['elements'] != 0],
                 )
+                if not np.array_equal(element, ):
+                    rprint(f'Ligand doesn\'t match! Skipping! {element} vs {pose_sample["elements"][pose_sample["elements"] != 0]}')
+                    continue
 
                 atom_array = np.zeros(150, dtype='<U5')
                 elements_array = np.zeros(150, dtype=np.int32)
