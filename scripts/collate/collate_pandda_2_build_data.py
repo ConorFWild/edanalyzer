@@ -144,6 +144,34 @@ def _get_pose_sample_from_res(
     )
     return known_hit_pos_sample
 
+def overlap_score(decoy, pose):
+    grid = gemmi.FloatGrid(90, 90, 90)
+    grid.spacegroup = gemmi.SpaceGroup('P1')
+    uc = gemmi.UnitCell(45.0, 45.0, 45.0, 90.0, 90.0, 90.0)
+    grid.set_unit_cell(uc)
+    for pos in pose:
+        pos = gemmi.Position(pos[0], pos[1], pos[2])  # *
+        grid.set_points_around(
+            pos,
+            radius=1.5,
+            value=1.0,
+        )
+
+    for pos in decoy:
+        pos = gemmi.Position(pos[0], pos[1], pos[2])  # *
+        grid.set_points_around(
+            pos,
+            radius=1.5,
+            value=2.0,
+        )
+    grid_array = np.array(grid, copy=False)
+
+    num_missed = grid_array[grid_array == 1]
+    num_total = grid_array[grid_array == 2]
+    overlap = (num_total-num_missed) / num_total
+    return overlap
+
+
 def setup_store(zarr_path):
     root = zarr.open(zarr_path, mode='w')
 
@@ -322,6 +350,7 @@ def main(config_path):
                 meta_idx
             )
             pose_elements = pose_sample["elements"][pose_sample["elements"] != 0]
+            pose_poss = pose_sample['positions'][pose_sample['elements'] != 0]
 
             # Get the ligand data
             ligand_data_sample = _get_ligand_data_sample_from_dataset_dir(
@@ -347,7 +376,7 @@ def main(config_path):
             for build_path in auotbuild_paths:
                 pose, atom, element, rmsd = _get_build_data(
                     build_path,
-                    pose_sample['positions'][pose_sample['elements'] != 0],
+                    pose_poss,
                     x, y, z
                 )
 
@@ -365,6 +394,10 @@ def main(config_path):
                 # rprint(f'{rmsd}')
                 if rmsd > 15:
                     continue
+                score = overlap_score(
+                    pose,
+                    pose_poss,
+                )
                 known_hit_pos_sample = np.array(
                     [
                         (
