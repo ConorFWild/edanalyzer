@@ -352,6 +352,7 @@ def main(config_path):
                 pose_array[:num_atoms, :] = pose[:num_atoms, :]
                 atom_array[:num_atoms] = atom[:num_atoms]
                 elements_array[:num_atoms] = element[:num_atoms]
+                rprint(f'{rmsd}')
                 if rmsd > 15:
                     continue
                 known_hit_pos_sample = np.array(
