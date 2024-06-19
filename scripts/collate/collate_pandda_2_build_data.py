@@ -364,7 +364,7 @@ def main(config_path):
                 )
                 decoy_pose_samples.append(known_hit_pos_sample)
 
-                _delta_vecs = pose_sample['positions'][pose_sample['elements'] != 0] - pose
+                _delta_vecs = pose_sample['positions'] - known_hit_pos_sample['positions']
                 _delta = np.linalg.norm(_delta_vecs, axis=1)
                 delta_sample = np.array([(
                     pose_idx,
