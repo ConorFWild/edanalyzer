@@ -57,9 +57,9 @@ xmap_sample_dtype = [('idx', '<i4'), ('event_idx', '<i4'), ('res_id', 'S32'), ('
 z_map_sample_dtype = [('idx', '<i4'), ('event_idx', '<i4'), ('res_id', 'S32'), ('sample', '<f4', (90, 90, 90))]
 known_hit_pose_sample_dtype = [
     ('idx', '<i8'),
-    ('positions', '<f4', (100, 3)),
-    ('atoms', '<U5', (100,)),
-    ('elements', '<i4', (100,)),
+    ('positions', '<f4', (150, 3)),
+    ('atoms', '<U5', (150,)),
+    ('elements', '<i4', (150,)),
 ]
 decoy_pose_sample_dtype = [
     ('idx', '<i4'),
@@ -103,6 +103,37 @@ def _get_build_data(build_path, pose_sample):
     rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(pose_sample - poss, axis=1))) / poss.shape[0])
     return poss, atom, elements, rmsd
 
+
+def _get_pose_sample_from_res(
+        model_dir,
+        res,
+        x, y, z,
+        idx_pose
+):
+    centroid = np.array([x, y, z])
+    poss, atom, elements = _res_to_array(res, )
+    com = np.mean(poss, axis=0).reshape((1, 3))
+    event_to_lig_com = com - centroid.reshape((1, 3))
+    _poss_centered = poss - com
+    _rmsd_target = np.copy(_poss_centered) + np.array([22.5, 22.5, 22.5]).reshape(
+        (1, 3)) + event_to_lig_com
+    size = min(150, _rmsd_target.shape[0])
+    atom_array = np.zeros(150, dtype='<U5')
+    elements_array = np.zeros(150, dtype=np.int32)
+    pose_array = np.zeros((150, 3))
+    pose_array[:size, :] = _rmsd_target[:size, :]
+    atom_array[:size] = atom[:size]
+    elements_array[:size] = elements[:size]
+
+    known_hit_pos_sample = np.array([(
+        idx_pose,
+        pose_array,
+        atom_array,
+        elements_array,
+    )],
+        dtype=known_hit_pose_sample_dtype
+    )
+    return known_hit_pos_sample
 
 def setup_store(zarr_path):
     root = zarr.open(zarr_path, mode='w')
@@ -272,7 +303,7 @@ def main(config_path):
                 meta_idx,
             )
             # Get the modelled pose sample
-            pose_sample = _get_pose_sample_from_dataset_dir(
+            pose_sample = _get_pose_sample_from_res(
                 model_dir,
                 res,
                 x, y, z,
