@@ -301,6 +301,7 @@ def main(config_path):
                     build_path,
                     pose_sample['positions'][pose_sample['elements'] != 0],
                 )
+
                 atom_array = np.zeros(150, dtype='<U5')
                 elements_array = np.zeros(150, dtype=np.int32)
                 pose_array = np.zeros((150, 3))
