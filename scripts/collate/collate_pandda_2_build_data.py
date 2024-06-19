@@ -383,8 +383,8 @@ def main(config_path):
                 # rprint(f"{pose_sample['positions'].shape} vs {known_hit_pos_sample['positions'].shape}")
                 _delta_vecs = pose_sample['positions'][0] - known_hit_pos_sample['positions'][0]
                 _delta = np.linalg.norm(_delta_vecs, axis=1)
-                rprint(_delta.shape)
-                rprint(_delta_vecs.shape)
+                # rprint(_delta.shape)
+                # rprint(_delta_vecs.shape)
                 delta_sample = np.array([(
                     pose_idx,
                     # idx_pose,
