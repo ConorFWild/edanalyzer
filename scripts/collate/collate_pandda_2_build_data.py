@@ -395,7 +395,7 @@ def main(config_path):
                 )
                 delta_samples.append(delta_sample)
                 tmp_pose_idx += 1
-            rprint(f'Got {len(delta_samples)} decoy poses!')
+            rprint(f'Got {len(delta_samples)} decoy poses, of which {len([dps for dps in decoy_pose_samples if dps["rmsd"] < 2.0])} close!')
 
             # Make the metadata sample
             meta_sample = np.array(
