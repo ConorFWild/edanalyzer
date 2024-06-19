@@ -52,9 +52,9 @@ meta_sample_dtype = [
     ('Confidence', '<U32'),
     ('size', '<f4')
 ]
-mtz_sample_dtype = [('idx', '<i4'), ('event_idx', '<i4'), ('res_id', 'S32'), ('sample', '<f4', (90, 90, 90))]
-xmap_sample_dtype = [('idx', '<i4'), ('event_idx', '<i4'), ('res_id', 'S32'), ('sample', '<f4', (90, 90, 90))]
-z_map_sample_dtype = [('idx', '<i4'), ('event_idx', '<i4'), ('res_id', 'S32'), ('sample', '<f4', (90, 90, 90))]
+mtz_sample_dtype = [('idx', '<i4'), ('sample', '<f4', (90, 90, 90))]
+xmap_sample_dtype = [('idx', '<i4'),  ('sample', '<f4', (90, 90, 90))]
+z_map_sample_dtype = [('idx', '<i4'), ('sample', '<f4', (90, 90, 90))]
 known_hit_pose_sample_dtype = [
     ('idx', '<i8'),
     ('positions', '<f4', (150, 3)),
