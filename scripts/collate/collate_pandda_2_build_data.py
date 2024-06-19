@@ -401,7 +401,7 @@ def main(config_path):
                     pose,
                     pose_poss,
                 )
-                rprint(f'Score: {score} vs rmsd: {rmsd}')
+                # rprint(f'Score: {score} vs rmsd: {rmsd}')
                 known_hit_pos_sample = np.array(
                     [
                         (
