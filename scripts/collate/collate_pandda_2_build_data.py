@@ -348,6 +348,7 @@ def main(config_path):
                 pose, atom, element, rmsd = _get_build_data(
                     build_path,
                     pose_sample['positions'][pose_sample['elements'] != 0],
+                    x, y, z
                 )
 
                 if not np.array_equal(element, pose_elements):
