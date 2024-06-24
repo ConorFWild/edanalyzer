@@ -154,6 +154,7 @@ class BuildScoringDataset(Dataset):
             transform,
             np.copy(sample_array)
         )
+        image_score_decoy_mask[image_score_decoy_mask > 0.0] = 1.0
 
         # valid_poss = (valid_poss - np.mean(valid_poss, axis=0)) + np.array([22.5, 22.5, 22.5])
 
@@ -176,6 +177,7 @@ class BuildScoringDataset(Dataset):
             transform,
             np.copy(sample_array)
         )
+        image_known_hit_pose_mask[image_known_hit_pose_mask >0.0] = 1.0
 
         score = np.sum(image_score_decoy_mask * image_known_hit_pose_mask) / np.sum(image_known_hit_pose_mask)
 
