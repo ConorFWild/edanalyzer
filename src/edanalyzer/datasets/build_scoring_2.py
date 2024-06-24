@@ -114,7 +114,7 @@ class BuildScoringDataset(Dataset):
         valid_elements = _decoy['elements'][valid_mask]
 
         centroid = np.mean(valid_poss, axis=0)
-        rprint(f'Sampling using array of shape {valid_poss.shape} around ligand centroid at: {centroid}')
+        rprint(f'Sampling ligand centroid at: {centroid} from array of shape {valid_poss.shape}')
 
         sample_array = np.zeros(
             (32, 32, 32),
