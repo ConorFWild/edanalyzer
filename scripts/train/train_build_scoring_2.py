@@ -24,7 +24,7 @@ def sample(iterable, num, replace, weights):
     return [_x for _x in df.sample(num, replace=replace, weights=weights)]
 
 
-def _get_train_test_idxs_full_conf(root):
+def _get_train_test_idxs_full_conf(root, config):
     # for each z map sample
     # 1. Get the corresponding ligand data
     # 2. Get the corresponding fragments
@@ -42,10 +42,11 @@ def _get_train_test_idxs_full_conf(root):
     # annotation_df = pd.DataFrame(table_annotation[:])
     ligand_idx_smiles_df = pd.DataFrame(
         root['ligand_data'].get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
-    decoy_table = pd.DataFrame(root['decoy_pose_sample'][:])
+    decoy_table = pd.DataFrame(
+        root['decoy_pose_sample'].get_basic_selection(slice(None), fields=['idx', 'meta_idx', 'rmsd']))
 
-    train_samples = metadata_table[metadata_table['system'].isin(train_systems)]
-    test_samples = metadata_table[metadata_table['system'].isin(test_systems)]
+    train_samples = metadata_table[~metadata_table['system'].isin(config['test']['test_systems'])]
+    test_samples = metadata_table[metadata_table['system'].isin(config['test']['test_systems'])]
 
     meta_to_decoy = {
         idx: decoy_table[decoy_table['meta_idx'] == idx]
@@ -75,20 +76,22 @@ def _get_train_test_idxs_full_conf(root):
         close_samples = decoys[decoys['rmsd'] < 2.0]
         far_samples = decoys[decoys['rmsd'] >= 2.0]
 
-        num_samples = min([close_samples, far_samples])
+        num_samples = min([len(close_samples), len(far_samples)])
         for j in range(num_samples):
             train_idxs.append(
                 {
-                    'meta': _meta[['idx']],
+                    'meta': _meta['idx'],
                     'decoy': close_samples['idx'].iloc[j],
-                    'embedding': decoys.sample(1)['idx'].iloc[0]
+                    'embedding': decoys.sample(1)['idx'].iloc[0],
+                    'train': True
                 }
             )
             train_idxs.append(
                 {
-                    'meta': _meta[['idx']],
+                    'meta': _meta['idx'],
                     'decoy': far_samples['idx'].iloc[j],
-                    'embedding': decoys.sample(1)['idx'].iloc[0]
+                    'embedding': decoys.sample(1)['idx'].iloc[0],
+                    'train': True
                 }
             )
 
@@ -99,18 +102,22 @@ def _get_train_test_idxs_full_conf(root):
         close_samples = decoys[decoys['rmsd'] < 2.0]
         far_samples = decoys[decoys['rmsd'] >= 2.0]
 
-        num_samples = min([close_samples, far_samples])
+        num_samples = min([len(close_samples), len(far_samples)])
         for j in range(num_samples):
             train_idxs.append(
                 {
-                    'meta': _meta[['idx']],
+                    'meta': _meta['idx'],
                     'decoy': close_samples['idx'].iloc[j],
+                    'embedding': decoys.sample(1)['idx'].iloc[0],
+                    'train': False
                 }
             )
             train_idxs.append(
                 {
-                    'meta': _meta[['idx']],
+                    'meta': _meta['idx'],
                     'decoy': far_samples['idx'].iloc[j],
+                    'embedding': decoys.sample(1)['idx'].iloc[0],
+                    'train': False
                 }
             )
 
@@ -141,7 +148,7 @@ def main(config_path, batch_size=12, num_workers=None):
     root = zarr.open(str(zarr_path), mode='r')
 
     rprint(f'Getting train/test data...')
-    all_train_pose_idxs, all_test_pose_idxs = _get_train_test_idxs_full_conf(root)
+    all_train_pose_idxs, all_test_pose_idxs = _get_train_test_idxs_full_conf(root, config)
 
     rprint(f"Got {len(all_train_pose_idxs)} train samples")
     rprint(f"Got {len(all_test_pose_idxs)} test samples")
@@ -178,7 +185,7 @@ def main(config_path, batch_size=12, num_workers=None):
     # Get the model
     rprint('Constructing model...')
     output = output_dir / 'build_scoring_nsys=87_opt=adamw_ls=2.5e-2_bs=128_lr=e-2_wd=e-1_sch=pl_cd=10_wn=0.5_r=5.5'
-    model = LitEventScoring(output)
+    model = LitBuildScoring(output)
 
     # Train
     rprint('Constructing trainer...')
