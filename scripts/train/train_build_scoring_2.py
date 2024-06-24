@@ -11,7 +11,7 @@ import tables
 import zarr
 import pandas as pd
 
-from edanalyzer.datasets.event_scoring import EventScoringDataset
+from edanalyzer.datasets.build_scoring_2 import BuildScoringDataset
 from edanalyzer.models.event_scoring import LitEventScoring
 from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 
@@ -22,8 +22,6 @@ from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveragi
 def sample(iterable, num, replace, weights):
     df = pd.Series(iterable)
     return [_x for _x in df.sample(num, replace=replace, weights=weights)]
-
-
 
 
 def _get_train_test_idxs_full_conf(root):
@@ -37,26 +35,29 @@ def _get_train_test_idxs_full_conf(root):
     # times negatively, and every positive fragment appears appears twice negatively
     rng = np.random.default_rng()
 
-    table_type = 'pandda_2'
+    # table_type = 'pandda_2'
 
     metadata_table = pd.DataFrame(root['meta_sample'][:])
     # table_annotation = root[table_type]['annotation']
-    annotation_df = pd.DataFrame(table_annotation[:])
+    # annotation_df = pd.DataFrame(table_annotation[:])
     ligand_idx_smiles_df = pd.DataFrame(
-        root[table_type]['ligand_data'].get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
-    ligand_conf_df = pd.DataFrame(
-        root[table_type]['ligand_confs'].get_basic_selection(slice(None), fields=['idx', 'num_heavy_atoms',
-                                                                                  'fragment_canonical_smiles',
-                                                                                  'ligand_canonical_smiles']))
+        root['ligand_data'].get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
+    decoy_table = pd.DataFrame(root['decoy_pose_sample'][:])
 
-    train_samples = metadata_table[annotation_df['partition'] == b'train']
-    test_samples = metadata_table[annotation_df['partition'] == b'test']
+    train_samples = metadata_table[metadata_table['system'].isin(train_systems)]
+    test_samples = metadata_table[metadata_table['system'].isin(test_systems)]
 
-    ligand_smiles_to_conf = {
-        _smiles: ligand_conf_df[ligand_conf_df['ligand_canonical_smiles'] == _smiles]
-        for _smiles
-        in ligand_conf_df['ligand_canonical_smiles'].unique()
+    meta_to_decoy = {
+        idx: decoy_table[decoy_table['meta_idx'] == idx]
+        for idx
+        in metadata_table['idx']
     }
+
+    # ligand_smiles_to_conf = {
+    #     _smiles: ligand_conf_df[ligand_conf_df['ligand_canonical_smiles'] == _smiles]
+    #     for _smiles
+    #     in ligand_conf_df['ligand_canonical_smiles'].unique()
+    # }
 
     pos_z_samples = []
     neg_z_samples = []
@@ -67,133 +68,52 @@ def _get_train_test_idxs_full_conf(root):
     train_pos_conf = []
     train_neg_conf = []
 
-    # Loop over the z samples adding positive samples for each
-    for _idx, z in train_samples.iterrows():
-        ligand_data_idx = z['ligand_data_idx']
-        # if ligand_data_idx == -1:
-        #     continue
-        if z['Confidence'] != 'High':
-            continue
-        ligand_data = root[table_type]['ligand_data'][ligand_data_idx]
-        ligand_canonical_smiles = ligand_data['canonical_smiles']
-        if ligand_canonical_smiles not in ligand_smiles_to_conf:
-            continue
-        confs = ligand_smiles_to_conf[ligand_canonical_smiles]
-        if len(confs) == 0:
-            continue
+    # Add the train samples
+    train_idxs = []
+    for _idx, _meta in train_samples.iterrows():
+        decoys = meta_to_decoy[_meta["idx"]]
+        close_samples = decoys[decoys['rmsd'] < 2.0]
+        far_samples = decoys[decoys['rmsd'] >= 2.0]
 
-        # Pos samples
-        ligand_conf_samples = []
-        for x in range(10):
-            positive_ligand_sample_distribution[ligand_canonical_smiles] += 1
-            ligand_conf_samples.append(ligand_smiles_to_conf[ligand_canonical_smiles].sample(1)['idx'].iloc[0])
-        pos_conf_samples += ligand_conf_samples
-        pos_z_samples += [z['idx'] for _j in range(10)]
-        train_pos_conf += [z['Confidence'] for _j in range(10)]
+        num_samples = min([close_samples, far_samples])
+        for j in range(num_samples):
+            train_idxs.append(
+                {
+                    'meta': _meta[['idx']],
+                    'decoy': close_samples['idx'].iloc[j],
+                    'embedding': decoys.sample(1)['idx'].iloc[0]
+                }
+            )
+            train_idxs.append(
+                {
+                    'meta': _meta[['idx']],
+                    'decoy': far_samples['idx'].iloc[j],
+                    'embedding': decoys.sample(1)['idx'].iloc[0]
+                }
+            )
 
-    print(f'Got {len(pos_conf_samples)} pos samples!')
+    # Get the test samples
+    test_idxs = []
+    for _idx, _meta in test_samples.iterrows():
+        decoys = meta_to_decoy[_meta["idx"]]
+        close_samples = decoys[decoys['rmsd'] < 2.0]
+        far_samples = decoys[decoys['rmsd'] >= 2.0]
 
-    # Loop over the z samples adding the inherent negative samples
-    for _idx, z in train_samples[train_samples['Confidence'] == 'Low'].sample(len(pos_conf_samples),
-                                                                              replace=True).iterrows():
-        # ligand_data_idx = z['ligand_data_idx']
-        # if ligand_data_idx != -1:
-        #     continue
-        if z['Confidence'] != 'Low':
-            continue
+        num_samples = min([close_samples, far_samples])
+        for j in range(num_samples):
+            train_idxs.append(
+                {
+                    'meta': _meta[['idx']],
+                    'decoy': close_samples['idx'].iloc[j],
+                }
+            )
+            train_idxs.append(
+                {
+                    'meta': _meta[['idx']],
+                    'decoy': far_samples['idx'].iloc[j],
+                }
+            )
 
-        # Select a uniform random fragment
-        ligand_freq = {
-            k: v / positive_ligand_sample_distribution[k]
-            for k, v
-            in negative_ligand_sample_distribution.items()
-            if positive_ligand_sample_distribution[k] > 0
-        }
-
-        ligand_smiles = min(ligand_freq, key=lambda _k: ligand_freq[_k])
-        negative_ligand_sample_distribution[ligand_smiles] += 1
-
-        lig_conf_sample = ligand_smiles_to_conf[ligand_smiles].sample(1)['idx'].iloc[0]
-
-        neg_conf_samples += [lig_conf_sample, ]
-        neg_z_samples += [z['idx'], ]
-        train_neg_conf += [z['Confidence'], ]
-
-    print(f'Got {len(neg_conf_samples)} neg decoy samples!')
-
-    test_pos_z_samples = []
-    test_neg_z_samples = []
-    test_pos_conf_samples = []
-    test_neg_conf_samples = []
-    test_pos_conf = []
-    test_neg_conf = []
-
-    # Loop over the z samples adding the test samples
-    for _idx, z in test_samples.iterrows():
-        #
-        ligand_data_idx = z['ligand_data_idx']
-        # if ligand_data_idx != -1:
-        if z['Confidence'] == 'High':
-            ligand_data = root[table_type]['ligand_data'][ligand_data_idx]
-            ligand_canonical_smiles = ligand_data['canonical_smiles']
-            if ligand_canonical_smiles not in ligand_smiles_to_conf:
-                continue
-
-            lig_conf_sample = ligand_smiles_to_conf[ligand_canonical_smiles].sample(1)['idx'].iloc[0]
-
-            test_pos_conf_samples.append(lig_conf_sample)
-            test_pos_z_samples.append(z['idx'])
-            test_pos_conf.append(z['Confidence'])
-
-        else:
-            fragment = \
-                sample(
-                    [_x for _x in positive_ligand_sample_distribution if positive_ligand_sample_distribution[_x] > 0],
-                    1, False,
-                    None)[0]
-            lig_conf_sample = ligand_smiles_to_conf[fragment].sample(1)['idx'].iloc[0]
-
-            test_neg_conf_samples.append(lig_conf_sample)
-            test_neg_z_samples.append(z['idx'])
-            test_neg_conf.append(z['Confidence'])
-
-
-
-    rprint({
-        'pos_z_samples len': len(pos_z_samples),
-        'neg_z_samples len': len(neg_z_samples),
-        'pos_conf_samples len': len(pos_conf_samples),
-        'neg_conf_samples len': len(neg_conf_samples),
-        'train_pos_conf len': len(train_pos_conf),
-        'train_neg_conf len': len(train_neg_conf),
-
-    })
-    train_idxs = [
-        {'table': table_type, 'z': z, 'f': f, 't': t}
-        for z, f, t
-        in zip(
-            pos_z_samples + neg_z_samples,
-            pos_conf_samples + neg_conf_samples,
-            train_pos_conf + train_neg_conf
-        )
-        # ([True] * len(pos_z_samples)) + ([False] * len(neg_z_samples)))]
-    ]
-    rprint({
-        'test_pos_z_samples len': len(test_pos_z_samples),
-        'test_neg_z_samples len': len(test_neg_z_samples),
-        'test_pos_conf_samples len': len(test_pos_conf_samples),
-        'test_neg_conf_samples len': len(test_neg_conf_samples),
-        'train_pos_conf len': len(test_pos_conf),
-        'train_neg_conf len': len(test_neg_conf),
-    })
-    test_idxs = [{'table': table_type, 'z': z, 'f': f, 't': t} for z, f, t
-                 in zip(
-            test_pos_z_samples + test_neg_z_samples,
-            test_pos_conf_samples + test_neg_conf_samples,
-            # ([True] * len(test_pos_conf_samples)) + ([False] * len(test_neg_conf_samples))
-            test_pos_conf + test_neg_conf
-        )
-                 ]
     return train_idxs, test_idxs
 
 
@@ -238,7 +158,7 @@ def main(config_path, batch_size=12, num_workers=None):
             # pos_train_pose_samples
             None
         ),
-        batch_size=128,#batch_size,
+        batch_size=128,  # batch_size,
         shuffle=True,
         num_workers=19,
     )
@@ -262,8 +182,8 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Train
     rprint('Constructing trainer...')
-    checkpoint_callback = ModelCheckpoint(dirpath=str(output ))
-    logger = CSVLogger(str( output / 'logs'))
+    checkpoint_callback = ModelCheckpoint(dirpath=str(output))
+    logger = CSVLogger(str(output / 'logs'))
     trainer = lt.Trainer(accelerator='gpu', logger=logger,
                          callbacks=[
                              checkpoint_callback,
