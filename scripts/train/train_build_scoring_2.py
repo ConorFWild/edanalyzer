@@ -12,7 +12,7 @@ import zarr
 import pandas as pd
 
 from edanalyzer.datasets.build_scoring_2 import BuildScoringDataset
-from edanalyzer.models.event_scoring import LitEventScoring
+from edanalyzer.models.build_scoring_2 import LitBuildScoring
 from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 
 from lightning.pytorch.loggers import CSVLogger
