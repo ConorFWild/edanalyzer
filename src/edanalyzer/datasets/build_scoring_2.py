@@ -91,7 +91,10 @@ class BuildScoringDataset(Dataset):
         sample_data = self.sample_indexes[idx]
 
         # Get the metadata, decoy pose and embedding
-        _meta, _decoy, _embedding, _train = sample_data['meta'], sample_data['decoy'], sample_data['embedding'], sample_data['train']
+        _meta_idx, _decoy_idx, _embedding_idx, _train = sample_data['meta'], sample_data['decoy'], sample_data['embedding'], sample_data['train']
+        _meta = self.meta_table[_meta_idx]
+        _decoy = self.decoy_table[_decoy_idx]
+        _embedding = self.decoy_table[_embedding_idx]
 
         # Get rng
         rng = np.random.default_rng()
@@ -200,8 +203,8 @@ class BuildScoringDataset(Dataset):
 
 
         # Get decoy for mol embedding
-        embedding = self.decoy_table[_embedding['idx']]
-        embedding_valid_mask = embedding['elements'] != 0
+        # embedding = self.decoy_table[_embedding['idx']]
+        embedding_valid_mask = _embedding['elements'] != 0
         if _train:
             do_drop = rng.random()
             if do_drop > 0.5:
@@ -209,8 +212,8 @@ class BuildScoringDataset(Dataset):
                 embedding_random_drop_index = rng.integers(0, len(embedding_valid_indicies))
                 embedding_drop_index = embedding_valid_indicies[embedding_random_drop_index]
                 embedding_valid_mask[embedding_drop_index] = False
-        embedding_valid_poss = embedding['positions'][embedding_valid_mask]
-        embedding_valid_elements = embedding['elements'][embedding_valid_mask]
+        embedding_valid_poss = _embedding['positions'][embedding_valid_mask]
+        embedding_valid_elements = _embedding['elements'][embedding_valid_mask]
 
         embedding_valid_poss = (embedding_valid_poss - np.mean(embedding_valid_poss, axis=0)) + np.array([22.5, 22.5, 22.5])
 
