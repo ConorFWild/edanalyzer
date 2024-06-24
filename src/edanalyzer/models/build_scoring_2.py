@@ -28,7 +28,7 @@ annotation_dtype = [
     ('event_num', 'i8')
 ]
 
-class LitEventScoring(lt.LightningModule):
+class LitBuildScoring(lt.LightningModule):
     def __init__(self, output_dir):
         super().__init__()
         # self.automatic_optimization = False
