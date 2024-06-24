@@ -98,7 +98,7 @@ class LitBuildScoring(lt.LightningModule):
         self.log('train_loss', loss_1)
 
 
-        for j in range(len(meta_idx[0])):
+        for j in range(len(meta_idx)):
             self.train_annotations.append(
                 {
                     "meta_idx": int(meta_idx[j].to(torch.device("cpu")).detach().numpy()),

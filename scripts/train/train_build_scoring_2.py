@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import fire
@@ -185,6 +186,7 @@ def main(config_path, batch_size=12, num_workers=None):
     # Get the model
     rprint('Constructing model...')
     output = output_dir / 'build_scoring_nsys=87_opt=adamw_ls=2.5e-2_bs=128_lr=e-2_wd=e-1_sch=pl_cd=10_wn=0.5_r=5.5'
+    shutil.rmtree(output)
     model = LitBuildScoring(output)
 
     # Train
