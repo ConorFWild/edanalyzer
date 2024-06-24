@@ -254,47 +254,47 @@ class LitBuildScoring(lt.LightningModule):
         #
         # _epoch = epoch
         # best_df = df[(df['epoch'] == _epoch)]
-        best_df = pd.DataFrame.from_records(annotations)
-        pr = []
-        for cutoff in np.linspace(0.0, 1.0, num=1000):
-            true_hit_best_df = best_df[best_df['y'] > 0.9]
-            negative_best_df = best_df[best_df['y'] <= 0.1]
-            true_hit_df = true_hit_best_df[true_hit_best_df['y_hat'] > cutoff]
-            false_hit_df = negative_best_df[negative_best_df['y_hat'] > cutoff]
-            true_negative_df = negative_best_df[negative_best_df['y_hat'] <= cutoff]
-            false_negative_df = true_hit_best_df[true_hit_best_df['y_hat'] <= cutoff]
-            tp = len(true_hit_df)
-            fp = len(false_hit_df)
-            tn = len(true_negative_df)
-            fn = len(false_negative_df)
-
-            if tp + fp == 0:
-                prec = 0.0
-            else:
-                prec = tp / (tp + fp)
-            if tp + fn == 0:
-                recall = 0.0
-            else:
-                recall = tp / (tp + fn)
-            if (fp + tn) == 0:
-                fpr = 0.0
-            else:
-                fpr = fp / (fp + tn)
-            pr.append(
-                {
-                    'Cutoff': cutoff,
-                    'Precision': prec,
-                    'Recall': recall,
-                    'False Positive Rate': fpr
-                }
-            )
-        pr_df = pd.DataFrame(pr)
-        best_fpr_10 = pr_df[pr_df['Recall'] > 0.999999999]['False Positive Rate'].min()
-        best_fpr_99 = pr_df[pr_df['Recall'] > 0.99]['False Positive Rate'].min()
-        best_fpr_95 = pr_df[pr_df['Recall'] > 0.95]['False Positive Rate'].min()
-        self.log('fpr10', best_fpr_10, 4)
-        self.log('fpr95', best_fpr_95, 4)
-        self.log('fpr99', best_fpr_99, 4)
+        # best_df = pd.DataFrame.from_records(annotations)
+        # pr = []
+        # for cutoff in np.linspace(0.0, 1.0, num=1000):
+        #     true_hit_best_df = best_df[best_df['y'] > 0.9]
+        #     negative_best_df = best_df[best_df['y'] <= 0.1]
+        #     true_hit_df = true_hit_best_df[true_hit_best_df['y_hat'] > cutoff]
+        #     false_hit_df = negative_best_df[negative_best_df['y_hat'] > cutoff]
+        #     true_negative_df = negative_best_df[negative_best_df['y_hat'] <= cutoff]
+        #     false_negative_df = true_hit_best_df[true_hit_best_df['y_hat'] <= cutoff]
+        #     tp = len(true_hit_df)
+        #     fp = len(false_hit_df)
+        #     tn = len(true_negative_df)
+        #     fn = len(false_negative_df)
+        #
+        #     if tp + fp == 0:
+        #         prec = 0.0
+        #     else:
+        #         prec = tp / (tp + fp)
+        #     if tp + fn == 0:
+        #         recall = 0.0
+        #     else:
+        #         recall = tp / (tp + fn)
+        #     if (fp + tn) == 0:
+        #         fpr = 0.0
+        #     else:
+        #         fpr = fp / (fp + tn)
+        #     pr.append(
+        #         {
+        #             'Cutoff': cutoff,
+        #             'Precision': prec,
+        #             'Recall': recall,
+        #             'False Positive Rate': fpr
+        #         }
+        #     )
+        # pr_df = pd.DataFrame(pr)
+        # best_fpr_10 = pr_df[pr_df['Recall'] > 0.999999999]['False Positive Rate'].min()
+        # best_fpr_99 = pr_df[pr_df['Recall'] > 0.99]['False Positive Rate'].min()
+        # best_fpr_95 = pr_df[pr_df['Recall'] > 0.95]['False Positive Rate'].min()
+        # self.log('fpr10', best_fpr_10, 4)
+        # self.log('fpr95', best_fpr_95, 4)
+        # self.log('fpr99', best_fpr_99, 4)
         # self.log('lr', )
 
         self.test_annotations.clear()
