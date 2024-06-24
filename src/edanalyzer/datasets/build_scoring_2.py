@@ -6,6 +6,8 @@ import torch
 import gemmi
 from scipy.spatial.transform import Rotation as R
 import zarr
+from rich import print as rprint
+
 
 from torch.utils.data import Dataset
 
@@ -112,6 +114,7 @@ class BuildScoringDataset(Dataset):
         valid_elements = _decoy['elements'][valid_mask]
 
         centroid = np.mean(valid_poss, axis=0)
+        rprint(f'Sampling around ligand centroid at: {centroid}')
 
         sample_array = np.zeros(
             (32, 32, 32),

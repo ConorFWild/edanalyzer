@@ -405,7 +405,7 @@ def main(config_path):
                 known_hit_pos_sample = np.array(
                     [
                         (
-                            pose_idx,
+                            tmp_pose_idx,
                             meta_idx,
                             pose_array,
                             atom_array,
@@ -424,7 +424,7 @@ def main(config_path):
                 # rprint(_delta.shape)
                 # rprint(_delta_vecs.shape)
                 delta_sample = np.array([(
-                    pose_idx,
+                    tmp_pose_idx,
                     # idx_pose,
                     meta_idx,
                     _delta,
