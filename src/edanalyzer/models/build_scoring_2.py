@@ -45,7 +45,7 @@ class LitBuildScoring(lt.LightningModule):
         self.bn = nn.BatchNorm1d(512)
         self.fc = nn.Sequential(
 
-            nn.Linear(512,2),
+            nn.Linear(512,1),
 
         )
         self.train_annotations = []
