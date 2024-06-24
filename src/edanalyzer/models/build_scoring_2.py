@@ -74,7 +74,7 @@ class LitBuildScoring(lt.LightningModule):
             "optimizer": optimizer,
             "lr_scheduler": {
                 "scheduler": lr_scheduler,
-                "monitor": "fpr95",
+                "monitor": "test_loss",
                 "interval": "epoch",
                 "frequency": 1,
                 "strict": False,
