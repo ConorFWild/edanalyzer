@@ -175,11 +175,11 @@ class BuildScoringDataset(Dataset):
         score = np.sum(image_score_decoy_mask * image_known_hit_pose_mask) / np.sum(image_known_hit_pose_mask)
 
         # Get maps
-        xmap_sample = self.xmap_table[_meta['idx']]
-        zmap_sample = self.zmap_table[_meta['idx']]
+        xmap_data = self.xmap_table[_meta['idx']]
+        zmap_data = self.zmap_table[_meta['idx']]
 
-        xmap = _get_grid_from_hdf5(xmap_sample)
-        zmap = _get_grid_from_hdf5(zmap_sample)
+        xmap = _get_grid_from_hdf5(xmap_data)
+        zmap = _get_grid_from_hdf5(zmap_data)
 
         xmap_sample = _sample_xmap_and_scale(
             xmap,
@@ -253,7 +253,7 @@ class BuildScoringDataset(Dataset):
             torch.from_numpy(
                 np.stack(
                     [
-                        zmap_sample * image_decoy_mask,
+                        z_map_sample * image_decoy_mask,
                         xmap_sample * image_decoy_mask,
                     ],
                     axis=0,
