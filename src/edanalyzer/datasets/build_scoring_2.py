@@ -69,14 +69,15 @@ class BuildScoringDataset(Dataset):
         self.zmap_table = self.root['z_map_sample']
         self.decoy_table = self.root['decoy_pose_sample']
         self.ligand_data_table = self.root['ligand_data']
+        self.known_hit_pose = self.root['known_hit_pose']
         # self.pandda_2_annotation_table = self.root['annotation']
         # self.pandda_2_frag_table = self.root['ligand_confs']  # ['ligand_fragments']
 
-        self.pandda_2_annotations = {
-            _x['event_idx']: _x
-            for _x
-            in self.pandda_2_annotation_table
-        }
+        # self.pandda_2_annotations = {
+        #     _x['event_idx']: _x
+        #     for _x
+        #     in self.pandda_2_annotation_table
+        # }
 
         self.sample_indexes = sample_indexes
 
@@ -89,17 +90,181 @@ class BuildScoringDataset(Dataset):
         # Get the sample data
         sample_data = self.sample_indexes[idx]
 
-        # Get the metadata and decoy pose
-        _meta, _decoy, _embedding = sample_data['meta'], sample_data['decoy'], sample_data['embedding']
+        # Get the metadata, decoy pose and embedding
+        _meta, _decoy, _embedding, _train = sample_data['meta'], sample_data['decoy'], sample_data['embedding'], sample_data['train']
 
+        # Get rng
+        rng = np.random.default_rng()
+
+        # Get the decoy
+        valid_mask = _decoy['elements'] != 0
+        if _train:
+            do_drop = rng.random()
+            if do_drop > 0.5:
+                valid_indicies = np.nonzero(valid_mask)
+                random_drop_index = rng.integers(0, len(valid_indicies))
+                drop_index = valid_indicies[random_drop_index]
+                valid_mask[drop_index] = False
+        valid_poss = _decoy['positions'][valid_mask]
+        valid_elements = _decoy['elements'][valid_mask]
+
+        centroid = np.mean(valid_poss, axis=0)
+
+        sample_array = np.zeros(
+            (32, 32, 32),
+            dtype=np.float32,
+        )
+        orientation = _get_random_orientation()
+        transform = _get_transform_from_orientation_centroid(
+            orientation,
+            centroid,
+            n=32
+        )
+
+        decoy_residue = _get_res_from_arrays(
+            valid_poss,
+            valid_elements,
+        )
+
+
+        decoy_mask_grid = _get_ligand_mask_float(
+            decoy_residue,
+            radius=3.5
+        )
+        image_decoy_mask = _sample_xmap(
+            decoy_mask_grid,
+            transform,
+            np.copy(sample_array)
+        )
+
+        decoy_score_mask_grid = _get_ligand_mask_float(
+            decoy_residue,
+            radius=2.0
+        )
+        image_score_decoy_mask = _sample_xmap(
+            decoy_score_mask_grid,
+            transform,
+            np.copy(sample_array)
+        )
+
+        # valid_poss = (valid_poss - np.mean(valid_poss, axis=0)) + np.array([22.5, 22.5, 22.5])
+
+        # Get mask of hit for score calculation
+        known_hit_pose = self.known_hit_pose[_meta['idx']]
+        known_hit_pose_valid_mask = known_hit_pose['elements'] != 0
+        known_hit_pose_valid_poss = known_hit_pose['positions'][known_hit_pose_valid_mask]
+        known_hit_pose_valid_elements = known_hit_pose['elements'][known_hit_pose_valid_mask]
+        known_hit_pose_residue = _get_res_from_arrays(
+            known_hit_pose_valid_poss,
+            known_hit_pose_valid_elements,
+        )
+
+        known_hit_pose_mask_grid = _get_ligand_mask_float(
+            known_hit_pose_residue,
+            radius=2.0
+        )
+        image_known_hit_pose_mask = _sample_xmap(
+            known_hit_pose_mask_grid,
+            transform,
+            np.copy(sample_array)
+        )
+
+        score = np.sum(image_score_decoy_mask * image_known_hit_pose_mask) / np.sum(image_known_hit_pose_mask)
 
         # Get maps
+        xmap_sample = self.xmap_table[_meta['idx']]
+        zmap_sample = self.zmap_table[_meta['idx']]
 
-        # Get decoy mask for maps
+        xmap = _get_grid_from_hdf5(xmap_sample)
+        zmap = _get_grid_from_hdf5(zmap_sample)
+
+        xmap_sample = _sample_xmap_and_scale(
+            xmap,
+            transform,
+            np.copy(sample_array)
+        )
+        z_map_sample = _sample_xmap_and_scale(
+            zmap,
+            transform,
+            np.copy(sample_array)
+        )
+
+        if _train:
+            u_s = rng.uniform(0.0, 0.5)
+            noise = rng.normal(size=(32,32,32)) * u_s
+            z_map_sample += noise.astype(np.float32)
+
+            u_s = rng.uniform(0.0, 0.5)
+            noise = rng.normal(size=(32,32,32)) * u_s
+            xmap_sample += noise.astype(np.float32)
+
 
         # Get decoy for mol embedding
+        embedding = self.decoy_table[_embedding['idx']]
+        embedding_valid_mask = embedding['elements'] != 0
+        if _train:
+            do_drop = rng.random()
+            if do_drop > 0.5:
+                embedding_valid_indicies = np.nonzero(embedding_valid_mask)
+                embedding_random_drop_index = rng.integers(0, len(embedding_valid_indicies))
+                embedding_drop_index = embedding_valid_indicies[embedding_random_drop_index]
+                embedding_valid_mask[embedding_drop_index] = False
+        embedding_valid_poss = embedding['positions'][embedding_valid_mask]
+        embedding_valid_elements = embedding['elements'][embedding_valid_mask]
 
-        #
+        embedding_valid_poss = (embedding_valid_poss - np.mean(embedding_valid_poss, axis=0)) + np.array([22.5, 22.5, 22.5])
+
+
+        embedding_orientation = _get_random_orientation()
+        embedding_transform = _get_transform_from_orientation_centroid(
+            embedding_orientation,
+            np.array([22.5,22.5,22.5]),
+            n=32
+        )
+
+        embedding_residue = _get_res_from_arrays(
+            embedding_valid_poss,
+            embedding_valid_elements,
+        )
+
+        embedding_mask_grid = _get_ligand_mask_float(
+            embedding_residue,
+            radius=1.0
+        )
+        image_embedding_mask = _sample_xmap(
+            embedding_mask_grid,
+            embedding_transform,
+            np.copy(sample_array)
+        )
+
+        # Return data
+        return (
+            [
+                _meta['idx'],
+                _decoy['idx'],
+                _embedding['idx'],
+                str(_meta['system']),
+                str(_meta['dtag']),
+                int(_meta['event_num']),
+            ],
+            torch.from_numpy(
+                np.stack(
+                    [
+                        zmap_sample * image_decoy_mask,
+                        xmap_sample * image_decoy_mask,
+                    ],
+                    axis=0,
+                    dtype=np.float32
+                )),
+            torch.from_numpy(
+                np.stack(
+                    [image_embedding_mask],
+                    axis=0,
+                    dtype=np.float32
+                )),
+            torch.from_numpy(np.array(_meta['rmsd'], dtype=np.float32)),
+            torch.from_numpy(np.array(score, dtype=np.float32))
+        )
 
         # Get the z map and pose
         if _table == 'normal':
@@ -155,8 +320,7 @@ class BuildScoringDataset(Dataset):
         frag_data = self.pandda_2_frag_table[_f]
 
         #
-        xmap = _get_grid_from_hdf5(xmap_sample_data)
-        z_map = _get_grid_from_hdf5(z_map_sample_data)
+
 
         # Subsample if training
         if annotation['partition'] == 'train':
@@ -242,25 +406,8 @@ class BuildScoringDataset(Dataset):
         xmap_mask_float = _get_ed_mask_float()
 
         # Get sample images
-        xmap_sample = _sample_xmap_and_scale(
-            xmap,
-            transform,
-            np.copy(sample_array)
-        )
-        # xmap_sample = np.copy(sample_array)
-        z_map_sample = _sample_xmap_and_scale(
-            z_map,
-            transform,
-            np.copy(sample_array)
-        )
-        if annotation['partition'] == 'train':
-            u_s = rng.uniform(0.0, 0.5)
-            noise = rng.normal(size=(32,32,32)) * u_s
-            z_map_sample += noise.astype(np.float32)
 
-            u_s = rng.uniform(0.0, 0.5)
-            noise = rng.normal(size=(32,32,32)) * u_s
-            xmap_sample += noise.astype(np.float32)
+
 
         ligand_mask_grid = _get_ligand_mask_float(
             z_map,
