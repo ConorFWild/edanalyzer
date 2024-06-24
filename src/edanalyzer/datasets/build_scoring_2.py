@@ -104,13 +104,7 @@ class BuildScoringDataset(Dataset):
         # Get the decoy
         valid_mask = _decoy['elements'] != 0
         rprint(f'Initial valid mask sum: {valid_mask.sum()}')
-        if _train:
-            do_drop = rng.random()
-            if do_drop > 0.5:
-                valid_indicies = np.nonzero(valid_mask)
-                random_drop_index = rng.integers(0, len(valid_indicies))
-                drop_index = valid_indicies[random_drop_index]
-                valid_mask[drop_index] = False
+        # π
         valid_poss = _decoy['positions'][valid_mask]
         valid_elements = _decoy['elements'][valid_mask]
 
