@@ -104,7 +104,7 @@ def _get_train_test_idxs_full_conf(root, config):
 
         num_samples = min([len(close_samples), len(far_samples)])
         for j in range(num_samples):
-            train_idxs.append(
+            test_idxs.append(
                 {
                     'meta': _meta['idx'],
                     'decoy': close_samples['idx'].iloc[j],
@@ -112,7 +112,7 @@ def _get_train_test_idxs_full_conf(root, config):
                     'train': False
                 }
             )
-            train_idxs.append(
+            test_idxs.append(
                 {
                     'meta': _meta['idx'],
                     'decoy': far_samples['idx'].iloc[j],
