@@ -103,7 +103,7 @@ class BuildScoringDataset(Dataset):
 
         # Get the decoy
         valid_mask = _decoy['elements'] != 0
-        rprint(f'Initial valid mask sum: {valid_mask.sum()}')
+        # rprint(f'Initial valid mask sum: {valid_mask.sum()}')
         # if _train:
         #     do_drop = rng.random()
         #     if do_drop > 0.5:
