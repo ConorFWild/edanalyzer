@@ -265,7 +265,7 @@ class BuildScoringDataset(Dataset):
                     axis=0,
                     dtype=np.float32
                 )),
-            torch.from_numpy(np.array(_meta['rmsd'], dtype=np.float32)),
+            torch.from_numpy(np.array(_decoy['rmsd'], dtype=np.float32)),
             torch.from_numpy(np.array(score, dtype=np.float32))
         )
 
