@@ -16,6 +16,9 @@ import pandas as pd
 from .resnet import resnet18, resnet10
 from .simple_autoencoder import SimpleConvolutionalEncoder, SimpleConvolutionalDecoder
 
+from edanalyzer.losses import categorical_loss
+
+
 annotation_dtype = [
     ('epoch', '<i4'),
     ('meta_idx', '<i4'),
@@ -45,7 +48,7 @@ class LitBuildScoring(lt.LightningModule):
         self.bn = nn.BatchNorm1d(512)
         self.fc = nn.Sequential(
 
-            nn.Linear(512,1),
+            nn.Linear(512,10),
 
         )
         self.train_annotations = []
@@ -91,11 +94,14 @@ class LitBuildScoring(lt.LightningModule):
 
         # full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
 
-        score = F.sigmoid(self.fc(z_encoding))
-        loss_1 = F.mse_loss(score, y)
-        total_loss = loss_1
+        # score = F.sigmoid(self.fc(z_encoding))
+        # loss_1 = F.mse_loss(score, y)
+        score = F.softmax(self.fc(z_encoding))
+        loss = categorical_loss(score, y)
 
-        self.log('train_loss', loss_1)
+        # total_loss = loss_1
+
+        self.log('train_loss', loss)
 
 
         for j in range(len(meta_idx)):
@@ -103,8 +109,12 @@ class LitBuildScoring(lt.LightningModule):
                 {
                     "meta_idx": int(meta_idx[j].to(torch.device("cpu")).detach().numpy()),
                     "decoy_idx": int(decoy_idx[j].to(torch.device("cpu")).detach().numpy()),
-                    "y": float(y[j].to(torch.device("cpu")).detach().numpy()),
-                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
+                    # "y": float(y[j].to(torch.device("cpu")).detach().numpy()),
+                    "y": 0.1 * float(np.argmax(y[j])),
+
+                    # "y_hat": float(score[j]).to(torch.device("cpu")).detach().numpy()),
+                    "y_hat": 0.1 * float(np.argmax(score[j])),
+
                     'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
                     "system": str(system[j]),
                     "dtag": str(dtag[j]),
@@ -112,7 +122,7 @@ class LitBuildScoring(lt.LightningModule):
                 }
             )
         # self.annotations[]
-        return total_loss
+        return loss
 
     def validation_step(self, test_batch, batch_idx):
         (meta_idx, decoy_idx, embedding_idx, system, dtag, event_num), z, m, rmsd, y = test_batch
@@ -126,9 +136,12 @@ class LitBuildScoring(lt.LightningModule):
         # print(f'Z Encoding: {z_encoding[0,:10]}')
         # print(f'Mol Encoding: {mol_encoding[0,:10]}')
 
-        score = F.sigmoid(self.fc(z_encoding))
+        # score = F.sigmoid(self.fc(z_encoding))
+        score = F.softmax(self.fc(z_encoding))
+        loss = categorical_loss(score, y)
 
-        loss = F.mse_loss(score, y)
+
+        # loss = F.mse_loss(score, y)
 
         self.log('test_loss', loss)
 
@@ -137,8 +150,10 @@ class LitBuildScoring(lt.LightningModule):
                 {
                     "meta_idx": int(meta_idx[j].to(torch.device("cpu")).detach().numpy()),
                     "decoy_idx": int(decoy_idx[j].to(torch.device("cpu")).detach().numpy()),
-                    "y": float(y[j].to(torch.device("cpu")).detach().numpy()),
-                    "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
+                    # "y": float(y[j].to(torch.device("cpu")).detach().numpy()),
+                    "y": 0.1 * float(np.argmax(y[j])),
+                    # "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
+                    "y_hat": 0.1 * float(np.argmax(score[j])),
                     'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
                     "system": str(system[j]),
                     "dtag": str(dtag[j]),

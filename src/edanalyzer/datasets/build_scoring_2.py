@@ -179,7 +179,7 @@ class BuildScoringDataset(Dataset):
         )
         image_known_hit_pose_mask[image_known_hit_pose_mask >0.0] = 1.0
 
-        score = np.sum(image_score_decoy_mask * image_known_hit_pose_mask) / np.sum(image_known_hit_pose_mask)
+        score = np.sum(image_score_decoy_mask * image_known_hit_pose_mask) / np.sum(image_score_decoy_mask)
 
         # Get maps
         xmap_data = self.xmap_table[_meta['idx']]
@@ -234,7 +234,6 @@ class BuildScoringDataset(Dataset):
 
         embedding_valid_poss = (embedding_valid_poss - np.mean(embedding_valid_poss, axis=0)) + np.array([22.5, 22.5, 22.5])
 
-
         embedding_orientation = _get_random_orientation()
         embedding_transform = _get_transform_from_orientation_centroid(
             embedding_orientation,
@@ -256,6 +255,10 @@ class BuildScoringDataset(Dataset):
             embedding_transform,
             np.copy(sample_array)
         )
+
+        score_his = np.zeros(10, dtype=np.float32)
+        score_his[int(10*score)] = 1.0
+
 
         # Return data
         return (
@@ -283,7 +286,8 @@ class BuildScoringDataset(Dataset):
                     dtype=np.float32
                 )),
             torch.from_numpy(np.array(_decoy['rmsd'], dtype=np.float32)),
-            torch.from_numpy(np.array(score, dtype=np.float32))
+            # torch.from_numpy(np.array(score, dtype=np.float32)),
+            torch.from_numpy(np.array(score_his, dtype=np.float32))
         )
 
         # Get the z map and pose
