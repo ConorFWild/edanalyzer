@@ -74,8 +74,8 @@ def _get_train_test_idxs_full_conf(root, config):
     train_idxs = []
     for _idx, _meta in train_samples.iterrows():
         decoys = meta_to_decoy[_meta["idx"]]
-        close_samples = decoys[decoys['rmsd'] < 2.0]
-        far_samples = decoys[decoys['rmsd'] >= 2.0]
+        close_samples = decoys[decoys['rmsd'] < 1.5]
+        far_samples = decoys[decoys['rmsd'] >= 1.5]
 
         num_samples = min([len(close_samples), len(far_samples)])
         for j in range(num_samples):
@@ -100,8 +100,8 @@ def _get_train_test_idxs_full_conf(root, config):
     test_idxs = []
     for _idx, _meta in test_samples.iterrows():
         decoys = meta_to_decoy[_meta["idx"]]
-        close_samples = decoys[decoys['rmsd'] < 2.0]
-        far_samples = decoys[decoys['rmsd'] >= 2.0]
+        close_samples = decoys[decoys['rmsd'] < 1.5]
+        far_samples = decoys[decoys['rmsd'] >= 1.5]
 
         num_samples = min([len(close_samples), len(far_samples)])
         for j in range(num_samples):
@@ -185,7 +185,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'build_scoring_nsys=87_opt=adamw_ls=2.5e-2_bs=128_lr=e-2_wd=e-1_sch=pl_cd=10_wn=0.5_r=5.5'
+    output = output_dir / 'build_scoring_nsys=87_opt=adamw_ls=2.5e-2_bs=128_lr=e-3_wd=e-2_sch=pl_cd=10_wn=0.5_r=5.5'
     shutil.rmtree(output)
     model = LitBuildScoring(output)
 
