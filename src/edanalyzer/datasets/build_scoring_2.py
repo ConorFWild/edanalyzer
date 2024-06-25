@@ -259,6 +259,22 @@ class BuildScoringDataset(Dataset):
         score_his = np.zeros(10, dtype=np.float32)
         score_his[int(10*score)] = 1.0
 
+        rmsd = _decoy['rmsd']
+        if _train:
+            if rmsd <= 1.5:
+                hit = [0.025, 0.975]
+            elif rmsd >= 1.5:
+                hit = [0.975, 0.025]
+            else:
+                raise Exception
+        else:
+            if rmsd <= 1.5:
+                hit = [0.0, 1.0]
+            elif rmsd >= 1.5:
+                hit = [1.0, 0.0]
+            else:
+                raise Exception
+
 
         # Return data
         return (
@@ -285,9 +301,9 @@ class BuildScoringDataset(Dataset):
                     axis=0,
                     dtype=np.float32
                 )),
-            torch.from_numpy(np.array(_decoy['rmsd'], dtype=np.float32)),
+            torch.from_numpy(np.array(rmsd, dtype=np.float32)),
             # torch.from_numpy(np.array(score, dtype=np.float32)),
-            torch.from_numpy(np.array(score_his, dtype=np.float32))
+            torch.from_numpy(np.array(hit, dtype=np.float32))
         )
 
         # Get the z map and pose

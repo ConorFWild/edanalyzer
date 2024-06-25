@@ -48,7 +48,7 @@ class LitBuildScoring(lt.LightningModule):
         self.bn = nn.BatchNorm1d(512)
         self.fc = nn.Sequential(
 
-            nn.Linear(512,10),
+            nn.Linear(512,2),
 
         )
         self.train_annotations = []
@@ -110,11 +110,11 @@ class LitBuildScoring(lt.LightningModule):
                     "meta_idx": int(meta_idx[j].to(torch.device("cpu")).detach().numpy()),
                     "decoy_idx": int(decoy_idx[j].to(torch.device("cpu")).detach().numpy()),
                     # "y": float(y[j].to(torch.device("cpu")).detach().numpy()),
-                    "y": 0.1 * float(np.argmax(y[j].cpu().detach())),
-
+                    # "y": 0.1 * float(np.argmax(y[j].cpu().detach())),
                     # "y_hat": float(score[j]).to(torch.device("cpu")).detach().numpy()),
-                    "y_hat": 0.1 * float(np.argmax(score[j].cpu().detach())),
-
+                    # "y_hat": 0.1 * float(np.argmax(score[j].cpu().detach())),
+                    "y": float(np.argmax(y[j][1].cpu().detach())),
+                    "y_hat": float(np.argmax(score[j][1].cpu().detach())),
                     'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
                     "system": str(system[j]),
                     "dtag": str(dtag[j]),
@@ -151,9 +151,11 @@ class LitBuildScoring(lt.LightningModule):
                     "meta_idx": int(meta_idx[j].to(torch.device("cpu")).detach().numpy()),
                     "decoy_idx": int(decoy_idx[j].to(torch.device("cpu")).detach().numpy()),
                     # "y": float(y[j].to(torch.device("cpu")).detach().numpy()),
-                    "y": 0.1 * float(np.argmax(y[j].cpu().detach())),
+                    # "y": 0.1 * float(np.argmax(y[j].cpu().detach())),
                     # "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
-                    "y_hat": 0.1 * float(np.argmax(score[j].cpu().detach())),
+                    # "y_hat": 0.1 * float(np.argmax(score[j].cpu().detach())),
+                    "y": float(np.argmax(y[j][1].cpu().detach())),
+                    "y_hat": float(np.argmax(score[j][1].cpu().detach())),
                     'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
                     "system": str(system[j]),
                     "dtag": str(dtag[j]),
