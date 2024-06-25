@@ -187,6 +187,10 @@ class BuildScoringDataset(Dataset):
 
         xmap = _get_grid_from_hdf5(xmap_data)
         zmap = _get_grid_from_hdf5(zmap_data)
+        # xmap_array = np.array(xmap, copy=False)
+        # xmap_array[:,:,:] = (xmap_array - np.mean(xmap_array)) / np.std(xmap_array)
+        # zmap_array = np.array(zmap, copy=False)
+        # xmap_array[:,:,:] = (zmap_array - np.mean(zmap_array)) / np.std(zmap_array)
 
         # xmap_sample = _sample_xmap_and_scale(
         #     xmap,
@@ -198,12 +202,12 @@ class BuildScoringDataset(Dataset):
         #     transform,
         #     np.copy(sample_array)
         # )
-        xmap_sample = _sample_xmap(
+        xmap_sample = _sample_xmap_and_scale(
             xmap,
             transform,
             np.copy(sample_array)
         )
-        z_map_sample = _sample_xmap(
+        z_map_sample = _sample_xmap_and_scale(
             zmap,
             transform,
             np.copy(sample_array)
