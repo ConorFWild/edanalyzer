@@ -145,6 +145,8 @@ class BuildScoringDataset(Dataset):
             transform,
             np.copy(sample_array)
         )
+        image_decoy_mask[image_decoy_mask > 0.0] = 1.0
+
 
         decoy_score_mask_grid = _get_ligand_mask_float(
             decoy_residue,
@@ -581,7 +583,7 @@ class BuildScoringDataset(Dataset):
              ],
             torch.from_numpy(image_density_float),
             torch.from_numpy(image_z_float),
-            torch.from_numpy(image_mol_float),
+            torch.from_numpy(image_decoy_mask),
             torch.from_numpy(image_decoded_density_float),
             torch.from_numpy(label_float)
         )
