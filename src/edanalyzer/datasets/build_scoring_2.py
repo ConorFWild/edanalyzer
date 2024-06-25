@@ -138,7 +138,7 @@ class BuildScoringDataset(Dataset):
 
         decoy_mask_grid = _get_ligand_mask_float(
             decoy_residue,
-            radius=3.5
+            radius=2.5
         )
         image_decoy_mask = _sample_xmap(
             decoy_mask_grid,
@@ -146,6 +146,7 @@ class BuildScoringDataset(Dataset):
             np.copy(sample_array)
         )
         image_decoy_mask[image_decoy_mask > 0.0] = 1.0
+        image_decoy_mask[image_decoy_mask <= 0.0] = 0.0
 
 
         decoy_score_mask_grid = _get_ligand_mask_float(
