@@ -256,8 +256,8 @@ class BuildScoringDataset(Dataset):
             np.copy(sample_array)
         )
 
-        score_his = np.zeros(10, dtype=np.float32)
-        score_his[int(10*score)] = 1.0
+        # score_his = np.zeros(10, dtype=np.float32)
+        # score_his[int(10*score)] = 1.0
 
         rmsd = _decoy['rmsd']
         if _train:
