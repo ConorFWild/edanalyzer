@@ -115,6 +115,7 @@ class BuildScoringDataset(Dataset):
         valid_elements = _decoy['elements'][valid_mask]
 
         centroid = np.mean(valid_poss, axis=0)
+        rprint(centroid)
         # rprint(_decoy)
         # rprint(f'Sampling ligand centroid at: {centroid} from array of shape {valid_poss.shape} from {valid_mask.sum()}')
 
@@ -179,7 +180,7 @@ class BuildScoringDataset(Dataset):
         )
         image_known_hit_pose_mask[image_known_hit_pose_mask >0.0] = 1.0
 
-        score = np.sum(image_score_decoy_mask * image_known_hit_pose_mask) / np.sum(image_score_decoy_mask)
+        # score = np.sum(image_score_decoy_mask * image_known_hit_pose_mask) / np.sum(image_score_decoy_mask)
 
         # Get maps
         xmap_data = self.xmap_table[_meta['idx']]
@@ -225,41 +226,41 @@ class BuildScoringDataset(Dataset):
 
         # Get decoy for mol embedding
         # embedding = self.decoy_table[_embedding['idx']]
-        embedding_valid_mask = _embedding['elements'] != 0
-        if _train:
-            do_drop = rng.random()
-            if do_drop > 0.5:
-                embedding_valid_indicies = np.nonzero(embedding_valid_mask)
-                embedding_random_drop_index = rng.integers(0, len(embedding_valid_indicies))
-                embedding_drop_index = embedding_valid_indicies[embedding_random_drop_index]
-                embedding_valid_mask[embedding_drop_index] = False
-        embedding_valid_poss = _embedding['positions'][embedding_valid_mask]
-        embedding_valid_elements = _embedding['elements'][embedding_valid_mask]
-
-        embedding_valid_poss = (embedding_valid_poss - np.mean(embedding_valid_poss, axis=0)) + np.array([22.5, 22.5, 22.5])
-
-        embedding_orientation = _get_random_orientation()
-        embedding_transform = _get_transform_from_orientation_centroid(
-            embedding_orientation,
-            np.array([22.5,22.5,22.5]),
-            n=32
-        )
-
-        embedding_residue = _get_res_from_arrays(
-            embedding_valid_poss,
-            embedding_valid_elements,
-        )
-
-        embedding_mask_grid = _get_ligand_mask_float(
-            embedding_residue,
-            radius=1.0
-        )
-        image_embedding_mask = _sample_xmap(
-            embedding_mask_grid,
-            embedding_transform,
-            np.copy(sample_array)
-        )
-
+        # embedding_valid_mask = _embedding['elements'] != 0
+        # if _train:
+        #     do_drop = rng.random()
+        #     if do_drop > 0.5:
+        #         embedding_valid_indicies = np.nonzero(embedding_valid_mask)
+        #         embedding_random_drop_index = rng.integers(0, len(embedding_valid_indicies))
+        #         embedding_drop_index = embedding_valid_indicies[embedding_random_drop_index]
+        #         embedding_valid_mask[embedding_drop_index] = False
+        # embedding_valid_poss = _embedding['positions'][embedding_valid_mask]
+        # embedding_valid_elements = _embedding['elements'][embedding_valid_mask]
+        #
+        # embedding_valid_poss = (embedding_valid_poss - np.mean(embedding_valid_poss, axis=0)) + np.array([22.5, 22.5, 22.5])
+        #
+        # embedding_orientation = _get_random_orientation()
+        # embedding_transform = _get_transform_from_orientation_centroid(
+        #     embedding_orientation,
+        #     np.array([22.5,22.5,22.5]),
+        #     n=32
+        # )
+        #
+        # embedding_residue = _get_res_from_arrays(
+        #     embedding_valid_poss,
+        #     embedding_valid_elements,
+        # )
+        #
+        # embedding_mask_grid = _get_ligand_mask_float(
+        #     embedding_residue,
+        #     radius=1.0
+        # )
+        # image_embedding_mask = _sample_xmap(
+        #     embedding_mask_grid,
+        #     embedding_transform,
+        #     np.copy(sample_array)
+        # )
+        image_embedding_mask = np.zeros([32,32,32], dtype=np.float32)
         # score_his = np.zeros(10, dtype=np.float32)
         # score_his[int(10*score)] = 1.0
 
