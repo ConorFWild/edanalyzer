@@ -37,7 +37,7 @@ class LitBuildScoring(lt.LightningModule):
         # self.automatic_optimization = False
         self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
         # self.z_encoder = SimpleConvolutionalEncoder(input_layers=2)
-        self.z_encoder = resnet10(num_classes=2, num_input=2, headless=True).float()
+        self.z_encoder = resnet10(num_classes=3, num_input=2, headless=True).float()
         self.x_encoder = SimpleConvolutionalEncoder(input_layers=1)
         # self.mol_encoder = SimpleConvolutionalEncoder(input_layers=1)
         self.mol_encoder = resnet10(num_classes=2, num_input=1, headless=True).float()
@@ -62,9 +62,9 @@ class LitBuildScoring(lt.LightningModule):
 
         # full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
 
-        # score = F.softmax(self.fc(full_encoding))
+        score = F.softmax(self.fc(z_encoding))
 
-        score = F.sigmoid(self.fc(z_encoding))
+        # score = F.sigmoid(self.fc(z_encoding))
 
         return score
 

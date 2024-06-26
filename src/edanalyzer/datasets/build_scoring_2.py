@@ -140,25 +140,27 @@ class BuildScoringDataset(Dataset):
             decoy_residue,
             radius=2.0
         )
-        image_decoy_mask = _sample_xmap(
+        image_decoy_sample = _sample_xmap(
             decoy_mask_grid,
             transform,
             np.copy(sample_array)
         )
-        image_decoy_mask[image_decoy_mask > 0.0] = 1.0
-        image_decoy_mask[image_decoy_mask <= 0.0] = 0.0
+
+        image_decoy_mask = np.copy(sample_array)
+        image_decoy_mask[image_decoy_sample > 0.0] = 1.0
+        image_decoy_mask[image_decoy_sample <= 0.0] = 0.0
 
 
         decoy_score_mask_grid = _get_ligand_mask_float(
             decoy_residue,
-            radius=1.5
+            radius=1.25
         )
         image_score_decoy_mask = _sample_xmap(
             decoy_score_mask_grid,
             transform,
             np.copy(sample_array)
         )
-        image_score_decoy_mask[image_score_decoy_mask > 0.0] = 1.0
+        # image_score_decoy_mask[image_score_decoy_mask > 0.0] = 1.0
 
         # valid_poss = (valid_poss - np.mean(valid_poss, axis=0)) + np.array([22.5, 22.5, 22.5])
 
@@ -299,6 +301,7 @@ class BuildScoringDataset(Dataset):
                     [
                         z_map_sample,# * image_decoy_mask,
                         xmap_sample * image_decoy_mask,
+                        image_score_decoy_mask
                     ],
                     axis=0,
                     dtype=np.float32
