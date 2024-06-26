@@ -216,14 +216,14 @@ class BuildScoringDataset(Dataset):
             np.copy(sample_array)
         )
 
-        if _train:
-            u_s = rng.uniform(0.0, 0.1)
-            noise = rng.normal(size=(32,32,32)) * u_s
-            z_map_sample += noise.astype(np.float32)
-
-            u_s = rng.uniform(0.0, 0.1)
-            noise = rng.normal(size=(32,32,32)) * u_s
-            xmap_sample += noise.astype(np.float32)
+        # if _train:
+        #     u_s = rng.uniform(0.0, 0.1)
+        #     noise = rng.normal(size=(32,32,32)) * u_s
+        #     z_map_sample += noise.astype(np.float32)
+        #
+        #     u_s = rng.uniform(0.0, 0.1)
+        #     noise = rng.normal(size=(32,32,32)) * u_s
+        #     xmap_sample += noise.astype(np.float32)
 
 
         # Get decoy for mol embedding
