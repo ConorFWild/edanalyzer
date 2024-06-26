@@ -101,7 +101,7 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
     score = np.sum(known_hit_score_sample * decoy_score_sample) / np.sum(decoy_score_sample)
 
 
-
+    return score
 
 
 
