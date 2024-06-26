@@ -26,6 +26,7 @@ annotation_dtype = [
     ('y', '<f4'),
     ('y_hat', '<f4'),
     ('rmsd', '<f4'),
+    ('score', '<f4'),
     ('system', '<U32'),
     ('dtag', '<U32'),
     ('event_num', 'i8')
@@ -86,7 +87,7 @@ class LitBuildScoring(lt.LightningModule):
         # return optimizer
 
     def training_step(self, train_batch, batch_idx):
-        (meta_idx, decoy_idx, embedding_idx, system, dtag, event_num), z, m, rmsd, y = train_batch
+        (meta_idx, decoy_idx, embedding_idx, system, dtag, event_num), z, m, rmsd, score, y = train_batch
         y = y.view(y.size(0), -1)
 
         # mol_encoding = self.mol_encoder(m)
@@ -116,6 +117,8 @@ class LitBuildScoring(lt.LightningModule):
                     "y": float(y[j][1].cpu().detach()),
                     "y_hat": float(score[j][1].cpu().detach()),
                     'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
+                    'score': float(score[j].to(torch.device("cpu")).detach().numpy()),
+
                     "system": str(system[j]),
                     "dtag": str(dtag[j]),
                     "event_num": int(event_num[j])
@@ -125,7 +128,7 @@ class LitBuildScoring(lt.LightningModule):
         return loss
 
     def validation_step(self, test_batch, batch_idx):
-        (meta_idx, decoy_idx, embedding_idx, system, dtag, event_num), z, m, rmsd, y = test_batch
+        (meta_idx, decoy_idx, embedding_idx, system, dtag, event_num), z, m, rmsd, score, y = test_batch
         y = y.view(y.size(0), -1)
 
         # mol_encoding = self.mol_encoder(m)
@@ -157,6 +160,7 @@ class LitBuildScoring(lt.LightningModule):
                     "y": float(y[j][1].cpu().detach()),
                     "y_hat": float(score[j][1].cpu().detach()),
                     'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
+                    'score': float(score[j].to(torch.device("cpu")).detach().numpy()),
                     "system": str(system[j]),
                     "dtag": str(dtag[j]),
                     "event_num": int(event_num[j])
@@ -204,6 +208,7 @@ class LitBuildScoring(lt.LightningModule):
                     float(_annotation['y']),
                     float(_annotation['y_hat']),
                     float(_annotation['rmsd']),
+                    float(_annotation['score']),
                     str(_annotation['system']),
                     str(_annotation['dtag']),
                     int(_annotation['event_num'])
@@ -258,6 +263,7 @@ class LitBuildScoring(lt.LightningModule):
                     float(_annotation['y']),
                     float(_annotation['y_hat']),
                     float(_annotation['rmsd']),
+                    float(_annotation['score']),
                     str(_annotation['system']),
                     str(_annotation['dtag']),
                     int(_annotation['event_num'])

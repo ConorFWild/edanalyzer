@@ -176,16 +176,24 @@ class BuildScoringDataset(Dataset):
 
         known_hit_pose_mask_grid = _get_ligand_mask_float(
             known_hit_pose_residue,
-            radius=2.0
+            radius=1.0
         )
         image_known_hit_pose_mask = _sample_xmap(
             known_hit_pose_mask_grid,
             transform,
             np.copy(sample_array)
         )
-        image_known_hit_pose_mask[image_known_hit_pose_mask >0.0] = 1.0
+        # image_known_hit_pose_mask[image_known_hit_pose_mask >0.0] = 1.0
 
         # score = np.sum(image_score_decoy_mask * image_known_hit_pose_mask) / np.sum(image_score_decoy_mask)
+        data = np.hstack(
+            [
+                image_score_decoy_mask[image_score_decoy_mask > 0].reshape(-1,1),
+                image_known_hit_pose_mask[image_score_decoy_mask > 0].reshape(-1, 1),
+
+            ]
+        )
+        score = np.corrcoef(data)
 
         # Get maps
         xmap_data = self.xmap_table[_meta['idx']]
@@ -313,7 +321,7 @@ class BuildScoringDataset(Dataset):
                     dtype=np.float32
                 )),
             torch.from_numpy(np.array(rmsd, dtype=np.float32)),
-            # torch.from_numpy(np.array(score, dtype=np.float32)),
+            torch.from_numpy(np.array(score, dtype=np.float32)),
             torch.from_numpy(np.array(hit, dtype=np.float32))
         )
 
