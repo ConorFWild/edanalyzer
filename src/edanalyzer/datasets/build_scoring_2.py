@@ -59,24 +59,46 @@ def get_mask_array():
     return mask_array
 
 
-# def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_residue):
-#     transform = _get_transform_from_orientation_centroid(
-#         orientation,
-#         centroid,
-#         n=128
-#     )
-#
-#     decoy_score_mask_grid = _get_ligand_mask_float(
-#         decoy_residue,
-#         radius=1.0,
-#         n=128
-#     )
-#
-#     decoy_score_mask_grid = _get_ligand_mask_float(
-#         decoy_residue,
-#         radius=1.0,
-#         n=128
-#     )
+def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_residue):
+    transform = _get_transform_from_orientation_centroid(
+        orientation,
+        centroid,
+        n=128
+    )
+
+    known_hit_score_mask_grid = _get_ligand_mask_float(
+        known_hit_pose_residue,
+        radius=1.0,
+        n=360,
+        r=45.0
+    )
+
+    decoy_score_mask_grid = _get_ligand_mask_float(
+        decoy_residue,
+        radius=1.0,
+        n=360,
+        r=45.0
+    )
+
+    known_hit_score_sample = _sample_xmap(
+        known_hit_score_mask_grid,
+        transform,
+        np.zeros([128, 128, 128])
+    )
+    known_hit_score_sample[known_hit_score_sample >= 0.0] = 1.0
+    known_hit_score_sample[known_hit_score_sample < 0.0] = 0.0
+
+    decoy_score_sample = _sample_xmap(
+        decoy_score_mask_grid,
+        transform,
+        np.zeros([128, 128, 128]),
+    )
+    decoy_score_sample[decoy_score_sample >= 0.0] = 1.0
+    decoy_score_sample[decoy_score_sample < 0.0] = 0.0
+
+
+
+    score = np.sum(known_hit_score_sample * decoy_score_sample) / np.sum(decoy_score_sample)
 
 
 
@@ -215,14 +237,15 @@ class BuildScoringDataset(Dataset):
         # image_known_hit_pose_mask[image_known_hit_pose_mask >0.0] = 1.0
 
         # score = np.sum(image_score_decoy_mask * image_known_hit_pose_mask) / np.sum(image_score_decoy_mask)
-        data = np.hstack(
-            [
-                image_score_decoy_mask[image_score_decoy_mask > 0].reshape(-1,1),
-                image_known_hit_pose_mask[image_score_decoy_mask > 0].reshape(-1, 1),
-
-            ]
-        )
-        score = np.corrcoef(data.T)[0, 1]
+        # data = np.hstack(
+        #     [
+        #         image_score_decoy_mask[image_score_decoy_mask > 0].reshape(-1,1),
+        #         image_known_hit_pose_mask[image_score_decoy_mask > 0].reshape(-1, 1),
+        #
+        #     ]
+        # )
+        # score = np.corrcoef(data.T)[0, 1]
+        score = _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_residue)
 
         # Get maps
         xmap_data = self.xmap_table[_meta['idx']]
