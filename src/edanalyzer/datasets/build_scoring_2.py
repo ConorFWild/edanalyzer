@@ -193,7 +193,7 @@ class BuildScoringDataset(Dataset):
 
             ]
         )
-        score = np.corrcoef(data)[0, 1]
+        score = np.corrcoef(data.T)[0, 1]
 
         # Get maps
         xmap_data = self.xmap_table[_meta['idx']]
