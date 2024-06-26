@@ -297,7 +297,7 @@ class BuildScoringDataset(Dataset):
             torch.from_numpy(
                 np.stack(
                     [
-                        z_map_sample * image_decoy_mask,
+                        z_map_sample,# * image_decoy_mask,
                         xmap_sample * image_decoy_mask,
                     ],
                     axis=0,
