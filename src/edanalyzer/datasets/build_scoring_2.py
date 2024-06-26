@@ -86,6 +86,7 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
         transform,
         np.zeros([64, 64, 64], dtype=np.float32)
     )
+    initial_known_hit_sum = np.sum(known_hit_score_sample)
     known_hit_score_sample[known_hit_score_sample >= 0.0] = 1.0
     known_hit_score_sample[known_hit_score_sample < 0.0] = 0.0
 
@@ -94,11 +95,15 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
         transform,
         np.zeros([64, 64, 64], dtype=np.float32),
     )
+    initial_decoy_sum = np.sum(known_hit_score_sample)
+
     decoy_score_sample[decoy_score_sample >= 0.0] = 1.0
     decoy_score_sample[decoy_score_sample < 0.0] = 0.0
 
     print(
         {
+            'initial_known_hit_sum': initial_known_hit_sum,
+            'initial_decoy_sum': initial_decoy_sum,
             'known hit sample sum': np.sum(known_hit_score_sample),
             'decoy sum': np.sum(decoy_score_sample),
             'n': np.power(64, 3)
