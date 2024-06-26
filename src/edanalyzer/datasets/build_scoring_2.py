@@ -91,7 +91,7 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
     decoy_score_sample = _sample_xmap(
         decoy_score_mask_grid,
         transform,
-        np.zeros([128, 128, 128], dtype=np.float32),
+        np.zeros([64, 64, 64], dtype=np.float32),
     )
     decoy_score_sample[decoy_score_sample >= 0.0] = 1.0
     decoy_score_sample[decoy_score_sample < 0.0] = 0.0
