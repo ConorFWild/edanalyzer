@@ -150,7 +150,7 @@ class BuildScoringDataset(Dataset):
 
         decoy_score_mask_grid = _get_ligand_mask_float(
             decoy_residue,
-            radius=2.0
+            radius=1.5
         )
         image_score_decoy_mask = _sample_xmap(
             decoy_score_mask_grid,
@@ -173,7 +173,7 @@ class BuildScoringDataset(Dataset):
 
         known_hit_pose_mask_grid = _get_ligand_mask_float(
             known_hit_pose_residue,
-            radius=1.5
+            radius=2.0
         )
         image_known_hit_pose_mask = _sample_xmap(
             known_hit_pose_mask_grid,
