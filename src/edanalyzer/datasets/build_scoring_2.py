@@ -173,7 +173,7 @@ class BuildScoringDataset(Dataset):
 
         known_hit_pose_mask_grid = _get_ligand_mask_float(
             known_hit_pose_residue,
-            radius=2.0
+            radius=1.5
         )
         image_known_hit_pose_mask = _sample_xmap(
             known_hit_pose_mask_grid,
