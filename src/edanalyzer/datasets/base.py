@@ -367,7 +367,7 @@ def _combine_transforms(new_transform, old_transform):
 
 
 def _get_transform_from_orientation_centroid(orientation, centroid, n):
-    sample_distance: float = 0.25
+    sample_distance: float = 0.5
     # n: int = 30
     # translation: float):
 

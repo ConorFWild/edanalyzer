@@ -90,6 +90,7 @@ class BuildScoringDataset(Dataset):
 
     def __getitem__(self, idx: int):
         # Get the sample data
+
         sample_data = self.sample_indexes[idx]
 
         # Get the metadata, decoy pose and embedding
