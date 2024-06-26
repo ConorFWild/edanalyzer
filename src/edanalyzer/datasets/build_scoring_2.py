@@ -87,7 +87,7 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
         np.zeros([64, 64, 64], dtype=np.float32)
     )
     initial_known_hit_sum = np.sum(known_hit_score_sample)
-    print(known_hit_score_sample)
+    # print(known_hit_score_sample)
     known_hit_score_sample[known_hit_score_sample >= 0.1] = 1.0
     known_hit_score_sample[known_hit_score_sample < 0.1] = 0.0
 
