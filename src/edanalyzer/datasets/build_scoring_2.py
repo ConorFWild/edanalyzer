@@ -63,7 +63,8 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
     transform = _get_transform_from_orientation_centroid(
         orientation,
         centroid,
-        n=64
+        n=64,
+        sd=0.25
     )
 
     known_hit_score_mask_grid = _get_ligand_mask_float(
@@ -243,7 +244,12 @@ class BuildScoringDataset(Dataset):
         #     ]
         # )
         # score = np.corrcoef(data.T)[0, 1]
-        score = _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_residue)
+        score = _get_overlap_volume(
+            orientation,
+            centroid,
+            known_hit_pose_residue,
+            decoy_residue,
+        )
 
         # Get maps
         xmap_data = self.xmap_table[_meta['idx']]
