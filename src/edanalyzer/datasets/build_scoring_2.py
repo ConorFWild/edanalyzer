@@ -169,6 +169,7 @@ class BuildScoringDataset(Dataset):
             if do_drop > 0.5:
                 valid_indicies = np.nonzero(valid_mask)
                 random_drop_index = rng.integers(0, high=len(valid_indicies), size=3)
+                print(random_drop_index)
                 drop_index = valid_indicies[random_drop_index]
                 valid_mask[drop_index] = False
         valid_poss = _decoy['positions'][valid_mask]
