@@ -99,7 +99,7 @@ class LitBuildScoring(lt.LightningModule):
         y = y.view(y.size(0), -1)
 
         # mol_encoding = self.mol_encoder(m)
-        z_encoding, rmsd_hat = self.z_encoder(z)
+        z_encoding = self.z_encoder(z)
 
         # full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
 
