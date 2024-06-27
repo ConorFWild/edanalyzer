@@ -75,7 +75,7 @@ def _get_train_test_idxs_full_conf(root, config):
     for _idx, _meta in train_samples.iterrows():
         decoys = meta_to_decoy[_meta["idx"]]
         close_samples = decoys[decoys['rmsd'] < 1.5]
-        far_samples = decoys[decoys['rmsd'] >= 2.5]
+        far_samples = decoys[decoys['rmsd'] >= 1.5]
 
         num_samples = min([len(close_samples), len(far_samples)])
         for j in range(num_samples):
@@ -101,7 +101,7 @@ def _get_train_test_idxs_full_conf(root, config):
     for _idx, _meta in test_samples.iterrows():
         decoys = meta_to_decoy[_meta["idx"]]
         close_samples = decoys[decoys['rmsd'] < 1.5]
-        far_samples = decoys[decoys['rmsd'] >= 2.5]
+        far_samples = decoys[decoys['rmsd'] >= 1.5]
 
         num_samples = min([len(close_samples), len(far_samples)])
         for j in range(num_samples):
