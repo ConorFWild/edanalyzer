@@ -28,6 +28,8 @@ annotation_dtype = [
     ('rmsd', '<f4'),
     ('rmsd_hat', '<f4'),
     ('corr', '<f4'),
+    ('corr_hat', '<f4'),
+
     ('system', '<U32'),
     ('dtag', '<U32'),
     ('event_num', 'i8')
@@ -58,6 +60,11 @@ class LitBuildScoring(lt.LightningModule):
             nn.Linear(512,1),
 
         )
+        self.fc_corr = nn.Sequential(
+
+            nn.Linear(512,1),
+
+        )
         self.train_annotations = []
         self.test_annotations = []
 
@@ -72,6 +79,9 @@ class LitBuildScoring(lt.LightningModule):
         score = F.softmax(self.fc(z_encoding))
 
         score = self.fc_rmsd(z_encoding)
+
+        score = self.fc_corr(z_encoding)
+
 
         # score = F.sigmoid(self.fc(z_encoding))
 
@@ -98,6 +108,7 @@ class LitBuildScoring(lt.LightningModule):
         (meta_idx, decoy_idx, embedding_idx, system, dtag, event_num), z, m, rmsd, corr, y = train_batch
         y = y.view(y.size(0), -1)
         rmsd_ = rmsd.view(rmsd.size(0), -1)
+        corr_ = corr.view(corr.size(0), -1)
 
         # mol_encoding = self.mol_encoder(m)
         z_encoding = self.z_encoder(z)
@@ -109,12 +120,16 @@ class LitBuildScoring(lt.LightningModule):
 
         loss_rmsd = F.mse_loss(rmsd_hat, rmsd_)
 
+        corr_hat = F.sigmoid(self.fc_corr(z_encoding))
+        loss_corr = F.mse_loss(corr_hat, corr_)
+
+
         score = F.softmax(self.fc(z_encoding))
         loss = categorical_loss(score, y)
 
         # total_loss = loss_1
 
-        loss = loss_rmsd
+        loss = loss_corr
 
         self.log('train_loss', loss )
 
@@ -133,6 +148,7 @@ class LitBuildScoring(lt.LightningModule):
                     'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
                     'rmsd_hat': float(rmsd_hat[j].to(torch.device("cpu")).detach().numpy()),
                     'corr': float(corr[j].to(torch.device("cpu")).detach().numpy()),
+                    'corr_hat': float(corr_hat[j].to(torch.device("cpu")).detach().numpy()),
                     "system": str(system[j]),
                     "dtag": str(dtag[j]),
                     "event_num": int(event_num[j])
@@ -145,6 +161,7 @@ class LitBuildScoring(lt.LightningModule):
         (meta_idx, decoy_idx, embedding_idx, system, dtag, event_num), z, m, rmsd, corr, y = test_batch
         y = y.view(y.size(0), -1)
         rmsd_ = rmsd.view(rmsd.size(0), -1)
+        corr_ = corr.view(corr.size(0), -1)
 
 
         # mol_encoding = self.mol_encoder(m)
@@ -157,6 +174,9 @@ class LitBuildScoring(lt.LightningModule):
 
         rmsd_hat = self.fc_rmsd(z_encoding)
         loss_rmsd = F.mse_loss(rmsd_hat, rmsd_)
+
+        corr_hat = F.sigmoid(self.fc_corr(z_encoding))
+        loss_corr = F.mse_loss(corr_hat, corr_)
 
         # score = F.sigmoid(self.fc(z_encoding))
         score = F.softmax(self.fc(z_encoding))
@@ -182,6 +202,7 @@ class LitBuildScoring(lt.LightningModule):
                     'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
                     'rmsd_hat': float(rmsd_hat[j].to(torch.device("cpu")).detach().numpy()),
                     'corr': float(corr[j].to(torch.device("cpu")).detach().numpy()),
+                    'corr_hat': float(corr_hat[j].to(torch.device("cpu")).detach().numpy()),
                     "system": str(system[j]),
                     "dtag": str(dtag[j]),
                     "event_num": int(event_num[j])
@@ -231,6 +252,7 @@ class LitBuildScoring(lt.LightningModule):
                     float(_annotation['rmsd']),
                     float(_annotation['rmsd_hat']),
                     float(_annotation['corr']),
+                    float(_annotation['corr_hat']),
                     str(_annotation['system']),
                     str(_annotation['dtag']),
                     int(_annotation['event_num'])
@@ -287,6 +309,7 @@ class LitBuildScoring(lt.LightningModule):
                     float(_annotation['rmsd']),
                     float(_annotation['rmsd_hat']),
                     float(_annotation['corr']),
+                    float(_annotation['corr_hat']),
                     str(_annotation['system']),
                     str(_annotation['dtag']),
                     int(_annotation['event_num'])
