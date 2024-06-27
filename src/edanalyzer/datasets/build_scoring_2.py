@@ -170,10 +170,11 @@ class BuildScoringDataset(Dataset):
                 valid_indicies = np.nonzero(valid_mask)
                 # print(valid_indicies)
                 # print(len(valid_indicies))
+                u_s = rng.uniform(0.0, 0.35)
                 random_drop_index = rng.integers(0, high=len(valid_indicies[0]), size=max(
                     [
                         3,
-                        int(0.3*len(valid_indicies[0]))
+                        int(u_s*len(valid_indicies[0]))
                     ]
                 ))
                 # print(random_drop_index)
