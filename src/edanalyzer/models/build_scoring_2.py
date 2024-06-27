@@ -97,6 +97,7 @@ class LitBuildScoring(lt.LightningModule):
     def training_step(self, train_batch, batch_idx):
         (meta_idx, decoy_idx, embedding_idx, system, dtag, event_num), z, m, rmsd, corr, y = train_batch
         y = y.view(y.size(0), -1)
+        rmsd_ = rmsd.view(rmsd.size(0), -1)
 
         # mol_encoding = self.mol_encoder(m)
         z_encoding = self.z_encoder(z)
@@ -105,7 +106,7 @@ class LitBuildScoring(lt.LightningModule):
 
         # score = F.sigmoid(self.fc(z_encoding))
         rmsd_hat =torch.exp(self.fc_rmsd(z_encoding))
-        loss_rmsd = F.mse_loss(rmsd_hat, rmsd)
+        loss_rmsd = F.mse_loss(rmsd_hat, rmsd_)
 
         score = F.softmax(self.fc(z_encoding))
         loss = categorical_loss(score, y)
@@ -142,6 +143,8 @@ class LitBuildScoring(lt.LightningModule):
     def validation_step(self, test_batch, batch_idx):
         (meta_idx, decoy_idx, embedding_idx, system, dtag, event_num), z, m, rmsd, corr, y = test_batch
         y = y.view(y.size(0), -1)
+        rmsd_ = rmsd.view(rmsd.size(0), -1)
+
 
         # mol_encoding = self.mol_encoder(m)
         z_encoding = self.z_encoder(z)
@@ -152,7 +155,7 @@ class LitBuildScoring(lt.LightningModule):
         # print(f'Mol Encoding: {mol_encoding[0,:10]}')
 
         rmsd_hat = torch.exp(self.fc_rmsd(z_encoding))
-        loss_rmsd = F.mse_loss(rmsd_hat, rmsd)
+        loss_rmsd = F.mse_loss(rmsd_hat, rmsd_)
 
         # score = F.sigmoid(self.fc(z_encoding))
         score = F.softmax(self.fc(z_encoding))
