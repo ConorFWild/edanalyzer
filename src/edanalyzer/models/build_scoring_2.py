@@ -183,7 +183,7 @@ class LitBuildScoring(lt.LightningModule):
         loss = categorical_loss(score, y)
 
 
-        loss = loss_rmsd
+        loss = loss_corr
         # loss = F.mse_loss(score, y)
 
         self.log('test_loss', loss)
