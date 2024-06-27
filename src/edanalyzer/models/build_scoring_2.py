@@ -71,7 +71,7 @@ class LitBuildScoring(lt.LightningModule):
 
         score = F.softmax(self.fc(z_encoding))
 
-        score = F.exp(self.fc_rmsd(z_encoding))
+        score = torch.exp(self.fc_rmsd(z_encoding))
 
         # score = F.sigmoid(self.fc(z_encoding))
 
@@ -104,7 +104,7 @@ class LitBuildScoring(lt.LightningModule):
         # full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
 
         # score = F.sigmoid(self.fc(z_encoding))
-        rmsd_hat = F.exp(self.fc_rmsd(z_encoding))
+        rmsd_hat =torch.exp(self.fc_rmsd(z_encoding))
         loss_rmsd = F.mse_loss(rmsd_hat, rmsd)
 
         score = F.softmax(self.fc(z_encoding))
@@ -151,7 +151,7 @@ class LitBuildScoring(lt.LightningModule):
         # print(f'Z Encoding: {z_encoding[0,:10]}')
         # print(f'Mol Encoding: {mol_encoding[0,:10]}')
 
-        rmsd_hat = F.exp(self.fc_rmsd(z_encoding))
+        rmsd_hat = torch.exp(self.fc_rmsd(z_encoding))
         loss_rmsd = F.mse_loss(rmsd_hat, rmsd)
 
         # score = F.sigmoid(self.fc(z_encoding))
