@@ -80,7 +80,7 @@ class LitBuildScoring(lt.LightningModule):
 
         score = self.fc_rmsd(z_encoding)
 
-        score = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=1.0)
+        score = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
 
 
         # score = F.sigmoid(self.fc(z_encoding))
@@ -120,7 +120,7 @@ class LitBuildScoring(lt.LightningModule):
 
         loss_rmsd = F.mse_loss(rmsd_hat, rmsd_)
 
-        corr_hat = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=1.0)
+        corr_hat = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
         loss_corr = F.mse_loss(corr_hat, corr_)
 
 
@@ -175,7 +175,7 @@ class LitBuildScoring(lt.LightningModule):
         rmsd_hat = self.fc_rmsd(z_encoding)
         loss_rmsd = F.mse_loss(rmsd_hat, rmsd_)
 
-        corr_hat = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=1.0)
+        corr_hat = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
         loss_corr = F.mse_loss(corr_hat, corr_)
 
         # score = F.sigmoid(self.fc(z_encoding))
