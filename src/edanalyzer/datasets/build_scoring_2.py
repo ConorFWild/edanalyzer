@@ -299,11 +299,11 @@ class BuildScoringDataset(Dataset):
         )
 
         if _train:
-            u_s = rng.uniform(0.0, 0.3)
+            u_s = rng.uniform(0.0, 0.25)
             noise = rng.normal(size=(32,32,32)) * u_s
             z_map_sample += noise.astype(np.float32)
 
-            u_s = rng.uniform(0.0, 0.3)
+            u_s = rng.uniform(0.0, 0.25)
             noise = rng.normal(size=(32,32,32)) * u_s
             xmap_sample += noise.astype(np.float32)
 
