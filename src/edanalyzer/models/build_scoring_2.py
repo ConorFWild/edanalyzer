@@ -26,6 +26,7 @@ annotation_dtype = [
     ('y', '<f4'),
     ('y_hat', '<f4'),
     ('rmsd', '<f4'),
+    ('rmsd_hat', '<f4'),
     ('corr', '<f4'),
     ('system', '<U32'),
     ('dtag', '<U32'),
@@ -52,6 +53,11 @@ class LitBuildScoring(lt.LightningModule):
             nn.Linear(512,2),
 
         )
+        self.fc_rmsd = nn.Sequential(
+
+            nn.Linear(512,1),
+
+        )
         self.train_annotations = []
         self.test_annotations = []
 
@@ -64,6 +70,8 @@ class LitBuildScoring(lt.LightningModule):
         # full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
 
         score = F.softmax(self.fc(z_encoding))
+
+        score = F.exp(self.fc_rmsd(z_encoding))
 
         # score = F.sigmoid(self.fc(z_encoding))
 
@@ -91,18 +99,22 @@ class LitBuildScoring(lt.LightningModule):
         y = y.view(y.size(0), -1)
 
         # mol_encoding = self.mol_encoder(m)
-        z_encoding = self.z_encoder(z)
+        z_encoding, rmsd_hat = self.z_encoder(z)
 
         # full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
 
         # score = F.sigmoid(self.fc(z_encoding))
-        # loss_1 = F.mse_loss(score, y)
+        rmsd_hat = F.exp(self.fc_rmsd(z_encoding))
+        loss_rmsd = F.mse_loss(rmsd_hat, rmsd)
+
         score = F.softmax(self.fc(z_encoding))
         loss = categorical_loss(score, y)
 
         # total_loss = loss_1
 
-        self.log('train_loss', loss)
+        loss = loss_rmsd
+
+        self.log('train_loss', loss )
 
 
         for j in range(len(meta_idx)):
@@ -117,8 +129,8 @@ class LitBuildScoring(lt.LightningModule):
                     "y": float(y[j][1].cpu().detach()),
                     "y_hat": float(score[j][1].cpu().detach()),
                     'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
+                    'rmsd_hat': float(rmsd_hat[j].to(torch.device("cpu")).detach().numpy()),
                     'corr': float(corr[j].to(torch.device("cpu")).detach().numpy()),
-
                     "system": str(system[j]),
                     "dtag": str(dtag[j]),
                     "event_num": int(event_num[j])
@@ -139,11 +151,15 @@ class LitBuildScoring(lt.LightningModule):
         # print(f'Z Encoding: {z_encoding[0,:10]}')
         # print(f'Mol Encoding: {mol_encoding[0,:10]}')
 
+        rmsd_hat = F.exp(self.fc_rmsd(z_encoding))
+        loss_rmsd = F.mse_loss(rmsd_hat, rmsd)
+
         # score = F.sigmoid(self.fc(z_encoding))
         score = F.softmax(self.fc(z_encoding))
         loss = categorical_loss(score, y)
 
 
+        loss = loss_rmsd
         # loss = F.mse_loss(score, y)
 
         self.log('test_loss', loss)
@@ -160,6 +176,7 @@ class LitBuildScoring(lt.LightningModule):
                     "y": float(y[j][1].cpu().detach()),
                     "y_hat": float(score[j][1].cpu().detach()),
                     'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
+                    'rmsd_hat': float(rmsd_hat[j].to(torch.device("cpu")).detach().numpy()),
                     'corr': float(corr[j].to(torch.device("cpu")).detach().numpy()),
                     "system": str(system[j]),
                     "dtag": str(dtag[j]),
@@ -208,6 +225,7 @@ class LitBuildScoring(lt.LightningModule):
                     float(_annotation['y']),
                     float(_annotation['y_hat']),
                     float(_annotation['rmsd']),
+                    float(_annotation['rmsd_hat']),
                     float(_annotation['corr']),
                     str(_annotation['system']),
                     str(_annotation['dtag']),
@@ -263,6 +281,7 @@ class LitBuildScoring(lt.LightningModule):
                     float(_annotation['y']),
                     float(_annotation['y_hat']),
                     float(_annotation['rmsd']),
+                    float(_annotation['rmsd_hat']),
                     float(_annotation['corr']),
                     str(_annotation['system']),
                     str(_annotation['dtag']),
