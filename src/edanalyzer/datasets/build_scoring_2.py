@@ -175,6 +175,7 @@ class BuildScoringDataset(Dataset):
                 print(type(random_drop_index))
                 print(random_drop_index.dtype)
                 drop_index = valid_indicies[0][random_drop_index]
+                print(drop_index)
                 valid_mask[drop_index] = False
         valid_poss = _decoy['positions'][valid_mask]
         valid_elements = _decoy['elements'][valid_mask]
