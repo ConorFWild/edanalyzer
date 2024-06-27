@@ -173,7 +173,7 @@ class BuildScoringDataset(Dataset):
                 random_drop_index = rng.integers(0, high=len(valid_indicies[0]), size=max(
                     [
                         3,
-                        int(0.25*len(valid_indicies[0]))
+                        int(0.3*len(valid_indicies[0]))
                     ]
                 ))
                 # print(random_drop_index)
