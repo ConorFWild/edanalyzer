@@ -687,9 +687,9 @@ def main(config_path):
                     rprint(f'Ligand doesn\'t match! Skipping! {element} vs {known_hit_pose_elements}')
                     continue
                 build_res = _get_res_from_arrays(
-                    known_hit_pose_poss,
-                    known_hit_pose_elements,
-                    known_hit_pose_atoms
+                    pose,
+                    element,
+                    atom
                 )
 
                 sup = gemmi.superpose_positions(
