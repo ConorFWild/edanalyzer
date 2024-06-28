@@ -428,11 +428,11 @@ def _get_augmented_decoy(
         small
 ):
     # Mask
-    rprint(atoms)
-    rprint(pose_poss)
-    rprint(pose_elements)
+    # rprint(atoms)
+    # rprint(pose_poss)
+    # rprint(pose_elements)
     masked_poss, masked_elements, mask = _random_mask(pose_poss, pose_elements)
-    rprint(mask)
+    # rprint(mask)
     masked_atoms = atoms[mask]#pose_sample["atoms"][mask]
 
     known_hit_poss_masked = known_hit_poss[mask]
@@ -709,9 +709,9 @@ def main(config_path):
             for translation, small, num, from_hit in [[0.1, 2, 250, True], [0.25, 1, 100, True,], [0.5, 3, 100, False], [1.0, 1, 100, False], [3.0, 3, 100, False], [5.0, 3, 100, False]]:
 
                 if from_hit:
-                    rprint([x for x in known_hit_pose_residue])
+                    # rprint([x for x in known_hit_pose_residue])
                     decoy_poss, decoy_atoms, decoy_elements = _res_to_array(known_hit_pose_residue)
-                    rprint([decoy_poss, decoy_atoms, decoy_elements])
+                    # rprint([decoy_poss, decoy_atoms, decoy_elements])
                 else:
                     decoy_num = rng.integers(0, high=len(superposed_builds),)
                     x = _res_to_array(superposed_builds[decoy_num])
