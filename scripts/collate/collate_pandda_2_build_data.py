@@ -617,9 +617,9 @@ def main(config_path):
                     tmp_pose_idx,
                     meta_idx,
                 )
-                rprint(decoy_sample['overlap_score'])
+                # rprint(decoy_sample['overlap_score'])
 
-                bin_id = int(decoy_sample['overlap_score'] * 10)
+                bin_id = int(decoy_sample['overlap_score'][0] * 10)
                 if bin_id == 10:
                     bin_id = 9
                 bins[bin_id].append(len(decoy_pose_samples))
@@ -662,7 +662,7 @@ def main(config_path):
                         tmp_pose_idx,
                         meta_idx,
                     )
-                    bin_id = int(decoy_sample['overlap_score'] * 10)
+                    bin_id = int(decoy_sample['overlap_score'][0] * 10)
                     if bin_id == 10:
                         bin_id = 9
                     bins[bin_id].append(len(decoy_pose_samples))
