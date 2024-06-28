@@ -118,14 +118,16 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
     decoy_predicted_density_sel = decoy_predicted_density_arr[sel]
     known_hit_predicted_density_sel = known_hit_predicted_density_arr[sel]
 
-    data = np.hstack(
-        [
-            decoy_predicted_density_sel.reshape(-1,1),
-            known_hit_predicted_density_sel.reshape(-1, 1),
+    # data = np.hstack(
+    #     [
+    #         decoy_predicted_density_sel.reshape(-1,1),
+    #         known_hit_predicted_density_sel.reshape(-1, 1),
+    #
+    #     ]
+    # )
+    # score = np.corrcoef(data.T)[0, 1]
 
-        ]
-    )
-    score = np.corrcoef(data.T)[0, 1]
+    score = 1- ( np.min(decoy_predicted_density_sel - known_hit_predicted_density_sel, 0.0) / np.sum(decoy_predicted_density_sel))
 
     return score
 
