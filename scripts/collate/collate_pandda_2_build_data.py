@@ -42,6 +42,24 @@ from edanalyzer.data.event_data import (
     _get_xmap_sample_from_dataset_dir
 )
 
+rng = np.random.default_rng()
+
+rprint(f'Generating small rotations')
+time_begin_gen = time.time()
+small_rotations = []
+identity = np.eye(3)
+for j in range(20):
+    rotations = R.random(100000)
+    rotmat = rotations.as_matrix()
+    mask = (rotmat > (0.9 * np.eye(3)))
+    diag = mask[:, np.array([0, 1, 2]), np.array([0, 1, 2])]
+    rot_mask = diag.sum(axis=1)
+    valid_rots = rotmat[rot_mask == 3, :, :]
+    rots = [x for x in valid_rots]
+    small_rotations += rots
+time_finish_gen = time.time()
+rprint(f"Generated small rotations in: {round(time_finish_gen - time_begin_gen, 2)}")
+
 meta_sample_dtype = [
     ('idx', '<i4'),
     # ('event_idx', '<i4'),
@@ -147,7 +165,7 @@ def _get_pose_sample_from_res(
     )
     return known_hit_pos_sample
 
-def overlap_score(decoy, pose):
+def _dep_overlap_score(decoy, pose):
     grid = gemmi.FloatGrid(90, 90, 90)
     grid.spacegroup = gemmi.SpaceGroup('P1')
     uc = gemmi.UnitCell(45.0, 45.0, 45.0, 90.0, 90.0, 90.0)
@@ -174,6 +192,39 @@ def overlap_score(decoy, pose):
     overlap = (num_total.size-num_missed.size) / num_total.size
     return overlap
 
+
+def overlap_score(known_hit_predicted_density, decoy_predicted_density, known_hit_pose_residue, decoy_residue):
+
+
+    known_hit_score_mask_grid = _get_ligand_mask_float(
+        known_hit_pose_residue,
+        radius=2.5,
+        n=90,
+        r=45.0
+    )
+
+    decoy_score_mask_grid = _get_ligand_mask_float(
+        decoy_residue,
+        radius=2.5,
+        n=90,
+        r=45.0
+    )
+
+    decoy_score_mask_arr = np.array(decoy_score_mask_grid, copy=False)
+    decoy_predicted_density_arr = np.array(decoy_predicted_density, copy=False)
+    # known_hit_score_mask_arr = np.array(known_hit_score_mask_grid, copy=False)
+    known_hit_predicted_density_arr = np.array(known_hit_predicted_density, copy=False)
+
+
+    sel = decoy_score_mask_arr > 0.0
+
+    decoy_predicted_density_sel = decoy_predicted_density_arr[sel]
+    known_hit_predicted_density_sel = known_hit_predicted_density_arr[sel]
+
+
+    score = 1- ( np.sum(np.clip(decoy_predicted_density_sel - known_hit_predicted_density_sel, 0.0, None)) / np.sum(decoy_predicted_density_sel))
+
+    return score
 
 def setup_store(zarr_path):
     root = zarr.open(zarr_path, mode='w')
@@ -241,6 +292,135 @@ def setup_store(zarr_path):
 
     return root
 
+def _get_predicted_density_from_res(residue, event_map):
+    optimized_structure = gemmi.Structure()
+    model = gemmi.Model('0')
+    chain = gemmi.Chain('A')
+
+    chain.add_residue(residue)
+    model.add_chain(chain)
+    optimized_structure.add_model(model)
+
+    # Get the electron density of the optimized structure
+    optimized_structure.cell = event_map.unit_cell
+    optimized_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
+    dencalc = gemmi.DensityCalculatorE()
+    dencalc.d_min = 0.75  #*2
+    # dencalc.rate = 1.5
+    dencalc.set_grid_cell_and_spacegroup(optimized_structure)
+    # dencalc.initialize_grid_to_size(event_map.nu, event_map.nv, event_map.nw)
+    dencalc.put_model_density_on_grid(optimized_structure[0])
+    calc_grid = dencalc.grid
+
+    return calc_grid
+
+
+def _random_mask(_decoy_poss, _decoy_elements):
+    valid_mask = _decoy_elements != 0
+    # rprint(f'Initial valid mask sum: {valid_mask.sum()}')
+    # if _train:
+    do_drop = rng.random()
+    if do_drop > 0.5:
+        valid_indicies = np.nonzero(valid_mask)
+
+        u_s = rng.uniform(0.0, 0.35)
+        random_drop_index = rng.integers(0, high=len(valid_indicies[0]), size=max(
+            [
+                3,
+                int(u_s * len(valid_indicies[0]))
+            ]
+        ))
+
+        drop_index = valid_indicies[0][random_drop_index]
+        valid_mask[drop_index] = False
+    valid_poss = _decoy_poss[valid_mask]
+    valid_elements = _decoy_elements[valid_mask]
+
+    return valid_poss, valid_elements, valid_mask
+
+def _permute_position(_poss_pose, _poss_decoy, translation=2.0):
+    # Get rotation and translation
+    rot = R.from_matrix(small_rotations[rng.integers(0, len(small_rotations))])
+    _translation = rng.uniform(-translation , translation , size=3).reshape((1, 3))
+
+    # Cetner
+    com = np.mean(_poss_decoy, axis=0).reshape((1, 3))
+    _poss_centered = _poss_decoy - com
+
+    # Randomly perturb and reorient
+    _rotated_poss = rot.apply(_poss_centered)
+    new_com = _translation + com
+    _new_poss = _rotated_poss + new_com
+
+    # Get RMSD to original
+    deltas = _poss_pose - _new_poss
+    rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(deltas, axis=1))) / _new_poss.shape[0])
+
+    return _new_poss, rmsd,  deltas, np.linalg.norm(deltas, axis=1)
+
+def _get_augmented_decoy(
+        known_hit_poss,
+        pose_sample,
+        pose_poss,
+        pose_elements,
+        pose_predicted_density,
+        known_hit_pose_residue,
+        template_grid,
+        tmp_pose_idx,
+                meta_idx):
+    # Mask
+    masked_poss, masked_elements, mask = _random_mask(pose_poss, pose_elements)
+    masked_atoms = pose_sample["atoms"][mask]
+    known_hit_poss_masked = known_hit_poss[mask]
+    # Permute
+    _new_poss, rmsd, _delta_vecs, _delta = _permute_position(known_hit_poss_masked, masked_poss)
+
+    # Get Overlap
+    decoy_res = _get_res_from_arrays(_new_poss, masked_elements)
+    decoy_predicted_density = _get_predicted_density_from_res(
+        decoy_res,
+        template_grid
+    )
+    ol_score = overlap_score(
+        pose_predicted_density,
+        decoy_predicted_density,
+        known_hit_pose_residue,
+        decoy_res
+    )
+
+    atom_array = np.zeros(150, dtype='<U5')
+    elements_array = np.zeros(150, dtype=np.int32)
+    pose_array = np.zeros((150, 3))
+    num_atoms = masked_elements.size
+    pose_array[:num_atoms, :] = _new_poss[:num_atoms, :]
+    atom_array[:num_atoms] = masked_atoms[:num_atoms]
+    elements_array[:num_atoms] = masked_elements[:num_atoms]
+
+    known_hit_pos_sample = np.array(
+        [
+            (
+                tmp_pose_idx,
+                meta_idx,
+                pose_array,
+                atom_array,
+                elements_array,
+                rmsd,
+                ol_score
+            )
+        ],
+        dtype=decoy_pose_sample_dtype
+    )
+
+    delta_sample = np.array([(
+        tmp_pose_idx,
+        # idx_pose,
+        meta_idx,
+        _delta,
+        _delta_vecs,
+    )], dtype=delta_dtype
+    )
+
+    return known_hit_pos_sample, delta_sample
 
 def main(config_path):
     rprint(f'Running collate_database from config file: {config_path}')
@@ -263,7 +443,7 @@ def main(config_path):
     #
     # Open a file in "w"rite mode
     # zarr_path = 'output/event_data_with_mtzs_2.zarr'
-    zarr_path = '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/build_data.zarr'
+    zarr_path = '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/build_data_augmented.zarr'
 
     root = setup_store(zarr_path)
     table_meta_sample = root['meta_sample']
@@ -352,8 +532,8 @@ def main(config_path):
                 x, y, z,
                 meta_idx
             )
-            pose_elements = pose_sample["elements"][pose_sample["elements"] != 0]
-            pose_poss = pose_sample['positions'][pose_sample['elements'] != 0]
+            known_hit_pose_elements = pose_sample["elements"][pose_sample["elements"] != 0]
+            known_hit_pose_poss = pose_sample['positions'][pose_sample['elements'] != 0]
 
             # Get the ligand data
             ligand_data_sample = _get_ligand_data_sample_from_dataset_dir(
@@ -376,15 +556,65 @@ def main(config_path):
             tmp_pose_idx = pose_idx
             auotbuild_paths = _get_event_autobuilds_paths(dataset_dir, event_idx)
             rprint(f'Got {len(auotbuild_paths)} autobuild paths!')
+
+            known_hit_pose_residue = _get_res_from_arrays(
+                known_hit_pose_poss,
+                known_hit_pose_elements,
+            )
+            template_grid = gemmi.FloatGrid(90,90,90)
+            template_grid.spacegroup = gemmi.find_spacegroup_by_name("P1")
+            template_grid.set_unit_cell(gemmi.UnitCell(45.0, 45.0, 45.0, 90.0, 90.0, 90.0))
+            pose_predicted_density = _get_predicted_density_from_res(
+                known_hit_pose_residue,
+                template_grid
+            )
+
+            bins = {
+                0:[],
+                1:[],
+                2:[],
+                3:[],
+                4:[],
+                5:[],
+                6:[],
+                7:[],
+                8:[],
+                9:[]
+            }
+
+            # Generate decoys around known hit
+            for j in range(50):
+                decoy_sample, decoy_delta_sample = _get_augmented_decoy(
+                    known_hit_pose_poss,
+                    pose_sample,
+                    known_hit_pose_poss,
+                    known_hit_pose_elements,
+                    pose_predicted_density,
+                    known_hit_pose_residue,
+                    template_grid,
+                    tmp_pose_idx,
+                    meta_idx,
+                )
+                bin_id = int(decoy_sample['overlap_score'] * 10)
+                if bin_id == 10:
+                    bin_id = 9
+                bins[bin_id].append(len(decoy_pose_samples))
+                decoy_pose_samples.append(decoy_sample)
+                delta_samples.append(decoy_delta_sample)
+                tmp_pose_idx += 1
+
+            # Generate decoys around autobuilds
             for build_path in auotbuild_paths:
                 pose, atom, element, rmsd = _get_build_data(
                     build_path,
-                    pose_poss,
+                    known_hit_pose_poss,
                     x, y, z
                 )
 
-                if not np.array_equal(element, pose_elements):
-                    rprint(f'Ligand doesn\'t match! Skipping! {element} vs {pose_elements}')
+                if not np.array_equal(element, known_hit_pose_elements):
+                    rprint(f'Ligand doesn\'t match! Skipping! {element} vs {known_hit_pose_elements}')
+                    continue
+                if rmsd > 15:
                     continue
 
                 atom_array = np.zeros(150, dtype='<U5')
@@ -395,45 +625,30 @@ def main(config_path):
                 atom_array[:num_atoms] = atom[:num_atoms]
                 elements_array[:num_atoms] = element[:num_atoms]
                 # rprint(f'{rmsd}')
-                if rmsd > 15:
-                    continue
-                score = overlap_score(
-                    pose,
-                    pose_poss,
-                )
-                # rprint(f'Score: {score} vs rmsd: {rmsd}')
-                known_hit_pos_sample = np.array(
-                    [
-                        (
-                            tmp_pose_idx,
-                            meta_idx,
-                            pose_array,
-                            atom_array,
-                            elements_array,
-                            rmsd,
-                            score
-                        )
-                    ],
-                    dtype=decoy_pose_sample_dtype
-                )
-                decoy_pose_samples.append(known_hit_pos_sample)
+                for j in range(50):
+                    decoy_sample, decoy_delta_sample = _get_augmented_decoy(
+                        known_hit_pose_poss,
+                        pose_sample,
+                        pose,
+                        element,
+                        pose_predicted_density,
+                        known_hit_pose_residue,
+                        template_grid,
+                        tmp_pose_idx,
+                        meta_idx,
+                    )
+                    bin_id = int(decoy_sample['overlap_score'] * 10)
+                    if bin_id == 10:
+                        bin_id = 9
+                    bins[bin_id].append(len(decoy_pose_samples))
+                    decoy_pose_samples.append(decoy_sample)
+                    delta_samples.append(decoy_delta_sample)
+                    tmp_pose_idx += 1
 
-                # rprint(f"{pose_sample['positions'].shape} vs {known_hit_pos_sample['positions'].shape}")
-                _delta_vecs = pose_sample['positions'][0] - known_hit_pos_sample['positions'][0]
-                _delta = np.linalg.norm(_delta_vecs, axis=1)
-                # rprint(_delta.shape)
-                # rprint(_delta_vecs.shape)
-                delta_sample = np.array([(
-                    tmp_pose_idx,
-                    # idx_pose,
-                    meta_idx,
-                    _delta,
-                    _delta_vecs,
-                )], dtype=delta_dtype
-                )
-                delta_samples.append(delta_sample)
-                tmp_pose_idx += 1
             rprint(f'Got {len(delta_samples)} decoy poses, of which {len([dps for dps in decoy_pose_samples if dps["rmsd"] < 2.0])} close!')
+
+            rprint(f"Bin sizes:")
+            rprint({bin_id / 10: len(bins[bin_id]) for bin_id in bins})
 
             # Make the metadata sample
             meta_sample = np.array(
@@ -459,6 +674,10 @@ def main(config_path):
             # annotation_table.append()
             ligand_data_table.append(ligand_data_sample)
 
+            # Filter decoys to an even distribution over bins of overlap score
+
+
+            # Add filtered decoys
             for decoy_pose_sample, delta_sample in zip(decoy_pose_samples, delta_samples):
                 table_decoy_pose_sample.append(
                     decoy_pose_sample
