@@ -611,7 +611,7 @@ def main(config_path):
             }
 
             # Generate decoys around known hit
-            for translation, small in [[0.25, True], [1.0, True], [3.0, False], [5.0, False]]:
+            for translation, small in [[0.1, True], [0.25, True], [0.5, False], [1.0, True], [3.0, False], [5.0, False]]:
                 for j in range(250):
                     decoy_sample, decoy_delta_sample = _get_augmented_decoy(
                         known_hit_pose_poss,
