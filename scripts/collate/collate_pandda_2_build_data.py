@@ -18,9 +18,24 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 from rdkit.Chem.Lipinski import RotatableBondSmarts
 from rdkit.Chem import AllChem
+from scipy.spatial.transform import Rotation as R
 
 from edanalyzer import constants
-from edanalyzer.datasets.base import _load_xmap_from_mtz_path, _load_xmap_from_path, _sample_xmap_and_scale
+from edanalyzer.datasets.base import (
+    _load_xmap_from_mtz_path,
+    _load_xmap_from_path,
+    _sample_xmap_and_scale,
+    _get_ligand_mask_float,
+    _sample_xmap,
+    _get_identity_matrix,
+    _get_random_orientation,
+    _get_centroid_from_res,
+    _get_transform_from_orientation_centroid,
+    _get_res_from_structure_chain_res,
+    _get_structure_from_path,
+    _get_res_from_arrays,
+    _get_grid_from_hdf5,
+    _get_ed_mask_float)
 from edanalyzer.data.database import _parse_inspect_table_row, Event, _get_system_from_dtag, _get_known_hit_structures, \
     _get_known_hits, _get_known_hit_centroids, _res_to_array
 from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionORM, PanDDAORM, AnnotationORM, SystemORM, \
