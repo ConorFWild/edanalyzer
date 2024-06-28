@@ -612,8 +612,8 @@ def main(config_path):
                 known_hit_pose_poss,
                 known_hit_pose_elements,
             )
-            rprint([x for x in known_hit_pose_residue])
-            rprint(known_hit_pose_poss)
+            # rprint([x for x in known_hit_pose_residue])
+            # rprint(known_hit_pose_poss)
             template_grid = gemmi.FloatGrid(180,180,180)
             template_grid.spacegroup = gemmi.find_spacegroup_by_name("P1")
             template_grid.set_unit_cell(gemmi.UnitCell(45.0, 45.0, 45.0, 90.0, 90.0, 90.0))
@@ -666,13 +666,16 @@ def main(config_path):
 
                 # Generate decoys around known hit
             for translation, small, num, from_hit in [[0.1, 2, 250, True], [0.25, 1, 100, True,], [0.5, 3, 100, False], [1.0, 1, 100, False], [3.0, 3, 100, False], [5.0, 3, 100, False]]:
+
                 if from_hit:
+                    rprint(_res_to_array(known_hit_pose_residue))
                     decoy_poss, decoy_atoms, decoy_elements = _res_to_array(known_hit_pose_residue)
                     rprint([decoy_poss, decoy_atoms, decoy_elements])
                 else:
                     decoy_num = rng.integers(0, high=len(superposed_builds),)
                     x = _res_to_array(superposed_builds[decoy_num])
                     decoy_poss, decoy_atoms, decoy_elements = x[0][0], x[0][1], x[0][2]
+
                 for j in range(num):
                     decoy_sample, decoy_delta_sample = _get_augmented_decoy(
                         known_hit_pose_poss,
