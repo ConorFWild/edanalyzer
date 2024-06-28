@@ -111,6 +111,8 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
     known_hit_score_mask_arr = np.array(known_hit_score_mask_grid, copy=False)
     known_hit_predicted_density_arr = np.array(known_hit_predicted_density, copy=False)
 
+    print([decoy_score_mask_arr.shape, decoy_predicted_density_arr.shape])
+
     sel = decoy_score_mask_arr > 0.0
 
     decoy_predicted_density_sel = decoy_predicted_density_arr[sel]
