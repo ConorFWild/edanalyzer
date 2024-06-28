@@ -353,7 +353,7 @@ def _random_mask(_decoy_poss, _decoy_elements):
 
     return valid_poss, valid_elements, valid_mask
 
-def _permute_position(_poss_pose, _poss_decoy, translation=0.25):
+def _permute_position(_poss_pose, _poss_decoy, translation=5):
     # Get rotation and translation
     rot = R.from_matrix(small_rotations[rng.integers(0, len(small_rotations))])
     _translation = rng.uniform(-translation , translation , size=3).reshape((1, 3))
@@ -605,7 +605,7 @@ def main(config_path):
             }
 
             # Generate decoys around known hit
-            for j in range(50):
+            for j in range(1000):
                 decoy_sample, decoy_delta_sample = _get_augmented_decoy(
                     known_hit_pose_poss,
                     known_hit_pose_atoms,
@@ -628,47 +628,47 @@ def main(config_path):
                 tmp_pose_idx += 1
 
             # Generate decoys around autobuilds
-            for build_path in auotbuild_paths:
-                pose, atom, element, rmsd = _get_build_data(
-                    build_path,
-                    known_hit_pose_poss,
-                    x, y, z
-                )
-
-                if not np.array_equal(element, known_hit_pose_elements):
-                    rprint(f'Ligand doesn\'t match! Skipping! {element} vs {known_hit_pose_elements}')
-                    continue
-                if rmsd > 15:
-                    continue
-
-                atom_array = np.zeros(150, dtype='<U5')
-                elements_array = np.zeros(150, dtype=np.int32)
-                pose_array = np.zeros((150, 3))
-                num_atoms = element.size
-                pose_array[:num_atoms, :] = pose[:num_atoms, :]
-                atom_array[:num_atoms] = atom[:num_atoms]
-                elements_array[:num_atoms] = element[:num_atoms]
-
-                # rprint(f'{rmsd}')
-                for j in range(50):
-                    decoy_sample, decoy_delta_sample = _get_augmented_decoy(
-                        known_hit_pose_poss,
-                        atom,
-                        pose,
-                        element,
-                        pose_predicted_density,
-                        known_hit_pose_residue,
-                        template_grid,
-                        tmp_pose_idx,
-                        meta_idx,
-                    )
-                    bin_id = int(decoy_sample['overlap_score'][0] * 10)
-                    if bin_id == 10:
-                        bin_id = 9
-                    bins[bin_id].append(len(decoy_pose_samples))
-                    decoy_pose_samples.append(decoy_sample)
-                    delta_samples.append(decoy_delta_sample)
-                    tmp_pose_idx += 1
+            # for build_path in auotbuild_paths:
+            #     pose, atom, element, rmsd = _get_build_data(
+            #         build_path,
+            #         known_hit_pose_poss,
+            #         x, y, z
+            #     )
+            #
+            #     if not np.array_equal(element, known_hit_pose_elements):
+            #         rprint(f'Ligand doesn\'t match! Skipping! {element} vs {known_hit_pose_elements}')
+            #         continue
+            #     if rmsd > 15:
+            #         continue
+            #
+            #     atom_array = np.zeros(150, dtype='<U5')
+            #     elements_array = np.zeros(150, dtype=np.int32)
+            #     pose_array = np.zeros((150, 3))
+            #     num_atoms = element.size
+            #     pose_array[:num_atoms, :] = pose[:num_atoms, :]
+            #     atom_array[:num_atoms] = atom[:num_atoms]
+            #     elements_array[:num_atoms] = element[:num_atoms]
+            #
+            #     # rprint(f'{rmsd}')
+            #     for j in range(50):
+            #         decoy_sample, decoy_delta_sample = _get_augmented_decoy(
+            #             known_hit_pose_poss,
+            #             atom,
+            #             pose,
+            #             element,
+            #             pose_predicted_density,
+            #             known_hit_pose_residue,
+            #             template_grid,
+            #             tmp_pose_idx,
+            #             meta_idx,
+            #         )
+            #         bin_id = int(decoy_sample['overlap_score'][0] * 10)
+            #         if bin_id == 10:
+            #             bin_id = 9
+            #         bins[bin_id].append(len(decoy_pose_samples))
+            #         decoy_pose_samples.append(decoy_sample)
+            #         delta_samples.append(decoy_delta_sample)
+            #         tmp_pose_idx += 1
 
             rprint(f'Got {len(delta_samples)} decoy poses, of which {len([dps for dps in decoy_pose_samples if dps["rmsd"] < 2.0])} close!')
 
