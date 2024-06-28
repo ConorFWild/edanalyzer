@@ -375,7 +375,7 @@ def _permute_position(_poss_pose, _poss_decoy, translation=2.0):
 
 def _get_augmented_decoy(
         known_hit_poss,
-        pose_sample,
+        atoms,
         pose_poss,
         pose_elements,
         pose_predicted_density,
@@ -385,7 +385,8 @@ def _get_augmented_decoy(
                 meta_idx):
     # Mask
     masked_poss, masked_elements, mask = _random_mask(pose_poss, pose_elements)
-    masked_atoms = pose_sample["atoms"][mask]
+    masked_atoms = atoms[mask]#pose_sample["atoms"][mask]
+
     known_hit_poss_masked = known_hit_poss[mask]
     # Permute
     _new_poss, rmsd, _delta_vecs, _delta = _permute_position(known_hit_poss_masked, masked_poss)
@@ -549,6 +550,7 @@ def main(config_path):
             )
             known_hit_pose_elements = pose_sample["elements"][pose_sample["elements"] != 0]
             known_hit_pose_poss = pose_sample['positions'][pose_sample['elements'] != 0]
+            known_hit_pose_atoms = pose_sample['atoms'][pose_sample['elements'] != 0]
 
             # Get the ligand data
             ligand_data_sample = _get_ligand_data_sample_from_dataset_dir(
@@ -601,7 +603,7 @@ def main(config_path):
             for j in range(50):
                 decoy_sample, decoy_delta_sample = _get_augmented_decoy(
                     known_hit_pose_poss,
-                    pose_sample,
+                    known_hit_pose_atoms,
                     known_hit_pose_poss,
                     known_hit_pose_elements,
                     pose_predicted_density,
@@ -639,11 +641,12 @@ def main(config_path):
                 pose_array[:num_atoms, :] = pose[:num_atoms, :]
                 atom_array[:num_atoms] = atom[:num_atoms]
                 elements_array[:num_atoms] = element[:num_atoms]
+
                 # rprint(f'{rmsd}')
                 for j in range(50):
                     decoy_sample, decoy_delta_sample = _get_augmented_decoy(
                         known_hit_pose_poss,
-                        pose_sample,
+                        atom,
                         pose,
                         element,
                         pose_predicted_density,
