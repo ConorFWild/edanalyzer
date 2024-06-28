@@ -353,7 +353,7 @@ def _random_mask(_decoy_poss, _decoy_elements):
 
     return valid_poss, valid_elements, valid_mask
 
-def _permute_position(_poss_pose, _poss_decoy, translation=2.0):
+def _permute_position(_poss_pose, _poss_decoy, translation=0.25):
     # Get rotation and translation
     rot = R.from_matrix(small_rotations[rng.integers(0, len(small_rotations))])
     _translation = rng.uniform(-translation , translation , size=3).reshape((1, 3))
