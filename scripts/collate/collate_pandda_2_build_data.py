@@ -353,9 +353,12 @@ def _random_mask(_decoy_poss, _decoy_elements):
 
     return valid_poss, valid_elements, valid_mask
 
-def _permute_position(_poss_pose, _poss_decoy, translation=5):
+def _permute_position(_poss_pose, _poss_decoy, translation=5, small=True):
     # Get rotation and translation
-    rot = R.from_matrix(small_rotations[rng.integers(0, len(small_rotations))])
+    if small:
+        rot = R.from_matrix(small_rotations[rng.integers(0, len(small_rotations))])
+    else:
+        rot = rot = R.random()
     _translation = rng.uniform(-translation , translation , size=3).reshape((1, 3))
 
     # Cetner
@@ -382,14 +385,17 @@ def _get_augmented_decoy(
         known_hit_pose_residue,
         template_grid,
         tmp_pose_idx,
-                meta_idx):
+                meta_idx,
+        translation,
+        small
+):
     # Mask
     masked_poss, masked_elements, mask = _random_mask(pose_poss, pose_elements)
     masked_atoms = atoms[mask]#pose_sample["atoms"][mask]
 
     known_hit_poss_masked = known_hit_poss[mask]
     # Permute
-    _new_poss, rmsd, _delta_vecs, _delta = _permute_position(known_hit_poss_masked, masked_poss)
+    _new_poss, rmsd, _delta_vecs, _delta = _permute_position(known_hit_poss_masked, masked_poss, translation, small)
 
     # Get Overlap
     decoy_res = _get_res_from_arrays(_new_poss, masked_elements)
@@ -605,27 +611,30 @@ def main(config_path):
             }
 
             # Generate decoys around known hit
-            for j in range(1000):
-                decoy_sample, decoy_delta_sample = _get_augmented_decoy(
-                    known_hit_pose_poss,
-                    known_hit_pose_atoms,
-                    known_hit_pose_poss,
-                    known_hit_pose_elements,
-                    pose_predicted_density,
-                    known_hit_pose_residue,
-                    template_grid,
-                    tmp_pose_idx,
-                    meta_idx,
-                )
-                # rprint(decoy_sample['overlap_score'])
+            for translation, small in [[0.25, True], [1.0, True], [3.0, False], [5.0, False]]:
+                for j in range(500):
+                    decoy_sample, decoy_delta_sample = _get_augmented_decoy(
+                        known_hit_pose_poss,
+                        known_hit_pose_atoms,
+                        known_hit_pose_poss,
+                        known_hit_pose_elements,
+                        pose_predicted_density,
+                        known_hit_pose_residue,
+                        template_grid,
+                        tmp_pose_idx,
+                        meta_idx,
+                        translation,
+                        small
+                    )
+                    # rprint(decoy_sample['overlap_score'])
 
-                bin_id = int(decoy_sample['overlap_score'][0] * 10)
-                if bin_id == 10:
-                    bin_id = 9
-                bins[bin_id].append(len(decoy_pose_samples))
-                decoy_pose_samples.append(decoy_sample)
-                delta_samples.append(decoy_delta_sample)
-                tmp_pose_idx += 1
+                    bin_id = int(decoy_sample['overlap_score'][0] * 10)
+                    if bin_id == 10:
+                        bin_id = 9
+                    bins[bin_id].append(len(decoy_pose_samples))
+                    decoy_pose_samples.append(decoy_sample)
+                    delta_samples.append(decoy_delta_sample)
+                    tmp_pose_idx += 1
 
             # Generate decoys around autobuilds
             # for build_path in auotbuild_paths:
