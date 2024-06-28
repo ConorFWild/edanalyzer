@@ -106,8 +106,8 @@ def _res_to_array(res):
         atoms.append(atom.name)
         elements.append(element)
 
-    rprint([x for x in res])
-    rprint([poss, atoms, elements])
+    # rprint([x for x in res])
+    # rprint([poss, atoms, elements])
 
     return np.array(poss), np.array(atoms), np.array(elements)
 
