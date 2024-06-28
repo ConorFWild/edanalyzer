@@ -75,6 +75,23 @@ for j in range(20):
 time_finish_gen = time.time()
 rprint(f"Generated small rotations in: {round(time_finish_gen - time_begin_gen, 2)}")
 
+
+very_small_rotations = []
+identity = np.eye(3)
+for j in range(20):
+    rotations = R.random(100000)
+    rotmat = rotations.as_matrix()
+    mask = (rotmat > (0.95 * np.eye(3)))
+    diag = mask[:, np.array([0, 1, 2]), np.array([0, 1, 2])]
+    rot_mask = diag.sum(axis=1)
+    valid_rots = rotmat[rot_mask == 3, :, :]
+    rots = [x for x in valid_rots]
+    very_small_rotations += rots
+time_finish_gen = time.time()
+rprint(f"Generated small rotations in: {round(time_finish_gen - time_begin_gen, 2)}")
+
+
+
 meta_sample_dtype = [
     ('idx', '<i4'),
     # ('event_idx', '<i4'),
@@ -355,10 +372,12 @@ def _random_mask(_decoy_poss, _decoy_elements):
 
 def _permute_position(_poss_pose, _poss_decoy, translation=5, small=True):
     # Get rotation and translation
-    if small:
+    if small == 1:
         rot = R.from_matrix(small_rotations[rng.integers(0, len(small_rotations))])
-    else:
-        rot = rot = R.random()
+    elif small == 2:
+        rot = R.from_matrix(very_small_rotations[rng.integers(0, len(very_small_rotations))])
+    elif small == 3:
+        rot = R.random()
     _translation = rng.uniform(-translation , translation , size=3).reshape((1, 3))
 
     # Cetner
@@ -611,7 +630,7 @@ def main(config_path):
             }
 
             # Generate decoys around known hit
-            for translation, small, num in [[0.1, True, 500], [0.25, True, 100], [0.5, False, 100], [1.0, True, 100], [3.0, False, 100], [5.0, False, 100]]:
+            for translation, small, num in [[0.1, 2, 250], [0.25, 1, 100], [0.5, 3, 100], [1.0, 1, 100], [3.0, 3, 100], [5.0, 3, 100]]:
                 for j in range(num):
                     decoy_sample, decoy_delta_sample = _get_augmented_decoy(
                         known_hit_pose_poss,
