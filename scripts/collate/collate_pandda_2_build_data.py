@@ -736,7 +736,7 @@ def main(config_path):
 
             rprint(f"Bin sizes:")
             rprint({bin_id / 10: len(bins[bin_id]) for bin_id in bins})
-            rprint(min(bins.values()))
+            rprint(min([len(x) for x in bins.values()]))
 
             # Make the metadata sample
             meta_sample = np.array(
