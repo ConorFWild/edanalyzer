@@ -664,7 +664,8 @@ def main(config_path):
                     decoy_poss, decoy_atoms, decoy_elements = _res_to_array(known_hit_pose_residue)
                 else:
                     decoy_num = rng.integers(0, high=len(superposed_builds),)
-                    decoy_poss, decoy_atoms, decoy_elements = _res_to_array(superposed_builds[decoy_num])
+                    x = _res_to_array(superposed_builds[decoy_num])
+                    decoy_poss, decoy_atoms, decoy_elements = x[0][0], x[0][1], x[0][2]
                 for j in range(num):
                     decoy_sample, decoy_delta_sample = _get_augmented_decoy(
                         known_hit_pose_poss,
