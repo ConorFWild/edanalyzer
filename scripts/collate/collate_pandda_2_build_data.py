@@ -427,12 +427,17 @@ def _get_augmented_decoy(
         dtype=decoy_pose_sample_dtype
     )
 
+    _delta_array =np.zeros((150,))
+    _delta_vecs_array = np.zeros((150, 3))
+    _delta_array[:num_atoms] = _delta[:num_atoms]
+    _delta_vecs_array[:num_atoms, :] = _delta_vecs[:num_atoms,:]
+
     delta_sample = np.array([(
         tmp_pose_idx,
         # idx_pose,
         meta_idx,
-        _delta,
-        _delta_vecs,
+        _delta_array,
+        _delta_vecs_array,
     )], dtype=delta_dtype
     )
 
