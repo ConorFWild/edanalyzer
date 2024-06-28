@@ -736,7 +736,8 @@ def main(config_path):
 
             rprint(f"Bin sizes:")
             rprint({bin_id / 10: len(bins[bin_id]) for bin_id in bins})
-            rprint(min([len(x) for x in bins.values()]))
+            smallest_num = min([len(x) for x in bins.values()])
+            rprint(smallest_num)
 
             # Make the metadata sample
             meta_sample = np.array(
@@ -766,13 +767,15 @@ def main(config_path):
 
 
             # Add filtered decoys
-            for decoy_pose_sample, delta_sample in zip(decoy_pose_samples, delta_samples):
-                table_decoy_pose_sample.append(
-                    decoy_pose_sample
-                )
-                delta_table.append(
-                    delta_sample
-                )
+            # for decoy_pose_sample, delta_sample in zip(decoy_pose_samples, delta_samples):
+            for key, val in bins.items():
+                for decoy_num in val[:smallest_num]:
+                    table_decoy_pose_sample.append(
+                        decoy_pose_samples[decoy_num]
+                    )
+                    delta_table.append(
+                        delta_samples[decoy_num]
+                    )
 
             meta_idx += 1
             pose_idx = tmp_pose_idx
