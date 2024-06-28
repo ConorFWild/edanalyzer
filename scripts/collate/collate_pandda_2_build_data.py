@@ -617,6 +617,8 @@ def main(config_path):
                     tmp_pose_idx,
                     meta_idx,
                 )
+                rprint(decoy_sample['overlap_score'])
+
                 bin_id = int(decoy_sample['overlap_score'] * 10)
                 if bin_id == 10:
                     bin_id = 9
@@ -660,7 +662,6 @@ def main(config_path):
                         tmp_pose_idx,
                         meta_idx,
                     )
-                    rprint(decoy_sample['overlap_score'])
                     bin_id = int(decoy_sample['overlap_score'] * 10)
                     if bin_id == 10:
                         bin_id = 9
