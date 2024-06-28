@@ -211,12 +211,12 @@ def _dep_overlap_score(decoy, pose):
 def overlap_score(known_hit_predicted_density, decoy_predicted_density, known_hit_pose_residue, decoy_residue):
 
 
-    known_hit_score_mask_grid = _get_ligand_mask_float(
-        known_hit_pose_residue,
-        radius=2.5,
-        n=90,
-        r=45.0
-    )
+    # known_hit_score_mask_grid = _get_ligand_mask_float(
+    #     known_hit_pose_residue,
+    #     radius=2.5,
+    #     n=90,
+    #     r=45.0
+    # )
 
     decoy_score_mask_grid = _get_ligand_mask_float(
         decoy_residue,
@@ -578,7 +578,7 @@ def main(config_path):
                 known_hit_pose_poss,
                 known_hit_pose_elements,
             )
-            template_grid = gemmi.FloatGrid(90,90,90)
+            template_grid = gemmi.FloatGrid(180,180,180)
             template_grid.spacegroup = gemmi.find_spacegroup_by_name("P1")
             template_grid.set_unit_cell(gemmi.UnitCell(45.0, 45.0, 45.0, 90.0, 90.0, 90.0))
             pose_predicted_density = _get_predicted_density_from_res(
