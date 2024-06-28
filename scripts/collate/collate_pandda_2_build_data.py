@@ -221,7 +221,7 @@ def overlap_score(known_hit_predicted_density, decoy_predicted_density, known_hi
     decoy_score_mask_grid = _get_ligand_mask_float(
         decoy_residue,
         radius=2.5,
-        n=90,
+        n=180,
         r=45.0
     )
 
