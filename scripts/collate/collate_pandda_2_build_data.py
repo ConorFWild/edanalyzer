@@ -91,7 +91,6 @@ time_finish_gen = time.time()
 rprint(f"Generated small rotations in: {round(time_finish_gen - time_begin_gen, 2)}")
 
 
-
 meta_sample_dtype = [
     ('idx', '<i4'),
     # ('event_idx', '<i4'),
@@ -668,7 +667,7 @@ def main(config_path):
             for translation, small, num, from_hit in [[0.1, 2, 250, True], [0.25, 1, 100, True,], [0.5, 3, 100, False], [1.0, 1, 100, False], [3.0, 3, 100, False], [5.0, 3, 100, False]]:
 
                 if from_hit:
-                    rprint(_res_to_array(known_hit_pose_residue))
+                    rprint([x for x in known_hit_pose_residue])
                     decoy_poss, decoy_atoms, decoy_elements = _res_to_array(known_hit_pose_residue)
                     rprint([decoy_poss, decoy_atoms, decoy_elements])
                 else:
