@@ -72,7 +72,7 @@ def _get_predicted_density_from_res(residue, event_map):
     optimized_structure.cell = event_map.unit_cell
     optimized_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
     dencalc = gemmi.DensityCalculatorE()
-    dencalc.d_min = 2.0  #*2
+    dencalc.d_min = 1.5  #*2
     # dencalc.rate = 1.5
     dencalc.set_grid_cell_and_spacegroup(optimized_structure)
     # dencalc.initialize_grid_to_size(event_map.nu, event_map.nv, event_map.nw)
