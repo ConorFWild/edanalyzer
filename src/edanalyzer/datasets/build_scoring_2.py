@@ -127,7 +127,7 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
     # )
     # score = np.corrcoef(data.T)[0, 1]
 
-    score = 1- ( np.min(decoy_predicted_density_sel - known_hit_predicted_density_sel, 0.0) / np.sum(decoy_predicted_density_sel))
+    score = 1- ( np.clip(decoy_predicted_density_sel - known_hit_predicted_density_sel, 0.0, None) / np.sum(decoy_predicted_density_sel))
 
     return score
 
