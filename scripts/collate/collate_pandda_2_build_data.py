@@ -633,7 +633,7 @@ def main(config_path):
                 9:[]
             }
 
-            superposed_builds = [known_hit_pose_residue]
+            superposed_builds = [known_hit_pose_residue,]
             for build_path in auotbuild_paths:
                 pose, atom, element, rmsd = _get_build_data(
                     build_path,
@@ -666,6 +666,7 @@ def main(config_path):
             for translation, small, num, from_hit in [[0.1, 2, 250, True], [0.25, 1, 100, True,], [0.5, 3, 100, False], [1.0, 1, 100, False], [3.0, 3, 100, False], [5.0, 3, 100, False]]:
                 if from_hit:
                     decoy_poss, decoy_atoms, decoy_elements = _res_to_array(known_hit_pose_residue)
+                    rprint([decoy_poss, decoy_atoms, decoy_elements])
                 else:
                     decoy_num = rng.integers(0, high=len(superposed_builds),)
                     x = _res_to_array(superposed_builds[decoy_num])
