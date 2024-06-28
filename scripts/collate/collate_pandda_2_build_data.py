@@ -410,6 +410,7 @@ def _get_augmented_decoy(
 ):
     # Mask
     masked_poss, masked_elements, mask = _random_mask(pose_poss, pose_elements)
+    rprint(mask)
     masked_atoms = atoms[mask]#pose_sample["atoms"][mask]
 
     known_hit_poss_masked = known_hit_poss[mask]
