@@ -59,6 +59,28 @@ def get_mask_array():
     return mask_array
 
 
+def _get_predicted_density_from_res(residue, event_map):
+    optimized_structure = gemmi.Structure()
+    model = gemmi.Model('0')
+    chain = gemmi.Chain('A')
+
+    chain.add_residue(residue)
+    model.add_chain(chain)
+    optimized_structure.add_model(model)
+
+    # Get the electron density of the optimized structure
+    optimized_structure.cell = event_map.unit_cell
+    optimized_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
+    dencalc = gemmi.DensityCalculatorE()
+    dencalc.d_min = 2.0  #*2
+    # dencalc.rate = 1.5
+    dencalc.set_grid_cell_and_spacegroup(optimized_structure)
+    # dencalc.initialize_grid_to_size(event_map.nu, event_map.nv, event_map.nw)
+    dencalc.put_model_density_on_grid(optimized_structure[0])
+    calc_grid = dencalc.grid
+
+    return calc_grid
+
 def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_residue):
     transform = _get_transform_from_orientation_centroid(
         orientation,
@@ -69,53 +91,78 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
 
     known_hit_score_mask_grid = _get_ligand_mask_float(
         known_hit_pose_residue,
-        radius=1.0,
+        radius=2.5,
         n=180,
         r=45.0
     )
 
     decoy_score_mask_grid = _get_ligand_mask_float(
         decoy_residue,
-        radius=1.0,
+        radius=2.5,
         n=180,
         r=45.0
     )
 
-    known_hit_score_sample = _sample_xmap(
-        known_hit_score_mask_grid,
-        transform,
-        np.zeros([64, 64, 64], dtype=np.float32)
+    known_hit_predicted_density = _get_predicted_density_from_res(known_hit_pose_residue, known_hit_score_mask_grid)
+    decoy_predicted_density = _get_predicted_density_from_res(decoy_residue, decoy_score_mask_grid)
+
+    decoy_score_mask_arr = np.array(decoy_score_mask_grid, copy=False)
+    decoy_predicted_density_arr = np.array(decoy_predicted_density, copy=False)
+    known_hit_score_mask_arr = np.array(known_hit_score_mask_grid, copy=False)
+    known_hit_predicted_density_arr = np.array(known_hit_predicted_density, copy=False)
+
+    sel = decoy_score_mask_arr > 0.0
+
+    decoy_predicted_density_sel = decoy_predicted_density_arr[sel]
+    known_hit_predicted_density_sel = known_hit_predicted_density_arr[sel]
+
+    data = np.hstack(
+        [
+            decoy_predicted_density_sel.reshape(-1,1),
+            known_hit_predicted_density_sel.reshape(-1, 1),
+
+        ]
     )
-    initial_known_hit_sum = np.sum(known_hit_score_sample)
-    # print(known_hit_score_sample)
-    known_hit_score_sample[known_hit_score_sample >= 0.1] = 1.0
-    known_hit_score_sample[known_hit_score_sample < 0.1] = 0.0
-
-    decoy_score_sample = _sample_xmap(
-        decoy_score_mask_grid,
-        transform,
-        np.zeros([64, 64, 64], dtype=np.float32),
-    )
-    initial_decoy_sum = np.sum(decoy_score_sample)
-
-    decoy_score_sample[decoy_score_sample >= 0.1] = 1.0
-    decoy_score_sample[decoy_score_sample < 0.1] = 0.0
-
-    # print(
-    #     {
-    #         'initial_known_hit_sum': initial_known_hit_sum,
-    #         'initial_decoy_sum': initial_decoy_sum,
-    #         'known hit sample sum': np.sum(known_hit_score_sample),
-    #         'decoy sum': np.sum(decoy_score_sample),
-    #         'n': np.power(64, 3)
-    #     }
-    # )
-
-
-    score = np.sum(known_hit_score_sample * decoy_score_sample) / np.sum(decoy_score_sample)
-
+    score = np.corrcoef(data.T)[0, 1]
 
     return score
+
+
+    # known_hit_score_sample = _sample_xmap(
+    #     known_hit_score_mask_grid,
+    #     transform,
+    #     np.zeros([64, 64, 64], dtype=np.float32)
+    # )
+    # initial_known_hit_sum = np.sum(known_hit_score_sample)
+    # # print(known_hit_score_sample)
+    # known_hit_score_sample[known_hit_score_sample >= 0.1] = 1.0
+    # known_hit_score_sample[known_hit_score_sample < 0.1] = 0.0
+    #
+    # decoy_score_sample = _sample_xmap(
+    #     decoy_score_mask_grid,
+    #     transform,
+    #     np.zeros([64, 64, 64], dtype=np.float32),
+    # )
+    # initial_decoy_sum = np.sum(decoy_score_sample)
+    #
+    # decoy_score_sample[decoy_score_sample >= 0.1] = 1.0
+    # decoy_score_sample[decoy_score_sample < 0.1] = 0.0
+    #
+    # # print(
+    # #     {
+    # #         'initial_known_hit_sum': initial_known_hit_sum,
+    # #         'initial_decoy_sum': initial_decoy_sum,
+    # #         'known hit sample sum': np.sum(known_hit_score_sample),
+    # #         'decoy sum': np.sum(decoy_score_sample),
+    # #         'n': np.power(64, 3)
+    # #     }
+    # # )
+    #
+    #
+    # score = np.sum(known_hit_score_sample * decoy_score_sample) / np.sum(decoy_score_sample)
+    #
+    #
+    # return score
 
 
 
