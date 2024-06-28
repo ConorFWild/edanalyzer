@@ -91,6 +91,26 @@ time_finish_gen = time.time()
 rprint(f"Generated small rotations in: {round(time_finish_gen - time_begin_gen, 2)}")
 
 
+def _res_to_array(res):
+    poss = []
+    atoms = []
+    elements = []
+    for atom in res.first_conformer():
+        pos = atom.pos
+        element = atom.element.atomic_number
+        # if atom.has_altloc():
+        #     raise Exception
+        if element == 1:
+            continue
+        poss.append([pos.x, pos.y, pos.z])
+        atoms.append(atom.name)
+        elements.append(element)
+
+    rprint([x for x in res])
+    rprint([poss, atoms, elements])
+
+    return np.array(poss), np.array(atoms), np.array(elements)
+
 meta_sample_dtype = [
     ('idx', '<i4'),
     # ('event_idx', '<i4'),
