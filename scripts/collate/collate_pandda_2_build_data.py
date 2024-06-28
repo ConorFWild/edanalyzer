@@ -629,14 +629,48 @@ def main(config_path):
                 9:[]
             }
 
-            # Generate decoys around known hit
-            for translation, small, num in [[0.1, 2, 250], [0.25, 1, 100], [0.5, 3, 100], [1.0, 1, 100], [3.0, 3, 100], [5.0, 3, 100]]:
+            superposed_builds = [known_hit_pose_residue]
+            for build_path in auotbuild_paths:
+                pose, atom, element, rmsd = _get_build_data(
+                    build_path,
+                    known_hit_pose_poss,
+                    x, y, z
+                )
+
+                if not np.array_equal(element, known_hit_pose_elements):
+                    rprint(f'Ligand doesn\'t match! Skipping! {element} vs {known_hit_pose_elements}')
+                    continue
+                build_res = _get_res_from_arrays(
+                    known_hit_pose_poss,
+                    known_hit_pose_elements,
+                )
+
+                sup = gemmi.superpose_positions(
+                    [atom.pos for atom in known_hit_pose_residue],
+                    [atom.pos for atom in build_res]
+                )
+
+                trans = sup.transform
+                for atom in build_res:
+                    new_pos_vec = trans.apply(atom.pos)
+                    new_pos = gemmi.Position(new_pos_vec.x, new_pos_vec.y, new_pos_vec.z)
+                    atom.pos = new_pos
+
+                superposed_builds.append(build_res)
+
+                # Generate decoys around known hit
+            for translation, small, num, from_hit in [[0.1, 2, 250, True], [0.25, 1, 100, True,], [0.5, 3, 100, False], [1.0, 1, 100, False], [3.0, 3, 100, False], [5.0, 3, 100, False]]:
+                if from_hit:
+                    decoy_poss, decoy_atoms, decoy_elements = _res_to_array(known_hit_pose_residue)
+                else:
+                    decoy_num = rng.integers(0, high=len(superposed_builds),)
+                    decoy_poss, decoy_atoms, decoy_elements = _res_to_array(superposed_builds[decoy_num])
                 for j in range(num):
                     decoy_sample, decoy_delta_sample = _get_augmented_decoy(
                         known_hit_pose_poss,
-                        known_hit_pose_atoms,
-                        known_hit_pose_poss,
-                        known_hit_pose_elements,
+                        decoy_atoms,
+                        decoy_poss,
+                        decoy_elements,
                         pose_predicted_density,
                         known_hit_pose_residue,
                         template_grid,
