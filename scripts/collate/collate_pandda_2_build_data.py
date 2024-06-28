@@ -440,7 +440,7 @@ def _get_augmented_decoy(
     _new_poss, rmsd, _delta_vecs, _delta = _permute_position(known_hit_poss_masked, masked_poss, translation, small)
 
     # Get Overlap
-    decoy_res = _get_res_from_arrays(_new_poss, masked_elements)
+    decoy_res = _get_res_from_arrays(_new_poss, masked_elements, masked_atoms)
     decoy_predicted_density = _get_predicted_density_from_res(
         decoy_res,
         template_grid
@@ -490,6 +490,26 @@ def _get_augmented_decoy(
     )
 
     return known_hit_pos_sample, delta_sample
+
+def _get_res_from_arrays(positions, elements, names):
+    res = gemmi.Residue()
+    res.name = 'LIG'
+
+    for _pos, _element, _name in zip(positions, elements, names):
+        if _element != 0:
+            pos = gemmi.Position(_pos[0], _pos[1], _pos[2])
+            if _element == 0:
+                continue
+
+            element = gemmi.Element(_element)
+            atom = gemmi.Atom()
+            atom.name = _name
+            atom.charge = 0
+            atom.pos = pos
+            atom.element = element
+            res.add_atom(atom)
+
+    return res
 
 def main(config_path):
     rprint(f'Running collate_database from config file: {config_path}')
@@ -630,6 +650,7 @@ def main(config_path):
             known_hit_pose_residue = _get_res_from_arrays(
                 known_hit_pose_poss,
                 known_hit_pose_elements,
+                known_hit_pose_atoms
             )
             # rprint([x for x in known_hit_pose_residue])
             # rprint(known_hit_pose_poss)
@@ -668,6 +689,7 @@ def main(config_path):
                 build_res = _get_res_from_arrays(
                     known_hit_pose_poss,
                     known_hit_pose_elements,
+                    known_hit_pose_atoms
                 )
 
                 sup = gemmi.superpose_positions(
