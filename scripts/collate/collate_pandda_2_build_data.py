@@ -612,7 +612,7 @@ def main(config_path):
                 known_hit_pose_poss,
                 known_hit_pose_elements,
             )
-            rprint(x for x in known_hit_pose_residue)
+            rprint([x for x in known_hit_pose_residue])
             rprint(known_hit_pose_poss)
             template_grid = gemmi.FloatGrid(180,180,180)
             template_grid.spacegroup = gemmi.find_spacegroup_by_name("P1")
