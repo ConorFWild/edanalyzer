@@ -203,15 +203,15 @@ class BuildScoringDataset(Dataset):
         sample_data = self.sample_indexes[idx]
 
         # Get the metadata, decoy pose and embedding
-        _meta_idx, _decoy_idx, _embedding_idx, _train = sample_data['meta'], sample_data['decoy'], sample_data['embedding'], sample_data['train']
-        rprint(
-            [
-                _meta_idx,
-                _decoy_idx,
-                _embedding_idx,
-                _train
-            ]
-        )
+        _meta_idx, _decoy_idx, _embedding_idx, _train = sample_data['meta'], int(sample_data['decoy']), sample_data['embedding'], sample_data['train']
+        # rprint(
+        #     [
+        #         _meta_idx,
+        #         _decoy_idx,
+        #         _embedding_idx,
+        #         _train
+        #     ]
+        # )
         _meta = self.meta_table[_meta_idx]
         _decoy = self.decoy_table[_decoy_idx]
         _embedding = self.decoy_table[_embedding_idx]
