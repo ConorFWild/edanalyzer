@@ -124,7 +124,7 @@ def main(config_path, batch_size=12, num_workers=None):
     output_dir = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output')
 
     # zarr_path = output_dir / 'event_data_with_mtzs_3.zarr'
-    zarr_path = output_dir / 'build_data.zarr'
+    zarr_path = output_dir / 'build_data_augmented.zarr'
 
     root = zarr.open(str(zarr_path), mode='r')
 
