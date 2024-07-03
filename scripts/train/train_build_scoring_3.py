@@ -46,6 +46,7 @@ def _get_train_test_idxs_full_conf(root, config):
     decoy_table = pd.DataFrame(
         root['decoy_pose_sample'].get_basic_selection(slice(None), fields=['idx', 'meta_idx', 'rmsd']))
 
+    decoy_table['idx'] = np.arange(len(decoy_table))
     rprint(f'Len of decoy table: {len(decoy_table)}')
 
     train_samples = metadata_table[~metadata_table['system'].isin(config['test']['test_systems'])]
