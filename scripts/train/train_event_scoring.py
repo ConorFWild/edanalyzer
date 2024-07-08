@@ -858,16 +858,22 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'event_scoring_nsys=87_opt=adamw_ls=2.5e-2_bs=128_lr=e-2_wd=e-1_sch=pl_cd=10_wn=0.5_r=5.5'
+    output = output_dir / 'event_scoring_prod_nsys=87_opt=adamw_ls=2.5e-2_bs=128_lr=e-2_wd=e-1_sch=pl_cd=10_wn=0.5_r=5.5'
     model = LitEventScoring(output)
 
     # Train
     rprint('Constructing trainer...')
     checkpoint_callback = ModelCheckpoint(dirpath=str(output ))
+    checkpoint_callback_best = ModelCheckpoint(
+        monitor='fpr10',
+        dirpath=str(output),
+        filename='sample-mnist-{epoch:02d}-{fpr10:.2f}'
+    )
     logger = CSVLogger(str( output / 'logs'))
     trainer = lt.Trainer(accelerator='gpu', logger=logger,
                          callbacks=[
                              checkpoint_callback,
+                             checkpoint_callback_best,
                              StochasticWeightAveraging(swa_lrs=1e-3,
                                                        # swa_epoch_start=0.75,
                                                        swa_epoch_start=0.5,
