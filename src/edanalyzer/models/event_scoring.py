@@ -640,10 +640,13 @@ class LitEventScoring(lt.LightningModule):
         #     sch.step(self.trainer.callback_metrics["test_loss"])
 
 def get_fpr(best_df, fpr):
-    cutoff = best_df['y_hat'].quantile(fpr)
+    true_hit_best_df = best_df[best_df['y'] > 0.9]
     negative_best_df = best_df[best_df['y'] <= 0.1]
-    false_hit_df = negative_best_df[negative_best_df['y_hat'] > cutoff]
-    true_negative_df = negative_best_df[negative_best_df['y_hat'] <= cutoff]
+
+    cutoff = true_hit_best_df['y_hat'].quantile(fpr)
+
+    false_hit_df = negative_best_df[negative_best_df['y_hat'] >= cutoff]
+    true_negative_df = negative_best_df[negative_best_df['y_hat'] < cutoff]
     fp = len(false_hit_df)
     tn = len(true_negative_df)
 
