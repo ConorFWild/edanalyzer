@@ -179,9 +179,9 @@ def main(config_path, batch_size=12, num_workers=None):
     rprint('Constructing trainer...')
     checkpoint_callback = ModelCheckpoint(dirpath=str(output))
     checkpoint_callback_best = ModelCheckpoint(
-        monitor='val_loss',
+        monitor='test_loss',
         dirpath=str(output),
-        filename='sample-mnist-{epoch:02d}-{val_loss:.2f}'
+        filename='sample-mnist-{epoch:02d}-{test_loss:.2f}'
     )
 
     logger = CSVLogger(str(output / 'logs'))
