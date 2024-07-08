@@ -269,7 +269,6 @@ class EventScoringDataset(Dataset):
             xmap_sample += noise.astype(np.float32)
 
         ligand_mask_grid = _get_ligand_mask_float(
-            z_map,
             transformed_residue,
         )
         image_ligand_mask = _sample_xmap(
