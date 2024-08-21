@@ -4,7 +4,7 @@ import yaml
 import pandas as pd
 import numpy as np
 
-from edanalyzer import constands
+from edanalyzer import constants
 
 
 def match_event(ref_event, mov_event_table):
@@ -36,7 +36,7 @@ def get_centroid(res):
     return np.mean(np.array(poss), axis=0)
 def get_build(mov_event, mov_panddas_path):
     mov_dtag, mov_x, mov_y, mov_z = mov_event['dtag'], mov_event['x'], mov_event['y'], mov_event['z']
-    st_file = mov_panddas_path / 'processed_dataset' / mov_dtag / 'modelled_structures'/ constands.PANDDA_MODEL_FILE.format(dtag=dtag)
+    st_file = mov_panddas_path / 'processed_dataset' / mov_dtag / 'modelled_structures'/ constants.PANDDA_MODEL_FILE.format(dtag=dtag)
     st = gemmi.read_structure(str(st_file))
     ligands = {}
     for model in st:
