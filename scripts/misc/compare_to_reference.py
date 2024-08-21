@@ -51,7 +51,7 @@ def get_build(mov_event, mov_panddas_path):
 
     centroids = {idx: get_centroid(res) for idx, res in ligands.items()}
 
-    distances = {idx: np.linalg.norm(centroid - np.array(mov_x, mov_y, mov_z)) for idx, centroid in centroids.items()}
+    distances = {idx: np.linalg.norm(centroid - np.array([mov_x, mov_y, mov_z])) for idx, centroid in centroids.items()}
     return ligands[min(ligands, key=lambda _x: distances[_x])]
 
 def get_event_score(mov_event, mov_panddas_path):
