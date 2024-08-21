@@ -3,6 +3,7 @@ import fire
 import yaml
 import pandas as pd
 import numpy as np
+import gemmi
 
 from edanalyzer import constants
 
@@ -82,7 +83,7 @@ def main(mov_panddas_path, ref_panddas_path):
     ref_event_table = pd.read_csv(ref_panddas_path / 'analyses/pandda_inspect_events.csv')
     ref_high_conf_event_table = ref_event_table[ref_event_table['Ligand Confidence'] == 'High']
     records = []
-    for ref_event in ref_high_conf_event_table.iterrows():
+    for idx, ref_event in ref_high_conf_event_table.iterrows():
         mov_event, matching_event_distance = match_event(ref_event, mov_event_table)
         mov_build = get_build(mov_event, mov_panddas_path)
         ref_build = get_build(ref_event, ref_panddas_path)
