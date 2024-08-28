@@ -109,9 +109,13 @@ def main():
     job_script_paths = []
     for pandda_dir in sorted(DATA_DIRS.glob('*')):
         rprint(f'PanDDA dir is: {pandda_dir.name}')
+        #
+        # if not pandda_dir.is_dir():
+        #
 
         if pandda_dir.name not in TEST_SYSTEMS:
             rprint(f'{pandda_dir.name} not a test system! Skipping!')
+            continue
 
         # Get the high confidence datasets
         high_conf_datasets = _get_high_conf_datasets(pandda_dir)
