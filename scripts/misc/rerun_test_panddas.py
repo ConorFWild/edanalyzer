@@ -137,10 +137,10 @@ def main():
         job_script = _make_job_script(data_dir, pandda_dir, ','.join(high_conf_datasets))
         rprint(f'Jobscript is:\n')
         rprint(job_script)
-        raise Exception
+        # raise Exception
 
         # Save the job script
-        job_script_path = _save_job_script(job_script, data_dir.name)
+        job_script_path = _save_job_script(job_script, pandda_dir.name)
         rprint(f'Job script path is: {job_script_path}')
         job_script_paths.append(job_script_path)
 
