@@ -14,7 +14,10 @@ def match_event(ref_event, mov_event_table):
     distances = {}
     events = {}
     for j, mov_event in mov_event_table[mov_event_table['dtag'] == ref_dtag].iterrows():
-        mov_dtag, mov_x, mov_y, mov_z = mov_event['dtag'], mov_event['x'], mov_event['y'], mov_event['z']
+        try:
+            mov_dtag, mov_x, mov_y, mov_z = mov_event['dtag'], mov_event['x'], mov_event['y'], mov_event['z']
+        except:
+            return None, None
         if mov_dtag != ref_dtag:
             continue
         distance = np.linalg.norm(np.array([mov_x-ref_x, mov_y-ref_y, mov_z-ref_z,]))
