@@ -123,7 +123,7 @@ def main():
         # Get the high confidence datasets
         high_conf_datasets = _get_high_conf_datasets(pandda_dir)
         if not high_conf_datasets:
-            rprint(f'{pandda_dir.name} has no high conf datasets! Skipping!')
+            rprint(f'\t{pandda_dir.name} has no high conf datasets! Skipping!')
             continue
 
         # Get the corresponding data dir
@@ -134,18 +134,18 @@ def main():
         try:
             data_dir_stats = _get_data_dir_stats(data_dir)
         except:
-            rprint(f'{pandda_dir.name} has missing data! Skipping!')
+            rprint(f'\t{pandda_dir.name} has missing data! Skipping!')
 
             continue
         rprint(f'Dataset stats are: {data_dir_stats}')
 
         # Skip if too few datasets
         if data_dir_stats['num_datasets'] < 60:
-            rprint(f'### Too few datasets! Skipping!')
+            rprint(f'\t### Too few datasets! Skipping!')
             continue
 
         if (OUTPUT_DIR / data_dir.name).exists():
-            rprint(f'### Already processed! Skipping!')
+            rprint(f'\t### Already processed! Skipping!')
             continue
 
         # Generate a job script
