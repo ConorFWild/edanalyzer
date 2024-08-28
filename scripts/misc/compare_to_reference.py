@@ -108,6 +108,7 @@ def main(mov_panddas_path, ref_panddas_path):
         else:
             build_score = get_build_score(mov_event, mov_panddas_path)
             print(mov_build)
+            print(ref_build)
             build_rmsd = get_build_rmsd(mov_build, ref_build)
 
         record = {
