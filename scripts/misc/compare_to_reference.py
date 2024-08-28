@@ -93,15 +93,19 @@ def main(mov_panddas_path, ref_panddas_path):
         if mov_event is None:
             print(f'No match for {ref_event["dtag"]}')
             mov_build = None
-            ref_build = None
             event_score = None
+
+        else:
+            event_score = get_event_score(mov_event, mov_panddas_path)
+            mov_build = get_build(mov_event, mov_panddas_path)
+
+        ref_build = get_build(ref_event, ref_panddas_path)
+
+        if mov_build is None:
             build_score = None
             build_rmsd = None
-        else:
 
-            mov_build = get_build(mov_event, mov_panddas_path)
-            ref_build = get_build(ref_event, ref_panddas_path)
-            event_score = get_event_score(mov_event, mov_panddas_path)
+        else:
             build_score = get_build_score(mov_event, mov_panddas_path)
             build_rmsd = get_build_rmsd(mov_build, ref_build)
 
