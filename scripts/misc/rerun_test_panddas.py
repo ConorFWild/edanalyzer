@@ -45,10 +45,13 @@ JOB_SCRIPT_TEMPLATE = (
 
 
 def _get_high_conf_datasets(pandda_dir):
-    inspect_table = pandda_dir / 'analyses' / 'pandda_inspect_events.csv'
-    df = pd.read_csv(inspect_table)
-    high_conf_datasets = df[df['Ligand Confidence'] == "High"]
-    return [x for x in high_conf_datasets['dtag']]
+    try:
+        inspect_table = pandda_dir / 'analyses' / 'pandda_inspect_events.csv'
+        df = pd.read_csv(inspect_table)
+        high_conf_datasets = df[df['Ligand Confidence'] == "High"]
+        return [x for x in high_conf_datasets['dtag']]
+    except:
+        return None
 
 def _get_data_dir(pandda_dir):
     with open(pandda_dir / 'input.yaml', 'r') as f:
@@ -119,6 +122,9 @@ def main():
 
         # Get the high confidence datasets
         high_conf_datasets = _get_high_conf_datasets(pandda_dir)
+        if not high_conf_datasets:
+            rprint(f'{pandda_dir.name} has no high conf datasets! Skipping!')
+            continue
 
         # Get the corresponding data dir
         data_dir = _get_data_dir(pandda_dir)
