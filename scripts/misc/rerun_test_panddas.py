@@ -131,7 +131,12 @@ def main():
         rprint(f'Dataset dir is: {data_dir.name}')
 
         # Check Integrity
-        data_dir_stats = _get_data_dir_stats(data_dir)
+        try:
+            data_dir_stats = _get_data_dir_stats(data_dir)
+        except:
+            rprint(f'{pandda_dir.name} has missing data! Skipping!')
+
+            continue
         rprint(f'Dataset stats are: {data_dir_stats}')
 
         # Skip if too few datasets
