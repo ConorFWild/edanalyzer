@@ -89,6 +89,8 @@ def main(mov_panddas_path, ref_panddas_path):
     ref_high_conf_event_table = ref_event_table[ref_event_table['Ligand Confidence'] == 'High']
     records = []
     for idx, ref_event in ref_high_conf_event_table.iterrows():
+        print(ref_event['dtag'])
+
         mov_event, matching_event_distance = match_event(ref_event, mov_event_table)
         if mov_event is None:
             print(f'No match for {ref_event["dtag"]}')
