@@ -48,7 +48,7 @@ def get_build(mov_event, mov_panddas_path):
     for model in st:
         for chain in model:
             for res in chain:
-                if res.name == 'LIG':
+                if (res.name == 'LIG') or (res.name == 'XXX'):
                     ligands[(chain.name, res.seqid.num)] = res
 
     if len(ligands) == 0:
