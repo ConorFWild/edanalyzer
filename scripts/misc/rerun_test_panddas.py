@@ -149,10 +149,10 @@ def main():
 
         ...
     # Submit the job scripts
-    for job_script_path in job_script_paths:
-        stdout, stderr = _submit_job_script(job_script_path)
-        rprint(stdout)
-        rprint(stderr)
+    # for job_script_path in job_script_paths:
+    #     stdout, stderr = _submit_job_script(job_script_path)
+    #     rprint(stdout)
+    #     rprint(stderr)
         ...
     ...
 
