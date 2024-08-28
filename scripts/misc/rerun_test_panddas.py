@@ -70,12 +70,12 @@ def _get_data_dir_stats(data_dir):
     }
 
 
-def _make_job_script(data_dir, high_conf_datasets):
+def _make_job_script(data_dir, pandda_dir, high_conf_datasets):
     job_script = JOB_SCRIPT_TEMPLATE.format(
-        output=OUTPUT_DIR / f'{data_dir.name}.o',
-        error=OUTPUT_DIR / f'{data_dir.name}.e',
+        output=OUTPUT_DIR / f'{pandda_dir.name}.o',
+        error=OUTPUT_DIR / f'{pandda_dir.name}.e',
         data_dirs=data_dir,
-        out_dir=OUTPUT_DIR / data_dir.name,
+        out_dir=OUTPUT_DIR / pandda_dir.name,
         only_datasets=high_conf_datasets
     )
     return job_script
@@ -134,7 +134,7 @@ def main():
             continue
 
         # Generate a job script
-        job_script = _make_job_script(data_dir, ','.join(high_conf_datasets))
+        job_script = _make_job_script(data_dir, pandda_dir, ','.join(high_conf_datasets))
         rprint(f'Jobscript is:\n')
         rprint(job_script)
         raise Exception
