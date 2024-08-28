@@ -134,7 +134,7 @@ def main():
             continue
 
         # Generate a job script
-        job_script = _make_job_script(data_dir, high_conf_datasets)
+        job_script = _make_job_script(data_dir, ','.join(high_conf_datasets))
         rprint(f'Jobscript is:\n')
         rprint(job_script)
         raise Exception
