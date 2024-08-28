@@ -87,7 +87,7 @@ def main(mov_panddas_path, ref_panddas_path):
     records = []
     for idx, ref_event in ref_high_conf_event_table.iterrows():
         mov_event, matching_event_distance = match_event(ref_event, mov_event_table)
-        if not mov_event:
+        if mov_event is None:
             print(f'No match for {ref_event["dtag"]}')
         mov_build = get_build(mov_event, mov_panddas_path)
         ref_build = get_build(ref_event, ref_panddas_path)
