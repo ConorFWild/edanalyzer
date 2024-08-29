@@ -37,9 +37,9 @@ ligand_data_dtype = [
 
 known_hit_pose_sample_dtype = [
     ('idx', '<i8'),
-    ('positions', '<f4', (100, 3)),
-    ('atoms', '<U5', (100,)),
-    ('elements', '<i4', (100,)),
+    ('positions', '<f4', (150, 3)),
+    ('atoms', '<U5', (150,)),
+    ('elements', '<i4', (150,)),
     # ('rmsd', '<f4')
 ]
 
