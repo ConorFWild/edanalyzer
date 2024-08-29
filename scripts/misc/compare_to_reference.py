@@ -8,6 +8,13 @@ import gemmi
 from edanalyzer import constants
 
 
+annotations = {
+    'PTP1B':
+        {
+            'PTP1B-y1608': "Two credible ligands, of which only one had been modelled"
+        }
+}
+
 def match_event(ref_event, mov_event_table):
     ref_dtag, ref_x, ref_y, ref_z = ref_event['dtag'], ref_event['x'], ref_event['y'], ref_event['z']
 
