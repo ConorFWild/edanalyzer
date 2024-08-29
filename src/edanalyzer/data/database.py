@@ -417,12 +417,12 @@ def _get_known_hit_poses(
     # Get pos array
     poss, atoms, elements = _res_to_array(res)
 
-    size = min(100, poss.shape[0])
+    size = min(150, poss.shape[0])
 
-    elements_array = np.zeros(100, dtype=np.int32)
+    elements_array = np.zeros(150, dtype=np.int32)
     elements_array[:size] = elements[:size]
 
-    atom_array = np.zeros(100, dtype='<U5')
+    atom_array = np.zeros(150, dtype='<U5')
     atom_array[:size] = atoms[:size]
 
     # Iterate over poses
@@ -468,7 +468,7 @@ def _get_known_hit_poses(
             rmsds.append(rmsd)
 
             # Pad the poss to a uniform size
-            pose_array = np.zeros((100, 3))
+            pose_array = np.zeros((150, 3))
             pose_array[:size, :] = _new_poss[:size, :]
             poses.append(pose_array)
 
