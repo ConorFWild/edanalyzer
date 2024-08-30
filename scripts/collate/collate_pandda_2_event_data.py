@@ -162,7 +162,7 @@ def main(config_path):
                 if len(event_distances) > 0:
                     closest_event_id = min(event_centroids, key=lambda _event_num: event_distances[_event_num])
                     x, y, z = event_centroids[closest_event_id]
-                    rprint(f'Closest event distance is {min(event_distances)}')
+                    rprint(f'Closest event distance is {event_distances[closest_event_id]}')
 
                 else:
                     rprint(
