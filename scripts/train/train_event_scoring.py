@@ -609,7 +609,7 @@ def main(config_path, batch_size=12, num_workers=None):
     output_dir = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output')
 
     # zarr_path = output_dir / 'event_data_with_mtzs_3.zarr'
-    zarr_path = output_dir / 'event_data.zarr'
+    zarr_path = output_dir / 'event_data_2.zarr'
 
     root = zarr.open(str(zarr_path), mode='r')
 
@@ -858,7 +858,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'event_scoring_prod_nsys=87_opt=adamw_ls=2.5e-2_bs=128_lr=e-2_wd=e-1_sch=pl_cd=10_wn=0.5_r=5.5'
+    output = output_dir / 'event_scoring_prod_2_nsys=87_opt=adamw_ls=2.5e-2_bs=128_lr=e-2_wd=e-1_sch=pl_cd=10_wn=0.5_r=5.5'
     model = LitEventScoring(output)
 
     # Train
