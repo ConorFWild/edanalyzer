@@ -139,8 +139,38 @@ def main(config_path):
                 #     rprint(f'\t\tAmbiguous event! Skipping!')
                 #     continue
 
-                x, y, z = _row['x'], _row['y'], _row['z']
+                initial_x, initial_y, initial_z = _row['x'], _row['y'], _row['z']
+
+
+
                 dataset_dir = pandda_dir / 'processed_datasets' / dtag
+
+                processed_dataset_yaml = dataset_dir / 'processed_dataset.yaml'
+                with open(processed_dataset_yaml, 'r') as f:
+                    processed_dataset = yaml.safe_load(f)
+
+                selected_model = processed_dataset['Summary']['Selected Model']
+
+                event_distances = {}
+                event_centroids = {}
+                for event_num, event in processed_dataset['Models'][selected_model]['Events'].items():
+                    event_centroid = event['Centroid']
+                    distance = np.linalg.norm(np.array(event_centroid) - np.array([initial_x, initial_y, initial_z]))
+                    event_distances[event_num] = distance
+                    event_centroids[event_num] = event_centroid
+
+                if len(event_distances) > 0:
+                    closest_event_id = min(event_centroids, key=lambda _event_num: event_distances[_event_num])
+                    x, y, z = event_centroids[closest_event_id]
+                    rprint(f'Closest event distance is {min(event_distances)}')
+
+                else:
+                    rprint(
+                        f'Could not match high confidence ligand {dtag} {event_idx} to an initial event!\n'
+                        f'Check model in {dataset_dir} is appropriate!\n'
+                        'SKIPPING!'
+                    )
+                    continue
 
                 model_dir = dataset_dir / 'modelled_structures'
 
