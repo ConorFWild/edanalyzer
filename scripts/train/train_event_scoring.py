@@ -864,6 +864,11 @@ def main(config_path, batch_size=12, num_workers=None):
     # Train
     rprint('Constructing trainer...')
     checkpoint_callback = ModelCheckpoint(dirpath=str(output ))
+    checkpoint_callback_best_95 = ModelCheckpoint(
+        monitor='fpr95',
+        dirpath=str(output),
+        filename='sample-mnist-{epoch:02d}-{fpr95:.2f}'
+    )
     checkpoint_callback_best_99 = ModelCheckpoint(
         monitor='fpr99',
         dirpath=str(output),
@@ -880,6 +885,7 @@ def main(config_path, batch_size=12, num_workers=None):
                              checkpoint_callback,
                              checkpoint_callback_best_10,
                              checkpoint_callback_best_99,
+                             checkpoint_callback_best_95,
                              StochasticWeightAveraging(swa_lrs=1e-3,
                                                        # swa_epoch_start=0.75,
                                                        swa_epoch_start=0.5,
