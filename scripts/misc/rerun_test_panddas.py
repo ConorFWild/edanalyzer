@@ -27,7 +27,7 @@ TEST_SYSTEMS = [
 ]
 # DATA_DIRS = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/data')
 DATA_DIRS = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score')
-OUTPUT_DIR = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/test_systems_panddas')
+OUTPUT_DIR = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/test_systems_panddas_new_event_score')
 JOB_SCRIPT_TEMPLATE = (
     '#!/bin/bash\n'
     '#SBATCH --nodes=1\n'
@@ -108,7 +108,11 @@ def _submit_job_script(job_script_path):
     return str(stdout), str(stderr)
 
 def main():
+    if not OUTPUT_DIR.exists():
+        os.mkdir(OUTPUT_DIR, )
+
     # Iterate over data dirs
+
     job_script_paths = []
     for pandda_dir in sorted(DATA_DIRS.glob('*')):
         rprint(f'PanDDA dir is: {pandda_dir.name}')
