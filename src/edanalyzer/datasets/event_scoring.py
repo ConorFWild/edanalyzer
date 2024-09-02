@@ -241,7 +241,9 @@ class EventScoringDataset(Dataset):
 
 
         if annotation['partition'] == 'train':
-            mask = get_mask_array()
+            # mask = get_mask_array()
+            mask = np.ones((32,32,32), dtype=np.float32)
+
         else:
             mask = np.ones((32,32,32), dtype=np.float32)
 

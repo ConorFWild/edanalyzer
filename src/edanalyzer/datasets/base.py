@@ -448,7 +448,7 @@ def _get_ligand_mask_float(res, radius=1.0, n=32, r=16.0):
 
     return mask
 
-def _get_ed_mask_float( radius=5.5):
+def _get_ed_mask_float( radius=8.0):
     mask = gemmi.FloatGrid(32,32,32)
     mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
     mask.set_unit_cell(gemmi.UnitCell(16.0,16.0,16.0,90.0,90.0,90.0))
