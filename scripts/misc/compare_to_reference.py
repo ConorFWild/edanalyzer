@@ -15,6 +15,12 @@ annotations = {
         }
 }
 
+def _get_processed_dataset(ref_event, mov_panddas_path):
+    with open(mov_panddas_path / 'processed_datasets' / ref_event['dtag'] / 'processed_dataset.yaml', 'r') as f:
+        processed_dataset = yaml.safe_load(f)
+
+    return processed_dataset
+
 def match_event(ref_event, mov_event_table):
     ref_dtag, ref_x, ref_y, ref_z = ref_event['dtag'], ref_event['x'], ref_event['y'], ref_event['z']
 
@@ -72,6 +78,24 @@ def get_event_score(mov_event, mov_panddas_path):
 
     return yml[mov_event['event_idx']]['Score']
 
+def match_event_all_models(ref_event, processed_dataset, ):
+    ref_x, ref_y, ref_z = ref_event['x'], ref_event['y'], ref_event['z']
+    distances = {}
+    events = {}
+    for model_id, model in processed_dataset['Models'].items():
+        for event_id, mov_event in model['Events'].items():
+            mov_x, mov_y, mov_z = mov_event['Centroid']
+            distance = np.linalg.norm(np.array([mov_x - ref_x, mov_y - ref_y, mov_z - ref_z, ]))
+
+            distances[(model_id, event_id)] = distance
+            events[(model_id, event_id)] = mov_event
+
+    if len(distances) != 0:
+        idx = min(distances, key=lambda _x: distances[_x])
+        return events[idx], distances[idx]
+
+    return None, None
+
 def get_build_score(mov_event, mov_panddas_path):
     with open(mov_panddas_path / 'processed_datasets' / mov_event['dtag'] / 'events.yaml') as f:
         yml = yaml.safe_load(f)
@@ -98,6 +122,8 @@ def main(mov_panddas_path, ref_panddas_path):
     for idx, ref_event in ref_high_conf_event_table.iterrows():
         print(ref_event['dtag'])
 
+        processed_dataset = _get_processed_dataset(ref_event, mov_panddas_path)
+
         mov_event, matching_event_distance = match_event(ref_event, mov_event_table)
         if mov_event is None:
             print(f'No match for {ref_event["dtag"]}')
@@ -107,6 +133,8 @@ def main(mov_panddas_path, ref_panddas_path):
         else:
             event_score = get_event_score(mov_event, mov_panddas_path)
             mov_build = get_build(mov_event, mov_panddas_path)
+
+        closest_event_any_model, closest_event_dist_any_model = match_event_all_models(ref_event, processed_dataset, )
 
         ref_build = get_build(ref_event, ref_panddas_path)
 
@@ -124,6 +152,7 @@ def main(mov_panddas_path, ref_panddas_path):
             'dtag': ref_event['dtag'],
             'event_score': event_score,
             'closest_event_distance': matching_event_distance,
+            "closest_event_distance_any_model": closest_event_dist_any_model,
             'build_score': build_score,
             'build_rmsd': build_rmsd
         }
