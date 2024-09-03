@@ -7,7 +7,6 @@ import gemmi
 
 from edanalyzer import constants
 
-
 annotations = {
     'PTP1B':
         {
@@ -15,11 +14,37 @@ annotations = {
         }
 }
 
+COMPARATORS_DIR = Path(
+    '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score/')
+
+COMPARATOR_DATASETS = {
+    "BAZ2BA": COMPARATORS_DIR / 'BAZ2BA',
+    "MRE11AA": COMPARATORS_DIR / 'MRE11AA',
+    "Zika_NS3A": COMPARATORS_DIR / 'Zika_NS3A',
+    "DCLRE1CA": COMPARATORS_DIR / 'DCLRE1CA',
+    "GluN1N2A": COMPARATORS_DIR / 'GluN1N2A',
+    "Tif6": COMPARATORS_DIR / 'Tif6',
+    "AURA": COMPARATORS_DIR / 'AURA',
+    "A71EV2A": COMPARATORS_DIR / 'A71EV2A',
+    "SETDB1": COMPARATORS_DIR / 'SETDB1',
+    "JMJD2DA": COMPARATORS_DIR / 'JMJD2DA',
+    "PTP1B": COMPARATORS_DIR / 'PTP1B',
+    "BRD1A": COMPARATORS_DIR / 'BRD1A',
+    "PP1": COMPARATORS_DIR / 'PP1',
+    "PWWP_C64S": COMPARATORS_DIR / 'PWWP_C64S',
+    "NS3Hel": COMPARATORS_DIR / 'NS3Hel',
+    "NSP16": COMPARATORS_DIR / 'NSP16',
+}
+
+NEW_PANDDAS_DIR = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/test_systems_panddas_new_event_score_2')
+
+
 def _get_processed_dataset(ref_event, mov_panddas_path):
     with open(mov_panddas_path / 'processed_datasets' / ref_event['dtag'] / 'processed_dataset.yaml', 'r') as f:
         processed_dataset = yaml.safe_load(f)
 
     return processed_dataset
+
 
 def match_event(ref_event, mov_event_table):
     ref_dtag, ref_x, ref_y, ref_z = ref_event['dtag'], ref_event['x'], ref_event['y'], ref_event['z']
@@ -33,7 +58,7 @@ def match_event(ref_event, mov_event_table):
             return None, None
         if mov_dtag != ref_dtag:
             continue
-        distance = np.linalg.norm(np.array([mov_x-ref_x, mov_y-ref_y, mov_z-ref_z,]))
+        distance = np.linalg.norm(np.array([mov_x - ref_x, mov_y - ref_y, mov_z - ref_z, ]))
 
         distances[j] = distance
         events[j] = mov_event
@@ -43,6 +68,7 @@ def match_event(ref_event, mov_event_table):
         return events[idx], distances[idx]
 
     return None, None
+
 
 def get_centroid(res):
     poss = []
@@ -55,7 +81,8 @@ def get_centroid(res):
 
 def get_build(mov_event, mov_panddas_path):
     mov_dtag, mov_x, mov_y, mov_z = mov_event['dtag'], mov_event['x'], mov_event['y'], mov_event['z']
-    st_file = mov_panddas_path / 'processed_datasets' / mov_dtag / 'modelled_structures'/ constants.PANDDA_MODEL_FILE.format(dtag=mov_dtag)
+    st_file = mov_panddas_path / 'processed_datasets' / mov_dtag / 'modelled_structures' / constants.PANDDA_MODEL_FILE.format(
+        dtag=mov_dtag)
     st = gemmi.read_structure(str(st_file))
     ligands = {}
     for model in st:
@@ -72,16 +99,19 @@ def get_build(mov_event, mov_panddas_path):
     distances = {idx: np.linalg.norm(centroid - np.array([mov_x, mov_y, mov_z])) for idx, centroid in centroids.items()}
     return ligands[min(ligands, key=lambda _x: distances[_x])]
 
+
 def get_build_any_model(mov_event):
     build_path = mov_event['Build Path']
     st = gemmi.read_structure(str(build_path))
     return st[0][0][0]
+
 
 def get_event_score(mov_event, mov_panddas_path):
     with open(mov_panddas_path / 'processed_datasets' / mov_event['dtag'] / 'events.yaml') as f:
         yml = yaml.safe_load(f)
 
     return yml[mov_event['event_idx']]['Score']
+
 
 def match_event_all_models(ref_event, processed_dataset, ):
     ref_x, ref_y, ref_z = ref_event['x'], ref_event['y'], ref_event['z']
@@ -105,11 +135,13 @@ def match_event_all_models(ref_event, processed_dataset, ):
 
     return None, None
 
+
 def get_build_score(mov_event, mov_panddas_path):
     with open(mov_panddas_path / 'processed_datasets' / mov_event['dtag'] / 'events.yaml') as f:
         yml = yaml.safe_load(f)
 
     return yml[mov_event['event_idx']]['Build']['Score']
+
 
 def get_build_rmsd(mov_build, ref_build):
     deltas = []
@@ -117,10 +149,11 @@ def get_build_rmsd(mov_build, ref_build):
         ref_atom = ref_build[mov_atom.name][0]
         mov_pos = mov_atom.pos
         ref_pos = ref_atom.pos
-        delta = np.array([ref_pos.x-mov_pos.x, ref_pos.y-mov_pos.y, ref_pos.z-mov_pos.z, ])
+        delta = np.array([ref_pos.x - mov_pos.x, ref_pos.y - mov_pos.y, ref_pos.z - mov_pos.z, ])
         deltas.append(delta)
     rmsd = np.sqrt(np.sum(np.square(np.linalg.norm(np.array(deltas), axis=1))) / len(deltas))
     return rmsd
+
 
 def main(mov_panddas_path, ref_panddas_path):
     mov_panddas_path, ref_panddas_path = Path(mov_panddas_path), Path(ref_panddas_path)
@@ -150,7 +183,7 @@ def main(mov_panddas_path, ref_panddas_path):
 
         ref_build = get_build(ref_event, ref_panddas_path)
 
-        mov_build_any_model = get_build_any_model(closest_event_any_model,)
+        mov_build_any_model = get_build_any_model(closest_event_any_model, )
 
         if mov_build is None:
             build_score = None
@@ -182,5 +215,15 @@ def main(mov_panddas_path, ref_panddas_path):
     pd.DataFrame(records).to_csv(mov_panddas_path / 'reference_comparison.csv')
 
 
+def all_systems():
+    for dataset_dir in NEW_PANDDAS_DIR.glob('*'):
+        if not dataset_dir.is_dir():
+            continue
+
+        comparator_dir = COMPARATOR_DATASETS[dataset_dir.name]
+        main(dataset_dir, comparator_dir)
+    ...
+
+
 if __name__ == "__main__":
-    fire.Fire(main)
+    fire.Fire(all_systems)
