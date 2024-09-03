@@ -120,7 +120,10 @@ def main(mov_panddas_path, ref_panddas_path):
     ref_high_conf_event_table = ref_event_table[ref_event_table['Ligand Confidence'] == 'High']
     records = []
     for idx, ref_event in ref_high_conf_event_table.iterrows():
-        print(ref_event['dtag'])
+        ref_dtag, ref_x, ref_y, ref_z = ref_event['dtag'], ref_event['x'], ref_event['y'], ref_event['z']
+        print(ref_dtag)
+
+        print(f'Centroid: {round(ref_x, 2)} {round(ref_y, 2)} {round(ref_z, 2)}')
 
         processed_dataset = _get_processed_dataset(ref_event, mov_panddas_path)
 
