@@ -96,7 +96,11 @@ def match_event_all_models(ref_event, processed_dataset, ):
             events[(model_id, event_id)] = mov_event
 
     if len(distances) != 0:
-        idx = min(distances, key=lambda _x: distances[_x])
+        close_distances = {_k: _v for _k, _v in distances.items() if _v < 6.0}
+        if len(close_distances) != 0:
+            idx = max(close_distances, key=lambda _x: events[_x]['Score'])
+        else:
+            idx = min(distances, key=lambda _x: distances[_x])
         return events[idx], distances[idx]
 
     return None, None
