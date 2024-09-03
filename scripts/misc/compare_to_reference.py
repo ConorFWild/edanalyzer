@@ -72,6 +72,11 @@ def get_build(mov_event, mov_panddas_path):
     distances = {idx: np.linalg.norm(centroid - np.array([mov_x, mov_y, mov_z])) for idx, centroid in centroids.items()}
     return ligands[min(ligands, key=lambda _x: distances[_x])]
 
+def get_build_any_model(mov_event):
+    build_path = mov_event['Build Path']
+    st = gemmi.read_structure(str(build_path))
+    return st[0][0][0]
+
 def get_event_score(mov_event, mov_panddas_path):
     with open(mov_panddas_path / 'processed_datasets' / mov_event['dtag'] / 'events.yaml') as f:
         yml = yaml.safe_load(f)
@@ -141,6 +146,8 @@ def main(mov_panddas_path, ref_panddas_path):
 
         ref_build = get_build(ref_event, ref_panddas_path)
 
+        mov_build_any_model = get_build_any_model(closest_event_any_model,)
+
         if mov_build is None:
             build_score = None
             build_rmsd = None
@@ -151,13 +158,20 @@ def main(mov_panddas_path, ref_panddas_path):
             print(ref_build)
             build_rmsd = get_build_rmsd(mov_build, ref_build)
 
+        event_score_any_model = closest_event_any_model['Event Score']
+        build_score_any_model = closest_event_any_model['Build Score']
+        build_rmsd_any_model = get_build_rmsd(mov_build_any_model, ref_build)
+
         record = {
             'dtag': ref_event['dtag'],
             'event_score': event_score,
             'closest_event_distance': matching_event_distance,
-            "closest_event_distance_any_model": closest_event_dist_any_model,
             'build_score': build_score,
-            'build_rmsd': build_rmsd
+            'build_rmsd': build_rmsd,
+            "delta_any_model": closest_event_dist_any_model,
+            'event_score_any_model': event_score_any_model,
+            'build_score_any_mode': build_score_any_model,
+            'rmsd_any_model': build_rmsd_any_model
         }
         records.append(record)
 
