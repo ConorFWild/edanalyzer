@@ -215,6 +215,7 @@ def main(mov_panddas_path, ref_panddas_path):
 
         record = {
             'dtag': ref_event['dtag'],
+            'event_id': ref_event['event_id'],
             'event_score': event_score,
             'closest_event_distance': matching_event_distance,
             'build_score': build_score,
