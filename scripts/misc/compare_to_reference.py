@@ -198,11 +198,16 @@ def main(mov_panddas_path, ref_panddas_path):
             except:
                 build_rmsd = None
 
-        event_score_any_model = closest_event_any_model['Score']
-        build_score_any_model = closest_event_any_model['Build Score']
-        try:
-            build_rmsd_any_model = get_build_rmsd(mov_build_any_model, ref_build)
-        except:
+        if closest_event_dist_any_model:
+            event_score_any_model = closest_event_any_model['Score']
+            build_score_any_model = closest_event_any_model['Build Score']
+            try:
+                build_rmsd_any_model = get_build_rmsd(mov_build_any_model, ref_build)
+            except:
+                build_rmsd_any_model = None
+        else:
+            event_score_any_model = None
+            build_score_any_model = None
             build_rmsd_any_model = None
 
         record = {
