@@ -1,0 +1,352 @@
+import dataclasses
+import itertools
+
+import numpy as np
+import torch
+import gemmi
+from scipy.spatial.transform import Rotation as R
+import zarr
+from rich import print as rprint
+
+
+from torch.utils.data import Dataset
+
+from .base import (
+    _load_xmap_from_mtz_path,
+    _load_xmap_from_path,
+    _sample_xmap_and_scale,
+    _get_ligand_mask_float,
+    _sample_xmap,
+    _get_identity_matrix,
+    _get_random_orientation,
+    _get_centroid_from_res,
+    _get_transform_from_orientation_centroid,
+    _get_res_from_structure_chain_res,
+    _get_structure_from_path,
+    _get_res_from_arrays,
+    _get_grid_from_hdf5,
+    _get_ed_mask_float
+)
+
+patch_lower = [x for x in range(8)]
+patch_upper = [x for x in range(24,32)]
+patch_set = [patch_lower, patch_upper]
+
+# print(patch_set)
+
+patch_arrays = [
+    np.array([[x, y, z] for x, y, z in itertools.product(xs, ys, zs)])
+    for xs, ys, zs
+    in itertools.product(patch_set, patch_set, patch_set)
+]
+
+# print(patch_arrays[0])
+
+patches = [
+    (patch[:, 0].flatten(), patch[:,1].flatten(), patch[:,2].flatten(), )
+    for patch
+    in patch_arrays
+]
+# print(patches[0])
+
+
+def get_mask_array():
+    rng = np.random.default_rng()
+    mask_array = np.ones((32, 32, 32), dtype=np.float32)
+    for patch in patches:
+        if rng.random() > 0.5:
+            mask_array[patch] = 0.0
+
+    return mask_array
+
+
+def _get_predicted_density_from_res(residue, event_map):
+    optimized_structure = gemmi.Structure()
+    model = gemmi.Model('0')
+    chain = gemmi.Chain('A')
+
+    chain.add_residue(residue)
+    model.add_chain(chain)
+    optimized_structure.add_model(model)
+
+    # Get the electron density of the optimized structure
+    optimized_structure.cell = event_map.unit_cell
+    optimized_structure.spacegroup_hm = gemmi.find_spacegroup_by_name("P 1").hm
+    dencalc = gemmi.DensityCalculatorE()
+    dencalc.d_min = 0.75  #*2
+    # dencalc.rate = 1.5
+    dencalc.set_grid_cell_and_spacegroup(optimized_structure)
+    # dencalc.initialize_grid_to_size(event_map.nu, event_map.nv, event_map.nw)
+    dencalc.put_model_density_on_grid(optimized_structure[0])
+    calc_grid = dencalc.grid
+
+    return calc_grid
+
+def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_residue):
+    transform = _get_transform_from_orientation_centroid(
+        orientation,
+        centroid,
+        n=64,
+        sd=0.25
+    )
+
+    known_hit_score_mask_grid = _get_ligand_mask_float(
+        known_hit_pose_residue,
+        radius=2.5,
+        n=180,
+        r=45.0
+    )
+
+    decoy_score_mask_grid = _get_ligand_mask_float(
+        decoy_residue,
+        radius=2.5,
+        n=180,
+        r=45.0
+    )
+
+    known_hit_predicted_density = _get_predicted_density_from_res(known_hit_pose_residue, known_hit_score_mask_grid)
+    decoy_predicted_density = _get_predicted_density_from_res(decoy_residue, decoy_score_mask_grid)
+
+    decoy_score_mask_arr = np.array(decoy_score_mask_grid, copy=False)
+    decoy_predicted_density_arr = np.array(decoy_predicted_density, copy=False)
+    known_hit_score_mask_arr = np.array(known_hit_score_mask_grid, copy=False)
+    known_hit_predicted_density_arr = np.array(known_hit_predicted_density, copy=False)
+
+
+    sel = decoy_score_mask_arr > 0.0
+
+    decoy_predicted_density_sel = decoy_predicted_density_arr[sel]
+    known_hit_predicted_density_sel = known_hit_predicted_density_arr[sel]
+
+    # data = np.hstack(
+    #     [
+    #         decoy_predicted_density_sel.reshape(-1,1),
+    #         known_hit_predicted_density_sel.reshape(-1, 1),
+    #
+    #     ]
+    # )
+    # score = np.corrcoef(data.T)[0, 1]
+
+    score = 1- ( np.sum(np.clip(decoy_predicted_density_sel - known_hit_predicted_density_sel, 0.0, None)) / np.sum(decoy_predicted_density_sel))
+
+    return score
+
+
+    # known_hit_score_sample = _sample_xmap(
+    #     known_hit_score_mask_grid,
+    #     transform,
+    #     np.zeros([64, 64, 64], dtype=np.float32)
+    # )
+    # initial_known_hit_sum = np.sum(known_hit_score_sample)
+    # # print(known_hit_score_sample)
+    # known_hit_score_sample[known_hit_score_sample >= 0.1] = 1.0
+    # known_hit_score_sample[known_hit_score_sample < 0.1] = 0.0
+    #
+    # decoy_score_sample = _sample_xmap(
+    #     decoy_score_mask_grid,
+    #     transform,
+    #     np.zeros([64, 64, 64], dtype=np.float32),
+    # )
+    # initial_decoy_sum = np.sum(decoy_score_sample)
+    #
+    # decoy_score_sample[decoy_score_sample >= 0.1] = 1.0
+    # decoy_score_sample[decoy_score_sample < 0.1] = 0.0
+    #
+    # # print(
+    # #     {
+    # #         'initial_known_hit_sum': initial_known_hit_sum,
+    # #         'initial_decoy_sum': initial_decoy_sum,
+    # #         'known hit sample sum': np.sum(known_hit_score_sample),
+    # #         'decoy sum': np.sum(decoy_score_sample),
+    # #         'n': np.power(64, 3)
+    # #     }
+    # # )
+    #
+    #
+    # score = np.sum(known_hit_score_sample * decoy_score_sample) / np.sum(decoy_score_sample)
+    #
+    #
+    # return score
+
+
+
+class BuildScoringDataset(Dataset):
+
+    def __init__(self, zarr_path, sample_indexes, pos_train_pose_samples):
+        # self.data = data
+        self.root = zarr.open(zarr_path, mode='r')
+
+        self.meta_table = self.root['meta_sample']
+        self.xmap_table = self.root['xmap_sample']
+        self.zmap_table = self.root['z_map_sample']
+        self.decoy_table = self.root['decoy_pose_sample']
+        self.ligand_data_table = self.root['ligand_data']
+        self.known_hit_pose = self.root['known_hit_pose']
+        # self.pandda_2_annotation_table = self.root['annotation']
+        # self.pandda_2_frag_table = self.root['ligand_confs']  # ['ligand_fragments']
+
+        # self.pandda_2_annotations = {
+        #     _x['event_idx']: _x
+        #     for _x
+        #     in self.pandda_2_annotation_table
+        # }
+
+        self.sample_indexes = sample_indexes
+
+        self.pos_train_pose_samples = pos_train_pose_samples
+
+    def __len__(self):
+        return len(self.sample_indexes)
+
+    def __getitem__(self, idx: int):
+        # Get the sample data
+
+        sample_data = self.sample_indexes[idx]
+
+        # Get the metadata, decoy pose and embedding
+        _meta_idx, _decoy_idx, _embedding_idx, _train = sample_data['meta'], int(sample_data['decoy']), sample_data['embedding'], sample_data['train']
+        rprint(
+            [
+                _meta_idx,
+                _decoy_idx,
+                _embedding_idx,
+                _train,
+            ]
+        )
+        _meta = self.meta_table[_meta_idx]
+        _decoy = self.decoy_table[_decoy_idx]
+        _embedding = self.decoy_table[_embedding_idx]
+
+        # Get rng
+        rng = np.random.default_rng()
+
+        # Get the decoy
+        valid_mask = _decoy['elements'] != 0
+        valid_poss = _decoy['positions'][valid_mask]
+        valid_elements = _decoy['elements'][valid_mask]
+
+        centroid = np.mean(valid_poss, axis=0)
+
+        sample_array = np.zeros(
+            (32, 32, 32),
+            dtype=np.float32,
+        )
+        orientation = _get_random_orientation()
+        transform = _get_transform_from_orientation_centroid(
+            orientation,
+            centroid,
+            n=32
+        )
+
+        decoy_residue = _get_res_from_arrays(
+            valid_poss,
+            valid_elements,
+        )
+
+        # decoy_mask_grid = _get_ligand_mask_float(
+        #     decoy_residue,
+        #     radius=2.0,
+        #     n=90,
+        #     r=45.0
+        # )
+        # image_decoy_sample = _sample_xmap(
+        #     decoy_mask_grid,
+        #     transform,
+        #     np.copy(sample_array)
+        # )
+        #
+        # image_decoy_mask = np.copy(sample_array)
+        # image_decoy_mask[image_decoy_sample > 0.0] = 1.0
+        # image_decoy_mask[image_decoy_sample <= 0.0] = 0.0
+
+        xmap_mask_float = _get_ed_mask_float()
+
+        decoy_score_mask_grid = _get_ligand_mask_float(
+            decoy_residue,
+            radius=1.0,
+            n=90,
+            r=45.0
+        )
+        image_score_decoy_mask = _sample_xmap(
+            decoy_score_mask_grid,
+            transform,
+            np.copy(sample_array)
+        )
+
+        # Get mask of hit for score calculation
+        score = _decoy['overlap_score']
+
+        # Get maps
+        xmap_data = self.xmap_table[_meta['idx']]
+        zmap_data = self.zmap_table[_meta['idx']]
+
+        xmap = _get_grid_from_hdf5(xmap_data)
+        zmap = _get_grid_from_hdf5(zmap_data)
+
+        xmap_sample = _sample_xmap_and_scale(
+            xmap,
+            transform,
+            np.copy(sample_array)
+        )
+        z_map_sample = _sample_xmap_and_scale(
+            zmap,
+            transform,
+            np.copy(sample_array)
+        )
+
+        if _train:
+            u_s = rng.uniform(0.0, 0.25)
+            noise = rng.normal(size=(32,32,32)) * u_s
+            z_map_sample += noise.astype(np.float32)
+
+            u_s = rng.uniform(0.0, 0.25)
+            noise = rng.normal(size=(32,32,32)) * u_s
+            xmap_sample += noise.astype(np.float32)
+
+        rmsd = _decoy['rmsd']
+        if _train:
+            if rmsd < 1.5:
+                hit = [0.025, 0.975]
+            elif rmsd >= 1.5:
+                hit = [0.975, 0.025]
+            else:
+                raise Exception
+        else:
+            if rmsd < 1.5:
+                hit = [0.0, 1.0]
+            elif rmsd >= 1.5:
+                hit = [1.0, 0.0]
+            else:
+                raise Exception
+
+
+        # Return data
+        return (
+            [
+                _meta['idx'],
+                _decoy['idx'],
+                _embedding['idx'],
+                str(_meta['system']),
+                str(_meta['dtag']),
+                int(_meta['event_num']),
+            ],
+            torch.from_numpy(
+                np.stack(
+                    [
+                        z_map_sample,# * image_decoy_mask,
+                        xmap_sample * xmap_mask_float,
+                        image_score_decoy_mask
+                    ],
+                    axis=0,
+                    dtype=np.float32
+                )),
+            torch.from_numpy(
+                np.stack(
+                    [image_score_decoy_mask],
+                    axis=0,
+                    dtype=np.float32
+                )),
+            torch.from_numpy(np.array(rmsd, dtype=np.float32)),
+            torch.from_numpy(np.array(score, dtype=np.float32)),
+            torch.from_numpy(np.array(hit, dtype=np.float32))
+        )
