@@ -193,7 +193,10 @@ def main(mov_panddas_path, ref_panddas_path):
             build_score = get_build_score(mov_event, mov_panddas_path)
             print(mov_build)
             print(ref_build)
-            build_rmsd = get_build_rmsd(mov_build, ref_build)
+            try:
+                build_rmsd = get_build_rmsd(mov_build, ref_build)
+            except:
+                build_rmsd = None
 
         event_score_any_model = closest_event_any_model['Score']
         build_score_any_model = closest_event_any_model['Build Score']
