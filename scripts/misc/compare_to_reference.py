@@ -183,7 +183,7 @@ def main(mov_panddas_path, ref_panddas_path):
 
         ref_build = get_build(ref_event, ref_panddas_path)
 
-        if ref_build is not None:
+        if closest_event_any_model is not None:
             mov_build_any_model = get_build_any_model(closest_event_any_model, )
         else:
             mov_build_any_model = None
