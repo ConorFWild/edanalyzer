@@ -200,7 +200,10 @@ def main(mov_panddas_path, ref_panddas_path):
 
         event_score_any_model = closest_event_any_model['Score']
         build_score_any_model = closest_event_any_model['Build Score']
-        build_rmsd_any_model = get_build_rmsd(mov_build_any_model, ref_build)
+        try:
+            build_rmsd_any_model = get_build_rmsd(mov_build_any_model, ref_build)
+        except:
+            build_rmsd_any_model = None
 
         record = {
             'dtag': ref_event['dtag'],
