@@ -36,7 +36,7 @@ COMPARATOR_DATASETS = {
     "NSP16": COMPARATORS_DIR / 'NSP16',
 }
 
-NEW_PANDDAS_DIR = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/test_systems_panddas_new_event_score_2')
+NEW_PANDDAS_DIR = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/test_systems_panddas_new_event_score_4')
 
 
 def _get_processed_dataset(ref_event, mov_panddas_path):
