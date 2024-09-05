@@ -235,6 +235,9 @@ def all_systems():
         if not dataset_dir.is_dir():
             continue
 
+        if not (dataset_dir / 'analyses' / 'pandda_analyse_events.csv').exists():
+            continue
+
         comparator_dir = COMPARATOR_DATASETS[dataset_dir.name]
         main(dataset_dir, comparator_dir)
     ...
