@@ -440,6 +440,8 @@ def get_comparator_data():
             "pandda_path": _row['mov_panddas_path']
         }
 
+        dataset_key = f"{_row['dtag']}_{_row['model_id']}_{_row['mov_event_id']}"
+
         datasets[_row['dtag']] = Dataset(
             lambda: _get_structure(_row['mov_panddas_path'], _row['dtag'], ),
             lambda: _get_reflections(_row['mov_panddas_path'], _row['dtag'], ),
@@ -448,7 +450,7 @@ def get_comparator_data():
             {
                 1: Event(
                     lambda: _get_event_map(_row['mov_panddas_path'], _row['dtag'], _row['model_id'], _row['bdc']),
-                    _row['bdc'],
+                    round(_row['bdc'], 2),
                     event_row
                 )
             },
