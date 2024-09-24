@@ -160,7 +160,7 @@ def _make_dataset_dir(processed_datasets_dir, dtag, dataset: Dataset):
         ))
 
     # Store the metadata
-    with open(processed_datasets_dir/ dtag / 'meta.yaml') as f:
+    with open(processed_datasets_dir/ dtag / 'meta.yaml', 'w') as f:
         yaml.dump(dataset.meta, f)
 
 
