@@ -70,6 +70,7 @@ class Dataset:
 
 def _get_ligand_files(ligand_cif_file, ligand_pdb_file):
     return ligand_cif_file, ligand_pdb_file
+
 def _get_structure(mov_panddas_path, dtag, ):
     return gemmi.read_structure(
         str(mov_panddas_path / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
@@ -442,8 +443,8 @@ def get_comparator_data():
         datasets[_row['dtag']] = Dataset(
             lambda: _get_structure(_row['mov_panddas_path'], _row['dtag'], ),
             lambda: _get_reflections(_row['mov_panddas_path'], _row['dtag'], ),
-            lambda: _get_ligand_files(_row['ligand_cif_file'], _row['ligand_pdb_file']),
             lambda: _get_z_map(_row['mov_panddas_path'], _row['dtag'], _row['model_id']),
+            lambda: _get_ligand_files(_row['ligand_cif_file'], _row['ligand_pdb_file']),
             {
                 1: Event(
                     lambda: _get_event_map(_row['mov_panddas_path'], _row['dtag'], _row['model_id'], _row['bdc']),
