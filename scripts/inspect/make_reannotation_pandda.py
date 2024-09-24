@@ -10,6 +10,8 @@ import fire
 import pony
 from rich import print as rprint
 import zarr
+from rich.traceback import install
+install(show_locals=True)
 
 import pandas as pd
 import gemmi
