@@ -127,6 +127,8 @@ def _save_reflections(ref, path):
 
 
 def _make_dataset_dir(processed_datasets_dir, dtag, dataset: Dataset):
+    rprint(f'Making dir: {processed_datasets_dir / dtag}')
+
     # Save the structure
     _save_structure(dataset.structure(),
                     processed_datasets_dir/ dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag))
@@ -191,14 +193,13 @@ def _make_site_table(datasets: dict[str, Dataset], path):
 
 def make_pandda(path: Path, datasets: dict[str, Dataset]):
     # Make the directories
-    psuedo_pandda_dir = path / "build_annotation_pandda_3"
-    analyses_dir = psuedo_pandda_dir / "analyses"
-    processed_datasets_dir = psuedo_pandda_dir / "processed_datasets"
+    analyses_dir = path / "analyses"
+    processed_datasets_dir = path / "processed_datasets"
     analyse_table_path = analyses_dir / "pandda_analyse_events.csv"
     analyse_site_table_path = analyses_dir / "pandda_analyse_sites.csv"
 
     # Spoof the main directories
-    try_make(psuedo_pandda_dir)
+    try_make(path)
     try_make(analyses_dir)
     try_make(processed_datasets_dir)
 
@@ -387,10 +388,12 @@ def get_comparator_data():
                         )
 
     df = pd.DataFrame(records)
+    print(df)
 
     # Filter to the high scoring spurious events
     highest_scoring_build_df = df.loc[df.groupby(['dtag', ])['build_score'].idxmax()]
     spurious_highest_scoring_build_df = highest_scoring_build_df[highest_scoring_build_df['spurious']]
+    print(spurious_highest_scoring_build_df)
 
     # Get the dataset
     datasets = {}
@@ -447,6 +450,7 @@ def get_comparator_data():
             },
             meta
         )
+    rprint(datasets)
 
     # Make a annotation pandda
     make_pandda(PANDDAS_REANNOTATION_DIR, datasets)
