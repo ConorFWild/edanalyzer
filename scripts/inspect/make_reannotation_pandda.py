@@ -130,6 +130,7 @@ def _save_reflections(ref, path):
 
 def _make_dataset_dir(processed_datasets_dir, dtag, dataset: Dataset):
     rprint(f'Making dir: {processed_datasets_dir / dtag}')
+    try_make(processed_datasets_dir/ dtag)
 
     # Save the structure
     _save_structure(dataset.structure(),
