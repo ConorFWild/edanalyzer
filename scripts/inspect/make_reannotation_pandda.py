@@ -129,11 +129,11 @@ def _save_reflections(ref, path):
 def _make_dataset_dir(processed_datasets_dir, dtag, dataset: Dataset):
     # Save the structure
     _save_structure(dataset.structure(),
-                    processed_datasets_dir / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag))
+                    processed_datasets_dir/ dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(dtag=dtag))
 
     # Save the reflections
     _save_reflections(dataset.reflections(),
-                      processed_datasets_dir / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dtag))
+                      processed_datasets_dir/ dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dtag))
 
     # Get ligand files
     ligand_cif_file, ligand_pdb_file = dataset.ligand_files()
@@ -142,19 +142,20 @@ def _make_dataset_dir(processed_datasets_dir, dtag, dataset: Dataset):
 
     # Save the zmap
     zmap = dataset.z_map()
-    _save_xmap(zmap, processed_datasets_dir / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=f"{dtag}"))
+    _save_xmap(zmap, processed_datasets_dir / dtag / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=f"{dtag}"))
 
     # Save the event maps
     for event_id, event in dataset.events.items():
         event_map = event.event_map()
-        _save_xmap(event_map, processed_datasets_dir / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
+        _save_xmap(event_map, processed_datasets_dir / dtag / constants.PANDDA_EVENT_MAP_TEMPLATE.format(
             dtag=f"{dtag}",
             event_idx=str(event_id),
             bdc=f"{event.bdc}"
         ))
 
     # Store the metadata
-    ...
+    with open(processed_datasets_dir/ dtag / 'meta.yaml') as f:
+        yaml.dump(dataset.meta, f)
 
 
 def _make_event_table(datasets: dict[str, Dataset], path):
