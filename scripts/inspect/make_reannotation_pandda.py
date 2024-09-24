@@ -380,9 +380,9 @@ def get_comparator_data():
                                 'centroid_z': ref_centroid[2],
                                 'spurious': True,
                                 'mov_panddas_path': mov_panddas_path,
-                                'autobuild_path': ref_event['Build Path'],
-                                'ligand_cif_file': ligand_dir / ref_event['Ligand Key'],
-                                'ligand_pdb_file': ligand_dir / ref_event['Ligand Key'],
+                                'autobuild_path': mov_event['Build Path'],
+                                'ligand_cif_file': ligand_dir / mov_event['Ligand Key'],
+                                'ligand_pdb_file': ligand_dir / mov_event['Ligand Key'],
 
                             }
                         )
