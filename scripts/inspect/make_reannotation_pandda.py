@@ -442,7 +442,7 @@ def get_comparator_data():
 
         dataset_key = f"{_row['dtag']}_{_row['model_id']}_{_row['mov_event_id']}"
 
-        datasets[_row['dtag']] = Dataset(
+        datasets[dataset_key] = Dataset(
             lambda: _get_structure(_row['mov_panddas_path'], _row['dtag'], ),
             lambda: _get_reflections(_row['mov_panddas_path'], _row['dtag'], ),
             lambda: _get_z_map(_row['mov_panddas_path'], _row['dtag'], _row['model_id']),
