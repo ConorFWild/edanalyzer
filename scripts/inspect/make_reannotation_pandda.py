@@ -454,3 +454,6 @@ def get_comparator_data():
 
     # Make a annotation pandda
     make_pandda(PANDDAS_REANNOTATION_DIR, datasets)
+
+if __name__ == '__main__':
+    fire.Fire(get_comparator_data)
