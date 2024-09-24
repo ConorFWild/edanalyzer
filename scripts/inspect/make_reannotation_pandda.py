@@ -4,6 +4,7 @@ import time
 from pathlib import Path
 import dataclasses
 import typing
+from functools import partial
 
 import yaml
 import fire
@@ -447,13 +448,13 @@ def get_comparator_data():
         # dataset_key = f"{j}"
 
         datasets[dataset_key] = Dataset(
-            lambda: _get_structure(_row['mov_panddas_path'], _row['dtag'], ),
-            lambda: _get_reflections(_row['mov_panddas_path'], _row['dtag'], ),
-            lambda: _get_z_map(_row['mov_panddas_path'], _row['dtag'], _row['model_id']),
-            lambda: _get_ligand_files(_row['ligand_cif_file'], _row['ligand_pdb_file']),
+            partial(_get_structure, _row['mov_panddas_path'], _row['dtag'], ),
+            partial(_get_reflections,_row['mov_panddas_path'], _row['dtag'], ),
+            partial(_get_z_map,_row['mov_panddas_path'], _row['dtag'], _row['model_id']),
+            partial(_get_ligand_files, _row['ligand_cif_file'], _row['ligand_pdb_file']),
             {
                 1: Event(
-                    lambda: _get_event_map(_row['mov_panddas_path'], _row['dtag'], _row['model_id'], _row['bdc']),
+                    partial(_get_event_map, _row['mov_panddas_path'], _row['dtag'], _row['model_id'], _row['bdc']),
                     round(_row['bdc'], 2),
                     event_row
                 )
