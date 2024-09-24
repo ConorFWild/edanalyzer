@@ -72,6 +72,7 @@ def _get_ligand_files(ligand_cif_file, ligand_pdb_file):
     return ligand_cif_file, ligand_pdb_file
 
 def _get_structure(mov_panddas_path, dtag, ):
+    rprint(f'{dtag}')
     return gemmi.read_structure(
         str(mov_panddas_path / constants.PANDDA_PROCESSED_DATASETS_DIR / dtag / constants.PANDDA_INITIAL_MODEL_TEMPLATE.format(
             dtag=dtag)))
