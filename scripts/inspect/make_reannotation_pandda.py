@@ -403,8 +403,11 @@ def get_comparator_data():
     datasets = {}
     j = 0
     for _idx, _row in spurious_highest_scoring_build_df.iterrows():
+        dataset_key = f"{_row['dtag']}_{_row['model_id']}_{_row['mov_event_id']}"
+
         event_row = {
-            "dtag": _row['dtag'],
+            # "dtag": _row['dtag'],
+            "dtag": dataset_key,
             "event_idx": 1,
             "1-BDC": _row['bdc'],
             "cluster_size": 1,
@@ -430,7 +433,6 @@ def get_comparator_data():
             "exclude_from_z_map_analysis": False,
             "exclude_from_characterisation": False,
         }
-        j += 1
 
         meta = {
             "dtag": _row['dtag'],
@@ -441,6 +443,7 @@ def get_comparator_data():
         }
 
         dataset_key = f"{_row['dtag']}_{_row['model_id']}_{_row['mov_event_id']}"
+        # dataset_key = f"{j}"
 
         datasets[dataset_key] = Dataset(
             lambda: _get_structure(_row['mov_panddas_path'], _row['dtag'], ),
@@ -456,6 +459,8 @@ def get_comparator_data():
             },
             meta
         )
+        j += 1
+
     rprint(datasets)
 
     # Make a annotation pandda
