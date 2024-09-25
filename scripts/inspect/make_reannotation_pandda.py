@@ -362,7 +362,7 @@ def get_comparator_data():
                     if key not in matched:
                         mov_x, mov_y, mov_z = mov_event['Centroid']
                         distance = np.linalg.norm(np.array([mov_x - ref_x, mov_y - ref_y, mov_z - ref_z, ]))
-                        ligand_dir = mov_panddas_path / 'processed_datasets' / ref_event['dtag'] / 'ligand_file'
+                        ligand_dir = mov_panddas_path / 'processed_datasets' / ref_event['dtag'] / 'ligand_files'
                         records.append(
                             {
                                 'system': mov_panddas_path.name,
