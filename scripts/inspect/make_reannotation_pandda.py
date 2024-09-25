@@ -147,7 +147,7 @@ def _make_dataset_dir(processed_datasets_dir, dtag, dataset: Dataset):
     try_make(processed_datasets_dir / dtag / 'ligand_files')
     ligand_cif_file, ligand_pdb_file = dataset.ligand_files()
     try_link(ligand_cif_file, processed_datasets_dir / dtag / 'ligand_files' / f'{Path(ligand_cif_file).name}.cif')
-    try_link(ligand_pdb_file, processed_datasets_dir / dtag / 'ligand_files' / f'{Path(ligand_pdb_file).name}.cif')
+    try_link(ligand_pdb_file, processed_datasets_dir / dtag / 'ligand_files' / f'{Path(ligand_pdb_file).name}.pdb')
 
     # Save the zmap
     zmap = dataset.z_map()
