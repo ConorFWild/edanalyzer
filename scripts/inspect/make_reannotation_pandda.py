@@ -144,6 +144,7 @@ def _make_dataset_dir(processed_datasets_dir, dtag, dataset: Dataset):
                       processed_datasets_dir/ dtag / constants.PANDDA_INITIAL_MTZ_TEMPLATE.format(dtag=dtag))
 
     # Get ligand files
+    try_make(processed_datasets_dir / dtag / 'ligand_files')
     ligand_cif_file, ligand_pdb_file = dataset.ligand_files()
     try_link(ligand_cif_file, processed_datasets_dir / dtag / 'ligand_files' / Path(ligand_cif_file).name)
     try_link(ligand_pdb_file, processed_datasets_dir / dtag / 'ligand_files' / Path(ligand_pdb_file).name)
