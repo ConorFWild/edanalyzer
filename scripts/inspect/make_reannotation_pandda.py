@@ -153,7 +153,7 @@ def _make_dataset_dir(processed_datasets_dir, dtag, dataset: Dataset):
     zmap = dataset.z_map()
     zmap_np = np.array(zmap, copy=False)
     zmap_np_copy = zmap_np.copy()
-    zmap_np[:,:,:] = (zmap_np_copy[:,:,:] - np.mean(zmap_np_copy)) / np.std(zmap_np_copy)
+    zmap_np[:,:,:] = ((zmap_np_copy - np.mean(zmap_np_copy)) / np.std(zmap_np_copy))[:,:,:]
     _save_xmap(zmap, processed_datasets_dir / dtag / constants.PANDDA_ZMAP_TEMPLATE.format(dtag=f"{dtag}"))
 
     # Save the event maps
