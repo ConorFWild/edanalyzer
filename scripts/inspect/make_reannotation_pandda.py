@@ -146,8 +146,8 @@ def _make_dataset_dir(processed_datasets_dir, dtag, dataset: Dataset):
     # Get ligand files
     try_make(processed_datasets_dir / dtag / 'ligand_files')
     ligand_cif_file, ligand_pdb_file = dataset.ligand_files()
-    try_link(ligand_cif_file, processed_datasets_dir / dtag / 'ligand_files' / f'{Path(ligand_cif_file).name}.cif')
-    try_link(ligand_pdb_file, processed_datasets_dir / dtag / 'ligand_files' / f'{Path(ligand_pdb_file).name}.pdb')
+    try_link(ligand_cif_file, processed_datasets_dir / dtag / 'ligand_files' / Path(ligand_cif_file).name)
+    try_link(ligand_pdb_file, processed_datasets_dir / dtag / 'ligand_files' / Path(ligand_pdb_file).name)
 
     # Save the zmap
     zmap = dataset.z_map()
@@ -388,8 +388,8 @@ def get_comparator_data():
                                 'spurious': True,
                                 'mov_panddas_path': mov_panddas_path,
                                 'autobuild_path': mov_event['Build Path'],
-                                'ligand_cif_file': ligand_dir / mov_event['Ligand Key'],
-                                'ligand_pdb_file': ligand_dir / mov_event['Ligand Key'],
+                                'ligand_cif_file': ligand_dir / f"{mov_event['Ligand Key']}.cif",
+                                'ligand_pdb_file': ligand_dir / f"{mov_event['Ligand Key']}.pdb",
 
                             }
                         )
