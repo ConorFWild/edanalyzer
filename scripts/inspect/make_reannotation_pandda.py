@@ -444,8 +444,8 @@ def get_comparator_data():
             "dtag": _row['dtag'],
             "model_idx": _row['model_id'],
             "event_idx": _row['mov_event_id'],
-            "autobuild_path": _row['autobuild_path'],
-            "pandda_path": _row['mov_panddas_path']
+            "autobuild_path": str(_row['autobuild_path']),
+            "pandda_path": str(_row['mov_panddas_path'])
         }
 
         dataset_key = f"{_row['dtag']}_{_row['model_id']}_{_row['mov_event_id']}"
