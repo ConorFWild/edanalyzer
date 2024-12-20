@@ -178,7 +178,11 @@ class EventScoringDataset(Dataset):
             (32, 32, 32),
             dtype=np.float32,
         )
-        orientation = _get_random_orientation()
+        if annotation['partition'] == 'train':
+
+            orientation = _get_random_orientation()
+        else:
+            orientation = np.eye(3)
         transform = _get_transform_from_orientation_centroid(
             orientation,
             centroid,

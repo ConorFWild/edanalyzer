@@ -378,7 +378,7 @@ def _get_transform_from_orientation_centroid(orientation, centroid, n, sd=0.5):
 
     # Get sample grid centroid
     sample_grid_centroid = (np.array([n, n, n]) * sample_distance) / 2
-    sample_grid_centroid_pos = gemmi.Position(*sample_grid_centroid)
+    # sample_grid_centroid_pos = gemmi.Position(*sample_grid_centroid)
 
     # Get centre grid transform
     centre_grid_transform = gemmi.Transform()
@@ -394,12 +394,12 @@ def _get_transform_from_orientation_centroid(orientation, centroid, n, sd=0.5):
     rotation_transform.mat.fromlist(rotation_matrix.tolist())
 
     # Apply random rotation transform to centroid
-    transformed_centroid = rotation_transform.apply(sample_grid_centroid_pos)
-    transformed_centroid_array = np.array([transformed_centroid.x, transformed_centroid.y, transformed_centroid.z])
+    # transformed_centroid = rotation_transform.apply(sample_grid_centroid_pos)
+    # transformed_centroid_array = np.array([transformed_centroid.x, transformed_centroid.y, transformed_centroid.z])
 
     # Recentre transform
-    rotation_recentre_transform = gemmi.Transform()
-    rotation_recentre_transform.vec.fromlist((sample_grid_centroid - transformed_centroid_array).tolist())
+    # rotation_recentre_transform = gemmi.Transform()
+    # rotation_recentre_transform.vec.fromlist((sample_grid_centroid - transformed_centroid_array).tolist())
 
     # Event centre transform
     event_centre_transform = gemmi.Transform()
