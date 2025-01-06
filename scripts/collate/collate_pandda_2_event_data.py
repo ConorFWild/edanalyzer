@@ -64,7 +64,7 @@ def main(config_path):
     #
     # Open a file in "w"rite mode
     # zarr_path = 'output/event_data_with_mtzs_2.zarr'
-    zarr_path = '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/event_data_2.zarr'
+    zarr_path = '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/event_data_3.zarr'
 
     root = zarr.open(zarr_path, mode='a')
 
@@ -437,7 +437,7 @@ def main(config_path):
             poss = np.zeros((150, 3))
             poss[:embedding.shape[0], :] = embedding[:, :]
             mol_els = np.array(
-                [m.GetAtomWithIdx(_atom_idx).GetAtomicNum() for _atom_idx in [a.GetIdx() for a in m.GetAtoms()]])
+                [m2.GetAtomWithIdx(_atom_idx).GetAtomicNum() for _atom_idx in [a.GetIdx() for a in m2.GetAtoms()]])
             els = np.zeros(150)
             els[:len(mol_els)] = mol_els[:]
 
