@@ -390,6 +390,8 @@ def main(config_path):
     #                 mol_frag_group.append(record)
     #                 mol_frag_idx += 1
 
+
+    print(f'Generating ligand confs...')
     ligand_data_table = root['pandda_2']['ligand_data']
     try:
         del root['pandda_2']['ligand_confs']
