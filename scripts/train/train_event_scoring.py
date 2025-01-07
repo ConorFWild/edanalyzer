@@ -538,7 +538,8 @@ def _get_train_test_idxs_full_conf(root):
             test_pos_z_samples.append(z['idx'])
             test_pos_conf.append(z['Confidence'])
 
-        else:
+        # else:
+        elif z['Confidence'] == 'Low':
             fragment = \
                 sample(
                     [_x for _x in positive_ligand_sample_distribution if positive_ligand_sample_distribution[_x] > 0],
@@ -858,7 +859,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'event_scoring_prod_nsys=87_opt=adamw_ls=2.5e-2_bs=128_lr=e-2_wd=e-1_sch=pl_cd=10_wn=0.5_r=8.0'
+    output = output_dir / 'event_scoring_prod_2_nsys=87_opt=adamw_ls=2.5e-2_bs=128_lr=e-2_wd=e-1_sch=pl_cd=10_wn=0.5_r=8.0'
     model = LitEventScoring(output)
 
     # Train

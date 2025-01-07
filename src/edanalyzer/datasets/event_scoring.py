@@ -193,7 +193,7 @@ class EventScoringDataset(Dataset):
         # valid_mask = pose_data['elements'] != 0
         # valid_poss = pose_data['positions'][valid_mask]
         # valid_elements = pose_data['elements'][valid_mask]
-        valid_mask = frag_data['elements'] != 0
+        valid_mask = frag_data['elements'] > 1
         if annotation['partition'] == 'train':
             do_drop = rng.random()
             if do_drop > 0.5:
