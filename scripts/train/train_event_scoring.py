@@ -689,10 +689,9 @@ def _get_train_test_idxs_full_conf(root):
     })
     train_idxs = [
         {'z': z, }
-        for z, f, t
-        in zip(
-            pos_z_samples + neg_z_samples,
-        )
+        for z
+        in pos_z_samples + neg_z_samples,
+
     ]
     rprint({
         'test_pos_z_samples len': len(test_pos_z_samples),
@@ -703,9 +702,7 @@ def _get_train_test_idxs_full_conf(root):
         'train_neg_conf len': len(test_neg_conf),
     })
     test_idxs = [{'z': z, } for z
-                 in zip(
-            test_pos_z_samples + test_neg_z_samples,
-        )
+                 in  test_pos_z_samples + test_neg_z_samples,
                  ]
     return train_idxs, test_idxs
 
