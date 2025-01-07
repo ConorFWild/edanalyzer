@@ -644,19 +644,21 @@ def _get_train_test_idxs_full_conf(root):
     train_pos_conf = []
     train_neg_conf = []
 
-    # Loop over the z samples adding positive samples for each
-    print(f'Getting positive train samples')
-    for _idx, z in train_samples[train_samples['Confidence'] == 'High'].iterrows():
-        pos_z_samples += [z['idx'],]
 
-    print(f'Got {len(pos_z_samples)} pos samples!')
 
     # Loop over the z samples adding the inherent negative samples
     print(f'Getting negative train samples')
-    for _idx, z in train_samples[train_samples['Confidence'] == 'Low'].sample(len(pos_z_samples),
-                                                                              replace=True).iterrows():
+    for _idx, z in train_samples[train_samples['Confidence'] == 'Low'].iterrows():
 
         neg_z_samples += [z['idx'], ]
+
+    # Loop over the z samples adding positive samples for each
+    print(f'Getting positive train samples')
+    for _idx, z in train_samples[train_samples['Confidence'] == 'High'].sample(len(neg_z_samples),
+                                                                              replace=True).iterrows():
+        pos_z_samples += [z['idx'],]
+
+    print(f'Got {len(pos_z_samples)} pos samples!')
 
     print(f'Got {len(neg_conf_samples)} neg decoy samples!')
 
