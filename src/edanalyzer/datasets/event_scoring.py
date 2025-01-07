@@ -476,6 +476,10 @@ class EventScoringDataset(Dataset):
             hit = [1.0, 0.0]
             label = np.array(hit)
             label_float = label.astype(np.float32)
+            sample_array = np.zeros(
+                (32, 32, 32),
+                dtype=np.float32,
+            )
             return (
                 [
                     'pandda_2',
