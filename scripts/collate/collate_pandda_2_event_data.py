@@ -434,7 +434,7 @@ def main(config_path):
         # print(f'Got {len(cids)} embeddings')
 
         # 2.e.2
-        for embedding in [_conf.GetPositions() for _conf in m2.GetConformers()]:
+        for embedding in [_conf.GetPositions() for _conf in m3.GetConformers()]:
             # 2.e.2.a.
             # fragment_smiles = Chem.MolToSmiles(_frag)
             # print(f'Fragment Smiles: {fragment_smiles}')

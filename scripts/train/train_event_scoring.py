@@ -419,7 +419,7 @@ def sample(iterable, num, replace, weights):
 #
 #     return train_idxs, test_idxs
 
-def _get_train_test_idxs_full_conf(root):
+def _dep_get_train_test_idxs_full_conf(root):
     # for each z map sample
     # 1. Get the corresponding ligand data
     # 2. Get the corresponding fragments
@@ -441,7 +441,6 @@ def _get_train_test_idxs_full_conf(root):
     ligand_idx_smiles_df = pd.DataFrame(
         root[table_type]['ligand_data'].get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
     print(f'Loading conf table')
-
     ligand_conf_df = pd.DataFrame(
         root[table_type]['ligand_confs'].get_basic_selection(slice(None), fields=['idx', 'num_heavy_atoms',
                                                                                   'fragment_canonical_smiles',
@@ -595,6 +594,117 @@ def _get_train_test_idxs_full_conf(root):
             test_pos_conf_samples + test_neg_conf_samples,
             # ([True] * len(test_pos_conf_samples)) + ([False] * len(test_neg_conf_samples))
             test_pos_conf + test_neg_conf
+        )
+                 ]
+    return train_idxs, test_idxs
+
+def _get_train_test_idxs_full_conf(root):
+    # for each z map sample
+    # 1. Get the corresponding ligand data
+    # 2. Get the corresponding fragments
+    # 3. Sample the map n times positively (random corresponding fragment, random conformation)
+    # 4. Sample the the map n times negatively (weighted random fragment of different size, random conformation)
+    # 5. Sample the fragments n times negatively (random corresponding fragment, random conformation, random negative map)
+    # Sample distribution is now 1/3 positive to negative, and every positive map appears the same number of
+    # times negatively, and every positive fragment appears appears twice negatively
+    rng = np.random.default_rng()
+
+    table_type = 'pandda_2'
+
+    print(f'Loading metadata table')
+    metadata_table = pd.DataFrame(root[table_type]['z_map_sample_metadata'][:])
+    table_annotation = root[table_type]['annotation']
+    print(f'Loading annotation table')
+    annotation_df = pd.DataFrame(table_annotation[:])
+    print(f'Loading ligand table')
+    ligand_idx_smiles_df = pd.DataFrame(
+        root[table_type]['ligand_data'].get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
+    print(f'Loading conf table')
+    ligand_conf_df = pd.DataFrame(
+        root[table_type]['ligand_confs'].get_basic_selection(slice(None), fields=['idx', 'num_heavy_atoms',
+                                                                                  'fragment_canonical_smiles',
+                                                                                  'ligand_canonical_smiles']))
+
+    train_samples = metadata_table[annotation_df['partition'] == b'train']
+    test_samples = metadata_table[annotation_df['partition'] == b'test']
+
+    print(f'Getting ligand smiles to conf mapping')
+    ligand_smiles_to_conf = {
+        _smiles: ligand_conf_df[ligand_conf_df['ligand_canonical_smiles'] == _smiles]
+        for _smiles
+        in ligand_conf_df['ligand_canonical_smiles'].unique()
+    }
+
+    pos_z_samples = []
+    neg_z_samples = []
+    pos_conf_samples = []
+    neg_conf_samples = []
+    positive_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
+    negative_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
+    train_pos_conf = []
+    train_neg_conf = []
+
+    # Loop over the z samples adding positive samples for each
+    print(f'Getting positive train samples')
+    for _idx, z in train_samples[train_samples['Confidence'] == 'High'].iterrows():
+        pos_z_samples += [z['idx'],]
+
+    print(f'Got {len(pos_z_samples)} pos samples!')
+
+    # Loop over the z samples adding the inherent negative samples
+    print(f'Getting negative train samples')
+    for _idx, z in train_samples[train_samples['Confidence'] == 'Low'].sample(len(pos_z_samples),
+                                                                              replace=True).iterrows():
+
+        neg_z_samples += [z['idx'], ]
+
+    print(f'Got {len(neg_conf_samples)} neg decoy samples!')
+
+    test_pos_z_samples = []
+    test_neg_z_samples = []
+    test_pos_conf_samples = []
+    test_neg_conf_samples = []
+    test_pos_conf = []
+    test_neg_conf = []
+
+    # Loop over the z samples adding the test samples
+    print(f'Getting test samples')
+    for _idx, z in test_samples.iterrows():
+        if z['Confidence'] == 'High':
+            test_pos_z_samples.append(z['idx'])
+
+        elif z['Confidence'] == 'Low':
+            test_neg_z_samples.append(z['idx'])
+
+
+
+    rprint({
+        'pos_z_samples len': len(pos_z_samples),
+        'neg_z_samples len': len(neg_z_samples),
+        'pos_conf_samples len': len(pos_conf_samples),
+        'neg_conf_samples len': len(neg_conf_samples),
+        'train_pos_conf len': len(train_pos_conf),
+        'train_neg_conf len': len(train_neg_conf),
+
+    })
+    train_idxs = [
+        {'z': z, }
+        for z, f, t
+        in zip(
+            pos_z_samples + neg_z_samples,
+        )
+    ]
+    rprint({
+        'test_pos_z_samples len': len(test_pos_z_samples),
+        'test_neg_z_samples len': len(test_neg_z_samples),
+        'test_pos_conf_samples len': len(test_pos_conf_samples),
+        'test_neg_conf_samples len': len(test_neg_conf_samples),
+        'train_pos_conf len': len(test_pos_conf),
+        'train_neg_conf len': len(test_neg_conf),
+    })
+    test_idxs = [{'z': z, } for z
+                 in zip(
+            test_pos_z_samples + test_neg_z_samples,
         )
                  ]
     return train_idxs, test_idxs
@@ -868,7 +978,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'event_scoring_prod_3'
+    output = output_dir / 'event_scoring_prod_4'
     model = LitEventScoring(output)
 
     # Train
