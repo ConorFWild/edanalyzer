@@ -476,7 +476,11 @@ class EventScoringDataset(Dataset):
             hit = [1.0, 0.0]
             label = np.array(hit)
             label_float = label.astype(np.float32)
-            sample_array = np.zeros(
+            sample_array_z = np.zeros(
+                (1, 32, 32, 32),
+                dtype=np.float32,
+            )
+            sample_array_mol = np.zeros(
                 (1, 32, 32, 32),
                 dtype=np.float32,
             )
@@ -490,8 +494,8 @@ class EventScoringDataset(Dataset):
                     int(z_map_sample_metadata['event_num']),
                 ],
                 0,
-                torch.from_numpy(sample_array),
-                torch.from_numpy(sample_array),
+                torch.from_numpy(np.copy(sample_array_z)),
+                torch.from_numpy(np.copy(sample_array_mol)),
                 0,
                 torch.from_numpy(label_float)
             )
