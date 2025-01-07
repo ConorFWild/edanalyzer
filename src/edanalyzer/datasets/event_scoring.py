@@ -466,11 +466,31 @@ class EventScoringDataset(Dataset):
             smiles = ligand_data['canonical_smiles']
 
         # Get the molecule
-        m = Chem.MolFromSmiles(smiles)
-        m2 = Chem.AddHs(m)
-        cids = AllChem.EmbedMultipleConfs(m2, numConfs=10)
-        m3 = Chem.RemoveHs(m2)
-        embedding = [_conf.GetPositions() for _conf in m3.GetConformers()][0]
+        try:
+            m = Chem.MolFromSmiles(smiles)
+            m2 = Chem.AddHs(m)
+            cids = AllChem.EmbedMultipleConfs(m2, numConfs=10)
+            m3 = Chem.RemoveHs(m2)
+            embedding = [_conf.GetPositions() for _conf in m3.GetConformers()][0]
+        except:
+            hit = [1.0, 0.0]
+            label = np.array(hit)
+            label_float = label.astype(np.float32)
+            return (
+                [
+                    'pandda_2',
+                    _z,
+                    -1,
+                    str(z_map_sample_metadata['system']),
+                    str(z_map_sample_metadata['dtag']),
+                    int(z_map_sample_metadata['event_num']),
+                ],
+                0,
+                torch.from_numpy(sample_array),
+                torch.from_numpy(sample_array),
+                0,
+                torch.from_numpy(label_float)
+            )
 
         #
         xmap = _get_grid_from_hdf5(xmap_sample_data)
