@@ -477,7 +477,7 @@ class EventScoringDataset(Dataset):
             label = np.array(hit)
             label_float = label.astype(np.float32)
             sample_array = np.zeros(
-                (32, 32, 32),
+                (1, 32, 32, 32),
                 dtype=np.float32,
             )
             return (
