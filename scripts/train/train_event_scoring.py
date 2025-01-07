@@ -432,11 +432,16 @@ def _get_train_test_idxs_full_conf(root):
 
     table_type = 'pandda_2'
 
+    print(f'Loading metadata table')
     metadata_table = pd.DataFrame(root[table_type]['z_map_sample_metadata'][:])
     table_annotation = root[table_type]['annotation']
+    print(f'Loading annotation table')
     annotation_df = pd.DataFrame(table_annotation[:])
+    print(f'Loading ligand table')
     ligand_idx_smiles_df = pd.DataFrame(
         root[table_type]['ligand_data'].get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
+    print(f'Loading conf table')
+
     ligand_conf_df = pd.DataFrame(
         root[table_type]['ligand_confs'].get_basic_selection(slice(None), fields=['idx', 'num_heavy_atoms',
                                                                                   'fragment_canonical_smiles',
@@ -445,6 +450,7 @@ def _get_train_test_idxs_full_conf(root):
     train_samples = metadata_table[annotation_df['partition'] == b'train']
     test_samples = metadata_table[annotation_df['partition'] == b'test']
 
+    print(f'Getting ligand smiles to conf mapping')
     ligand_smiles_to_conf = {
         _smiles: ligand_conf_df[ligand_conf_df['ligand_canonical_smiles'] == _smiles]
         for _smiles
@@ -461,6 +467,7 @@ def _get_train_test_idxs_full_conf(root):
     train_neg_conf = []
 
     # Loop over the z samples adding positive samples for each
+    print(f'Getting positive train samples')
     for _idx, z in train_samples.iterrows():
         ligand_data_idx = z['ligand_data_idx']
         # if ligand_data_idx == -1:
@@ -487,6 +494,7 @@ def _get_train_test_idxs_full_conf(root):
     print(f'Got {len(pos_conf_samples)} pos samples!')
 
     # Loop over the z samples adding the inherent negative samples
+    print(f'Getting negative train samples')
     for _idx, z in train_samples[train_samples['Confidence'] == 'Low'].sample(len(pos_conf_samples),
                                                                               replace=True).iterrows():
         # ligand_data_idx = z['ligand_data_idx']
@@ -522,6 +530,7 @@ def _get_train_test_idxs_full_conf(root):
     test_neg_conf = []
 
     # Loop over the z samples adding the test samples
+    print(f'Getting test samples')
     for _idx, z in test_samples.iterrows():
         #
         ligand_data_idx = z['ligand_data_idx']
@@ -859,7 +868,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'event_scoring_prod_2_nsys=87_opt=adamw_ls=2.5e-2_bs=128_lr=e-2_wd=e-1_sch=pl_cd=10_wn=0.5_r=8.0'
+    output = output_dir / 'event_scoring_prod_3'
     model = LitEventScoring(output)
 
     # Train
@@ -887,10 +896,10 @@ def main(config_path, batch_size=12, num_workers=None):
                              checkpoint_callback_best_10,
                              checkpoint_callback_best_99,
                              checkpoint_callback_best_95,
-                             StochasticWeightAveraging(swa_lrs=1e-3,
-                                                       # swa_epoch_start=0.75,
-                                                       swa_epoch_start=0.5,
-                                                       )
+                             # StochasticWeightAveraging(swa_lrs=1e-3,
+                             #                           # swa_epoch_start=0.75,
+                             #                           swa_epoch_start=0.5,
+                             #                           )
                          ],
                          enable_progress_bar=False,
                          gradient_clip_val=1.5,
