@@ -617,30 +617,30 @@ def _get_train_test_idxs_full_conf(root):
     print(f'Loading annotation table')
     annotation_df = pd.DataFrame(table_annotation[:])
     print(f'Loading ligand table')
-    ligand_idx_smiles_df = pd.DataFrame(
-        root[table_type]['ligand_data'].get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
-    print(f'Loading conf table')
-    ligand_conf_df = pd.DataFrame(
-        root[table_type]['ligand_confs'].get_basic_selection(slice(None), fields=['idx', 'num_heavy_atoms',
-                                                                                  'fragment_canonical_smiles',
-                                                                                  'ligand_canonical_smiles']))
+    # ligand_idx_smiles_df = pd.DataFrame(
+    #     root[table_type]['ligand_data'].get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
+    # print(f'Loading conf table')
+    # ligand_conf_df = pd.DataFrame(
+    #     root[table_type]['ligand_confs'].get_basic_selection(slice(None), fields=['idx', 'num_heavy_atoms',
+    #                                                                               'fragment_canonical_smiles',
+    #                                                                               'ligand_canonical_smiles']))
 
     train_samples = metadata_table[annotation_df['partition'] == b'train']
     test_samples = metadata_table[annotation_df['partition'] == b'test']
 
-    print(f'Getting ligand smiles to conf mapping')
-    ligand_smiles_to_conf = {
-        _smiles: ligand_conf_df[ligand_conf_df['ligand_canonical_smiles'] == _smiles]
-        for _smiles
-        in ligand_conf_df['ligand_canonical_smiles'].unique()
-    }
+    # print(f'Getting ligand smiles to conf mapping')
+    # ligand_smiles_to_conf = {
+    #     _smiles: ligand_conf_df[ligand_conf_df['ligand_canonical_smiles'] == _smiles]
+    #     for _smiles
+    #     in ligand_conf_df['ligand_canonical_smiles'].unique()
+    # }
 
     pos_z_samples = []
     neg_z_samples = []
     pos_conf_samples = []
     neg_conf_samples = []
-    positive_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
-    negative_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
+    # positive_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
+    # negative_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
     train_pos_conf = []
     train_neg_conf = []
 
