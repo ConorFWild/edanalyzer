@@ -609,9 +609,9 @@ class EventScoringDataset(Dataset):
                 str( z_map_sample_metadata['dtag']),
                 int( z_map_sample_metadata['event_num']),
              ],
-            [],
+            0,
             torch.from_numpy(image_z_float),
             torch.from_numpy(image_mol_float),
-            [],
+            0,
             torch.from_numpy(label_float)
         )
