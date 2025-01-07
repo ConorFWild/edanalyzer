@@ -450,7 +450,7 @@ class EventScoringDataset(Dataset):
         # Get the z map and pose
         z_map_sample_metadata = self.pandda_2_z_map_sample_metadata_table[_z]
         z_map_sample_idx = z_map_sample_metadata['idx']
-        conf = _z['Confidence']
+        conf = z_map_sample_metadata['Confidence']
         assert _z == z_map_sample_idx
         ligand_data_idx = z_map_sample_metadata['ligand_data_idx']
         xmap_sample_data = self.pandda_2_xmap_sample_table[z_map_sample_idx]
