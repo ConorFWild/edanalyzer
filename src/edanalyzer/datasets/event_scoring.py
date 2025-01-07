@@ -525,7 +525,7 @@ class EventScoringDataset(Dataset):
         )
 
         # Get the ligand
-        valid_poss = (embedding - np.mean(embedding, axis=0)) + np.array([22.5, 22.5, 22.5])
+        valid_poss = (embedding - np.mean(embedding, axis=0)) + np.array([8.0,8.0,8.0])
         valid_elements = np.array(
                 [m3.GetAtomWithIdx(_atom_idx).GetAtomicNum() for _atom_idx in [a.GetIdx() for a in m3.GetAtoms()]])
         ligand_sample_array = np.zeros(
