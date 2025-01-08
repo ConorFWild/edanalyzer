@@ -440,7 +440,7 @@ class EventScoringDataset(Dataset):
 
         metadata_table = pd.DataFrame(self.pandda_2_z_map_sample_metadata_table[:])
         # ligand_idx_smiles_df = pd.DataFrame(self.pandda_2_ligand_data_table.get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
-        annotation_df = pd.DataFrame(self.pandda_2_annotations[:])
+        annotation_df = pd.DataFrame(self.pandda_2_annotation_table[:])
         train_samples = metadata_table[annotation_df['partition'] == b'train']
         pos_samples = train_samples[train_samples['Confidence'] == 'High']
         selected_pos_samples = pos_samples.iloc[sample_indexes]
@@ -592,7 +592,6 @@ class EventScoringDataset(Dataset):
             u_s = rng.uniform(0.0, 0.5)
             noise = rng.normal(size=(32,32,32)) * u_s
             xmap_sample += noise.astype(np.float32)
-
 
         # Make the image
         image_ligand_mask = _sample_xmap(
