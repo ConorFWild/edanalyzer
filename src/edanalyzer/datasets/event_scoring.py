@@ -446,8 +446,10 @@ class EventScoringDataset(Dataset):
         selected_pos_samples = pos_samples.iloc[sample_indexes]
         selected_smiles = ligand_data_df.iloc[selected_pos_samples['ligand_data_idx']]
         unique_smiles, smiles_counts = np.unique(selected_smiles, return_counts=True)
-        self.unique_smiles_frequencies = pd.Series(unique_smiles)
-        self.frequencies = pd.Series(smiles_counts.astype(float) / np.sum(smiles_counts))
+        self.unique_smiles = pd.Series(unique_smiles)
+        self.unique_smiles_frequencies = pd.Series(smiles_counts.astype(float) / np.sum(smiles_counts))
+        print(self.unique_smiles)
+        print(self.unique_smiles_frequencies)
 
     def __len__(self):
         return len(self.sample_indexes)
@@ -471,7 +473,7 @@ class EventScoringDataset(Dataset):
         rng = np.random.default_rng()
         if (annotation['partition'] == 'train') & (conf == 'Low'):
             # smiles = self.unique_smiles[rng.integers(0, len(self.unique_smiles))]
-            smiles = self.unique_smiles_series.sample(weights=self.unique_smiles_frequencies)
+            smiles = self.unique_smiles.sample(weights=self.unique_smiles_frequencies)
         else:
             ligand_data = self.pandda_2_ligand_data_table[ligand_data_idx]
             smiles = ligand_data['canonical_smiles']

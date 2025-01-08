@@ -627,6 +627,7 @@ def _get_train_test_idxs_full_conf(root):
     #                                                                               'fragment_canonical_smiles',
     #                                                                               'ligand_canonical_smiles']))
     valid_smiles_mask = valid_smiles_df.iloc[ligand_idx_smiles_df.iloc[metadata_table['ligand_data_idx']]['idx']]['valid']
+    print(valid_smiles_mask)
     train_samples = metadata_table[(annotation_df['partition'] == b'train') & valid_smiles_mask]
     test_samples = metadata_table[(annotation_df['partition'] == b'test') & valid_smiles_mask]
 
@@ -645,8 +646,6 @@ def _get_train_test_idxs_full_conf(root):
     # negative_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
     train_pos_conf = []
     train_neg_conf = []
-
-
 
     # Loop over the z samples adding the inherent negative samples
     print(f'Getting negative train samples')
@@ -679,8 +678,6 @@ def _get_train_test_idxs_full_conf(root):
 
         elif z['Confidence'] == 'Low':
             test_neg_z_samples.append(z['idx'])
-
-
 
     rprint({
         'pos_z_samples len': len(pos_z_samples),
