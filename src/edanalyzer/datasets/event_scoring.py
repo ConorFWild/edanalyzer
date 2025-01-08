@@ -443,7 +443,7 @@ class EventScoringDataset(Dataset):
         annotation_df = pd.DataFrame(self.pandda_2_annotation_table[:])
         train_samples = metadata_table[annotation_df['partition'] == b'train']
         pos_samples = train_samples[train_samples['Confidence'] == 'High']
-        selected_pos_samples = pos_samples.iloc[[x['z'] for x in sample_indexes.values()]]
+        selected_pos_samples = pos_samples.iloc[[x['z'] for x in sample_indexes]]
         selected_smiles = ligand_data_df.iloc[selected_pos_samples['ligand_data_idx']]
         unique_smiles, smiles_counts = np.unique(selected_smiles, return_counts=True)
         self.unique_smiles = pd.Series(unique_smiles)
