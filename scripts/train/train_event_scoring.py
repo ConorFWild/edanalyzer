@@ -617,16 +617,18 @@ def _get_train_test_idxs_full_conf(root):
     print(f'Loading annotation table')
     annotation_df = pd.DataFrame(table_annotation[:])
     print(f'Loading ligand table')
-    # ligand_idx_smiles_df = pd.DataFrame(
-    #     root[table_type]['ligand_data'].get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
+    ligand_idx_smiles_df = pd.DataFrame(
+        root[table_type]['ligand_data'].get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
+    print(f'Getting valid smiles...')
+    valid_smiles_df = pd.DataFrame(root[table_type]['valid_smiles'][:])
     # print(f'Loading conf table')
     # ligand_conf_df = pd.DataFrame(
     #     root[table_type]['ligand_confs'].get_basic_selection(slice(None), fields=['idx', 'num_heavy_atoms',
     #                                                                               'fragment_canonical_smiles',
     #                                                                               'ligand_canonical_smiles']))
-
-    train_samples = metadata_table[annotation_df['partition'] == b'train']
-    test_samples = metadata_table[annotation_df['partition'] == b'test']
+    valid_smiles_mask = valid_smiles_df.iloc[ligand_idx_smiles_df.iloc[metadata_table['ligand_smiles_idx']]['idx']]['valid']
+    train_samples = metadata_table[(annotation_df['partition'] == b'train') & valid_smiles_mask]
+    test_samples = metadata_table[(annotation_df['partition'] == b'test') & valid_smiles_mask]
 
     # print(f'Getting ligand smiles to conf mapping')
     # ligand_smiles_to_conf = {
@@ -961,6 +963,7 @@ def main(config_path, batch_size=12, num_workers=None):
         batch_size=128,#batch_size,
         shuffle=True,
         num_workers=19,
+        drop_last=True
     )
     rprint(f"Got {len(dataset_train)} training samples")
     dataset_test = DataLoader(
@@ -972,6 +975,7 @@ def main(config_path, batch_size=12, num_workers=None):
         ),
         batch_size=batch_size,
         num_workers=19,
+        drop_last=True
     )
     rprint(f"Got {len(dataset_test)} test samples")
 
