@@ -626,7 +626,7 @@ def _get_train_test_idxs_full_conf(root):
     #     root[table_type]['ligand_confs'].get_basic_selection(slice(None), fields=['idx', 'num_heavy_atoms',
     #                                                                               'fragment_canonical_smiles',
     #                                                                               'ligand_canonical_smiles']))
-    valid_smiles_mask = valid_smiles_df.iloc[ligand_idx_smiles_df.iloc[metadata_table['ligand_smiles_idx']]['idx']]['valid']
+    valid_smiles_mask = valid_smiles_df.iloc[ligand_idx_smiles_df.iloc[metadata_table['ligand_data_idx']]['idx']]['valid']
     train_samples = metadata_table[(annotation_df['partition'] == b'train') & valid_smiles_mask]
     test_samples = metadata_table[(annotation_df['partition'] == b'test') & valid_smiles_mask]
 
