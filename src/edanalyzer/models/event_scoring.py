@@ -276,7 +276,7 @@ class LitEventScoring(lt.LightningModule):
                 "scheduler": lr_scheduler,
                 "monitor": "fpr95",
                 "interval": "epoch",
-                "frequency": 1,
+                "frequency": 10,
                 "strict": False,
             },
         }
