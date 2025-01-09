@@ -71,201 +71,199 @@ def main(config_path):
     #### COMMENTS BEGIN HERE
 
 
+
+    try:
+        del root['pandda_2']
+    except:
+        rprint(f'No PanDDA 2 group!')
+    pandda_2_group = root.create_group('pandda_2')
+
+    # Create 2 new tables in group1
+    z_map_sample_metadata_table = _make_z_map_sample_metadata_table(pandda_2_group)
+    z_map_sample_table = _make_z_map_sample_table(pandda_2_group)
+    xmap_sample_table = _make_xmap_sample_table(pandda_2_group)
+    ligand_data_table = _make_ligand_data_table(pandda_2_group)
+    known_hit_pose_table = _make_known_hit_pose_table(pandda_2_group)
+    annotation_table = _make_annotation_table(pandda_2_group)
+
+    # PanDDA 2 events
+
     #
-    # try:
-    #     del root['pandda_2']
-    # except:
-    #     rprint(f'No PanDDA 2 group!')
-    # pandda_2_group = root.create_group('pandda_2')
-    #
-    # # Create 2 new tables in group1
-    # z_map_sample_metadata_table = _make_z_map_sample_metadata_table(pandda_2_group)
-    # z_map_sample_table = _make_z_map_sample_table(pandda_2_group)
-    # xmap_sample_table = _make_xmap_sample_table(pandda_2_group)
-    # ligand_data_table = _make_ligand_data_table(pandda_2_group)
-    # known_hit_pose_table = _make_known_hit_pose_table(pandda_2_group)
-    # annotation_table = _make_annotation_table(pandda_2_group)
-    #
-    # # PanDDA 2 events
-    #
-    # #
-    # rprint(f"Querying events...")
-    # with pony.orm.db_session:
-    #
-    #     # Loop over PanDDA directories
-    #     z_map_sample_metadata_idx = 0
-    #     idx_pose = 0
-    #     idx_ligand_data = 0
-    #     annotation_idx = 0
-    #     for pandda_dir in Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score/').glob('*'):
-    #         if pandda_dir.name == 'TcCS':
-    #             continue
-    #
-    #         # if pandda_dir.name != 'PTP1B':
-    #         #     continue
-    #
-    #         # Skip if not a directory
-    #         if not pandda_dir.is_dir():
-    #             continue
-    #         rprint(f'PanDDA dir is: {pandda_dir}')
-    #
-    #         # Skip if no inspect table
-    #         pandda_inspect_table = pandda_dir / 'analyses' / 'pandda_inspect_events.csv'
-    #         if not pandda_inspect_table.exists():
-    #             rprint(f'\tNO INSPECT TABLE! SKIPPING!')
-    #
-    #             continue
-    #
-    #         # Get the inspect table
-    #         inspect_table = pd.read_csv(pandda_inspect_table)
-    #
-    #         # if not inspect_table[constants.PANDDA_INSPECT_VIEWED].all():
-    #         #     rprint(f'\tNOT FINISHED INSPECTING TABLE! SKIPPING!')
-    #         #
-    #         #     continue
-    #
-    #         # Iterate the inspect table
-    #         for _idx, _row in inspect_table.iterrows():
-    #             # Unpack the row information
-    #             dtag, event_idx, bdc, conf, viewed, size = _row['dtag'], _row['event_idx'], _row['1-BDC'], _row[
-    #                 constants.PANDDA_INSPECT_HIT_CONDFIDENCE], _row[constants.PANDDA_INSPECT_VIEWED], _row[constants.PANDDA_INSPECT_CLUSTER_SIZE]
-    #
-    #             system = _get_system_from_dtag(dtag)
-    #
-    #             rprint(f'\tProcessing event: {dtag} {event_idx} {conf}')
-    #
-    #             if not viewed:
-    #                 rprint('\t\tNot Viewed! Skipping!')
-    #                 continue
-    #
-    #             # if conf == 'Medium':
-    #             #     rprint(f'\t\tAmbiguous event! Skipping!')
-    #             #     continue
-    #
-    #             initial_x, initial_y, initial_z = _row['x'], _row['y'], _row['z']
-    #
-    #
-    #
-    #             dataset_dir = pandda_dir / 'processed_datasets' / dtag
-    #
-    #             processed_dataset_yaml = dataset_dir / 'processed_dataset.yaml'
-    #             with open(processed_dataset_yaml, 'r') as f:
-    #                 processed_dataset = yaml.safe_load(f)
-    #
-    #             selected_model = processed_dataset['Summary']['Selected Model']
-    #
-    #             event_distances = {}
-    #             event_centroids = {}
-    #             for event_num, event in processed_dataset['Models'][selected_model]['Events'].items():
-    #                 event_centroid = event['Centroid']
-    #                 distance = np.linalg.norm(np.array(event_centroid) - np.array([initial_x, initial_y, initial_z]))
-    #                 event_distances[event_num] = distance
-    #                 event_centroids[event_num] = event_centroid
-    #
-    #             if len(event_distances) > 0:
-    #                 closest_event_id = min(event_centroids, key=lambda _event_num: event_distances[_event_num])
-    #                 x, y, z = event_centroids[closest_event_id]
-    #                 rprint(f'Closest event distance is {event_distances[closest_event_id]}')
-    #
-    #             else:
-    #                 rprint(
-    #                     f'Could not match high confidence ligand {dtag} {event_idx} to an initial event!\n'
-    #                     f'Check model in {dataset_dir} is appropriate!\n'
-    #                     'SKIPPING!'
-    #                 )
-    #                 continue
-    #
-    #             model_dir = dataset_dir / 'modelled_structures'
-    #
-    #             # Get the corresponding residue
-    #             resid, res, dist = _get_closest_res_from_dataset_dir(
-    #                 dataset_dir,
-    #                 x, y, z
-    #             )
-    #             if (conf == 'High') & (dist > 6.0):
-    #                 rprint(
-    #                     f'Could not match high confidence ligand {dtag} {event_idx} to a build!\n'
-    #                     f'Check model in {dataset_dir} is appropriate!\n'
-    #                     'SKIPPING!'
-    #                 )
-    #                 # raise Exception
-    #                 continue
-    #
-    #             # Get the z map sample
-    #             z_map_sample = _get_z_map_sample_from_dataset_dir(
-    #                 dataset_dir,
-    #                 x, y, z,
-    #                 z_map_sample_metadata_idx,
-    #             )
-    #             xmap_sample = _get_xmap_sample_from_dataset_dir(
-    #                 dataset_dir,
-    #                 x, y, z,
-    #                 z_map_sample_metadata_idx,
-    #             )
-    #             if conf == 'High':
-    #                 # Get the pose sample
-    #                 pose_sample = _get_pose_sample_from_dataset_dir(
-    #                     model_dir,
-    #                     res,
-    #                     x, y, z,
-    #                     idx_pose
-    #                 )
-    #
-    #             # Get the ligand data
-    #             ligand_data_sample = _get_ligand_data_sample_from_dataset_dir(
-    #                 dataset_dir,
-    #                 res,
-    #                 idx_ligand_data,
-    #             )
-    #             if not ligand_data_sample:
-    #                 rprint(f'\t\tNO LIGAND DATA! SKIPPING!')
-    #                 continue
-    #
-    #             # Get the annotation data
-    #             annotation_sample = _get_annotation_sample_from_dataset_dir(
-    #                 dataset_dir,
-    #                 conf,
-    #                 test_systems,
-    #                 annotation_idx,
-    #                 z_map_sample_metadata_idx
-    #             )
-    #
-    #             # Get the z map metadata sample
-    #             if conf == 'High':
-    #                 tmp_idx_pose = idx_pose
-    #             else:
-    #                 # tmp_idx_ligand_data = -1
-    #                 tmp_idx_pose = -1
-    #             tmp_idx_ligand_data = idx_ligand_data
-    #
-    #             z_map_metadata_sample = _get_z_map_metadata_sample_from_dataset_dir(
-    #                 z_map_sample_metadata_idx,
-    #                 event_idx,
-    #                 resid,
-    #                 tmp_idx_ligand_data,
-    #                 tmp_idx_pose,
-    #                 system,
-    #                 dtag,
-    #                 event_idx,
-    #                 conf,
-    #                 size
-    #             )
-    #
-    #             z_map_sample_metadata_table.append(z_map_metadata_sample)
-    #             z_map_sample_table.append(z_map_sample)
-    #             xmap_sample_table.append(xmap_sample)
-    #             ligand_data_table.append(ligand_data_sample)
-    #             if conf == 'High':
-    #                 known_hit_pose_table.append(pose_sample)
-    #                 idx_pose += 1
-    #             idx_ligand_data += 1
-    #             annotation_table.append(annotation_sample)
-    #             z_map_sample_metadata_idx += 1
-    #             annotation_idx += 1
-    #
-    #
-    #             ...
-    #         ...
+    rprint(f"Querying events...")
+    with pony.orm.db_session:
+
+        # Loop over PanDDA directories
+        z_map_sample_metadata_idx = 0
+        idx_pose = 0
+        idx_ligand_data = 0
+        annotation_idx = 0
+        for pandda_dir in Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score/').glob('*'):
+            if pandda_dir.name == 'TcCS':
+                continue
+
+            # if pandda_dir.name != 'PTP1B':
+            #     continue
+
+            # Skip if not a directory
+            if not pandda_dir.is_dir():
+                continue
+            rprint(f'PanDDA dir is: {pandda_dir}')
+
+            # Skip if no inspect table
+            pandda_inspect_table = pandda_dir / 'analyses' / 'pandda_inspect_events.csv'
+            if not pandda_inspect_table.exists():
+                rprint(f'\tNO INSPECT TABLE! SKIPPING!')
+
+                continue
+
+            # Get the inspect table
+            inspect_table = pd.read_csv(pandda_inspect_table)
+
+            # if not inspect_table[constants.PANDDA_INSPECT_VIEWED].all():
+            #     rprint(f'\tNOT FINISHED INSPECTING TABLE! SKIPPING!')
+            #
+            #     continue
+
+            # Iterate the inspect table
+            for _idx, _row in inspect_table.iterrows():
+                # Unpack the row information
+                dtag, event_idx, bdc, conf, viewed, size = _row['dtag'], _row['event_idx'], _row['1-BDC'], _row[
+                    constants.PANDDA_INSPECT_HIT_CONDFIDENCE], _row[constants.PANDDA_INSPECT_VIEWED], _row[constants.PANDDA_INSPECT_CLUSTER_SIZE]
+
+                system = _get_system_from_dtag(dtag)
+
+                rprint(f'\tProcessing event: {dtag} {event_idx} {conf}')
+
+                if not viewed:
+                    rprint('\t\tNot Viewed! Skipping!')
+                    continue
+
+                # if conf == 'Medium':
+                #     rprint(f'\t\tAmbiguous event! Skipping!')
+                #     continue
+
+                initial_x, initial_y, initial_z = _row['x'], _row['y'], _row['z']
+
+                dataset_dir = pandda_dir / 'processed_datasets' / dtag
+
+                processed_dataset_yaml = dataset_dir / 'processed_dataset.yaml'
+                with open(processed_dataset_yaml, 'r') as f:
+                    processed_dataset = yaml.safe_load(f)
+
+                selected_model = processed_dataset['Summary']['Selected Model']
+
+                event_distances = {}
+                event_centroids = {}
+                for event_num, event in processed_dataset['Models'][selected_model]['Events'].items():
+                    event_centroid = event['Centroid']
+                    distance = np.linalg.norm(np.array(event_centroid) - np.array([initial_x, initial_y, initial_z]))
+                    event_distances[event_num] = distance
+                    event_centroids[event_num] = event_centroid
+
+                if len(event_distances) > 0:
+                    closest_event_id = min(event_centroids, key=lambda _event_num: event_distances[_event_num])
+                    x, y, z = event_centroids[closest_event_id]
+                    rprint(f'Closest event distance is {event_distances[closest_event_id]}')
+
+                else:
+                    rprint(
+                        f'Could not match high confidence ligand {dtag} {event_idx} to an initial event!\n'
+                        f'Check model in {dataset_dir} is appropriate!\n'
+                        'SKIPPING!'
+                    )
+                    continue
+
+                model_dir = dataset_dir / 'modelled_structures'
+
+                # Get the corresponding residue
+                resid, res, dist = _get_closest_res_from_dataset_dir(
+                    dataset_dir,
+                    x, y, z
+                )
+                if (conf == 'High') & (dist > 6.0):
+                    rprint(
+                        f'Could not match high confidence ligand {dtag} {event_idx} to a build!\n'
+                        f'Check model in {dataset_dir} is appropriate!\n'
+                        'SKIPPING!'
+                    )
+                    # raise Exception
+                    continue
+
+                # Get the z map sample
+                z_map_sample = _get_z_map_sample_from_dataset_dir(
+                    dataset_dir,
+                    x, y, z,
+                    z_map_sample_metadata_idx,
+                )
+                xmap_sample = _get_xmap_sample_from_dataset_dir(
+                    dataset_dir,
+                    x, y, z,
+                    z_map_sample_metadata_idx,
+                )
+                if conf == 'High':
+                    # Get the pose sample
+                    pose_sample = _get_pose_sample_from_dataset_dir(
+                        model_dir,
+                        res,
+                        x, y, z,
+                        idx_pose
+                    )
+
+                # Get the ligand data
+                ligand_data_sample = _get_ligand_data_sample_from_dataset_dir(
+                    dataset_dir,
+                    res,
+                    idx_ligand_data,
+                )
+                if not ligand_data_sample:
+                    rprint(f'\t\tNO LIGAND DATA! SKIPPING!')
+                    continue
+
+                # Get the annotation data
+                annotation_sample = _get_annotation_sample_from_dataset_dir(
+                    dataset_dir,
+                    conf,
+                    test_systems,
+                    annotation_idx,
+                    z_map_sample_metadata_idx
+                )
+
+                # Get the z map metadata sample
+                if conf == 'High':
+                    tmp_idx_pose = idx_pose
+                else:
+                    # tmp_idx_ligand_data = -1
+                    tmp_idx_pose = -1
+                tmp_idx_ligand_data = idx_ligand_data
+
+                z_map_metadata_sample = _get_z_map_metadata_sample_from_dataset_dir(
+                    z_map_sample_metadata_idx,
+                    event_idx,
+                    resid,
+                    tmp_idx_ligand_data,
+                    tmp_idx_pose,
+                    system,
+                    dtag,
+                    event_idx,
+                    conf,
+                    size
+                )
+
+                z_map_sample_metadata_table.append(z_map_metadata_sample)
+                z_map_sample_table.append(z_map_sample)
+                xmap_sample_table.append(xmap_sample)
+                ligand_data_table.append(ligand_data_sample)
+                if conf == 'High':
+                    known_hit_pose_table.append(pose_sample)
+                    idx_pose += 1
+                idx_ligand_data += 1
+                annotation_table.append(annotation_sample)
+                z_map_sample_metadata_idx += 1
+                annotation_idx += 1
+
+
+                ...
+            ...
 
     #### COMMENTS END HERE
 
@@ -410,59 +408,59 @@ def main(config_path):
             chunks=(1,),
             dtype=ligand_conf_dtype
         )
-
-    mol_conf_idx = 0
-
-    # for _ligand_data in ligand_data_table:
-    z_map_sample_metadata_table = root['pandda_2']['z_map_sample_metadata']
-
-    high_conf = z_map_sample_metadata_table.get_mask_selection(z_map_sample_metadata_table['Confidence'] == ['High'])
-    num = len(high_conf)
-    for j, _z_map_sample_metadata in enumerate(high_conf):
-        print(f'{j} / {num}')
-        if _z_map_sample_metadata['Confidence'] != 'High':
-            continue
-
-        _ligand_data = ligand_data_table[_z_map_sample_metadata['ligand_data_idx']]
-
-        m = Chem.MolFromSmiles(_ligand_data['canonical_smiles'])
-
-        # 2.c.
-        m2 = Chem.AddHs(m)
-        cids = AllChem.EmbedMultipleConfs(m2, numConfs=50)
-        # print(f'Got {len(cids)} embeddings')
-
-        # 2.e.2
-        for embedding in [_conf.GetPositions() for _conf in m3.GetConformers()]:
-            # 2.e.2.a.
-            # fragment_smiles = Chem.MolToSmiles(_frag)
-            # print(f'Fragment Smiles: {fragment_smiles}')
-
-            #
-            # print(f'Embedding Size: {embedding.shape[0]}')
-            poss = np.zeros((150, 3))
-            poss[:embedding.shape[0], :] = embedding[:, :]
-            mol_els = np.array(
-                [m2.GetAtomWithIdx(_atom_idx).GetAtomicNum() for _atom_idx in [a.GetIdx() for a in m2.GetAtoms()]])
-            els = np.zeros(150)
-            els[:len(mol_els)] = mol_els[:]
-
-            # 2. e. 2. b.
-            record = np.array([(
-                mol_conf_idx,
-                _ligand_data['idx'],
-                len(mol_els),
-                _ligand_data['canonical_smiles'],
-                _ligand_data['canonical_smiles'],
-                poss,
-                els
-            )],
-                dtype=ligand_conf_dtype)
-            # print(record)
-
-            #
-            mol_conf_group.append(record)
-            mol_conf_idx += 1
+    #
+    # mol_conf_idx = 0
+    #
+    # # for _ligand_data in ligand_data_table:
+    # z_map_sample_metadata_table = root['pandda_2']['z_map_sample_metadata']
+    #
+    # high_conf = z_map_sample_metadata_table.get_mask_selection(z_map_sample_metadata_table['Confidence'] == ['High'])
+    # num = len(high_conf)
+    # for j, _z_map_sample_metadata in enumerate(high_conf):
+    #     print(f'{j} / {num}')
+    #     if _z_map_sample_metadata['Confidence'] != 'High':
+    #         continue
+    #
+    #     _ligand_data = ligand_data_table[_z_map_sample_metadata['ligand_data_idx']]
+    #
+    #     m = Chem.MolFromSmiles(_ligand_data['canonical_smiles'])
+    #
+    #     # 2.c.
+    #     m2 = Chem.AddHs(m)
+    #     cids = AllChem.EmbedMultipleConfs(m2, numConfs=50)
+    #     # print(f'Got {len(cids)} embeddings')
+    #
+    #     # 2.e.2
+    #     for embedding in [_conf.GetPositions() for _conf in m3.GetConformers()]:
+    #         # 2.e.2.a.
+    #         # fragment_smiles = Chem.MolToSmiles(_frag)
+    #         # print(f'Fragment Smiles: {fragment_smiles}')
+    #
+    #         #
+    #         # print(f'Embedding Size: {embedding.shape[0]}')
+    #         poss = np.zeros((150, 3))
+    #         poss[:embedding.shape[0], :] = embedding[:, :]
+    #         mol_els = np.array(
+    #             [m2.GetAtomWithIdx(_atom_idx).GetAtomicNum() for _atom_idx in [a.GetIdx() for a in m2.GetAtoms()]])
+    #         els = np.zeros(150)
+    #         els[:len(mol_els)] = mol_els[:]
+    #
+    #         # 2. e. 2. b.
+    #         record = np.array([(
+    #             mol_conf_idx,
+    #             _ligand_data['idx'],
+    #             len(mol_els),
+    #             _ligand_data['canonical_smiles'],
+    #             _ligand_data['canonical_smiles'],
+    #             poss,
+    #             els
+    #         )],
+    #             dtype=ligand_conf_dtype)
+    #         # print(record)
+    #
+    #         #
+    #         mol_conf_group.append(record)
+    #         mol_conf_idx += 1
 
 
 if __name__ == "__main__":
