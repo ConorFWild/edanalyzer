@@ -491,7 +491,7 @@ class EventScoringDataset(Dataset):
             label = np.array(hit)
             label_float = label.astype(np.float32)
             sample_array_z = np.zeros(
-                (2, 32, 32, 32),
+                (1, 32, 32, 32),
                 dtype=np.float32,
             )
             sample_array_mol = np.zeros(
@@ -604,7 +604,7 @@ class EventScoringDataset(Dataset):
         image_z = np.stack(
             [
                 z_map_sample,
-                xmap_sample * xmap_mask_float
+                # xmap_sample * xmap_mask_float
             ],
             axis=0
         )
