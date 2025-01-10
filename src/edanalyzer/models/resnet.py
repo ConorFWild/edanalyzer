@@ -1263,8 +1263,8 @@ class ResNet(nn.Module):
                  width_per_group=64,
                  replace_stride_with_dilation=None,
                  norm_layer=None,
-                 headless=False
-
+                 headless=False,
+                 p=0.5
                  ):
         super(ResNet, self).__init__()
         if norm_layer is None:
@@ -1288,18 +1288,18 @@ class ResNet(nn.Module):
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
-        self.drop1 = nn.Dropout()
+        self.drop1 = nn.Dropout(p=p)
         self.layer1 = self._make_layer(block, 64, layers[0])
-        self.drop2 = nn.Dropout()
+        self.drop2 = nn.Dropout(p=p)
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
                                        dilate=replace_stride_with_dilation[0])
-        self.drop3 = nn.Dropout()
+        self.drop3 = nn.Dropout(p=p)
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
                                        dilate=replace_stride_with_dilation[1])
-        self.drop4 = nn.Dropout()
+        self.drop4 = nn.Dropout(p=p)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
                                        dilate=replace_stride_with_dilation[2])
-        self.drop5 = nn.Dropout()
+        self.drop5 = nn.Dropout(p=p)
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
