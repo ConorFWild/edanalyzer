@@ -388,6 +388,60 @@ def main(config_path):
     #                 mol_frag_group.append(record)
     #                 mol_frag_idx += 1
 
+    valid_smiles_dtype = [
+        ('idx', 'i8'),
+        ('valid', '?'),
+    ]
+    try:
+        del root['pandda_2']['ligand_confs']
+    except Exception as e:
+        print(e)
+    valid_smiles_group = root['pandda_2'].create_dataset(
+        'valid_smiles',
+        shape=(0,),
+        chunks=(1,),
+        dtype=valid_smiles_dtype
+    )
+
+    df = pd.DataFrame(
+        root['pandda_2']['ligand_data'].get_basic_selection(slice(None), fields=['idx', 'canonical_smiles', ]))
+
+    unique_smiles_series = df['canonical_smiles'].unique()
+
+    smiles_validity = {}
+    for idx, smiles in enumerate(unique_smiles_series):
+        # idx = _row['idx']
+        # smiles = _row['canonical_smiles']
+        print(f'{idx}/{len(unique_smiles_series)} : {smiles}')
+        try:
+            m = Chem.MolFromSmiles(smiles)
+            m2 = Chem.AddHs(m)
+            cids = AllChem.EmbedMultipleConfs(m2, numConfs=10)
+            m3 = Chem.RemoveHs(m2)
+            embedding = [_conf.GetPositions() for _conf in m3.GetConformers()][0]
+
+            smiles_validity[smiles] = True
+        except Exception as e:
+            print(e)
+            smiles_validity[smiles] = False
+
+    for _idx, _row in df.iterrows():
+        smiles = _row['canonical_smiles']
+        if smiles_validity[smiles]:
+            valid_smiles_group.append(
+                np.array(
+                    [(_idx, True)],
+                    dtype=valid_smiles_dtype
+                )
+            )
+        else:
+            valid_smiles_group.append(
+                np.array(
+                    [(_idx, False)],
+                    dtype=valid_smiles_dtype
+                )
+            )
+
     print(f'Generating ligand confs...')
     ligand_data_table = root['pandda_2']['ligand_data']
     try:

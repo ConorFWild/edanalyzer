@@ -7,7 +7,7 @@ from numcodecs import Blosc, Delta
 from .database import _get_st_hits, _res_to_array, _get_matched_cifs_from_dir, _get_smiles, \
     _get_atom_ids, _get_connectivity, _get_system_from_dtag
 from ..datasets.base import _get_structure_from_path, _load_xmap_from_path, _sample_xmap_and_scale, \
-    _load_xmap_from_mtz_path
+    _load_xmap_from_mtz_path, _sample_xmap
 from ..constants import PANDDA_ZMAP_TEMPLATE, PANDDA_INSPECT_MODEL_DIR, PANDDA_INITIAL_MTZ_TEMPLATE
 
 z_map_sample_metadata_dtype = [
@@ -201,10 +201,10 @@ def _get_z_map_sample_from_dataset_dir(dataset_dir, x, y, z, idx_z_map):
     centroid = np.array([x, y, z])
     transform = gemmi.Transform()
     transform.mat.fromlist((np.eye(3) * 0.5).tolist())
-    transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
+    transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])).tolist())
 
     # Record the 2fofc map sample
-    z_map_sample_array = _sample_xmap_and_scale(
+    z_map_sample_array = _sample_xmap(
         zmap,
         transform,
         np.zeros((90, 90, 90), dtype=np.float32),
@@ -229,10 +229,10 @@ def _get_xmap_sample_from_dataset_dir(dataset_dir, x, y, z, idx_z_map):
     centroid = np.array([x, y, z])
     transform = gemmi.Transform()
     transform.mat.fromlist((np.eye(3) * 0.5).tolist())
-    transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])))
+    transform.vec.fromlist((centroid - np.array([22.5, 22.5, 22.5])).tolist())
 
     # Record the 2fofc map sample
-    xmap_sample_array = _sample_xmap_and_scale(
+    xmap_sample_array = _sample_xmap(
         xmap,
         transform,
         np.zeros((90, 90, 90), dtype=np.float32),
