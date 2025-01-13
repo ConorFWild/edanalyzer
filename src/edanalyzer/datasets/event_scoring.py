@@ -574,13 +574,13 @@ class EventScoringDataset(Dataset):
         xmap_mask_float = _get_ed_mask_float()
 
         # Get sample images
-        xmap_sample = _sample_xmap_and_scale(
+        xmap_sample = _sample_xmap(
             xmap,
             transform,
             np.copy(sample_array)
         )
         # xmap_sample = np.copy(sample_array)
-        z_map_sample = _sample_xmap_and_scale(
+        z_map_sample = _sample_xmap(
             z_map,
             transform,
             np.copy(sample_array)
