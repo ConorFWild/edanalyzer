@@ -1271,7 +1271,8 @@ class ResNet(nn.Module):
             norm_layer = nn.BatchNorm3d
         self._norm_layer = norm_layer
 
-        self.inplanes = 64
+        base_planes = 32
+        self.inplanes = base_planes
         self.dilation = 1
         if replace_stride_with_dilation is None:
             # each element in the tuple indicates if we should replace
@@ -1289,19 +1290,19 @@ class ResNet(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
         self.drop1 = nn.Dropout(p=p)
-        self.layer1 = self._make_layer(block, 64, layers[0])
+        self.layer1 = self._make_layer(block, base_planes, layers[0])
         self.drop2 = nn.Dropout(p=p)
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
+        self.layer2 = self._make_layer(block, base_planes * 2, layers[1], stride=2,
                                        dilate=replace_stride_with_dilation[0])
         self.drop3 = nn.Dropout(p=p)
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
+        self.layer3 = self._make_layer(block, base_planes * 4, layers[2], stride=2,
                                        dilate=replace_stride_with_dilation[1])
         self.drop4 = nn.Dropout(p=p)
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
+        self.layer4 = self._make_layer(block, base_planes * 8, layers[3], stride=2,
                                        dilate=replace_stride_with_dilation[2])
         self.drop5 = nn.Dropout(p=p)
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
-        self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.fc = nn.Linear(base_planes * 8 * block.expansion, num_classes)
 
         # self.act = nn.Softmax()
 

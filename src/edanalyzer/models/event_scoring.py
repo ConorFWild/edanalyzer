@@ -224,7 +224,7 @@ class LitEventScoring(lt.LightningModule):
             # nn.Linear(256,128),
             # nn.ReLU(inplace=True),
             # nn.Dropout(),
-            nn.Linear(512*2,2),
+            nn.Linear(32*8*2,2),
             # nn.BatchNorm1d(16),
             # nn.Linear(256,128),
             # nn.ReLU(inplace=True),
