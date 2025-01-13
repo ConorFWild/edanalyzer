@@ -525,10 +525,10 @@ class EventScoringDataset(Dataset):
 
         #
         if annotation['partition'] == 'train':
-            u_s = rng.uniform(0.0, 1.0)
+            u_s = rng.uniform(0.0, 3.0)
             xmap_sample_data = gaussian_filter(xmap_sample_data, sigma=u_s)
 
-            u_s = rng.uniform(0.0, 1.0)
+            u_s = rng.uniform(0.0, 3.0)
             z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
 
         xmap = _get_grid_from_hdf5(xmap_sample_data)
