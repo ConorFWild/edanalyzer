@@ -62,10 +62,10 @@ test:
     - GluN1N2A
     - Tif6
     - AURA
-    - A71EV2A
+#    - A71EV2A
     - SETDB1
     - JMJD2DA
-    - PTP1B
+#    - PTP1B
     - BRD1A
     - PP1
     - PWWP_C64S
