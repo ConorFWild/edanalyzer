@@ -43,7 +43,7 @@ def main():
                 print(f'Not a dir! Skipping!')
                 continue
 
-            if not (dtag_dir / 'dimple.pdb').exists():
+            if not ((dtag_dir / 'dimple.pdb').exists() & (dtag_dir / 'dimple.mtz').exists() ):
                 print(f'No data! Skipping!')
                 continue
 
@@ -70,10 +70,11 @@ def main():
             )
 
             compound_dir_name = 'compound'
-            shutil.copytree(
-                dtag_dir / compound_dir_name,
-                dtag_output_dir / compound_dir_name
-            )
+            if (dtag_dir / compound_dir_name).exists():
+                shutil.copytree(
+                    dtag_dir / compound_dir_name,
+                    dtag_output_dir / compound_dir_name
+                )
 
 
 if __name__ == "__main__":
