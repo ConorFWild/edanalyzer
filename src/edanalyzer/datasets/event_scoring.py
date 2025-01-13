@@ -167,10 +167,10 @@ class DepEventScoringDataset(Dataset):
 
         #
         if annotation['partition'] == 'train':
-            u_s = rng.uniform(0.0, 1.0)
+            u_s = rng.uniform(0.0, 1.5)
             xmap_sample_data = gaussian_filter(xmap_sample_data, sigma=u_s)
 
-            u_s = rng.uniform(0.0, 1.0)
+            u_s = rng.uniform(0.0, 1.5)
             z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
 
 
