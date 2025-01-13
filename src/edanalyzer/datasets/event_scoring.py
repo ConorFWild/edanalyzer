@@ -10,6 +10,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 import pandas as pd
 
+from scipy.ndimage import gaussian_filter
 
 from torch.utils.data import Dataset
 
@@ -165,6 +166,14 @@ class DepEventScoringDataset(Dataset):
         frag_data = self.pandda_2_frag_table[_f]
 
         #
+        if annotation['partition'] == 'train':
+            u_s = rng.uniform(0.0, 1.0)
+            xmap_sample_data = gaussian_filter(xmap_sample_data, sigma=u_s)
+
+            u_s = rng.uniform(0.0, 1.0)
+            z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
+
+
         xmap = _get_grid_from_hdf5(xmap_sample_data)
         z_map = _get_grid_from_hdf5(z_map_sample_data)
 
