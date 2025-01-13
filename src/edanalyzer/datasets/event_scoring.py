@@ -608,7 +608,7 @@ class EventScoringDataset(Dataset):
             ],
             axis=0
         )
-        image_z_float = image_z.astype(np.float32)  * mask
+        image_z_float = image_z.astype(np.float32) # * mask
 
         image_mol = np.stack(
             [
