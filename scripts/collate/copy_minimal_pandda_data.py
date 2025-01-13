@@ -57,24 +57,27 @@ def main():
                 continue
 
             # Copy pdb, mtz and ligand files
-            pdb_file_name = 'dimple.pdb'
-            shutil.copyfile(
-                dtag_dir / pdb_file_name,
-                dtag_output_dir / pdb_file_name
-            )
-
-            mtz_file_name = 'dimple.mtz'
-            shutil.copyfile(
-                dtag_dir / mtz_file_name,
-                dtag_output_dir / mtz_file_name
-            )
-
-            compound_dir_name = 'compound'
-            if (dtag_dir / compound_dir_name).exists():
-                shutil.copytree(
-                    dtag_dir / compound_dir_name,
-                    dtag_output_dir / compound_dir_name
+            try:
+                pdb_file_name = 'dimple.pdb'
+                shutil.copyfile(
+                    dtag_dir / pdb_file_name,
+                    dtag_output_dir / pdb_file_name
                 )
+
+                mtz_file_name = 'dimple.mtz'
+                shutil.copyfile(
+                    dtag_dir / mtz_file_name,
+                    dtag_output_dir / mtz_file_name
+                )
+
+                compound_dir_name = 'compound'
+                if (dtag_dir / compound_dir_name).exists():
+                    shutil.copytree(
+                        dtag_dir / compound_dir_name,
+                        dtag_output_dir / compound_dir_name
+                    )
+            except Exception as e:
+                print(e)
 
 
 if __name__ == "__main__":
