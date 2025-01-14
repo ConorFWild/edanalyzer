@@ -591,7 +591,7 @@ class EventScoringDataset(Dataset):
         else:
             mask = np.ones((32,32,32), dtype=np.float32)
 
-        xmap_mask_float = _get_ed_mask_float(radius=6.0)
+        xmap_mask_float = _get_ed_mask_float(radius=4.0)
 
         # Get sample images
         xmap_sample = _sample_xmap(
