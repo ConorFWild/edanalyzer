@@ -981,6 +981,7 @@ def main(config_path, batch_size=12, num_workers=None):
     output = output_dir / 'event_scoring_prod_15'
     model = LitEventScoring(output)
 
+
     # Train
     rprint('Constructing trainer...')
     checkpoint_callback = ModelCheckpoint(dirpath=str(output ))
