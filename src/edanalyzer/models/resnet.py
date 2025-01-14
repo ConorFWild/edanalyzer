@@ -1302,7 +1302,7 @@ class ResNet(nn.Module):
                                        dilate=replace_stride_with_dilation[2])
         self.drop5 = nn.Dropout(p=p)
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
-        self.fc = nn.Linear(base_planes * 8 * block.expansion, num_classes)
+        self.fc = nn.Linear(base_planes * 4 * block.expansion, num_classes)
 
         # self.act = nn.Softmax()
 
@@ -1360,8 +1360,8 @@ class ResNet(nn.Module):
         x = self.drop3(x)
         x = self.layer3(x)
         x = self.drop4(x)
-        x = self.layer4(x)
-        x = self.drop5(x)
+        # x = self.layer4(x)
+        # x = self.drop5(x)
 
         x = self.avgpool(x)
         # x = torch.flatten(x, 1)
