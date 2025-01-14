@@ -531,6 +531,10 @@ class EventScoringDataset(Dataset):
             u_s = rng.uniform(0.0, 3.0)
             z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
 
+        if (annotation['partition'] == 'train') & (rng.uniform(0.0, 0.5) > 0.5):
+            xmap_sample_data[:,:,:] = 0.0
+            ...
+
         xmap = _get_grid_from_hdf5(xmap_sample_data)
         z_map = _get_grid_from_hdf5(z_map_sample_data)
 
