@@ -31,6 +31,9 @@ from .base import (
     _get_ed_mask_float
 )
 
+Z_LEVELS = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, ]
+X_LEVELS = [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, ]
+
 patch_lower = [x for x in range(8)]
 patch_upper = [x for x in range(24,32)]
 patch_set = [patch_lower, patch_upper]
@@ -621,10 +624,25 @@ class EventScoringDataset(Dataset):
             np.copy(ligand_sample_array)
         )
 
+        # image_z = np.stack(
+        #     [
+        #         z_map_sample,
+        #         xmap_sample * xmap_mask_float
+        #     ],
+        #     axis=0
+        # )
+        # image_z_float = image_z.astype(np.float32) # * mask
+
         image_z = np.stack(
             [
-                z_map_sample,
-                xmap_sample * xmap_mask_float
+                z_map_sample > _cutoff
+                for _cutoff
+                in Z_LEVELS
+
+            ] + [
+                (xmap_sample > _cutoff) * xmap_mask_float
+                for _cutoff
+                in X_LEVELS
             ],
             axis=0
         )

@@ -204,7 +204,7 @@ class LitEventScoring(lt.LightningModule):
         # self.automatic_optimization = False
         # self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
         # self.z_encoder = SimpleConvolutionalEncoder(input_layers=2)
-        self.z_encoder = resnet10(num_classes=2, num_input=2, headless=True).float()
+        self.z_encoder = resnet10(num_classes=2, num_input=16, headless=True).float()
         # self.x_encoder = SimpleConvolutionalEncoder(input_layers=1)
         # self.mol_encoder = SimpleConvolutionalEncoder(input_layers=1)
         self.mol_encoder = resnet10(num_classes=2, num_input=1, headless=True).float()
@@ -224,7 +224,7 @@ class LitEventScoring(lt.LightningModule):
             # nn.Linear(256,128),
             # nn.ReLU(inplace=True),
             # nn.Dropout(),
-            nn.Linear(8*2*2,2),
+            nn.Linear(16*2*2,2),
             # nn.BatchNorm1d(16),
             # nn.Linear(256,128),
             # nn.ReLU(inplace=True),
