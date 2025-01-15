@@ -272,13 +272,13 @@ class LitEventScoring(lt.LightningModule):
         # return [optimizer], [lr_scheduler]
         return {
             "optimizer": optimizer,
-            "lr_scheduler": {
-                # "scheduler": lr_scheduler,
-                "monitor": "fpr95",
-                "interval": "epoch",
-                "frequency": 10,
-                "strict": False,
-            },
+            # "lr_scheduler": {
+            #     # "scheduler": lr_scheduler,
+            #     "monitor": "fpr95",
+            #     "interval": "epoch",
+            #     "frequency": 10,
+            #     "strict": False,
+            # },
         }
         # return optimizer
 
