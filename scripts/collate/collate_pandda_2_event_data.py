@@ -246,7 +246,10 @@ def main(config_path):
                     dtag,
                     event_idx,
                     conf,
-                    size
+                    size,
+                    x,
+                    y,
+                    z
                 )
 
                 z_map_sample_metadata_table.append(z_map_metadata_sample)
