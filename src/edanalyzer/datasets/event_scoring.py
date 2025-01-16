@@ -491,7 +491,7 @@ class EventScoringDataset(Dataset):
 
         # If training replace positives with negatives
         if (annotation['partition'] == 'train') & (rng.uniform(0.0, 1.0) > 0.5) & (conf == 'High'):
-            conf='Low'
+            conf = 'Low'
             low_conf_sample = self.metadata_table_low_conf.sample().iloc[0]
             z_map_sample_data = self.pandda_2_z_map_sample_table[low_conf_sample['idx']]
 
