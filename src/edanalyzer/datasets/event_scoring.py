@@ -450,12 +450,17 @@ class EventScoringDataset(Dataset):
 
         self.unique_smiles = ligand_data_df['canonical_smiles'].unique()
 
-        metadata_table = pd.DataFrame(self.pandda_2_z_map_sample_metadata_table[:])
+        self.metadata_table = pd.DataFrame(self.pandda_2_z_map_sample_metadata_table[:])
+        self.sampled_metadata_table = self.metadata_table.iloc[[x['z'] for x in sample_indexes]]
+        self.metadata_table_high_conf = self.sampled_metadata_table[self.sampled_metadata_table['Confidence'] == 'High']
+        self.metadata_table_low_conf = self.sampled_metadata_table[self.sampled_metadata_table['Confidence'] == 'Low']
+
+
         # ligand_idx_smiles_df = pd.DataFrame(self.pandda_2_ligand_data_table.get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
         # annotation_df = pd.DataFrame(self.pandda_2_annotation_table[:])
         # train_samples = metadata_table[annotation_df['partition'] == b'train']
         # pos_samples = train_samples[train_samples['Confidence'] == 'High']
-        selected_pos_samples = metadata_table.iloc[[x['z'] for x in sample_indexes]]
+        selected_pos_samples = self.metadata_table.iloc[[x['z'] for x in sample_indexes]]
         selected_smiles = ligand_data_df.iloc[selected_pos_samples['ligand_data_idx']]['canonical_smiles']
         print(selected_smiles)
         unique_smiles, smiles_counts = np.unique(selected_smiles, return_counts=True)
@@ -468,6 +473,8 @@ class EventScoringDataset(Dataset):
         return len(self.sample_indexes)
 
     def __getitem__(self, idx: int):
+        rng = np.random.default_rng()
+
         # Get the sample idx
         sample_data = self.sample_indexes[idx]
         _z= sample_data['z']
@@ -482,8 +489,15 @@ class EventScoringDataset(Dataset):
         z_map_sample_data = self.pandda_2_z_map_sample_table[z_map_sample_idx]
         annotation = self.pandda_2_annotations[z_map_sample_metadata['event_idx']]
 
+        # If training replace positives with negatives
+        if (annotation['partition'] == 'train') & (rng.uniform(0.0, 1.0) > 0.5) & (conf == 'High'):
+            conf='Low'
+            low_conf_sample = self.metadata_table_low_conf.sample().iloc[0]
+            z_map_sample_data = self.pandda_2_z_map_sample_table[low_conf_sample['idx']]
+
+            ...
+
         # If training replace with a random ligand
-        rng = np.random.default_rng()
         if (annotation['partition'] == 'train') & (conf == 'Low'):
             # smiles = self.unique_smiles[rng.integers(0, len(self.unique_smiles))]
             smiles = self.unique_smiles.sample(weights=self.unique_smiles_frequencies)
@@ -534,9 +548,9 @@ class EventScoringDataset(Dataset):
             u_s = rng.uniform(0.0, 1.0)
             z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
 
-        if (annotation['partition'] == 'train') & (rng.uniform(0.0, 1.0) > 0.5):
-            xmap_sample_data[:,:,:] = 0.0
-            ...
+        # if (annotation['partition'] == 'train') & (rng.uniform(0.0, 1.0) > 0.5):
+        #     xmap_sample_data[:,:,:] = 0.0
+        #     ...
 
         xmap = _get_grid_from_hdf5(xmap_sample_data)
         z_map = _get_grid_from_hdf5(z_map_sample_data)
