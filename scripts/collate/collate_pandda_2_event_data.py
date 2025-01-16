@@ -176,10 +176,15 @@ def main(config_path):
                 model_dir = dataset_dir / 'modelled_structures'
 
                 # Get the corresponding residue
-                resid, res, dist = _get_closest_res_from_dataset_dir(
-                    dataset_dir,
-                    x, y, z
-                )
+                try:
+                    resid, res, dist = _get_closest_res_from_dataset_dir(
+                        dataset_dir,
+                        x, y, z
+                    )
+                except Exception as e:
+                    print(e)
+                    print('Couldn\'t match res! Skipping!')
+                    continue
                 if (conf == 'High') & (dist > 6.0):
                     rprint(
                         f'Could not match high confidence ligand {dtag} {event_idx} to a build!\n'
