@@ -978,7 +978,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'event_scoring_prod_23'
+    output = output_dir / 'event_scoring_prod_24'
     model = LitEventScoring(output)
 
 
