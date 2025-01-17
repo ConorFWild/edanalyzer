@@ -637,29 +637,29 @@ class EventScoringDataset(Dataset):
             np.copy(ligand_sample_array)
         )
 
-        # image_z = np.stack(
-        #     [
-        #         z_map_sample,
-        #         xmap_sample * xmap_mask_float
-        #     ],
-        #     axis=0
-        # )
-        # image_z_float = image_z.astype(np.float32) # * mask
-
         image_z = np.stack(
             [
-                z_map_sample > _cutoff
-                for _cutoff
-                in Z_LEVELS
-
-            ] + [
-                (xmap_sample > _cutoff) * xmap_mask_float
-                for _cutoff
-                in X_LEVELS
+                z_map_sample,
+                xmap_sample * xmap_mask_float
             ],
             axis=0
         )
         image_z_float = image_z.astype(np.float32) # * mask
+
+        # image_z = np.stack(
+        #     [
+        #         z_map_sample > _cutoff
+        #         for _cutoff
+        #         in Z_LEVELS
+        #
+        #     ] + [
+        #         (xmap_sample > _cutoff) * xmap_mask_float
+        #         for _cutoff
+        #         in X_LEVELS
+        #     ],
+        #     axis=0
+        # )
+        # image_z_float = image_z.astype(np.float32) # * mask
 
         image_mol = np.stack(
             [
