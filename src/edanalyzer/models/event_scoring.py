@@ -224,7 +224,7 @@ class LitEventScoring(lt.LightningModule):
             # nn.Linear(256,128),
             # nn.ReLU(inplace=True),
             # nn.Dropout(),
-            nn.Linear(8*2*2,2),
+            nn.Linear(8*8*2,2),
             # nn.BatchNorm1d(16),
             # nn.Linear(256,128),
             # nn.ReLU(inplace=True),
@@ -266,7 +266,7 @@ class LitEventScoring(lt.LightningModule):
         return score
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.parameters(), lr=1e-2, weight_decay=1e-4)
+        optimizer = torch.optim.AdamW(self.parameters(), lr=1e-2, weight_decay=1e-3)
         # optimizer = torch.optim.SGD(self.parameters(), lr=1e-1, weight_decay=1e-2)
         lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, cooldown=10)
         # return [optimizer], [lr_scheduler]
