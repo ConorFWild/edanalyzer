@@ -505,9 +505,12 @@ class EventScoringDataset(Dataset):
                 pose_data_idx = high_conf_sample['pose_data_idx']
                 pose_data = self.pandda_2_pose_table[pose_data_idx]
 
+            # Select new background
             low_conf_sample = self.metadata_table_low_conf.sample().iloc[0]
             low_conf_z_map_sample_data = self.pandda_2_z_map_sample_table[low_conf_sample['idx']]
+            low_conf_x_map_sample_data = self.pandda_2_xmap_sample_table[low_conf_sample['idx']]
 
+            #
             _valid_mask = pose_data['elements'] > 1
             _valid_poss = pose_data['positions'][_valid_mask]
             _valid_elements = pose_data['elements'][_valid_mask]
@@ -524,6 +527,7 @@ class EventScoringDataset(Dataset):
             _ligand_mask_array = np.array(_ligand_mask_grid) > 0
 
             z_map_sample_data[~_ligand_mask_array] = low_conf_z_map_sample_data[~_ligand_mask_array]
+            xmap_sample_data[~_ligand_mask_array] = low_conf_x_map_sample_data[~_ligand_mask_array]
 
 
         # If training replace with a random ligand
