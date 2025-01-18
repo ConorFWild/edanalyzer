@@ -490,12 +490,41 @@ class EventScoringDataset(Dataset):
         annotation = self.pandda_2_annotations[z_map_sample_metadata['event_idx']]
 
         # If training replace positives with negatives
-        if (annotation['partition'] == 'train') & (rng.uniform(0.0, 1.0) > 0.5) & (conf == 'High'):
-            conf = 'Low'
-            low_conf_sample = self.metadata_table_low_conf.sample().iloc[0]
-            z_map_sample_data = self.pandda_2_z_map_sample_table[low_conf_sample['idx']]
+        # if (annotation['partition'] == 'train') & (rng.uniform(0.0, 1.0) > 0.5) & (conf == 'High'):
+        #     conf = 'Low'
+        #     low_conf_sample = self.metadata_table_low_conf.sample().iloc[0]
+        #     z_map_sample_data = self.pandda_2_z_map_sample_table[low_conf_sample['idx']]
 
-            ...
+        #
+        pose_data_idx = z_map_sample_metadata['pose_data_idx']
+        if (rng.uniform(0.0, 1.0) > 0.5) & (annotation['partition'] == 'train'):
+            if pose_data_idx != -1:  # High confidence sample: chop in totally random background
+                pose_data = self.pandda_2_pose_table[pose_data_idx]
+            else:  # Low confidence sample: chop in low confidence background
+                high_conf_sample = self.metadata_table_high_conf.sample().iloc[0]
+                pose_data_idx = high_conf_sample['pose_data_idx']
+                pose_data = self.pandda_2_pose_table[pose_data_idx]
+
+            low_conf_sample = self.metadata_table_low_conf.sample().iloc[0]
+            low_conf_z_map_sample_data = self.pandda_2_z_map_sample_table[low_conf_sample['idx']]
+
+            _valid_mask = pose_data['elements'] > 1
+            _valid_poss = pose_data['positions'][_valid_mask]
+            _valid_elements = pose_data['elements'][_valid_mask]
+            _transformed_residue = _get_res_from_arrays(
+                _valid_poss,
+                _valid_elements,
+            )
+            _ligand_mask_grid = _get_ligand_mask_float(
+                _transformed_residue,
+                2.5,
+                90,
+                45.0
+            )
+            _ligand_mask_array = np.array(_ligand_mask_grid) > 0
+
+            z_map_sample_data[~_ligand_mask_array] = low_conf_z_map_sample_data[~_ligand_mask_array]
+
 
         # If training replace with a random ligand
         if (annotation['partition'] == 'train') & (conf == 'Low'):
