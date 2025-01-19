@@ -978,7 +978,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'event_scoring_prod_25'
+    output = output_dir / 'event_scoring_prod_26'
     model = LitEventScoring(output)
 
 
@@ -1015,7 +1015,7 @@ def main(config_path, batch_size=12, num_workers=None):
                          ],
                          enable_progress_bar=False,
                          gradient_clip_val=1.5,
-                         max_epochs=50
+                         max_epochs=200
                          )
     rprint(f'Training...')
     trainer.fit(model, dataset_train, dataset_test)
