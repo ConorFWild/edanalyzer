@@ -523,9 +523,10 @@ class EventScoringDataset(Dataset):
                 _valid_poss,
                 _valid_elements,
             )
+            _radius = rng.uniform(1.0, 2.5)
             _ligand_mask_grid = _get_ligand_mask_float(
                 _transformed_residue,
-                2.0,
+                _radius,
                 90,
                 45.0
             )
