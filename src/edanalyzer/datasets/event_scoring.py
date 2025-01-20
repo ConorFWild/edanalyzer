@@ -497,7 +497,7 @@ class EventScoringDataset(Dataset):
 
         #
         pose_data_idx = z_map_sample_metadata['pose_data_idx']
-        if (rng.uniform(0.0, 1.0) > 0.25) & (annotation['partition'] == 'train'):
+        if (rng.uniform(0.0, 1.0) > 0.2) & (annotation['partition'] == 'train'):
             if pose_data_idx != -1:  # High confidence sample: chop in low confidence background
                 pose_data = self.pandda_2_pose_table[pose_data_idx]
             else:  # Low confidence sample: chop in low confidence background
