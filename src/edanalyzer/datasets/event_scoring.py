@@ -513,10 +513,11 @@ class EventScoringDataset(Dataset):
             #
             _valid_mask = pose_data['elements'] > 1
             if (annotation['partition'] == 'train') & (rng.random() > 0.5):
-                valid_indicies = np.nonzero(_valid_mask)
-                random_drop_index = rng.integers(0, len(valid_indicies))
-                drop_index = valid_indicies[random_drop_index]
-                _valid_mask[drop_index] = False
+                for _j in rng.integers(1, 3):
+                    valid_indicies = np.nonzero(_valid_mask)
+                    random_drop_index = rng.integers(0, len(valid_indicies))
+                    drop_index = valid_indicies[random_drop_index]
+                    _valid_mask[drop_index] = False
             _valid_poss = pose_data['positions'][_valid_mask]
             _valid_elements = pose_data['elements'][_valid_mask]
             _transformed_residue = _get_res_from_arrays(
