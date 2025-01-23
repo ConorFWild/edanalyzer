@@ -329,7 +329,7 @@ class LitEventScoring(lt.LightningModule):
         total_loss = loss_1 #+ loss_2 + loss_3 + loss_4
         # total_loss = loss_1 * loss_2 * loss_3 * loss_4
 
-        self.log('train_loss', loss_1, batch_size=128)
+        self.log('train_loss', loss_1, batch_size=128, )
         # self.log('mol_decode_loss', loss_2)
         # self.log('z_decode_loss', loss_3)
         # self.log('x_decode_loss', loss_4)
@@ -628,9 +628,9 @@ class LitEventScoring(lt.LightningModule):
         best_fpr_99 = get_fpr(best_df, 0.01)
         best_fpr_10 = get_fpr(best_df, 0.0)
 
-        self.log('fpr10', best_fpr_10, 4)
-        self.log('fpr95', best_fpr_95, 4)
-        self.log('fpr99', best_fpr_99, 4)
+        self.log('fpr10', best_fpr_10, 4, sync_dist=True)
+        self.log('fpr95', best_fpr_95, 4, sync_dist=True)
+        self.log('fpr99', best_fpr_99, 4, sync_dist=True)
         # self.log('lr', )
 
         self.test_annotations.clear()
