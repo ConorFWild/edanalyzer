@@ -1046,7 +1046,8 @@ def main(config_path, batch_size=12, num_workers=None):
                 checkpoint_callback_best_10,
                 checkpoint_callback_best_99,
                 checkpoint_callback_best_95,
-                RayTrainReportCallback()],
+                RayTrainReportCallback(),
+            ],
             plugins=[RayLightningEnvironment()],
             enable_progress_bar=False,
         )
@@ -1087,8 +1088,8 @@ def main(config_path, batch_size=12, num_workers=None):
 
 
     search_space = {
-        "lr": tune.loguniform(1e-4, 1e1),
-        "wd": tune.loguniform(1e-4, 1e1),
+        "lr": tune.loguniform(1e-4, 1e-1),
+        "wd": tune.loguniform(1e-4, 1e-1),
         'fraction_background_replace': tune.loguniform(1e-2, 5e-1),
         'xmap_radius': tune.uniform(3.0, 7.0)
         # "batch_size": tune.choice([32, 64]),
