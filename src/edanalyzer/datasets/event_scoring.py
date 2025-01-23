@@ -482,7 +482,7 @@ class EventScoringDataset(Dataset):
         try:
             res = z_map_sample_metadata['res'] + 0.01
         except:
-            res = 1.6935607 + 0.01
+            res = 0.590471872361221 + 0.01
         assert _z == z_map_sample_idx
         ligand_data_idx = z_map_sample_metadata['ligand_data_idx']
         xmap_sample_data = self.pandda_2_xmap_sample_table[z_map_sample_idx]
