@@ -992,7 +992,6 @@ def main(config_path, batch_size=12, num_workers=None):
     # Get the model
     rprint('Constructing model...')
     output = output_dir / 'event_scoring_prod_30'
-    model = LitEventScoring(output)
 
     # Train
     rprint('Constructing trainer...')
@@ -1034,6 +1033,8 @@ def main(config_path, batch_size=12, num_workers=None):
 
 
     def train_func(_config):
+        model = LitEventScoring(output, _config)
+
         trainer = lt.Trainer(
             # devices="auto",
             accelerator="gpu",
@@ -1059,7 +1060,6 @@ def main(config_path, batch_size=12, num_workers=None):
         dataset_train = DataLoader(
             EventScoringDataset(
                 _test_config
-
             ),
             batch_size=128,  # batch_size,
             shuffle=True,
