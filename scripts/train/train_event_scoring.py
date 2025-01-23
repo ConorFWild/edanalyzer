@@ -18,6 +18,17 @@ from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 from lightning.pytorch.loggers import CSVLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveraging
 
+from ray.train.lightning import (
+    RayDDPStrategy,
+    RayLightningEnvironment,
+    RayTrainReportCallback,
+    prepare_trainer,
+)
+from ray import tune
+from ray.tune.schedulers import ASHAScheduler
+from ray.train import RunConfig, ScalingConfig, CheckpointConfig
+from ray.train.torch import TorchTrainer
+
 
 def sample(iterable, num, replace, weights):
     df = pd.Series(iterable)
@@ -559,8 +570,6 @@ def _dep_get_train_test_idxs_full_conf(root):
             test_neg_z_samples.append(z['idx'])
             test_neg_conf.append(z['Confidence'])
 
-
-
     rprint({
         'pos_z_samples len': len(pos_z_samples),
         'neg_z_samples len': len(neg_z_samples),
@@ -598,6 +607,7 @@ def _dep_get_train_test_idxs_full_conf(root):
                  ]
     return train_idxs, test_idxs
 
+
 def _get_train_test_idxs_full_conf(root):
     # for each z map sample
     # 1. Get the corresponding ligand data
@@ -626,7 +636,8 @@ def _get_train_test_idxs_full_conf(root):
     #     root[table_type]['ligand_confs'].get_basic_selection(slice(None), fields=['idx', 'num_heavy_atoms',
     #                                                                               'fragment_canonical_smiles',
     #                                                                               'ligand_canonical_smiles']))
-    valid_smiles_mask = valid_smiles_df.iloc[ligand_idx_smiles_df.iloc[metadata_table['ligand_data_idx']]['idx']]['valid']
+    valid_smiles_mask = valid_smiles_df.iloc[ligand_idx_smiles_df.iloc[metadata_table['ligand_data_idx']]['idx']][
+        'valid']
     print(valid_smiles_mask)
     train_samples = metadata_table[(annotation_df['partition'] == b'train') & valid_smiles_mask]
     test_samples = metadata_table[(annotation_df['partition'] == b'test') & valid_smiles_mask]
@@ -650,14 +661,13 @@ def _get_train_test_idxs_full_conf(root):
     # Loop over the z samples adding the inherent negative samples
     print(f'Getting negative train samples')
     for _idx, z in train_samples[train_samples['Confidence'] == 'Low'].iterrows():
-
         neg_z_samples += [z['idx'], ]
 
     # Loop over the z samples adding positive samples for each
     print(f'Getting positive train samples')
-    for _idx, z in train_samples[train_samples['Confidence'] == 'High'].iterrows():# .sample(len(neg_z_samples),
-                                                                         #     replace=True).iterrows():
-        pos_z_samples += [z['idx'],]
+    for _idx, z in train_samples[train_samples['Confidence'] == 'High'].iterrows():  # .sample(len(neg_z_samples),
+        #     replace=True).iterrows():
+        pos_z_samples += [z['idx'], ]
 
     print(f'Got {len(pos_z_samples)} pos samples!')
 
@@ -703,9 +713,36 @@ def _get_train_test_idxs_full_conf(root):
         'train_neg_conf len': len(test_neg_conf),
     })
     test_idxs = [{'z': z, } for z
-                 in  test_pos_z_samples + test_neg_z_samples
+                 in test_pos_z_samples + test_neg_z_samples
                  ]
-    return train_idxs, test_idxs
+
+    res = {}
+    for train_test, sample_indexes in zip(['train', 'test'], [train_idxs, test_idxs]):
+        res[train_test] = {}
+        res[train_test]['indexes'] = sample_indexes
+
+        res[train_test]['pandda_2_annotations'] = {
+            _x['event_idx']: _x
+            for _x
+            in root['pandda_2']['annotation']
+        }
+
+        res[train_test]['ligand_data_df'] =ligand_idx_smiles_df
+
+        res[train_test]['metadata_table'] = metadata_table
+        sampled_metadata_table = metadata_table.iloc[[x['z'] for x in sample_indexes]]
+        res[train_test]['sampled_metadata_table'] = sampled_metadata_table
+        res[train_test]['metadata_table_high_conf'] = sampled_metadata_table[ sampled_metadata_table['Confidence'] == 'High']
+        res[train_test]['metadata_table_low_conf'] = sampled_metadata_table[ sampled_metadata_table['Confidence'] == 'Low']
+
+        selected_pos_samples = metadata_table.iloc[[x['z'] for x in sample_indexes]]
+        selected_smiles = ligand_idx_smiles_df.iloc[selected_pos_samples['ligand_data_idx']]['canonical_smiles']
+        print(selected_smiles)
+        unique_smiles, smiles_counts = np.unique(selected_smiles, return_counts=True)
+
+        res[train_test]['unique_smiles'] = pd.Series(unique_smiles)
+        res[train_test]['unique_smiles_frequencies'] = pd.Series(smiles_counts.astype(float) / np.sum(smiles_counts))
+    return res['train'], res['test']
 
 
 def main(config_path, batch_size=12, num_workers=None):
@@ -940,52 +977,26 @@ def main(config_path, batch_size=12, num_workers=None):
 
     rprint(f'Getting train/test data...')
     # all_train_pose_idxs, all_test_pose_idxs = _get_train_test_idxs(root)
-    all_train_pose_idxs, all_test_pose_idxs = _get_train_test_idxs_full_conf(root)
+    train_config, test_config = _get_train_test_idxs_full_conf(root)
 
-    rprint(f"Got {len(all_train_pose_idxs)} train samples")
-    rprint(f"Got {len(all_test_pose_idxs)} test samples")
+    # rprint(f"Got {len(all_train_pose_idxs)} train samples")
+    # rprint(f"Got {len(all_test_pose_idxs)} test samples")
 
     # Get the dataset
 
     # with pony.orm.db_session:
     #     query = [_x for _x in pony.orm.select(_y for _y in EventORM)]
     rprint(f'Constructing train and test dataloaders...')
-    dataset_train = DataLoader(
-        EventScoringDataset(
-            zarr_path,
-            all_train_pose_idxs,
-            # pos_train_pose_samples
-            None
-        ),
-        batch_size=128,#batch_size,
-        shuffle=True,
-        num_workers=19,
-        drop_last=True
-    )
-    rprint(f"Got {len(dataset_train)} training samples")
-    dataset_test = DataLoader(
-        EventScoringDataset(
-            zarr_path,
-            all_test_pose_idxs,
-            # pos_train_pose_samples
-            None
-        ),
-        batch_size=batch_size,
-        num_workers=19,
-        drop_last=True
-    )
-    rprint(f"Got {len(dataset_test)} test samples")
+
 
     # Get the model
     rprint('Constructing model...')
     output = output_dir / 'event_scoring_prod_29'
     model = LitEventScoring(output)
 
-
-
     # Train
     rprint('Constructing trainer...')
-    checkpoint_callback = ModelCheckpoint(dirpath=str(output ))
+    checkpoint_callback = ModelCheckpoint(dirpath=str(output))
     checkpoint_callback_best_95 = ModelCheckpoint(
         monitor='fpr95',
         dirpath=str(output),
@@ -1001,7 +1012,7 @@ def main(config_path, batch_size=12, num_workers=None):
         dirpath=str(output),
         filename='sample-mnist-{epoch:02d}-{fpr10:.2f}'
     )
-    logger = CSVLogger(str( output / 'logs'))
+    logger = CSVLogger(str(output / 'logs'))
     trainer = lt.Trainer(accelerator='gpu', logger=logger,
                          callbacks=[
                              checkpoint_callback,
@@ -1018,38 +1029,72 @@ def main(config_path, batch_size=12, num_workers=None):
                          max_epochs=50
                          )
     rprint(f'Training...')
-    trainer.fit(model, dataset_train, dataset_test)
+    # trainer.fit(model, dataset_train, dataset_test)
 
-    from ray.train.lightning import (
-        RayDDPStrategy,
-        RayLightningEnvironment,
-        RayTrainReportCallback,
-        prepare_trainer,
-    )
 
-    def train_func(config):
-        trainer = pl.Trainer(
-            devices="auto",
-            accelerator="auto",
+
+    def train_func(_config):
+        trainer = lt.Trainer(
+            # devices="auto",
+            accelerator="gpu",
+            gradient_clip_val=1.5,
             strategy=RayDDPStrategy(),
-            callbacks=[RayTrainReportCallback()],
+            logger=logger,
+            callbacks=[
+                checkpoint_callback,
+                checkpoint_callback_best_10,
+                checkpoint_callback_best_99,
+                checkpoint_callback_best_95,
+                RayTrainReportCallback()],
             plugins=[RayLightningEnvironment()],
             enable_progress_bar=False,
         )
         trainer = prepare_trainer(trainer)
+
+        _test_config = {
+                    'zarr_path': zarr_path,
+                }
+        _test_config.update(test_config)
+        _test_config.update(_config)
+        dataset_train = DataLoader(
+            EventScoringDataset(
+                _test_config
+
+            ),
+            batch_size=128,  # batch_size,
+            shuffle=True,
+            num_workers=19,
+            drop_last=True
+        )
+        rprint(f"Got {len(dataset_train)} training samples")
+        _train_config = {
+                    'zarr_path': zarr_path,
+                }
+        _train_config.update(train_config)
+        _train_config.update(_config)
+        dataset_test = DataLoader(
+            EventScoringDataset(
+                _train_config
+            ),
+            batch_size=batch_size,
+            num_workers=19,
+            drop_last=True
+        )
+        rprint(f"Got {len(dataset_test)} test samples")
+
         trainer.fit(model, dataset_train, dataset_test)
 
-    from ray import tune
-    from ray.tune.schedulers import ASHAScheduler
+
 
     search_space = {
-        "layer_1_size": tune.choice([32, 64, 128]),
-        "layer_2_size": tune.choice([64, 128, 256]),
-        "lr": tune.loguniform(1e-4, 1e-1),
-        "batch_size": tune.choice([32, 64]),
+        "lr": tune.loguniform(1e-4, 1e1),
+        "wd": tune.loguniform(1e-4, 1e1),
+        'fraction_background_replace': tune.loguniform(1e-2, 5e-1),
+        'xmap_radius': tune.uniform(3.0, 7.0)
+        # "batch_size": tune.choice([32, 64]),
     }
 
-    from ray.train import RunConfig, ScalingConfig, CheckpointConfig
+
 
     scaling_config = ScalingConfig(
         num_workers=1, use_gpu=True, resources_per_worker={"CPU": 19, "GPU": 1}
@@ -1058,12 +1103,11 @@ def main(config_path, batch_size=12, num_workers=None):
     run_config = RunConfig(
         checkpoint_config=CheckpointConfig(
             num_to_keep=2,
-            checkpoint_score_attribute="ptl/val_accuracy",
-            checkpoint_score_order="max",
+            checkpoint_score_attribute="fpr99",
+            checkpoint_score_order="min",
         ),
     )
 
-    from ray.train.torch import TorchTrainer
 
     # Define a TorchTrainer without hyper-parameters for Tuner
     ray_trainer = TorchTrainer(
@@ -1073,17 +1117,17 @@ def main(config_path, batch_size=12, num_workers=None):
     )
 
     num_samples = 10
-    scheduler = ASHAScheduler(max_t=num_epochs, grace_period=1, reduction_factor=2)
+    scheduler = ASHAScheduler(max_t=10, grace_period=1, reduction_factor=2)
 
     tuner = tune.Tuner(
-    ray_trainer,
-    param_space = {"train_loop_config": search_space},  # Goes to train_func as config dict
-    tune_config = tune.TuneConfig(
-        metric="ptl/val_accuracy",
-        mode="max",
-        num_samples=num_samples,
-        scheduler=scheduler,
-    ),)
+        ray_trainer,
+        param_space={"train_loop_config": search_space},  # Goes to train_func as config dict
+        tune_config=tune.TuneConfig(
+            metric="fpr99",
+            mode="min",
+            num_samples=num_samples,
+            scheduler=scheduler,
+        ), )
 
     print(tuner.fit())
 

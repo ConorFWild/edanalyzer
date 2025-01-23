@@ -427,8 +427,10 @@ def truncate(xmap, res):
 
 class EventScoringDataset(Dataset):
 
-    def __init__(self, zarr_path, sample_indexes, pos_train_pose_samples):
+    def __init__(self, config):
         # self.data = data
+
+        zarr_path = config['zarr_path']
         self.root = zarr.open(zarr_path, mode='r')
 
         self.pandda_2_z_map_sample_metadata_table = self.root['pandda_2']['z_map_sample_metadata']
@@ -439,39 +441,29 @@ class EventScoringDataset(Dataset):
         self.pandda_2_annotation_table = self.root['pandda_2']['annotation']
         self.pandda_2_frag_table = self.root['pandda_2']['ligand_confs']
 
-        self.pandda_2_annotations = {
-            _x['event_idx']: _x
-            for _x
-            in self.pandda_2_annotation_table
-        }
+        self.pandda_2_annotations = config['pandda_2_annotations']
 
-        self.sample_indexes = sample_indexes
+        self.sample_indexes = config['sample_indexes']
 
-        self.pos_train_pose_samples = pos_train_pose_samples
+        # self.pos_train_pose_samples = configp'pos_train_pose_samples
 
-        ligand_data_df = pd.DataFrame(
-            self.pandda_2_ligand_data_table.get_basic_selection(slice(None), fields=['idx', 'canonical_smiles',]))
+        # ligand_data_df = pd.DataFrame(
+        #     self.pandda_2_ligand_data_table.get_basic_selection(slice(None), fields=['idx', 'canonical_smiles',]))
 
-        self.unique_smiles = ligand_data_df['canonical_smiles'].unique()
+        self.unique_smiles = config['unique_smiles']
 
-        self.metadata_table = pd.DataFrame(self.pandda_2_z_map_sample_metadata_table[:])
-        self.sampled_metadata_table = self.metadata_table.iloc[[x['z'] for x in sample_indexes]]
-        self.metadata_table_high_conf = self.sampled_metadata_table[self.sampled_metadata_table['Confidence'] == 'High']
-        self.metadata_table_low_conf = self.sampled_metadata_table[self.sampled_metadata_table['Confidence'] == 'Low']
+        self.metadata_table = config['metadata_table']
+        self.sampled_metadata_table = config['sampled_metadata_table']
+        self.metadata_table_high_conf = config['metadata_table_high_conf']
+        self.metadata_table_low_conf = config['metadata_table_low_conf']
 
+        self.unique_smiles = config['unique_smiles']
+        self.unique_smiles_frequencies = config['unique_smiles_frequencies']
+        # print(self.unique_smiles)
+        # print(self.unique_smiles_frequencies)
 
-        # ligand_idx_smiles_df = pd.DataFrame(self.pandda_2_ligand_data_table.get_basic_selection(slice(None), fields=['idx', 'canonical_smiles']))
-        # annotation_df = pd.DataFrame(self.pandda_2_annotation_table[:])
-        # train_samples = metadata_table[annotation_df['partition'] == b'train']
-        # pos_samples = train_samples[train_samples['Confidence'] == 'High']
-        selected_pos_samples = self.metadata_table.iloc[[x['z'] for x in sample_indexes]]
-        selected_smiles = ligand_data_df.iloc[selected_pos_samples['ligand_data_idx']]['canonical_smiles']
-        print(selected_smiles)
-        unique_smiles, smiles_counts = np.unique(selected_smiles, return_counts=True)
-        self.unique_smiles = pd.Series(unique_smiles)
-        self.unique_smiles_frequencies = pd.Series(smiles_counts.astype(float) / np.sum(smiles_counts))
-        print(self.unique_smiles)
-        print(self.unique_smiles_frequencies)
+        self.fraction_background_replace = config['fraction_background_replace']
+        self.xmap_radius = config['xmap_radius']
 
     def __len__(self):
         return len(self.sample_indexes)
@@ -502,7 +494,7 @@ class EventScoringDataset(Dataset):
 
         #
         pose_data_idx = z_map_sample_metadata['pose_data_idx']
-        if (rng.uniform(0.0, 1.0) > 0.2) & (annotation['partition'] == 'train'):
+        if (rng.uniform(0.0, 1.0) > self.fraction_background_replace) & (annotation['partition'] == 'train'):
             if pose_data_idx != -1:  # High confidence sample: chop in low confidence background
                 pose_data = self.pandda_2_pose_table[pose_data_idx]
             else:  # Low confidence sample: chop in low confidence background
@@ -669,7 +661,7 @@ class EventScoringDataset(Dataset):
         else:
             mask = np.ones((32,32,32), dtype=np.float32)
 
-        xmap_mask_float = _get_ed_mask_float(radius=4.0)
+        xmap_mask_float = _get_ed_mask_float(radius=self.xmap_radius)
 
         # Get sample images
         xmap_sample = _sample_xmap(

@@ -199,7 +199,7 @@ class LitBuildScoring(lt.LightningModule):
 
 
 class LitEventScoring(lt.LightningModule):
-    def __init__(self, output_dir):
+    def __init__(self, output_dir, config):
         super().__init__()
         # self.automatic_optimization = False
         # self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
@@ -237,6 +237,8 @@ class LitEventScoring(lt.LightningModule):
         self.test_annotations = []
 
         self.output = output_dir
+        self.lr = config['lr']
+        self.wd = config['wd']
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
@@ -266,7 +268,7 @@ class LitEventScoring(lt.LightningModule):
         return score
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.parameters(), lr=1e-2, weight_decay=1e-2)
+        optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr, weight_decay=self.wd)
         # optimizer = torch.optim.SGD(self.parameters(), lr=1e-1, weight_decay=1e-2)
         lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, cooldown=10)
         # return [optimizer], [lr_scheduler]
