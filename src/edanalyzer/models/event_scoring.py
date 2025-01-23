@@ -641,6 +641,12 @@ class LitEventScoring(lt.LightningModule):
         # if isinstance(sch, torch.optim.lr_scheduler.ReduceLROnPlateau):
         #     sch.step(self.trainer.callback_metrics["test_loss"])
 
+    def on_after_backward(self):
+        print(f'UNUSUED PARAMS:')
+        for name, param in self.named_parameters():
+            if param.grad is None:
+                print(name)
+
 def get_fpr(best_df, fpr):
     true_hit_best_df = best_df[best_df['y'] > 0.9]
     negative_best_df = best_df[best_df['y'] <= 0.1]
