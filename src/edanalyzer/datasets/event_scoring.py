@@ -64,7 +64,11 @@ def get_mask_array():
 
     return mask_array
 
-
+def truncate(xmap, res):
+    sf = gemmi.transform_map_to_f_phi(xmap)
+    data = sf.prepare_asu_data(dmin=res)
+    grid = data.get_f_phi_on_grid([90,90,90])
+    return grid
 
 # class DepEventScoringDataset(Dataset):
 #
@@ -483,6 +487,7 @@ class EventScoringDataset(Dataset):
         z_map_sample_metadata = self.pandda_2_z_map_sample_metadata_table[_z]
         z_map_sample_idx = z_map_sample_metadata['idx']
         conf = z_map_sample_metadata['Confidence']
+        res = z_map_sample_metadata['res']
         assert _z == z_map_sample_idx
         ligand_data_idx = z_map_sample_metadata['ligand_data_idx']
         xmap_sample_data = self.pandda_2_xmap_sample_table[z_map_sample_idx]
@@ -581,12 +586,19 @@ class EventScoringDataset(Dataset):
             )
 
         #
-        if annotation['partition'] == 'train':
-            u_s = rng.uniform(0.0, 1.0)
-            xmap_sample_data = gaussian_filter(xmap_sample_data, sigma=u_s)
+        # if annotation['partition'] == 'train':
+            # u_s = rng.uniform(0.0, 1.0)
+            # xmap_sample_data = gaussian_filter(xmap_sample_data, sigma=u_s)
+            #
+            # u_s = rng.uniform(0.0, 1.0)
+            # z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
 
-            u_s = rng.uniform(0.0, 1.0)
-            z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
+            # if res > 2.5:
+            #     truncation_res = res
+            # else:
+            #     truncation_res = rng.uniform(res, 2.5)
+
+
 
         # if (annotation['partition'] == 'train') & (rng.uniform(0.0, 1.0) > 0.5):
         #     xmap_sample_data[:,:,:] = 0.0
@@ -594,6 +606,16 @@ class EventScoringDataset(Dataset):
 
         xmap = _get_grid_from_hdf5(xmap_sample_data)
         z_map = _get_grid_from_hdf5(z_map_sample_data)
+
+        if annotation['partition'] == 'train':
+
+            if res > 2.5:
+                truncation_res = res
+            else:
+                truncation_res = rng.uniform(res, 2.5)
+
+            xmap = truncate(xmap, truncation_res)
+            z_map = truncate(z_map, truncation_res)
 
         # Subsample if training
         if annotation['partition'] == 'train':

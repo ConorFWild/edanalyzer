@@ -254,7 +254,8 @@ def main(config_path):
                     size,
                     x,
                     y,
-                    z
+                    z,
+                    _row['high_resolution']
                 )
 
                 z_map_sample_metadata_table.append(z_map_metadata_sample)

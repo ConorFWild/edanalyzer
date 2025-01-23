@@ -23,7 +23,8 @@ z_map_sample_metadata_dtype = [
     ('size', '<f4'),
     ('x', '<f4'),
     ('y', '<f4'),
-    ('z', '<f4')
+    ('z', '<f4'),
+    ('res', '<f4')
 
 ]
 
@@ -265,7 +266,8 @@ def _get_z_map_metadata_sample_from_dataset_dir(
         size,
 x,
 y,
-                    z
+                    z,
+        res
 ):
     z_map_sample_metadata = np.array(
         [(
@@ -281,7 +283,8 @@ y,
             size,
             x,
             y,
-            z
+            z,
+            res
         )],
         dtype=z_map_sample_metadata_dtype
     )
