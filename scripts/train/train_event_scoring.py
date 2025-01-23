@@ -1094,8 +1094,6 @@ def main(config_path, batch_size=12, num_workers=None):
         # "batch_size": tune.choice([32, 64]),
     }
 
-
-
     scaling_config = ScalingConfig(
         num_workers=1, use_gpu=True, resources_per_worker={"CPU": 19, "GPU": 1}
     )
