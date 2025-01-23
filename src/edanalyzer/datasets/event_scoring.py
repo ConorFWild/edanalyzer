@@ -443,7 +443,7 @@ class EventScoringDataset(Dataset):
 
         self.pandda_2_annotations = config['pandda_2_annotations']
 
-        self.sample_indexes = config['sample_indexes']
+        self.sample_indexes = config['indexes']
 
         # self.pos_train_pose_samples = configp'pos_train_pose_samples
 
