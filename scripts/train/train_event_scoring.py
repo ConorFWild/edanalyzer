@@ -1040,7 +1040,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
 
     def train_func(_config):
-        model  = torch.compile(LitEventScoring(output, _config))
+        model = torch.compile(LitEventScoring(output, _config))
 
         trainer = lt.Trainer(
             # devices="auto",
@@ -1095,8 +1095,8 @@ def main(config_path, batch_size=12, num_workers=None):
 
 
     search_space = {
-        "lr": tune.loguniform(1e-4, 1e-1),
-        "wd": tune.loguniform(1e-4, 1e-1),
+        "lr": tune.loguniform(1e-4, 1e1),
+        "wd": tune.loguniform(1e-4, 1e1),
         'fraction_background_replace': tune.loguniform(1e-2, 5e-1),
         'xmap_radius': tune.uniform(3.0, 7.0)
         # "batch_size": tune.choice([32, 64]),
