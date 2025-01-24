@@ -1040,7 +1040,9 @@ def main(config_path, batch_size=12, num_workers=None):
 
 
     def train_func(_config):
+        print(f'Compiling!')
         model = torch.compile(LitEventScoring(output, _config))
+        print('Compiled!')
 
         trainer = lt.Trainer(
             # devices="auto",
