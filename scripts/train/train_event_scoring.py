@@ -1115,7 +1115,7 @@ def main(config_path, batch_size=12, num_workers=None):
         run_config=run_config,
     )
 
-    num_samples = 10
+    num_samples = 50
     scheduler = ASHAScheduler(max_t=10, grace_period=1, reduction_factor=2)
 
     tuner = tune.Tuner(
