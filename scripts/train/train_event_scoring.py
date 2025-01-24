@@ -10,6 +10,7 @@ import numpy as np
 import tables
 import zarr
 import pandas as pd
+import torch
 
 from edanalyzer.datasets.event_scoring import EventScoringDataset
 from edanalyzer.models.event_scoring import LitEventScoring
@@ -1039,7 +1040,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
 
     def train_func(_config):
-        model = LitEventScoring(output, _config)
+        model  = torch.compile(LitEventScoring(output, _config))
 
         trainer = lt.Trainer(
             # devices="auto",
