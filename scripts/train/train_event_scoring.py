@@ -28,6 +28,8 @@ from ray import tune
 from ray.tune.schedulers import ASHAScheduler
 from ray.train import RunConfig, ScalingConfig, CheckpointConfig
 from ray.train.torch import TorchTrainer
+from ray.tune.search.bayesopt import BayesOptSearch
+
 
 
 def sample(iterable, num, replace, weights):
@@ -1115,13 +1117,15 @@ def main(config_path, batch_size=12, num_workers=None):
         run_config=run_config,
     )
 
-    num_samples = 50
-    scheduler = ASHAScheduler(max_t=10, grace_period=1, reduction_factor=2)
+    num_samples = 60
+    scheduler = ASHAScheduler(max_t=15, grace_period=1, reduction_factor=2)
+    bayesopt = BayesOptSearch()
 
     tuner = tune.Tuner(
         ray_trainer,
         param_space={"train_loop_config": search_space},  # Goes to train_func as config dict
         tune_config=tune.TuneConfig(
+            search_alg=bayesopt,
             metric="fpr99",
             mode="min",
             num_samples=num_samples,
