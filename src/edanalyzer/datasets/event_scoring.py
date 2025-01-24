@@ -480,7 +480,7 @@ class EventScoringDataset(Dataset):
         z_map_sample_idx = z_map_sample_metadata['idx']
         conf = z_map_sample_metadata['Confidence']
         # try:
-        res = z_map_sample_metadata['res'] + 0.01
+        res = z_map_sample_metadata['res']
         # except:
             # res = 0.590471872361221 + 0.01
         assert _z == z_map_sample_idx
@@ -605,9 +605,9 @@ class EventScoringDataset(Dataset):
         if annotation['partition'] == 'train':
 
             if res > 2.5:
-                truncation_res = res
+                truncation_res = res +0.001
             else:
-                truncation_res = rng.uniform(res, 2.5)
+                truncation_res = rng.uniform(res+0.001, 2.5)
 
             xmap = truncate(xmap, truncation_res)
             z_map = truncate(z_map, truncation_res)
