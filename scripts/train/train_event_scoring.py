@@ -1135,8 +1135,8 @@ def main(config_path, batch_size=12, num_workers=None):
         param_space={"train_loop_config": search_space},  # Goes to train_func as config dict
         tune_config=tune.TuneConfig(
             search_alg=algo,
-            # metric="fpr99",
-            # mode="min",
+            metric="fpr99",
+            mode="min",
             num_samples=num_samples,
             scheduler=scheduler,
         ), )
