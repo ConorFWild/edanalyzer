@@ -581,12 +581,12 @@ class EventScoringDataset(Dataset):
             )
 
         #
-        # if annotation['partition'] == 'train':
-            # u_s = rng.uniform(0.0, 1.0)
-            # xmap_sample_data = gaussian_filter(xmap_sample_data, sigma=u_s)
-            #
-            # u_s = rng.uniform(0.0, 1.0)
-            # z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
+        if annotation['partition'] == 'train':
+            u_s = rng.uniform(0.0, 1.0)
+            xmap_sample_data = gaussian_filter(xmap_sample_data, sigma=u_s)
+
+            u_s = rng.uniform(0.0, 1.0)
+            z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
 
         # if (annotation['partition'] == 'train') & (rng.uniform(0.0, 1.0) > 0.5):
         #     xmap_sample_data[:,:,:] = 0.0
@@ -595,15 +595,15 @@ class EventScoringDataset(Dataset):
         xmap = _get_grid_from_hdf5(xmap_sample_data)
         z_map = _get_grid_from_hdf5(z_map_sample_data)
 
-        if annotation['partition'] == 'train':
-
-            if res > 2.5:
-                truncation_res = res +0.001
-            else:
-                truncation_res = rng.uniform(res+0.001, 2.5)
-
-            xmap = truncate(xmap, truncation_res)
-            z_map = truncate(z_map, truncation_res)
+        # if annotation['partition'] == 'train':
+        #
+        #     if res > 2.5:
+        #         truncation_res = res +0.001
+        #     else:
+        #         truncation_res = rng.uniform(res+0.001, 2.5)
+        #
+        #     xmap = truncate(xmap, truncation_res)
+        #     z_map = truncate(z_map, truncation_res)
 
         # Subsample if training
         if annotation['partition'] == 'train':
