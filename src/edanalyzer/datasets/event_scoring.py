@@ -588,13 +588,6 @@ class EventScoringDataset(Dataset):
             # u_s = rng.uniform(0.0, 1.0)
             # z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
 
-            # if res > 2.5:
-            #     truncation_res = res
-            # else:
-            #     truncation_res = rng.uniform(res, 2.5)
-
-
-
         # if (annotation['partition'] == 'train') & (rng.uniform(0.0, 1.0) > 0.5):
         #     xmap_sample_data[:,:,:] = 0.0
         #     ...

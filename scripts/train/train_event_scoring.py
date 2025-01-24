@@ -30,6 +30,7 @@ from ray.train import RunConfig, ScalingConfig, CheckpointConfig
 from ray.train.torch import TorchTrainer
 from ray.tune.search.bayesopt import BayesOptSearch
 from ray.tune.search.ax import AxSearch
+from ray.tune.search.hyperopt import HyperOptSearch
 
 
 
@@ -1123,16 +1124,18 @@ def main(config_path, batch_size=12, num_workers=None):
     scheduler = ASHAScheduler(max_t=15, grace_period=1, reduction_factor=2)
     # algo = BayesOptSearch(metric="fpr99", mode="min")
     # algo = TuneBOHB(metric="fpr99", mode="min")
-    algo =  AxSearch()
-
+    # algo =  AxSearch()
+    algo = HyperOptSearch(
+        metric="fpr99", mode="min",
+        )
 
     tuner = tune.Tuner(
         ray_trainer,
         param_space={"train_loop_config": search_space},  # Goes to train_func as config dict
         tune_config=tune.TuneConfig(
             search_alg=algo,
-            metric="fpr99",
-            mode="min",
+            # metric="fpr99",
+            # mode="min",
             num_samples=num_samples,
             scheduler=scheduler,
         ), )
