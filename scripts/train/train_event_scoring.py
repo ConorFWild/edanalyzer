@@ -1062,35 +1062,36 @@ def main(config_path, batch_size=12, num_workers=None):
         )
         trainer = prepare_trainer(trainer)
 
-        _test_config = {
-                    'zarr_path': zarr_path,
-                }
-        _test_config.update(test_config)
-        _test_config.update(_config)
-        dataset_test = DataLoader(
-            EventScoringDataset(
-                _test_config
-            ),
-            batch_size=128,  # batch_size,
-            shuffle=True,
-            num_workers=19,
-            drop_last=True
-        )
-        rprint(f"Got {len(dataset_test)} training samples")
         _train_config = {
-                    'zarr_path': zarr_path,
-                }
+            'zarr_path': zarr_path,
+        }
         _train_config.update(train_config)
         _train_config.update(_config)
         dataset_train = DataLoader(
             EventScoringDataset(
                 _train_config
             ),
+            batch_size=128,  # batch_size,
+            shuffle=True,
+            num_workers=19,
+            drop_last=True
+        )
+        rprint(f"Got {len(dataset_train)} training samples")
+
+        _test_config = {
+            'zarr_path': zarr_path,
+        }
+        _test_config.update(test_config)
+        _test_config.update(_config)
+        dataset_test = DataLoader(
+            EventScoringDataset(
+                _test_config
+            ),
             batch_size=batch_size,
             num_workers=19,
             drop_last=True
         )
-        rprint(f"Got {len(dataset_train)} test samples")
+        rprint(f"Got {len(dataset_test)} test samples")
 
         trainer.fit(model, dataset_train, dataset_test)
 
