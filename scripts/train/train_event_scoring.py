@@ -29,6 +29,8 @@ from ray.tune.schedulers import ASHAScheduler
 from ray.train import RunConfig, ScalingConfig, CheckpointConfig
 from ray.train.torch import TorchTrainer
 from ray.tune.search.bayesopt import BayesOptSearch
+from ray.tune.search.ax import AxSearch
+
 
 
 
@@ -1119,8 +1121,10 @@ def main(config_path, batch_size=12, num_workers=None):
 
     num_samples = 60
     scheduler = ASHAScheduler(max_t=15, grace_period=1, reduction_factor=2)
-    algo = BayesOptSearch(metric="fpr99", mode="min")
+    # algo = BayesOptSearch(metric="fpr99", mode="min")
     # algo = TuneBOHB(metric="fpr99", mode="min")
+    algo =  AxSearch()
+
 
     tuner = tune.Tuner(
         ray_trainer,
