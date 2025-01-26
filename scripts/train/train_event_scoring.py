@@ -1143,7 +1143,7 @@ def main(config_path, batch_size=12, num_workers=None):
             'drop_rate': 0.5
         }
     )
-    ray.init(_temp_dir=output_dir)
+    ray.init()
 
     tuner = tune.Tuner(
         ray_trainer,
