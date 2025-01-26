@@ -464,7 +464,8 @@ class EventScoringDataset(Dataset):
 
         self.fraction_background_replace = config['fraction_background_replace']
         self.xmap_radius = config['xmap_radius']
-        self.max_blur = config['max_blur']
+        self.max_x_blur = config['max_x_blur']
+        self.max_z_blue = config['max_z_blue']
 
     def __len__(self):
         return len(self.sample_indexes)
@@ -514,7 +515,9 @@ class EventScoringDataset(Dataset):
             #
             _valid_mask = pose_data['elements'] > 1
             if (annotation['partition'] == 'train') & (rng.random() > 0.5):
-                for _j in rng.integers(1, 3):
+                valid_indicies = np.nonzero(_valid_mask)
+                num_valid = len(valid_indicies)
+                for _j in rng.integers(1, max(num_valid-5, 1)):
                     valid_indicies = np.nonzero(_valid_mask)
                     random_drop_index = rng.integers(0, len(valid_indicies))
                     drop_index = valid_indicies[random_drop_index]
@@ -583,10 +586,10 @@ class EventScoringDataset(Dataset):
 
         #
         if annotation['partition'] == 'train':
-            u_s = rng.uniform(0.0, self.max_blur)
+            u_s = rng.uniform(0.0, self.max_x_blur)
             xmap_sample_data = gaussian_filter(xmap_sample_data, sigma=u_s)
 
-            u_s = rng.uniform(0.0, self.max_blur)
+            u_s = rng.uniform(0.0, self.max_z_blur)
             z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
 
         # if (annotation['partition'] == 'train') & (rng.uniform(0.0, 1.0) > 0.5):

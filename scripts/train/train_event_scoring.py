@@ -1104,7 +1104,8 @@ def main(config_path, batch_size=12, num_workers=None):
         "wd": tune.loguniform(1e-4, 1e0),
         'fraction_background_replace': tune.loguniform(1e-2, 5e-1),
         'xmap_radius': tune.uniform(3.0, 7.0),
-        'max_blur': tune.uniform(0.0, 3.0),
+        'max_x_blur': tune.uniform(0.0, 3.0),
+        'max_z_blur': tune.uniform(0.0, 3.0),
         'drop_rate': tune.uniform(0.0, 1.0)
         # "batch_size": tune.choice([32, 64]),
     }
