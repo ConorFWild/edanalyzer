@@ -35,8 +35,6 @@ from ray.tune.search.ax import AxSearch
 from ray.tune.search.hyperopt import HyperOptSearch
 
 
-
-
 def sample(iterable, num, replace, weights):
     df = pd.Series(iterable)
     return [_x for _x in df.sample(num, replace=replace, weights=weights)]
@@ -735,13 +733,15 @@ def _get_train_test_idxs_full_conf(root):
             in root['pandda_2']['annotation']
         }
 
-        res[train_test]['ligand_data_df'] =ligand_idx_smiles_df
+        res[train_test]['ligand_data_df'] = ligand_idx_smiles_df
 
         res[train_test]['metadata_table'] = metadata_table
         sampled_metadata_table = metadata_table.iloc[[x['z'] for x in sample_indexes]]
         res[train_test]['sampled_metadata_table'] = sampled_metadata_table
-        res[train_test]['metadata_table_high_conf'] = sampled_metadata_table[ sampled_metadata_table['Confidence'] == 'High']
-        res[train_test]['metadata_table_low_conf'] = sampled_metadata_table[ sampled_metadata_table['Confidence'] == 'Low']
+        res[train_test]['metadata_table_high_conf'] = sampled_metadata_table[
+            sampled_metadata_table['Confidence'] == 'High']
+        res[train_test]['metadata_table_low_conf'] = sampled_metadata_table[
+            sampled_metadata_table['Confidence'] == 'Low']
 
         selected_pos_samples = metadata_table.iloc[[x['z'] for x in sample_indexes]]
         selected_smiles = ligand_idx_smiles_df.iloc[selected_pos_samples['ligand_data_idx']]['canonical_smiles']
@@ -996,7 +996,6 @@ def main(config_path, batch_size=12, num_workers=None):
     #     query = [_x for _x in pony.orm.select(_y for _y in EventORM)]
     rprint(f'Constructing train and test dataloaders...')
 
-
     # Get the model
     rprint('Constructing model...')
     output = output_dir / 'event_scoring_prod_34'
@@ -1036,9 +1035,8 @@ def main(config_path, batch_size=12, num_workers=None):
     #                      max_epochs=50
     #                      )
     rprint(f'Training...')
+
     # trainer.fit(model, dataset_train, dataset_test)
-
-
 
     def train_func(_config):
         print(f'Compiling!')
@@ -1097,8 +1095,6 @@ def main(config_path, batch_size=12, num_workers=None):
 
         trainer.fit(model, dataset_train, dataset_test)
 
-
-
     search_space = {
         "lr": tune.loguniform(1e-4, 1e0),
         "wd": tune.loguniform(1e-4, 1e0),
@@ -1115,13 +1111,13 @@ def main(config_path, batch_size=12, num_workers=None):
     )
 
     run_config = RunConfig(
+        storage_path=output_dir,
         checkpoint_config=CheckpointConfig(
             num_to_keep=2,
             checkpoint_score_attribute="fpr99",
             checkpoint_score_order="min",
         ),
     )
-
 
     # Define a TorchTrainer without hyper-parameters for Tuner
     ray_trainer = TorchTrainer(
@@ -1144,9 +1140,9 @@ def main(config_path, batch_size=12, num_workers=None):
             'xmap_radius': 6.187276156207498,
             'max_x_blur': 0.3479295147607111,
             'max_z_blur': 0.3479295147607111,
-            'drop_rate':0.5
+            'drop_rate': 0.5
         }
-        )
+    )
     ray.init(_temp_dir=output_dir)
 
     tuner = tune.Tuner(
