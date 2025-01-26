@@ -19,6 +19,7 @@ from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 from lightning.pytorch.loggers import CSVLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveraging
 
+import ray
 from ray.train.lightning import (
     RayDDPStrategy,
     RayLightningEnvironment,
@@ -998,7 +999,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'event_scoring_prod_33'
+    output = output_dir / 'event_scoring_prod_34'
 
     # Train
     rprint('Constructing trainer...')
@@ -1104,6 +1105,7 @@ def main(config_path, batch_size=12, num_workers=None):
         'fraction_background_replace': tune.loguniform(1e-2, 5e-1),
         'xmap_radius': tune.uniform(3.0, 7.0),
         'max_blur': tune.uniform(0.0, 3.0),
+        'drop_rate': tune.uniform(0.0, 1.0)
         # "batch_size": tune.choice([32, 64]),
     }
 
@@ -1134,7 +1136,16 @@ def main(config_path, batch_size=12, num_workers=None):
     # algo =  AxSearch()
     algo = HyperOptSearch(
         metric="fpr99", mode="min",
+        points_to_evaluate={
+            'lr': 0.03503427000766074,
+            'wd': 0.0033389364254906707,
+            'fraction_background_replace': 0.4240318020166584,
+            'xmap_radius': 6.187276156207498,
+            'max_blur': 0.3479295147607111,
+            'drop_rate':0.5
+        }
         )
+    ray.init(_temp_dir=output_dir)
 
     tuner = tune.Tuner(
         ray_trainer,
