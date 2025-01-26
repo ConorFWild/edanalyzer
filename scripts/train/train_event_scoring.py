@@ -1131,7 +1131,7 @@ def main(config_path, batch_size=12, num_workers=None):
     )
 
     num_samples = 60
-    scheduler = ASHAScheduler(max_t=15, grace_period=2, reduction_factor=2)
+    scheduler = ASHAScheduler(max_t=20, grace_period=2, reduction_factor=2)
     # algo = BayesOptSearch(metric="fpr99", mode="min")
     # algo = TuneBOHB(metric="fpr99", mode="min")
     # algo =  AxSearch()
@@ -1142,7 +1142,8 @@ def main(config_path, batch_size=12, num_workers=None):
             'wd': 0.0033389364254906707,
             'fraction_background_replace': 0.4240318020166584,
             'xmap_radius': 6.187276156207498,
-            'max_blur': 0.3479295147607111,
+            'max_x_blur': 0.3479295147607111,
+            'max_z_blur': 0.3479295147607111,
             'drop_rate':0.5
         }
         )
