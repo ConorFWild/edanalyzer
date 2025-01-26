@@ -465,7 +465,7 @@ class EventScoringDataset(Dataset):
         self.fraction_background_replace = config['fraction_background_replace']
         self.xmap_radius = config['xmap_radius']
         self.max_x_blur = config['max_x_blur']
-        self.max_z_blue = config['max_z_blue']
+        self.max_z_blue = config['max_z_blur']
 
     def __len__(self):
         return len(self.sample_indexes)
