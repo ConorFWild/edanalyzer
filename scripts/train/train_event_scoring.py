@@ -1133,15 +1133,17 @@ def main(config_path, batch_size=12, num_workers=None):
     # algo =  AxSearch()
     algo = HyperOptSearch(
         metric="fpr99", mode="min",
-        points_to_evaluate=[{
-            'lr': 0.03503427000766074,
-            'wd': 0.0033389364254906707,
-            'fraction_background_replace': 0.4240318020166584,
-            'xmap_radius': 6.187276156207498,
-            'max_x_blur': 0.3479295147607111,
-            'max_z_blur': 0.3479295147607111,
-            'drop_rate': 0.5
-        }]
+        points_to_evaluate=[
+            {"train_loop_config": {
+                'lr': 0.03503427000766074,
+                'wd': 0.0033389364254906707,
+                'fraction_background_replace': 0.4240318020166584,
+                'xmap_radius': 6.187276156207498,
+                'max_x_blur': 0.3479295147607111,
+                'max_z_blur': 0.3479295147607111,
+                'drop_rate': 0.5
+            }}
+        ]
     )
     ray.init()
 
