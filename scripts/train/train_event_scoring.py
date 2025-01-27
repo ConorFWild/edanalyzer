@@ -1005,7 +1005,8 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'event_scoring_prod_37'
+    study_name = 'event_scoring_prod_37'
+    output = output_dir / study_name
 
     # Train
     rprint('Constructing trainer...')
@@ -1268,10 +1269,20 @@ def main(config_path, batch_size=12, num_workers=None):
         return trainer.callback_metrics['fpr99'].item()
 
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
-    study_name = "example-study"  # Unique identifier of the study.
+    # Unique identifier of the study.
     storage_name = f"sqlite:///{output_dir}/{study_name}.db"
-    study = optuna.create_study(study_name=study_name, storage=storage_name, direction='minimize', load_if_exists=True)
-    study.optimize(objective, n_trials=100)
+    pruner = optuna.pruners.HyperbandPruner(
+        min_resource=1, max_resource=20,
+    )
+    study = optuna.create_study(
+        study_name=study_name,
+        storage=storage_name,
+        direction='minimize',
+        load_if_exists=True,
+        pruner=pruner
+    )
+    study.optimize(objective, n_trials=200)
+
 
 if __name__ == "__main__":
     fire.Fire(main)
