@@ -1005,7 +1005,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'event_scoring_prod_36'
+    output = output_dir / 'event_scoring_prod_37'
 
     # Train
     rprint('Constructing trainer...')
@@ -1269,7 +1269,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
     study_name = "example-study"  # Unique identifier of the study.
-    storage_name = "sqlite:///{}.db".format(study_name)
+    storage_name = f"sqlite:///{output_dir}/{study_name}.db"
     study = optuna.create_study(study_name=study_name, storage=storage_name, direction='minimize', load_if_exists=True)
     study.optimize(objective, n_trials=100)
 
