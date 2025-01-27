@@ -1,5 +1,8 @@
 from pathlib import Path
 
+import logging
+import sys
+
 import fire
 import yaml
 from rich import print as rprint
@@ -1263,7 +1266,10 @@ def main(config_path, batch_size=12, num_workers=None):
         trainer.fit(model, dataset_train, dataset_test)
         return trainer.callback_metrics['fpr99'].item()
 
-    study = optuna.create_study(direction='minimize')
+    optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
+    study_name = "example-study"  # Unique identifier of the study.
+    storage_name = "sqlite:///{}.db".format(study_name)
+    study = optuna.create_study(study_name=study_name, storage=storage_name, direction='minimize')
     study.optimize(objective, n_trials=100)
 
 if __name__ == "__main__":
