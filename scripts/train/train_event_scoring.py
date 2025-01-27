@@ -1156,34 +1156,34 @@ def main(config_path, batch_size=12, num_workers=None):
     #     ],
     #     n_initial_points=5
     # )
-    algo=BasicVariantGenerator(
-                points_to_evaluate=[
-                        {
-                            'lr': 0.03503427000766074,
-                            'wd': 0.0033389364254906707,
-                            'fraction_background_replace': 0.4240318020166584,
-                            'xmap_radius': 6.187276156207498,
-                            'max_x_blur': 0.3479295147607111,
-                            'max_z_blur': 0.3479295147607111,
-                            'drop_rate': 0.5
-                        },
-                        {'lr': 0.0035822737616734305,
-                         'wd': 0.0002263704977559898,
-                         'fraction_background_replace': 0.15345573507886795,
-                         'xmap_radius': 5.396850198944849,
-                         'max_x_blur': 1.1240403061803592,
-                         'max_z_blur': 0.15653895006777918,
-                         'drop_rate': 0.21255856328991862,
-                         }
-                    ],
-            )
+    # algo=BasicVariantGenerator(
+    #             points_to_evaluate=[
+    #                     {
+    #                         'lr': 0.03503427000766074,
+    #                         'wd': 0.0033389364254906707,
+    #                         'fraction_background_replace': 0.4240318020166584,
+    #                         'xmap_radius': 6.187276156207498,
+    #                         'max_x_blur': 0.3479295147607111,
+    #                         'max_z_blur': 0.3479295147607111,
+    #                         'drop_rate': 0.5
+    #                     },
+    #                     {'lr': 0.0035822737616734305,
+    #                      'wd': 0.0002263704977559898,
+    #                      'fraction_background_replace': 0.15345573507886795,
+    #                      'xmap_radius': 5.396850198944849,
+    #                      'max_x_blur': 1.1240403061803592,
+    #                      'max_z_blur': 0.15653895006777918,
+    #                      'drop_rate': 0.21255856328991862,
+    #                      }
+    #                 ],
+    #         )
     ray.init()
 
     tuner = tune.Tuner(
         ray_trainer,
         param_space={'train_loop_config': search_space},  # Unpacked as arguments to TorchTrainer - Goes to train_func as config dict
         tune_config=tune.TuneConfig(
-            search_alg=algo,
+            # search_alg=algo,
             metric="fpr99",
             mode="min",
             num_samples=num_samples,
