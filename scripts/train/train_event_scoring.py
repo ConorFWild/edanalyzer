@@ -19,21 +19,24 @@ from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 from lightning.pytorch.loggers import CSVLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveraging
 
-import ray
-from ray.train.lightning import (
-    RayDDPStrategy,
-    RayLightningEnvironment,
-    RayTrainReportCallback,
-    prepare_trainer,
-)
-from ray import tune
-from ray.tune.schedulers import ASHAScheduler
-from ray.train import RunConfig, ScalingConfig, CheckpointConfig
-from ray.train.torch import TorchTrainer
-from ray.tune.search.bayesopt import BayesOptSearch
-from ray.tune.search.ax import AxSearch
-from ray.tune.search.hyperopt import HyperOptSearch
-from ray.tune.search.basic_variant import BasicVariantGenerator
+# import ray
+# from ray.train.lightning import (
+#     RayDDPStrategy,
+#     RayLightningEnvironment,
+#     RayTrainReportCallback,
+#     prepare_trainer,
+# )
+# from ray import tune
+# from ray.tune.schedulers import ASHAScheduler
+# from ray.train import RunConfig, ScalingConfig, CheckpointConfig
+# from ray.train.torch import TorchTrainer
+# from ray.tune.search.bayesopt import BayesOptSearch
+# from ray.tune.search.ax import AxSearch
+# from ray.tune.search.hyperopt import HyperOptSearch
+# from ray.tune.search.basic_variant import BasicVariantGenerator
+
+from optuna.integration import PyTorchLightningPruningCallback
+import optuna
 
 
 def sample(iterable, num, replace, weights):
@@ -999,7 +1002,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'event_scoring_prod_35'
+    output = output_dir / 'event_scoring_prod_36'
 
     # Train
     rprint('Constructing trainer...')
@@ -1039,7 +1042,173 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # trainer.fit(model, dataset_train, dataset_test)
 
-    def train_func(_config):
+    # def train_func(_config):
+    #     print(f'Compiling!')
+    #     model = LitEventScoring(output, _config)
+    #     # model = torch.compile(LitEventScoring(output, _config))
+    #     print('Compiled!')
+    #
+    #     trainer = lt.Trainer(
+    #         # devices="auto",
+    #         accelerator="gpu",
+    #         gradient_clip_val=1.5,
+    #         strategy=RayDDPStrategy(),
+    #         logger=logger,
+    #         callbacks=[
+    #             checkpoint_callback,
+    #             checkpoint_callback_best_10,
+    #             checkpoint_callback_best_99,
+    #             checkpoint_callback_best_95,
+    #             RayTrainReportCallback(),
+    #         ],
+    #         plugins=[RayLightningEnvironment()],
+    #         enable_progress_bar=False,
+    #     )
+    #     trainer = prepare_trainer(trainer)
+    #
+    #     _train_config = {
+    #         'zarr_path': zarr_path,
+    #     }
+    #     _train_config.update(train_config)
+    #     _train_config.update(_config)
+    #     dataset_train = DataLoader(
+    #         EventScoringDataset(
+    #             _train_config
+    #         ),
+    #         batch_size=128,  # batch_size,
+    #         shuffle=True,
+    #         num_workers=19,
+    #         drop_last=True
+    #     )
+    #     rprint(f"Got {len(dataset_train)} training samples")
+    #
+    #     _test_config = {
+    #         'zarr_path': zarr_path,
+    #     }
+    #     _test_config.update(test_config)
+    #     _test_config.update(_config)
+    #     dataset_test = DataLoader(
+    #         EventScoringDataset(
+    #             _test_config
+    #         ),
+    #         batch_size=batch_size,
+    #         num_workers=19,
+    #         drop_last=True
+    #     )
+    #     rprint(f"Got {len(dataset_test)} test samples")
+    #
+    #     trainer.fit(model, dataset_train, dataset_test)
+    #
+    # search_space = {
+    #     "lr": tune.loguniform(1e-4, 1e0),
+    #     "wd": tune.loguniform(1e-4, 1e0),
+    #     'fraction_background_replace': tune.loguniform(1e-2, 5e-1),
+    #     'xmap_radius': tune.uniform(3.0, 7.0),
+    #     'max_x_blur': tune.uniform(0.0, 3.0),
+    #     'max_z_blur': tune.uniform(0.0, 3.0),
+    #     'drop_rate': tune.uniform(0.0, 1.0)
+    #     # "batch_size": tune.choice([32, 64]),
+    # }
+    #
+    # scaling_config = ScalingConfig(
+    #     num_workers=1, use_gpu=True, resources_per_worker={"CPU": 19, "GPU": 1}
+    # )
+    #
+    # run_config = RunConfig(
+    #     storage_path=output_dir,
+    #     checkpoint_config=CheckpointConfig(
+    #         num_to_keep=2,
+    #         checkpoint_score_attribute="fpr99",
+    #         checkpoint_score_order="min",
+    #     ),
+    # )
+    #
+    # # Define a TorchTrainer without hyper-parameters for Tuner
+    # ray_trainer = TorchTrainer(
+    #     train_func,
+    #     scaling_config=scaling_config,
+    #     run_config=run_config,
+    # )
+    #
+    # num_samples = 200
+    # scheduler = ASHAScheduler(max_t=20, grace_period=2, reduction_factor=2)
+    # # algo = BayesOptSearch(metric="fpr99", mode="min")
+    # # algo = TuneBOHB(metric="fpr99", mode="min")
+    # # algo =  AxSearch()
+    # # algo = HyperOptSearch(
+    # #
+    # #     metric="fpr99", mode="min",
+    # #     points_to_evaluate=[
+    # #         # {
+    # #         #     'lr': 0.03503427000766074,
+    # #         #     'wd': 0.0033389364254906707,
+    # #         #     'fraction_background_replace': 0.4240318020166584,
+    # #         #     'xmap_radius': 6.187276156207498,
+    # #         #     'max_x_blur': 0.3479295147607111,
+    # #         #     'max_z_blur': 0.3479295147607111,
+    # #         #     'drop_rate': 0.5
+    # #         # },
+    # #         {'lr': 0.0035822737616734305,
+    # #          'wd': 0.0002263704977559898,
+    # #          'fraction_background_replace': 0.15345573507886795,
+    # #          'xmap_radius': 5.396850198944849,
+    # #          'max_x_blur': 1.1240403061803592,
+    # #          'max_z_blur': 0.15653895006777918,
+    # #          'drop_rate': 0.21255856328991862,
+    # #          }
+    # #     ],
+    # #     n_initial_points=5
+    # # )
+    # # algo=BasicVariantGenerator(
+    # #             points_to_evaluate=[
+    # #                     {
+    # #                         'lr': 0.03503427000766074,
+    # #                         'wd': 0.0033389364254906707,
+    # #                         'fraction_background_replace': 0.4240318020166584,
+    # #                         'xmap_radius': 6.187276156207498,
+    # #                         'max_x_blur': 0.3479295147607111,
+    # #                         'max_z_blur': 0.3479295147607111,
+    # #                         'drop_rate': 0.5
+    # #                     },
+    # #                     {'lr': 0.0035822737616734305,
+    # #                      'wd': 0.0002263704977559898,
+    # #                      'fraction_background_replace': 0.15345573507886795,
+    # #                      'xmap_radius': 5.396850198944849,
+    # #                      'max_x_blur': 1.1240403061803592,
+    # #                      'max_z_blur': 0.15653895006777918,
+    # #                      'drop_rate': 0.21255856328991862,
+    # #                      }
+    # #                 ],
+    # #         )
+    # ray.init()
+    #
+    # tuner = tune.Tuner(
+    #     ray_trainer,
+    #     param_space={'train_loop_config': search_space},  # Unpacked as arguments to TorchTrainer - Goes to train_func as config dict
+    #     tune_config=tune.TuneConfig(
+    #         # search_alg=algo,
+    #         metric="fpr99",
+    #         mode="min",
+    #         num_samples=num_samples,
+    #         scheduler=scheduler,
+    #     ), )
+    #
+    # print(tuner.fit())
+
+    def objective(trial):
+        # Suggest hyperparameters
+        _config = {
+            "lr": trial.suggest_loguniform('lr', 1e-4, 1e0),
+            "wd": trial.suggest_uniform('wd', 1e-4, 1e0),
+            'fraction_background_replace': trial.suggest_loguniform('fraction_background_replace', 1e-2, 5e-1),
+            'xmap_radius': trial.suggest_uniform('xmap_radius', 3.0, 7.0),
+            'max_x_blur': trial.suggest_uniform('max_x_blur', 0.0, 3.0),
+            'max_z_blur': trial.suggest_uniform('max_z_blur', 0.0, 3.0),
+            'drop_rate': trial.suggest_uniform('drop_rate', 0.0, 1.0)
+            # "batch_size": tune.choice([32, 64]),
+        }
+        print(f'Running trial with config:')
+        rprint(_config)
         print(f'Compiling!')
         model = LitEventScoring(output, _config)
         # model = torch.compile(LitEventScoring(output, _config))
@@ -1049,19 +1218,16 @@ def main(config_path, batch_size=12, num_workers=None):
             # devices="auto",
             accelerator="gpu",
             gradient_clip_val=1.5,
-            strategy=RayDDPStrategy(),
             logger=logger,
             callbacks=[
                 checkpoint_callback,
                 checkpoint_callback_best_10,
                 checkpoint_callback_best_99,
                 checkpoint_callback_best_95,
-                RayTrainReportCallback(),
+                PyTorchLightningPruningCallback(trial, monitor='fpr99')
             ],
-            plugins=[RayLightningEnvironment()],
             enable_progress_bar=False,
         )
-        trainer = prepare_trainer(trainer)
 
         _train_config = {
             'zarr_path': zarr_path,
@@ -1095,103 +1261,10 @@ def main(config_path, batch_size=12, num_workers=None):
         rprint(f"Got {len(dataset_test)} test samples")
 
         trainer.fit(model, dataset_train, dataset_test)
+        return trainer.callback_metrics['fpr99'].item()
 
-    search_space = {
-        "lr": tune.loguniform(1e-4, 1e0),
-        "wd": tune.loguniform(1e-4, 1e0),
-        'fraction_background_replace': tune.loguniform(1e-2, 5e-1),
-        'xmap_radius': tune.uniform(3.0, 7.0),
-        'max_x_blur': tune.uniform(0.0, 3.0),
-        'max_z_blur': tune.uniform(0.0, 3.0),
-        'drop_rate': tune.uniform(0.0, 1.0)
-        # "batch_size": tune.choice([32, 64]),
-    }
-
-    scaling_config = ScalingConfig(
-        num_workers=1, use_gpu=True, resources_per_worker={"CPU": 19, "GPU": 1}
-    )
-
-    run_config = RunConfig(
-        storage_path=output_dir,
-        checkpoint_config=CheckpointConfig(
-            num_to_keep=2,
-            checkpoint_score_attribute="fpr99",
-            checkpoint_score_order="min",
-        ),
-    )
-
-    # Define a TorchTrainer without hyper-parameters for Tuner
-    ray_trainer = TorchTrainer(
-        train_func,
-        scaling_config=scaling_config,
-        run_config=run_config,
-    )
-
-    num_samples = 200
-    scheduler = ASHAScheduler(max_t=20, grace_period=2, reduction_factor=2)
-    # algo = BayesOptSearch(metric="fpr99", mode="min")
-    # algo = TuneBOHB(metric="fpr99", mode="min")
-    # algo =  AxSearch()
-    # algo = HyperOptSearch(
-    #
-    #     metric="fpr99", mode="min",
-    #     points_to_evaluate=[
-    #         # {
-    #         #     'lr': 0.03503427000766074,
-    #         #     'wd': 0.0033389364254906707,
-    #         #     'fraction_background_replace': 0.4240318020166584,
-    #         #     'xmap_radius': 6.187276156207498,
-    #         #     'max_x_blur': 0.3479295147607111,
-    #         #     'max_z_blur': 0.3479295147607111,
-    #         #     'drop_rate': 0.5
-    #         # },
-    #         {'lr': 0.0035822737616734305,
-    #          'wd': 0.0002263704977559898,
-    #          'fraction_background_replace': 0.15345573507886795,
-    #          'xmap_radius': 5.396850198944849,
-    #          'max_x_blur': 1.1240403061803592,
-    #          'max_z_blur': 0.15653895006777918,
-    #          'drop_rate': 0.21255856328991862,
-    #          }
-    #     ],
-    #     n_initial_points=5
-    # )
-    # algo=BasicVariantGenerator(
-    #             points_to_evaluate=[
-    #                     {
-    #                         'lr': 0.03503427000766074,
-    #                         'wd': 0.0033389364254906707,
-    #                         'fraction_background_replace': 0.4240318020166584,
-    #                         'xmap_radius': 6.187276156207498,
-    #                         'max_x_blur': 0.3479295147607111,
-    #                         'max_z_blur': 0.3479295147607111,
-    #                         'drop_rate': 0.5
-    #                     },
-    #                     {'lr': 0.0035822737616734305,
-    #                      'wd': 0.0002263704977559898,
-    #                      'fraction_background_replace': 0.15345573507886795,
-    #                      'xmap_radius': 5.396850198944849,
-    #                      'max_x_blur': 1.1240403061803592,
-    #                      'max_z_blur': 0.15653895006777918,
-    #                      'drop_rate': 0.21255856328991862,
-    #                      }
-    #                 ],
-    #         )
-    ray.init()
-
-    tuner = tune.Tuner(
-        ray_trainer,
-        param_space={'train_loop_config': search_space},  # Unpacked as arguments to TorchTrainer - Goes to train_func as config dict
-        tune_config=tune.TuneConfig(
-            # search_alg=algo,
-            metric="fpr99",
-            mode="min",
-            num_samples=num_samples,
-            scheduler=scheduler,
-        ), )
-
-    print(tuner.fit())
-
+    study = optuna.create_study(direction='minimize')
+    study.optimize(objective, n_trials=100)
 
 if __name__ == "__main__":
     fire.Fire(main)
