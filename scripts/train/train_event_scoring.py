@@ -1127,14 +1127,14 @@ def main(config_path, batch_size=12, num_workers=None):
     )
 
     num_samples = 60
-    scheduler = ASHAScheduler(max_t=20, grace_period=2, reduction_factor=2)
+    scheduler = ASHAScheduler(max_t=5, grace_period=2, reduction_factor=2)
     # algo = BayesOptSearch(metric="fpr99", mode="min")
     # algo = TuneBOHB(metric="fpr99", mode="min")
     # algo =  AxSearch()
     algo = HyperOptSearch(
         metric="fpr99", mode="min",
         points_to_evaluate=[
-            {"train_loop_config": {
+            {
                 'lr': 0.03503427000766074,
                 'wd': 0.0033389364254906707,
                 'fraction_background_replace': 0.4240318020166584,
@@ -1142,14 +1142,23 @@ def main(config_path, batch_size=12, num_workers=None):
                 'max_x_blur': 0.3479295147607111,
                 'max_z_blur': 0.3479295147607111,
                 'drop_rate': 0.5
-            }}
-        ]
+            },
+            {'lr': 0.0035822737616734305,
+             'wd': 0.0002263704977559898,
+             'fraction_background_replace': 0.15345573507886795,
+             'xmap_radius': 5.396850198944849,
+             'max_x_blur': 1.1240403061803592,
+             'max_z_blur': 0.15653895006777918,
+             'drop_rate': 0.21255856328991862,
+             }
+        ],
+        n_initial_points=5
     )
     ray.init()
 
     tuner = tune.Tuner(
         ray_trainer,
-        param_space={"train_loop_config": search_space},  # Goes to train_func as config dict
+        param_space=search_space,  # Goes to train_func as config dict
         tune_config=tune.TuneConfig(
             search_alg=algo,
             metric="fpr99",
