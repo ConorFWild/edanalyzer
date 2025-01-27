@@ -1127,7 +1127,7 @@ def main(config_path, batch_size=12, num_workers=None):
         run_config=run_config,
     )
 
-    num_samples = 100
+    num_samples = 200
     scheduler = ASHAScheduler(max_t=20, grace_period=2, reduction_factor=2)
     # algo = BayesOptSearch(metric="fpr99", mode="min")
     # algo = TuneBOHB(metric="fpr99", mode="min")
