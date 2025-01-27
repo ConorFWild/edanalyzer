@@ -998,7 +998,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    output = output_dir / 'event_scoring_prod_34'
+    output = output_dir / 'event_scoring_prod_35'
 
     # Train
     rprint('Constructing trainer...')
