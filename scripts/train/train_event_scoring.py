@@ -1010,23 +1010,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Train
     rprint('Constructing trainer...')
-    checkpoint_callback = ModelCheckpoint(dirpath=str(output))
-    checkpoint_callback_best_95 = ModelCheckpoint(
-        monitor='fpr95',
-        dirpath=str(output),
-        filename='sample-mnist-{epoch:02d}-{fpr95:.2f}'
-    )
-    checkpoint_callback_best_99 = ModelCheckpoint(
-        monitor='fpr99',
-        dirpath=str(output),
-        filename='sample-mnist-{epoch:02d}-{fpr99:.2f}'
-    )
-    checkpoint_callback_best_10 = ModelCheckpoint(
-        monitor='fpr10',
-        dirpath=str(output),
-        filename='sample-mnist-{epoch:02d}-{fpr10:.2f}'
-    )
-    logger = CSVLogger(str(output / 'logs'))
+
     # trainer = lt.Trainer(accelerator='gpu', logger=logger,
     #                      callbacks=[
     #                          checkpoint_callback,
@@ -1229,8 +1213,29 @@ def main(config_path, batch_size=12, num_workers=None):
         }
         print(f'Running trial with config:')
         rprint(_config)
+
+        trial_output_dir = output / trial.number
+
+        checkpoint_callback = ModelCheckpoint(dirpath=str(trial_output_dir))
+        checkpoint_callback_best_95 = ModelCheckpoint(
+            monitor='fpr95',
+            dirpath=str(trial_output_dir),
+            filename='sample-mnist-{epoch:02d}-{fpr95:.2f}'
+        )
+        checkpoint_callback_best_99 = ModelCheckpoint(
+            monitor='fpr99',
+            dirpath=str(trial_output_dir),
+            filename='sample-mnist-{epoch:02d}-{fpr99:.2f}'
+        )
+        checkpoint_callback_best_10 = ModelCheckpoint(
+            monitor='fpr10',
+            dirpath=str(trial_output_dir),
+            filename='sample-mnist-{epoch:02d}-{fpr10:.2f}'
+        )
+        logger = CSVLogger(str(trial_output_dir / 'logs'))
+
         print(f'Compiling!')
-        model = LitEventScoring(output, _config)
+        model = LitEventScoring(trial_output_dir, _config)
         # model = torch.compile(LitEventScoring(output, _config))
         print('Compiled!')
 
@@ -1290,14 +1295,20 @@ def main(config_path, batch_size=12, num_workers=None):
     pruner = optuna.pruners.HyperbandPruner(
         min_resource=1, max_resource=15,
     )
-    study = optuna.create_study(
-        study_name=study_name,
-        storage=storage_name,
-        direction='minimize',
-        load_if_exists=True,
-        pruner=pruner
-    )
-    study.optimize(objective, n_trials=300)
+    if output_dir.exists():
+        study = optuna.create_study(
+            study_name=study_name,
+            storage=storage_name,
+            direction='minimize',
+            load_if_exists=True,
+            pruner=pruner
+        )
+    else:
+        study = optuna.load_study(
+            study_name=study_name,
+            storage=storage_name,
+        )
+    study.optimize(objective, n_trials=100)
 
 
 if __name__ == "__main__":
