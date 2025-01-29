@@ -466,6 +466,11 @@ class EventScoringDataset(Dataset):
         self.xmap_radius = config['xmap_radius']
         self.max_x_blur = config['max_x_blur']
         self.max_z_blue = config['max_z_blur']
+        self.drop_atom_rate = config['drop_atom_rate']
+        self.max_pos_atom_mask_radius = config['max_pos_atom_mask_radius']
+        self.max_translate = config['max_translate']
+        self.max_x_noise = config['max_x_noise']
+        self.max_z_noise = config['max_z_noise']
 
     def __len__(self):
         return len(self.sample_indexes)
@@ -514,7 +519,7 @@ class EventScoringDataset(Dataset):
 
             #
             _valid_mask = pose_data['elements'] > 1
-            if (annotation['partition'] == 'train') & (rng.random() > 0.5):
+            if (annotation['partition'] == 'train') & (rng.random() > self.drop_atom_rate):
                 valid_indicies = np.nonzero(_valid_mask)
                 num_valid = len(valid_indicies)
                 for _j in rng.integers(1, max(num_valid-5, 1)):
@@ -528,7 +533,7 @@ class EventScoringDataset(Dataset):
                 _valid_poss,
                 _valid_elements,
             )
-            _radius = rng.uniform(1.0, 2.5)
+            _radius = rng.uniform(1.0, self.max_pos_atom_mask_radius)
             _ligand_mask_grid = _get_ligand_mask_float(
                 _transformed_residue,
                 _radius,
@@ -611,7 +616,7 @@ class EventScoringDataset(Dataset):
 
         # Subsample if training
         if annotation['partition'] == 'train':
-            translation = 3*(2*(rng.random(3)-0.5))
+            translation = self.max_translate*(2*(rng.random(3)-0.5))
             centroid = np.array([22.5,22.5,22.5]) + translation
 
         else:
@@ -685,11 +690,11 @@ class EventScoringDataset(Dataset):
             xmap_sample = (xmap_sample * scale) + translate
 
         if annotation['partition'] == 'train':
-            u_s = rng.uniform(0.0, 0.5)
+            u_s = rng.uniform(0.0, self.max_x_noise)
             noise = rng.normal(size=(32,32,32)) * u_s
             z_map_sample += noise.astype(np.float32)
 
-            u_s = rng.uniform(0.0, 0.5)
+            u_s = rng.uniform(0.0, self.max_z_noise)
             noise = rng.normal(size=(32,32,32)) * u_s
             xmap_sample += noise.astype(np.float32)
 
@@ -734,12 +739,18 @@ class EventScoringDataset(Dataset):
 
 
         if annotation['partition'] == 'train':
+            # if conf == 'High':
+            #     hit = [self.label_noise, 1-self.label_noise]
+            # elif conf == 'Medium':
+            #     hit = [0.5, 0.5]
+            # elif conf == 'Low':
+            #     hit = [1-self.label_noise, self.label_noise]
             if conf == 'High':
-                hit = [0.025, 0.975]
+                hit = [0.0, 1.0]
             elif conf == 'Medium':
                 hit = [0.5, 0.5]
             elif conf == 'Low':
-                hit = [0.975, 0.025]
+                hit = [1.0, 0.0]
             else:
                 raise Exception
         else:

@@ -1005,7 +1005,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    study_name = 'event_scoring_prod_38'
+    study_name = 'event_scoring_prod_39'
     output = output_dir / study_name
 
     # Train
@@ -1203,12 +1203,28 @@ def main(config_path, batch_size=12, num_workers=None):
         # Suggest hyperparameters
         _config = {
             "lr": trial.suggest_loguniform('lr', 1e-4, 1e0),
-            "wd": trial.suggest_uniform('wd', 1e-4, 1e0),
-            'fraction_background_replace': trial.suggest_loguniform('fraction_background_replace', 1e-2, 5e-1),
+            "wd": trial.suggest_loguniform('wd', 1e-4, 1e0),
+            'fraction_background_replace': trial.suggest_uniform('fraction_background_replace', 1e-2, 5e-1),
             'xmap_radius': trial.suggest_uniform('xmap_radius', 3.0, 7.0),
             'max_x_blur': trial.suggest_uniform('max_x_blur', 0.0, 3.0),
             'max_z_blur': trial.suggest_uniform('max_z_blur', 0.0, 3.0),
-            'drop_rate': trial.suggest_uniform('drop_rate', 0.0, 1.0)
+            'drop_rate': trial.suggest_uniform('drop_rate', 0.0, 1.0),
+            'planes_1': trial.suggest_categorical('planes_1', [2, 4, 8, 16, 32]),
+            'drop_1': trial.suggest_uniform('drop_1', 0.0, 1.0),
+            'planes_2': trial.suggest_categorical('planes_2', [4, 8, 16, 32, 64]),
+            'drop_2': trial.suggest_uniform('drop_2', 0.0, 1.0),
+            'planes_3': trial.suggest_categorical('planes_3', [8, 16, 32, 64, 128]),
+            'drop_3': trial.suggest_uniform('drop_3', 0.0, 1.0),
+            'planes_4': trial.suggest_categorical('planes_4', [16, 32, 64, 128, 256]),
+            'drop_4': trial.suggest_uniform('drop_4', 0.0, 1.0),
+            'planes_5': trial.suggest_categorical('planes_5', [32, 64, 128, 256, 512]),
+            'drop_5': trial.suggest_uniform('drop_5', 0.0, 1.0),
+            'drop_atom_rate': trial.suggest_uniform('drop_atom_rate', 0.0, 1.0),
+            'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 1.01, 4.0),
+            'max_translate': trial.suggest_uniform('max_translate', 0.0, 5.0),
+            'max_x_noise': trial.suggest_uniform('max_x_noise', 0.0, 2.0),
+            'max_z_noise': trial.suggest_uniform('max_z_noise', 0.0, 2.0),
+
             # "batch_size": tune.choice([32, 64]),
         }
         print(f'Running trial with config:')
@@ -1231,7 +1247,7 @@ def main(config_path, batch_size=12, num_workers=None):
                 PyTorchLightningPruningCallback(trial, monitor='fpr99')
             ],
             enable_progress_bar=False,
-            max_epochs=20
+            max_epochs=15
         )
 
         _train_config = {
@@ -1272,7 +1288,7 @@ def main(config_path, batch_size=12, num_workers=None):
     # Unique identifier of the study.
     storage_name = f"sqlite:///{output_dir}/{study_name}.db"
     pruner = optuna.pruners.HyperbandPruner(
-        min_resource=1, max_resource=20,
+        min_resource=1, max_resource=15,
     )
     study = optuna.create_study(
         study_name=study_name,
@@ -1281,7 +1297,7 @@ def main(config_path, batch_size=12, num_workers=None):
         load_if_exists=True,
         pruner=pruner
     )
-    study.optimize(objective, n_trials=200)
+    study.optimize(objective, n_trials=300)
 
 
 if __name__ == "__main__":
