@@ -1273,7 +1273,7 @@ class ResNet(nn.Module):
         self._norm_layer = norm_layer
 
         base_planes = 8
-        self.inplanes = base_planes
+        self.inplanes = config['planes_1']
         self.dilation = 1
         if replace_stride_with_dilation is None:
             # each element in the tuple indicates if we should replace
@@ -1290,17 +1290,25 @@ class ResNet(nn.Module):
         self.bn1 = norm_layer(config['planes_1'])
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
+        # self.inplanes = config['planes_1']
         self.drop1 = nn.Dropout(p=config['drop_1'])
         self.layer1 = self._make_layer(block, config['planes_2'], layers[0])
+        # self.inplanes = config['planes_1']
         self.drop2 = nn.Dropout(p=config['drop_2'])
         self.layer2 = self._make_layer(block, config['planes_3'], layers[1], stride=2,
                                        dilate=replace_stride_with_dilation[0])
+        # self.inplanes = config['planes_1']
+
         self.drop3 = nn.Dropout(p=config['drop_3'])
         self.layer3 = self._make_layer(block, config['planes_4'], layers[2], stride=2,
                                        dilate=replace_stride_with_dilation[1])
+        # self.inplanes = config['planes_4']
+
         self.drop4 = nn.Dropout(p=config['drop_4'])
         self.layer4 = self._make_layer(block, config['planes_5'], layers[3], stride=2,
                                        dilate=replace_stride_with_dilation[2])
+        # self.inplanes = config['planes_1']
+
         self.drop5 = nn.Dropout(p=config['drop_5'])
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
         # self.fc = nn.Linear(base_planes * 4 * block.expansion, num_classes)
