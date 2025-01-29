@@ -1219,7 +1219,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
         trial_output_dir = output / f'{trial.number}'
         if not trial_output_dir.exists():
-            os.mkdir(output)
+            os.mkdir(trial_output_dir)
 
         checkpoint_callback = ModelCheckpoint(dirpath=str(trial_output_dir))
         checkpoint_callback_best_95 = ModelCheckpoint(
