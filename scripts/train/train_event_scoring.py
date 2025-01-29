@@ -1217,7 +1217,7 @@ def main(config_path, batch_size=12, num_workers=None):
         print(f'Running trial with config:')
         rprint(_config)
 
-        trial_output_dir = output / trial.number
+        trial_output_dir = output / f'{trial.number}'
         if not trial_output_dir.exists():
             os.mkdir(output)
 
