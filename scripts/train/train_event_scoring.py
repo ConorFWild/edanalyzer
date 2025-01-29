@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import logging
@@ -1007,6 +1008,8 @@ def main(config_path, batch_size=12, num_workers=None):
     rprint('Constructing model...')
     study_name = 'event_scoring_prod_39'
     output = output_dir / study_name
+    if not output.exists():
+        os.mkdir(output)
 
     # Train
     rprint('Constructing trainer...')
@@ -1215,6 +1218,8 @@ def main(config_path, batch_size=12, num_workers=None):
         rprint(_config)
 
         trial_output_dir = output / trial.number
+        if not trial_output_dir.exists():
+            os.mkdir(output)
 
         checkpoint_callback = ModelCheckpoint(dirpath=str(trial_output_dir))
         checkpoint_callback_best_95 = ModelCheckpoint(
@@ -1304,6 +1309,7 @@ def main(config_path, batch_size=12, num_workers=None):
             pruner=pruner
         )
     else:
+        print(f'Loading study!')
         study = optuna.load_study(
             study_name=study_name,
             storage=storage_name,
