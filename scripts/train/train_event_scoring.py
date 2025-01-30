@@ -676,14 +676,14 @@ def _get_train_test_idxs_full_conf(root):
     print(f'Getting negative train samples')
     for _idx, z in train_samples[train_samples['Confidence'] == 'Low'].iterrows():
         neg_z_samples += [z['idx'], ]
-        train_pos_conf.append('High')
+        train_pos_conf.append('Low')
 
     # Loop over the z samples adding positive samples for each
     print(f'Getting positive train samples')
     for _idx, z in train_samples[train_samples['Confidence'] == 'High'].iterrows():  # .sample(len(neg_z_samples),
         #     replace=True).iterrows():
         pos_z_samples += [z['idx'], ]
-        train_neg_conf.append('Low')
+        train_neg_conf.append('High')
 
     print(f'Got {len(pos_z_samples)} pos samples!')
 
@@ -1277,6 +1277,7 @@ def main(config_path, batch_size=12, num_workers=None):
         }
         _train_config.update(train_config)
         _train_config.update(_config)
+        _train_config.update({'test_train': 'train'})
         dataset_train = DataLoader(
             EventScoringDataset(
                 _train_config
@@ -1293,6 +1294,7 @@ def main(config_path, batch_size=12, num_workers=None):
         }
         _test_config.update(test_config)
         _test_config.update(_config)
+        _test_config.update({'test_train': 'test'})
         dataset_test = DataLoader(
             EventScoringDataset(
                 _test_config

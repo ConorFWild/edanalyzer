@@ -443,9 +443,11 @@ class EventScoringDataset(Dataset):
 
         self.pandda_2_annotations = config['pandda_2_annotations']
         self.sample_indexes = config['indexes']
-        pos_sample_indexes = [_v for _v in self.sample_indexes if _v['conf'] == 'High']
-        self.resampled_indexes = self.sample_indexes + (pos_sample_indexes * config['pos_resample_rate'])
-
+        if config['test_train'] == 'train':
+            pos_sample_indexes = [_v for _v in self.sample_indexes if _v['conf'] == 'High']
+            self.resampled_indexes = self.sample_indexes + (pos_sample_indexes * config['pos_resample_rate'])
+        else:
+            self.resampled_indexes = self.sample_indexes
         # self.pos_train_pose_samples = configp'pos_train_pose_samples
 
         # ligand_data_df = pd.DataFrame(
