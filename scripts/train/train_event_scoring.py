@@ -1325,7 +1325,7 @@ def main(config_path, batch_size=12, num_workers=None):
             study_name=study_name,
             storage=storage_name,
         )
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=200)
 
 
 if __name__ == "__main__":
