@@ -40,6 +40,7 @@ from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveragi
 # from ray.tune.search.basic_variant import BasicVariantGenerator
 
 from optuna.integration import PyTorchLightningPruningCallback
+from optuna.samplers import TPESampler
 import optuna
 
 
@@ -1317,13 +1318,15 @@ def main(config_path, batch_size=12, num_workers=None):
             storage=storage_name,
             direction='minimize',
             load_if_exists=True,
-            pruner=pruner
+            pruner=pruner,
+            sampler=TPESampler(constant_liar=True)
         )
     else:
         print(f'Loading study!')
         study = optuna.load_study(
             study_name=study_name,
             storage=storage_name,
+            sampler=TPESampler(constant_liar=True)
         )
     study.optimize(objective, n_trials=200)
 
