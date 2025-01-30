@@ -675,12 +675,14 @@ def _get_train_test_idxs_full_conf(root):
     print(f'Getting negative train samples')
     for _idx, z in train_samples[train_samples['Confidence'] == 'Low'].iterrows():
         neg_z_samples += [z['idx'], ]
+        train_pos_conf.append('High')
 
     # Loop over the z samples adding positive samples for each
     print(f'Getting positive train samples')
     for _idx, z in train_samples[train_samples['Confidence'] == 'High'].iterrows():  # .sample(len(neg_z_samples),
         #     replace=True).iterrows():
         pos_z_samples += [z['idx'], ]
+        train_neg_conf.append('Low')
 
     print(f'Got {len(pos_z_samples)} pos samples!')
 
@@ -698,9 +700,11 @@ def _get_train_test_idxs_full_conf(root):
     for _idx, z in test_samples.iterrows():
         if z['Confidence'] == 'High':
             test_pos_z_samples.append(z['idx'])
+            test_pos_conf.append('High')
 
         elif z['Confidence'] == 'Low':
             test_neg_z_samples.append(z['idx'])
+            test_neg_conf.append('Low')
 
     rprint({
         'pos_z_samples len': len(pos_z_samples),
@@ -712,9 +716,12 @@ def _get_train_test_idxs_full_conf(root):
 
     })
     train_idxs = [
-        {'z': z, }
-        for z
-        in pos_z_samples + neg_z_samples
+        {'z': z, 'conf': conf}
+        for z, conf
+        in zip(
+            pos_z_samples + neg_z_samples,
+            train_pos_conf + train_neg_conf
+        )
 
     ]
     rprint({
@@ -726,8 +733,11 @@ def _get_train_test_idxs_full_conf(root):
         'train_neg_conf len': len(test_neg_conf),
 
     })
-    test_idxs = [{'z': z, } for z
-                 in test_pos_z_samples + test_neg_z_samples
+    test_idxs = [{'z': z, 'conf': conf} for z, conf
+                 in zip(
+            test_pos_z_samples + test_neg_z_samples,
+            test_pos_conf + test_neg_conf
+        )
                  ]
 
     res = {}
@@ -1006,7 +1016,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    study_name = 'event_scoring_prod_39'
+    study_name = 'event_scoring_prod_40'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
@@ -1211,7 +1221,8 @@ def main(config_path, batch_size=12, num_workers=None):
             'max_translate': trial.suggest_uniform('max_translate', 0.0, 5.0),
             'max_x_noise': trial.suggest_uniform('max_x_noise', 0.0, 2.0),
             'max_z_noise': trial.suggest_uniform('max_z_noise', 0.0, 2.0),
-
+            'pos_resample_rate': trial.suggest_int('pos_resample_rate', 0, 10),
+            'p_flip': trial.suggest_uniform('p_flip', 0.0, 1.0),
             # "batch_size": tune.choice([32, 64]),
         }
         print(f'Running trial with config:')

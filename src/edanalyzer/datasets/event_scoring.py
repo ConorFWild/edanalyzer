@@ -442,8 +442,9 @@ class EventScoringDataset(Dataset):
         self.pandda_2_frag_table = self.root['pandda_2']['ligand_confs']
 
         self.pandda_2_annotations = config['pandda_2_annotations']
-
         self.sample_indexes = config['indexes']
+        pos_sample_indexes = [_v for _v in self.sample_indexes if _v['conf'] == 'High']
+        self.resampled_indexes = self.sample_indexes + (pos_sample_indexes * config['pos_resample_rate'])
 
         # self.pos_train_pose_samples = configp'pos_train_pose_samples
 
@@ -474,13 +475,13 @@ class EventScoringDataset(Dataset):
         self.p_flip = config['p_flip']
 
     def __len__(self):
-        return len(self.sample_indexes)
+        return len(self.resampled_indexes)
 
     def __getitem__(self, idx: int):
         rng = np.random.default_rng()
 
         # Get the sample idx
-        sample_data = self.sample_indexes[idx]
+        sample_data = self.resampled_indexes[idx]
         _z= sample_data['z']
 
         # Get the z map and pose
@@ -530,7 +531,7 @@ class EventScoringDataset(Dataset):
             low_conf_z_map_sample_data = self.pandda_2_z_map_sample_table[low_conf_sample['idx']]
             low_conf_x_map_sample_data = self.pandda_2_xmap_sample_table[low_conf_sample['idx']]
 
-            #
+            # Mask around ligand and paste in new background
             _valid_mask = pose_data['elements'] > 1
             if (annotation['partition'] == 'train') & (rng.random() > self.drop_atom_rate):
                 valid_indicies = np.nonzero(_valid_mask)
