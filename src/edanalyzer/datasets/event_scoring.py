@@ -471,6 +471,7 @@ class EventScoringDataset(Dataset):
         self.max_translate = config['max_translate']
         self.max_x_noise = config['max_x_noise']
         self.max_z_noise = config['max_z_noise']
+        self.p_flip = config['p_flip']
 
     def __len__(self):
         return len(self.sample_indexes)
@@ -496,6 +497,7 @@ class EventScoringDataset(Dataset):
         z_map_sample_data = self.pandda_2_z_map_sample_table[z_map_sample_idx]
         annotation = self.pandda_2_annotations[z_map_sample_metadata['event_idx']]
 
+
         # If training replace positives with negatives
         # if (annotation['partition'] == 'train') & (rng.uniform(0.0, 1.0) > 0.5) & (conf == 'High'):
         #     conf = 'Low'
@@ -511,6 +513,17 @@ class EventScoringDataset(Dataset):
                 high_conf_sample = self.metadata_table_high_conf.sample().iloc[0]
                 pose_data_idx = high_conf_sample['pose_data_idx']
                 pose_data = self.pandda_2_pose_table[pose_data_idx]
+
+            if rng.uniform(0.0, 1.0) > self.p_flip:
+                if rng.uniform(0.0, 1.0) > 0.5:
+                    xmap_sample_data = np.flip(xmap_sample_data, 0)
+                    z_map_sample_data = np.flip(z_map_sample_data, 0)
+                if rng.uniform(0.0, 1.0) > 0.5:
+                    xmap_sample_data = np.flip(xmap_sample_data, 1)
+                    z_map_sample_data = np.flip(z_map_sample_data, 1)
+                if rng.uniform(0.0, 1.0) > 0.5:
+                    xmap_sample_data = np.flip(xmap_sample_data, 2)
+                    z_map_sample_data = np.flip(z_map_sample_data, 2)
 
             # Select new background
             low_conf_sample = self.metadata_table_low_conf.sample().iloc[0]
