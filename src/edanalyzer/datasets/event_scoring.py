@@ -729,7 +729,7 @@ class EventScoringDataset(Dataset):
 
         high_z_mask = (z_map_sample > self.z_cutoff).astype(int)
         high_z_mask[high_z_mask == 0] = -1
-        high_z_mask_expanded = expand_labels(high_z_mask, distance=self.z_mask_radius, spacing=0.5)
+        high_z_mask_expanded = expand_labels(high_z_mask, distance=self.z_mask_radius / 0.5)
         high_z_mask_expanded[high_z_mask_expanded != 1] = 0
 
 
