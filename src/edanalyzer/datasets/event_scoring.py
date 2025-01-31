@@ -14,6 +14,8 @@ from scipy.ndimage import gaussian_filter
 
 from torch.utils.data import Dataset
 
+from skimage.segmentation import expand_labels
+
 from .base import (
     _load_xmap_from_mtz_path,
     _load_xmap_from_path,
@@ -475,6 +477,8 @@ class EventScoringDataset(Dataset):
         self.max_x_noise = config['max_x_noise']
         self.max_z_noise = config['max_z_noise']
         self.p_flip = config['p_flip']
+        self.z_mask_radius = config['z_mask_radius']
+        self.z_cutoff = config['z_cutoff']
 
     def __len__(self):
         return len(self.resampled_indexes)
@@ -499,6 +503,8 @@ class EventScoringDataset(Dataset):
         xmap_sample_data = self.pandda_2_xmap_sample_table[z_map_sample_idx]
         z_map_sample_data = self.pandda_2_z_map_sample_table[z_map_sample_idx]
         annotation = self.pandda_2_annotations[z_map_sample_metadata['event_idx']]
+
+
 
 
         # If training replace positives with negatives
@@ -721,10 +727,16 @@ class EventScoringDataset(Dataset):
             np.copy(ligand_sample_array)
         )
 
+        high_z_mask = (z_map_sample > self.z_cutoff).astype(int)
+        high_z_mask[high_z_mask == 0] = -1
+        high_z_mask_expanded = expand_labels(high_z_mask, distance=self.z_mask_radius, spacing=0.5)
+        high_z_mask_expanded[high_z_mask_expanded != 1] = 0
+
+
         image_z = np.stack(
             [
-                z_map_sample,
-                xmap_sample * xmap_mask_float
+                z_map_sample * high_z_mask_expanded,
+                xmap_sample * high_z_mask_expanded# xmap_mask_float
             ],
             axis=0
         )
