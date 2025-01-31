@@ -702,14 +702,14 @@ class EventScoringDataset(Dataset):
             transform,
             np.copy(sample_array)
         )
-        if annotation['partition'] == 'train':
-            translate = rng.uniform(-0.5, 0.5)
-            scale = rng.uniform(0.9, 1.1)
-            z_map_sample = (z_map_sample * scale) + translate
-
-            translate = rng.uniform(-0.5, 0.5)
-            scale = rng.uniform(0.9, 1.1)
-            xmap_sample = (xmap_sample * scale) + translate
+        # if annotation['partition'] == 'train':
+        #     translate = rng.uniform(-0.5, 0.5)
+        #     scale = rng.uniform(0.9, 1.1)
+        #     z_map_sample = (z_map_sample * scale) + translate
+        #
+        #     translate = rng.uniform(-0.5, 0.5)
+        #     scale = rng.uniform(0.9, 1.1)
+        #     xmap_sample = (xmap_sample * scale) + translate
 
         if annotation['partition'] == 'train':
             u_s = rng.uniform(0.0, self.max_x_noise)
