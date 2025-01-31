@@ -676,14 +676,14 @@ def _get_train_test_idxs_full_conf(root):
     print(f'Getting negative train samples')
     for _idx, z in train_samples[train_samples['Confidence'] == 'Low'].iterrows():
         neg_z_samples += [z['idx'], ]
-        train_pos_conf.append('Low')
+        train_neg_conf.append('Low')
 
     # Loop over the z samples adding positive samples for each
     print(f'Getting positive train samples')
     for _idx, z in train_samples[train_samples['Confidence'] == 'High'].iterrows():  # .sample(len(neg_z_samples),
         #     replace=True).iterrows():
         pos_z_samples += [z['idx'], ]
-        train_neg_conf.append('High')
+        train_pos_conf.append('High')
 
     print(f'Got {len(pos_z_samples)} pos samples!')
 
@@ -730,8 +730,8 @@ def _get_train_test_idxs_full_conf(root):
         'test_neg_z_samples len': len(test_neg_z_samples),
         'test_pos_conf_samples len': len(test_pos_conf_samples),
         'test_neg_conf_samples len': len(test_neg_conf_samples),
-        'train_pos_conf len': len(test_pos_conf),
-        'train_neg_conf len': len(test_neg_conf),
+        'test_pos_conf len': len(test_pos_conf),
+        'test_neg_conf len': len(test_neg_conf),
 
     })
     test_idxs = [{'z': z, 'conf': conf} for z, conf
