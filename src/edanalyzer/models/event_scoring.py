@@ -633,6 +633,13 @@ class LitEventScoring(lt.LightningModule):
         self.log('fpr99', best_fpr_99, 4, sync_dist=True)
         # self.log('lr', )
 
+        fpr99s = []
+        for _system in best_df['system'].unique():
+            fpr99s.append(get_fpr(best_df[best_df['system'] == _system], 0.01))
+
+
+        self.log('medianfpr99', np.median(fpr99s), 4, sync_dist=True)
+
         self.test_annotations.clear()
 
         # sch = self.lr_schedulers()
