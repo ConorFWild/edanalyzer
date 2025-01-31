@@ -1251,7 +1251,7 @@ def main(config_path, batch_size=12, num_workers=None):
             dirpath=str(trial_output_dir),
             filename='sample-mnist-{epoch:02d}-{fpr10:.2f}'
         )
-        checkpoint_callback_best_99 = ModelCheckpoint(
+        checkpoint_callback_best_median99 = ModelCheckpoint(
             monitor='medianfpr99',
             dirpath=str(trial_output_dir),
             filename='sample-mnist-{epoch:02d}-{medianfpr99:.2f}'
@@ -1274,6 +1274,7 @@ def main(config_path, batch_size=12, num_workers=None):
                 checkpoint_callback_best_10,
                 checkpoint_callback_best_99,
                 checkpoint_callback_best_95,
+                checkpoint_callback_best_median99,
                 PyTorchLightningPruningCallback(trial, monitor='medianfpr99')
             ],
             enable_progress_bar=False,
@@ -1314,7 +1315,7 @@ def main(config_path, batch_size=12, num_workers=None):
         rprint(f"Got {len(dataset_test)} test samples")
 
         trainer.fit(model, dataset_train, dataset_test)
-        return trainer.callback_metrics['fpr99'].item()
+        return trainer.callback_metrics['medianfpr99'].item()
 
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
     # Unique identifier of the study.
