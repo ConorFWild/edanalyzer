@@ -1017,7 +1017,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    study_name = 'event_scoring_prod_44'
+    study_name = 'event_scoring_prod_45'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
@@ -1225,7 +1225,8 @@ def main(config_path, batch_size=12, num_workers=None):
             'pos_resample_rate': trial.suggest_int('pos_resample_rate', 0, 10),
             'p_flip': trial.suggest_uniform('p_flip', 0.0, 1.0),
             'z_mask_radius': trial.suggest_uniform('z_mask_radius', 1.0, 3.5),
-            'z_cutoff': trial.suggest_uniform('z_cutoff', 1.5, 3.0)
+            'z_cutoff': trial.suggest_uniform('z_cutoff', 1.5, 3.0),
+            'combo_layer': trial.suggest_categorical('combo_layer', [8, 16, 32, 64, 128]),
             # "batch_size": tune.choice([32, 64]),
         }
         print(f'Running trial with config:')
@@ -1339,7 +1340,7 @@ def main(config_path, batch_size=12, num_workers=None):
             storage=storage_name,
             sampler=TPESampler(constant_liar=True)
         )
-    study.optimize(objective, n_trials=200)
+    study.optimize(objective, n_trials=300)
 
 
 if __name__ == "__main__":
