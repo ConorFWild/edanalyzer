@@ -572,7 +572,7 @@ class EventScoringDataset(Dataset):
         # If training replace with a random ligand
         if (self.test_train == 'train') & (conf == 'Low'):
             # smiles = self.unique_smiles[rng.integers(0, len(self.unique_smiles))]
-            smiles = self.unique_smiles.sample(weights=self.unique_smiles_frequencies).iloc[0]['canonical_smiles']
+            smiles = self.unique_smiles.sample(weights=self.unique_smiles_frequencies).iloc[0]
         else:
             ligand_data = self.pandda_2_ligand_data_table[ligand_data_idx]
             smiles = ligand_data['canonical_smiles']
