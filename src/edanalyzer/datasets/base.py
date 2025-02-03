@@ -539,7 +539,7 @@ def _get_grid_from_hdf5(event_map_data):
     grid.set_unit_cell(uc)
 
     grid_array = np.array(grid, copy=False)
-    grid_array[:, :, :] = (event_map_data['sample'])[:, :, :]
+    grid_array[:, :, :] = (event_map_data)[:, :, :]
 
     return grid
 

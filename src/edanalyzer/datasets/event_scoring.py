@@ -501,8 +501,8 @@ class EventScoringDataset(Dataset):
             # res = 0.590471872361221 + 0.01
         assert _z == z_map_sample_idx
         ligand_data_idx = z_map_sample_metadata['ligand_data_idx']
-        xmap_sample_data = self.pandda_2_xmap_sample_table[z_map_sample_idx]
-        z_map_sample_data = self.pandda_2_z_map_sample_table[z_map_sample_idx]
+        xmap_sample_data = self.pandda_2_xmap_sample_table[z_map_sample_idx]['sample']
+        z_map_sample_data = self.pandda_2_z_map_sample_table[z_map_sample_idx]['sample']
         annotation = self.pandda_2_annotations[z_map_sample_metadata['event_idx']]
 
 
@@ -537,8 +537,8 @@ class EventScoringDataset(Dataset):
 
             # Select new background
             low_conf_sample = self.metadata_table_low_conf.sample().iloc[0]
-            low_conf_z_map_sample_data = self.pandda_2_z_map_sample_table[low_conf_sample['idx']]
-            low_conf_x_map_sample_data = self.pandda_2_xmap_sample_table[low_conf_sample['idx']]
+            low_conf_z_map_sample_data = self.pandda_2_z_map_sample_table[low_conf_sample['idx']]['sample']
+            low_conf_x_map_sample_data = self.pandda_2_xmap_sample_table[low_conf_sample['idx']]['sample']
 
             # Mask around ligand and paste in new background
             _valid_mask = pose_data['elements'] > 1
