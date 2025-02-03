@@ -1327,7 +1327,7 @@ def main(config_path, batch_size=12, num_workers=None):
     # Unique identifier of the study.
     storage_name = f"sqlite:///{output_dir}/{study_name}.db"
     pruner = optuna.pruners.HyperbandPruner(
-        min_resource=1, max_resource=15,
+        min_resource=2, max_resource=15,
     )
     if output_dir.exists():
         study = optuna.create_study(
@@ -1343,7 +1343,8 @@ def main(config_path, batch_size=12, num_workers=None):
         study = optuna.load_study(
             study_name=study_name,
             storage=storage_name,
-            sampler=TPESampler(constant_liar=True)
+            sampler=TPESampler(constant_liar=True),
+            pruner=pruner,
         )
     study.optimize(objective, n_trials=300)
 
