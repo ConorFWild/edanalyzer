@@ -584,7 +584,8 @@ class EventScoringDataset(Dataset):
             cids = AllChem.EmbedMultipleConfs(m2, numConfs=10)
             m3 = Chem.RemoveHs(m2)
             embedding = [_conf.GetPositions() for _conf in m3.GetConformers()][0]
-        except:
+        except Exception as e:
+            print(f'Got exception in getting conf: {e}')
             hit = [1.0, 0.0]
             label = np.array(hit)
             label_float = label.astype(np.float32)
