@@ -431,6 +431,7 @@ class EventScoringDataset(Dataset):
 
     def __init__(self, config):
         # self.data = data
+        self.test_train =  config['test_train']
 
         zarr_path = config['zarr_path']
         self.root = zarr.open(zarr_path, mode='r')
@@ -515,7 +516,7 @@ class EventScoringDataset(Dataset):
 
         #
         pose_data_idx = z_map_sample_metadata['pose_data_idx']
-        if (rng.uniform(0.0, 1.0) > self.fraction_background_replace) & (annotation['partition'] == 'train'):
+        if (rng.uniform(0.0, 1.0) > self.fraction_background_replace) & (self.test_train == 'train'):
             if pose_data_idx != -1:  # High confidence sample: chop in low confidence background
                 pose_data = self.pandda_2_pose_table[pose_data_idx]
             else:  # Low confidence sample: chop in low confidence background
@@ -541,7 +542,7 @@ class EventScoringDataset(Dataset):
 
             # Mask around ligand and paste in new background
             _valid_mask = pose_data['elements'] > 1
-            if (annotation['partition'] == 'train') & (rng.random() > self.drop_atom_rate):
+            if (self.test_train == 'train') & (rng.random() > self.drop_atom_rate):
                 valid_indicies = np.nonzero(_valid_mask)
                 num_valid = len(valid_indicies)
                 for _j in rng.integers(1, max(num_valid-5, 1)):
@@ -569,7 +570,7 @@ class EventScoringDataset(Dataset):
 
 
         # If training replace with a random ligand
-        if (annotation['partition'] == 'train') & (conf == 'Low'):
+        if (self.test_train == 'train') & (conf == 'Low'):
             # smiles = self.unique_smiles[rng.integers(0, len(self.unique_smiles))]
             smiles = self.unique_smiles.sample(weights=self.unique_smiles_frequencies)
         else:
@@ -612,7 +613,7 @@ class EventScoringDataset(Dataset):
             )
 
         #
-        if annotation['partition'] == 'train':
+        if self.test_train == 'train':
             u_s = rng.uniform(0.0, self.max_x_blur)
             xmap_sample_data = gaussian_filter(xmap_sample_data, sigma=u_s)
 
@@ -637,7 +638,7 @@ class EventScoringDataset(Dataset):
         #     z_map = truncate(z_map, truncation_res)
 
         # Subsample if training
-        if annotation['partition'] == 'train':
+        if self.test_train == 'train':
             translation = self.max_translate*(2*(rng.random(3)-0.5))
             centroid = np.array([22.5,22.5,22.5]) + translation
 
@@ -649,7 +650,7 @@ class EventScoringDataset(Dataset):
             (32, 32, 32),
             dtype=np.float32,
         )
-        if annotation['partition'] == 'train':
+        if self.test_train == 'train':
             orientation = _get_random_orientation()
         else:
             orientation = np.eye(3)
@@ -682,7 +683,7 @@ class EventScoringDataset(Dataset):
             transformed_residue,
         )
 
-        if annotation['partition'] == 'train':
+        if self.test_train == 'train':
             mask = np.ones((32,32,32), dtype=np.float32)
 
         else:
@@ -711,7 +712,7 @@ class EventScoringDataset(Dataset):
         #     scale = rng.uniform(0.9, 1.1)
         #     xmap_sample = (xmap_sample * scale) + translate
 
-        if annotation['partition'] == 'train':
+        if self.test_train == 'train':
             u_s = rng.uniform(0.0, self.max_x_noise)
             noise = rng.normal(size=(32,32,32)) * u_s
             z_map_sample += noise.astype(np.float32)
@@ -766,7 +767,7 @@ class EventScoringDataset(Dataset):
         image_mol_float = image_mol.astype(np.float32)
 
 
-        if annotation['partition'] == 'train':
+        if self.test_train == 'train':
             # if conf == 'High':
             #     hit = [self.label_noise, 1-self.label_noise]
             # elif conf == 'Medium':

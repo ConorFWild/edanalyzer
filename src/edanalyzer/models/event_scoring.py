@@ -13,7 +13,7 @@ from numcodecs import Blosc, Delta
 import pandas as pd
 
 
-from .resnet import resnet18, resnet10
+from .resnet import _resnet, BasicBlock, resnet18, resnet10
 from .simple_autoencoder import SimpleConvolutionalEncoder, SimpleConvolutionalDecoder
 from edanalyzer.losses import categorical_loss
 
@@ -204,10 +204,22 @@ class LitEventScoring(lt.LightningModule):
         # self.automatic_optimization = False
         # self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
         # self.z_encoder = SimpleConvolutionalEncoder(input_layers=2)
-        self.z_encoder = resnet10(num_classes=2, num_input=2, headless=True, drop_rate=config['drop_rate'], config=config).float()
+        self.z_encoder = _resnet(
+            'resnet10',
+            BasicBlock,
+            [config['blocks_1'], config['blocks_2'], config['blocks_3'], config['blocks_4'], ],
+            False, False,
+            num_classes=2, num_input=2, headless=True,
+                                  drop_rate=config['drop_rate'], config=config).float()
         # self.x_encoder = SimpleConvolutionalEncoder(input_layers=1)
         # self.mol_encoder = SimpleConvolutionalEncoder(input_layers=1)
-        self.mol_encoder = resnet10(num_classes=2, num_input=1, headless=True, drop_rate=config['drop_rate'], config=config).float()
+        self.mol_encoder = _resnet(
+            'resnet10',
+            BasicBlock,
+            [config['blocks_1'], config['blocks_2'], config['blocks_3'], config['blocks_4'], ],
+            False, False,
+            num_classes=2, num_input=1, headless=True,
+                                    drop_rate=config['drop_rate'], config=config).float()
         # self.mol_decoder = SimpleConvolutionalDecoder()
         # self.x_decoder = SimpleConvolutionalDecoder(input_layers=512)
         # self.z_decoder = SimpleConvolutionalDecoder(input_layers=512)
@@ -225,6 +237,7 @@ class LitEventScoring(lt.LightningModule):
             # nn.ReLU(inplace=True),
             # nn.Dropout(),
             nn.Linear(config['planes_5']*2, config['combo_layer']),
+            nn.ReLU(inplace=True),
             # nn.BatchNorm1d(16),
             nn.Linear(config['combo_layer'] ,2),
             # nn.ReLU(inplace=True),

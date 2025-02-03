@@ -1017,7 +1017,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    study_name = 'event_scoring_prod_45'
+    study_name = 'event_scoring_prod_46'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
@@ -1227,6 +1227,11 @@ def main(config_path, batch_size=12, num_workers=None):
             'z_mask_radius': trial.suggest_uniform('z_mask_radius', 1.0, 3.5),
             'z_cutoff': trial.suggest_uniform('z_cutoff', 1.5, 3.0),
             'combo_layer': trial.suggest_categorical('combo_layer', [8, 16, 32, 64, 128]),
+            'blocks_1': trial.suggest_categorical('blocks_1', [1, 2, 3,]),
+            'blocks_2': trial.suggest_categorical('blocks_2', [1, 2, 3, ]),
+            'blocks_3': trial.suggest_categorical('blocks_3', [1, 2, 3, ]),
+            'blocks_4': trial.suggest_categorical('blocks_4', [1, 2, 3, ]),
+
             # "batch_size": tune.choice([32, 64]),
         }
         print(f'Running trial with config:')
