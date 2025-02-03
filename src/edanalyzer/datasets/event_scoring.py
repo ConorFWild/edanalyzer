@@ -471,7 +471,7 @@ class EventScoringDataset(Dataset):
         self.fraction_background_replace = config['fraction_background_replace']
         self.xmap_radius = config['xmap_radius']
         self.max_x_blur = config['max_x_blur']
-        self.max_z_blue = config['max_z_blur']
+        self.max_z_blur = config['max_z_blur']
         self.drop_atom_rate = config['drop_atom_rate']
         self.max_pos_atom_mask_radius = config['max_pos_atom_mask_radius']
         self.max_translate = config['max_translate']
