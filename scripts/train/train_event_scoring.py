@@ -1232,7 +1232,7 @@ def main(config_path, batch_size=12, num_workers=None):
             'blocks_3': trial.suggest_categorical('blocks_3', [1, 2,  ]),
             'blocks_4': trial.suggest_categorical('blocks_4', [1, 2,  ]),
             'grad_clip': trial.suggest_loguniform('grad_clip', 1e-4, 1e1),
-            'batch_size': trial.suggest_categorical('combo_layer', [16, 32, 64, 128, ]),
+            'batch_size': trial.suggest_categorical('batch_size', [16, 32, 64, 128, ]),
             # "batch_size": tune.choice([32, 64]),
         }
         print(f'Running trial with config:')
