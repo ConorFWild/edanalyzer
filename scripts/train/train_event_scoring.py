@@ -1207,15 +1207,15 @@ def main(config_path, batch_size=12, num_workers=None):
             'max_x_blur': trial.suggest_uniform('max_x_blur', 0.0, 3.0),
             'max_z_blur': trial.suggest_uniform('max_z_blur', 0.0, 3.0),
             'drop_rate': trial.suggest_uniform('drop_rate', 0.0, 1.0),
-            'planes_1': trial.suggest_categorical('planes_1', [2, 4, 8, 16, 32]),
+            'planes_1': trial.suggest_categorical('planes_1', [2, 4, 8, 16, ]),
             'drop_1': trial.suggest_uniform('drop_1', 0.0, 1.0),
-            'planes_2': trial.suggest_categorical('planes_2', [4, 8, 16, 32, 64]),
+            'planes_2': trial.suggest_categorical('planes_2', [4, 8, 16, 32, ]),
             'drop_2': trial.suggest_uniform('drop_2', 0.0, 1.0),
-            'planes_3': trial.suggest_categorical('planes_3', [8, 16, 32, 64, 128]),
+            'planes_3': trial.suggest_categorical('planes_3', [8, 16, 32, 64, ]),
             'drop_3': trial.suggest_uniform('drop_3', 0.0, 1.0),
-            'planes_4': trial.suggest_categorical('planes_4', [16, 32, 64, 128, 256]),
+            'planes_4': trial.suggest_categorical('planes_4', [16, 32, 64, 128, ]),
             'drop_4': trial.suggest_uniform('drop_4', 0.0, 1.0),
-            'planes_5': trial.suggest_categorical('planes_5', [32, 64, 128, 256, 512]),
+            'planes_5': trial.suggest_categorical('planes_5', [32, 64, 128, 256, ]),
             'drop_5': trial.suggest_uniform('drop_5', 0.0, 1.0),
             'drop_atom_rate': trial.suggest_uniform('drop_atom_rate', 0.0, 1.0),
             'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 1.01, 4.0),
@@ -1226,12 +1226,12 @@ def main(config_path, batch_size=12, num_workers=None):
             'p_flip': trial.suggest_uniform('p_flip', 0.0, 1.0),
             'z_mask_radius': trial.suggest_uniform('z_mask_radius', 1.0, 3.5),
             'z_cutoff': trial.suggest_uniform('z_cutoff', 1.5, 3.0),
-            'combo_layer': trial.suggest_categorical('combo_layer', [8, 16, 32, 64, 128]),
-            'blocks_1': trial.suggest_categorical('blocks_1', [1, 2, 3,]),
-            'blocks_2': trial.suggest_categorical('blocks_2', [1, 2, 3, ]),
-            'blocks_3': trial.suggest_categorical('blocks_3', [1, 2, 3, ]),
-            'blocks_4': trial.suggest_categorical('blocks_4', [1, 2, 3, ]),
-
+            'combo_layer': trial.suggest_categorical('combo_layer', [8, 16, 32, 64,]),
+            'blocks_1': trial.suggest_categorical('blocks_1', [1, 2, ]),
+            'blocks_2': trial.suggest_categorical('blocks_2', [1, 2,  ]),
+            'blocks_3': trial.suggest_categorical('blocks_3', [1, 2,  ]),
+            'blocks_4': trial.suggest_categorical('blocks_4', [1, 2,  ]),
+            'grad_clip': trial.suggest_loguniform(1e-4, 1e1)
             # "batch_size": tune.choice([32, 64]),
         }
         print(f'Running trial with config:')
@@ -1273,7 +1273,7 @@ def main(config_path, batch_size=12, num_workers=None):
         trainer = lt.Trainer(
             # devices="auto",
             accelerator="gpu",
-            gradient_clip_val=1.5,
+            gradient_clip_val=_config['grad_clip'],
             logger=logger,
             callbacks=[
                 checkpoint_callback,
@@ -1284,7 +1284,7 @@ def main(config_path, batch_size=12, num_workers=None):
                 PyTorchLightningPruningCallback(trial, monitor='medianfpr99')
             ],
             enable_progress_bar=False,
-            max_epochs=15
+            max_epochs=60
         )
 
         _train_config = {
@@ -1327,7 +1327,7 @@ def main(config_path, batch_size=12, num_workers=None):
     # Unique identifier of the study.
     storage_name = f"sqlite:///{output_dir}/{study_name}.db"
     pruner = optuna.pruners.HyperbandPruner(
-        min_resource=2, max_resource=15,
+        min_resource=2, max_resource=60,
     )
     if output_dir.exists():
         study = optuna.create_study(
