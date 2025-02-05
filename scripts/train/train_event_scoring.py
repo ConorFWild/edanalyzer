@@ -1203,7 +1203,7 @@ def main(config_path, batch_size=12, num_workers=None):
         _config = {
             "lr": trial.suggest_loguniform('lr', 1e-4, 1e0),
             "wd": trial.suggest_loguniform('wd', 1e-4, 1e0),
-            'fraction_background_replace': trial.suggest_uniform('fraction_background_replace', 1e-2, 1e0),
+            'fraction_background_replace': trial.suggest_uniform('fraction_background_replace', 0.0, 1e0),
             'xmap_radius': trial.suggest_uniform('xmap_radius', 3.0, 7.0),
             'max_x_blur': trial.suggest_uniform('max_x_blur', 0.0, 3.0),
             'max_z_blur': trial.suggest_uniform('max_z_blur', 0.0, 3.0),
