@@ -284,24 +284,28 @@ def setup_store(zarr_path):
         'meta_sample',
         shape=(0,),
         chunks=(1,),
+        shards=(1000,),
         dtype=meta_sample_dtype
     )
     table_mtz_sample = root.create_dataset(
         'mtz_sample',
         shape=(0,),
         chunks=(1,),
+        shards=(1000,),
         dtype=mtz_sample_dtype
     )
     table_xmap_sample = root.create_dataset(
         'xmap_sample',
         shape=(0,),
         chunks=(1,),
+        shards=(1000,),
         dtype=xmap_sample_dtype
     )
     table_z_map_sample = root.create_dataset(
         'z_map_sample',
         shape=(0,),
         chunks=(1,),
+        shards=(1000,),
         dtype=z_map_sample_dtype
     )
 
@@ -309,6 +313,7 @@ def setup_store(zarr_path):
         'known_hit_pose',
         shape=(0,),
         chunks=(1,),
+        shards=(1000,),
         dtype=known_hit_pose_sample_dtype
     )
 
@@ -316,6 +321,7 @@ def setup_store(zarr_path):
         'decoy_pose_sample',
         shape=(0,),
         chunks=(1,),
+        shards=(1000,),
         dtype=decoy_pose_sample_dtype
     )
 
@@ -323,6 +329,7 @@ def setup_store(zarr_path):
         'delta',
         shape=(0,),
         chunks=(1,),
+        shards=(1000,),
         dtype=delta_dtype
     )
 
@@ -330,6 +337,7 @@ def setup_store(zarr_path):
         'annotation',
         shape=(0,),
         chunks=(1,),
+        shards=(1000,),
         dtype=annotation_dtype
 
     )
@@ -338,6 +346,7 @@ def setup_store(zarr_path):
         'ligand_data',
         shape=(0,),
         chunks=(1,),
+        shards=(1000,),
         dtype=ligand_data_dtype
     )
 
