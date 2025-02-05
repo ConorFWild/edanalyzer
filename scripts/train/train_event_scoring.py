@@ -1343,9 +1343,9 @@ def main(config_path, batch_size=12, num_workers=None):
         )
         study.enqueue_trial(
             {
-                'lr': 0.01883318260118112,
-                'wd': 0.033286701037939215,
-                'fraction_background_replace': 0.3303017628273233,
+                'lr': 0.1083318260118112,
+                'wd': 0.33286701037939215,
+                'fraction_background_replace': 0.6603017628273233,
                 'xmap_radius': 3.4196300755415834,
                 'max_x_blur': 0.509006239862467,
                 'max_z_blur': 0.5404658825227494,
@@ -1370,13 +1370,15 @@ def main(config_path, batch_size=12, num_workers=None):
                 'z_mask_radius': 2.6144817327593346,
                 'z_cutoff': 2.324217445782787,
                 'combo_layer': 8,
-                'blocks_1': 2,
+                'blocks_1': 1,
                 'blocks_2': 1,
                 'blocks_3': 1,
                 'blocks_4': 1,
                 'grad_clip': 1.5,
-                'batch_size': 128
-            }
+                'batch_size': 128,
+
+            },
+            skip_if_exists=True
         )
     else:
         print(f'Loading study!')
