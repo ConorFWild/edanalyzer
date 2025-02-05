@@ -22,6 +22,7 @@ from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 
 from lightning.pytorch.loggers import CSVLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, StochasticWeightAveraging
+from lightning.pytorch.callbacks import EarlyStopping
 
 # import ray
 # from ray.train.lightning import (
@@ -1282,7 +1283,8 @@ def main(config_path, batch_size=12, num_workers=None):
                 checkpoint_callback_best_99,
                 checkpoint_callback_best_95,
                 checkpoint_callback_best_median99,
-                PyTorchLightningPruningCallback(trial, monitor='medianfpr99')
+                PyTorchLightningPruningCallback(trial, monitor='medianfpr99'),
+                EarlyStopping('medianfpr99', patience=5)
             ],
             enable_progress_bar=False,
             max_epochs=60
@@ -1321,7 +1323,7 @@ def main(config_path, batch_size=12, num_workers=None):
         )
         rprint(f"Got {len(dataset_test)} test samples")
 
-        trainer.fit(model, dataset_train, dataset_test)
+        trainer.fit(model, dataset_train, dataset_test, )
         return trainer.callback_metrics['medianfpr99'].item()
 
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
