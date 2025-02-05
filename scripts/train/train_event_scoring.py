@@ -1017,7 +1017,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    study_name = 'event_scoring_prod_47'
+    study_name = 'event_scoring_prod_48'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
@@ -1226,11 +1226,11 @@ def main(config_path, batch_size=12, num_workers=None):
             'p_flip': trial.suggest_uniform('p_flip', 0.0, 1.0),
             'z_mask_radius': trial.suggest_uniform('z_mask_radius', 1.0, 3.5),
             'z_cutoff': trial.suggest_uniform('z_cutoff', 1.5, 3.0),
-            'combo_layer': trial.suggest_categorical('combo_layer', [8, 16, 32, 64,]),
+            'combo_layer': trial.suggest_categorical('combo_layer', [8, 16, 32, 64, ]),
             'blocks_1': trial.suggest_categorical('blocks_1', [1, 2, ]),
-            'blocks_2': trial.suggest_categorical('blocks_2', [1, 2,  ]),
-            'blocks_3': trial.suggest_categorical('blocks_3', [1, 2,  ]),
-            'blocks_4': trial.suggest_categorical('blocks_4', [1, 2,  ]),
+            'blocks_2': trial.suggest_categorical('blocks_2', [1, 2, ]),
+            'blocks_3': trial.suggest_categorical('blocks_3', [1, 2, ]),
+            'blocks_4': trial.suggest_categorical('blocks_4', [1, 2, ]),
             'grad_clip': trial.suggest_loguniform('grad_clip', 1e-4, 1e1),
             'batch_size': trial.suggest_categorical('batch_size', [16, 32, 64, 128, ]),
             # "batch_size": tune.choice([32, 64]),
@@ -1338,6 +1338,43 @@ def main(config_path, batch_size=12, num_workers=None):
             load_if_exists=True,
             pruner=pruner,
             sampler=TPESampler(constant_liar=True)
+        )
+        study.enqueue_trial(
+            {
+                'lr': 0.01883318260118112,
+                'wd': 0.033286701037939215,
+                'fraction_background_replace': 0.3303017628273233,
+                'xmap_radius': 3.4196300755415834,
+                'max_x_blur': 0.509006239862467,
+                'max_z_blur': 0.5404658825227494,
+                'drop_rate': 0.2740422474916663,
+                'planes_1': 8,
+                'drop_1': 0.5857699954775857,
+                'planes_2': 16,
+                'drop_2': 0.55942742430428558,
+                'planes_3': 32,
+                'drop_3': 0.57119079747990835,
+                'planes_4': 32,
+                'drop_4': 0.5503045317689869,
+                'planes_5': 32,
+                'drop_5': 0.53070556902853285,
+                'drop_atom_rate': 0.9882224813506627,
+                'max_pos_atom_mask_radius': 3.8879501374819583,
+                'max_translate': 4.228243978932568,
+                'max_x_noise': 1.3199960910884487,
+                'max_z_noise': 1.2818494818488133,
+                'pos_resample_rate': 1,
+                'p_flip': 0.1435919086355283,
+                'z_mask_radius': 2.6144817327593346,
+                'z_cutoff': 2.324217445782787,
+                'combo_layer': 8,
+                'blocks_1': 2,
+                'blocks_2': 1,
+                'blocks_3': 1,
+                'blocks_4': 1,
+                'grad_clip': 1.5,
+                'batch_size': 128
+            }
         )
     else:
         print(f'Loading study!')
