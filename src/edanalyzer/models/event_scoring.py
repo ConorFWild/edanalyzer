@@ -236,15 +236,17 @@ class LitEventScoring(lt.LightningModule):
             # nn.Linear(256,128),
             # nn.ReLU(inplace=True),
             # nn.Dropout(),
-            nn.Linear(config['planes_5']*2, config['combo_layer']),
-            nn.ReLU(inplace=True),
+            # nn.Linear(config['planes_5']*2, config['combo_layer']),
+            # nn.ReLU(inplace=True),
             # nn.BatchNorm1d(16),
-            nn.Linear(config['combo_layer'] ,2),
+            # nn.Linear(config['combo_layer'] ,2),
             # nn.ReLU(inplace=True),
             # nn.Dropout(),
             # nn.Linear(512, 256),
             # nn.Dropout(),
             # nn.Linear(16, 2),
+            nn.Linear(config['planes_5'] , 2),
+
         )
         self.train_annotations = []
         self.test_annotations = []
@@ -252,6 +254,7 @@ class LitEventScoring(lt.LightningModule):
         self.output = output_dir
         self.lr = config['lr']
         self.wd = config['wd']
+        self.batch_size = config['batch_size']
 
     def forward(self, x, z, m, d):
         mol_encoding = self.mol_encoder(m)
@@ -272,9 +275,10 @@ class LitEventScoring(lt.LightningModule):
         #     dim=1,
         # )
         # density_encoding = self.density_encoder(full_density)
-        full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
+        # full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         # full_encoding = z_encoding * F.hardtanh(self.bn( self.mol_to_weight(mol_encoding)), min_val=-1.0, max_val=1.0)
         # full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
+        full_encoding = z_encoding * mol_encoding
 
         score = F.softmax(self.fc(full_encoding))
 
@@ -326,10 +330,10 @@ class LitEventScoring(lt.LightningModule):
         #     dim=1,
         # )
         # density_encoding = self.density_encoder(full_density)
-        full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
+        # full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         # full_encoding = z_encoding * F.hardtanh(self.bn( self.mol_to_weight(mol_encoding)), min_val=-1.0, max_val=1.0)
         # full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
-
+        full_encoding = z_encoding * mol_encoding
 
         # score = F.sigmoid(self.fc(full_encoding))
         score = F.softmax(self.fc(full_encoding))
@@ -342,7 +346,7 @@ class LitEventScoring(lt.LightningModule):
         total_loss = loss_1 #+ loss_2 + loss_3 + loss_4
         # total_loss = loss_1 * loss_2 * loss_3 * loss_4
 
-        self.log('train_loss', loss_1, batch_size=128, )
+        self.log('train_loss', loss_1, batch_size=self.batch_size, )
         # self.log('mol_decode_loss', loss_2)
         # self.log('z_decode_loss', loss_3)
         # self.log('x_decode_loss', loss_4)
@@ -390,9 +394,10 @@ class LitEventScoring(lt.LightningModule):
         # )
         # full_density = z
         # density_encoding = self.density_encoder(full_density)
-        full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
+        # full_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         # full_encoding =  z_encoding * F.hardtanh(self.bn( self.mol_to_weight(mol_encoding)), min_val=-1.0, max_val=1.0)
         # full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
+        full_encoding = z_encoding * mol_encoding
 
         # print(f'Z Encoding: {z_encoding[0,:10]}')
         # print(f'Mol Encoding: {mol_encoding[0,:10]}')
@@ -667,11 +672,12 @@ class LitEventScoring(lt.LightningModule):
     #         if param.grad is None:
     #             print(name)
 
-def get_fpr(best_df, fpr):
+
+def get_fpr(best_df, recall):
     true_hit_best_df = best_df[best_df['y'] > 0.9]
     negative_best_df = best_df[best_df['y'] <= 0.1]
 
-    cutoff = true_hit_best_df['y_hat'].quantile(fpr)
+    cutoff = true_hit_best_df['y_hat'].quantile(recall)
 
     false_hit_df = negative_best_df[negative_best_df['y_hat'] >= cutoff]
     true_negative_df = negative_best_df[negative_best_df['y_hat'] < cutoff]
@@ -679,8 +685,8 @@ def get_fpr(best_df, fpr):
     tn = len(true_negative_df)
 
     if (fp + tn) == 0:
-        fpr = 0.0
+        _fpr = 0.0
     else:
-        fpr = fp / (fp + tn)
+        _fpr = fp / (fp + tn)
 
-    return fpr
+    return _fpr
