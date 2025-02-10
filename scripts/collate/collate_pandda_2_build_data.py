@@ -423,6 +423,83 @@ def _permute_position(_poss_pose, _poss_decoy, translation=5, small=True):
 
     return _new_poss, rmsd,  deltas, np.linalg.norm(deltas, axis=1)
 
+# def _get_augmented_decoy(
+#         known_hit_poss,
+#         atoms,
+#         pose_poss,
+#         pose_elements,
+#         pose_predicted_density,
+#         known_hit_pose_residue,
+#         template_grid,
+#         tmp_pose_idx,
+#                 meta_idx,
+#         translation,
+#         small
+# ):
+#     # Mask
+#     # rprint(atoms)
+#     # rprint(pose_poss)
+#     # rprint(pose_elements)
+#     masked_poss, masked_elements, mask = _random_mask(pose_poss, pose_elements)
+#     # rprint(mask)
+#     masked_atoms = atoms[mask]#pose_sample["atoms"][mask]
+#
+#     known_hit_poss_masked = known_hit_poss[mask]
+#     # Permute
+#     _new_poss, rmsd, _delta_vecs, _delta = _permute_position(known_hit_poss_masked, masked_poss, translation, small)
+#
+#     # Get Overlap
+#     decoy_res = _get_res_from_arrays(_new_poss, masked_elements, masked_atoms)
+#     decoy_predicted_density = _get_predicted_density_from_res(
+#         decoy_res,
+#         template_grid
+#     )
+#     ol_score = overlap_score(
+#         pose_predicted_density,
+#         decoy_predicted_density,
+#         known_hit_pose_residue,
+#         decoy_res
+#     )
+#
+#     atom_array = np.zeros(150, dtype='<U5')
+#     elements_array = np.zeros(150, dtype=np.int32)
+#     pose_array = np.zeros((150, 3))
+#     num_atoms = masked_elements.size
+#     pose_array[:num_atoms, :] = _new_poss[:num_atoms, :]
+#     atom_array[:num_atoms] = masked_atoms[:num_atoms]
+#     elements_array[:num_atoms] = masked_elements[:num_atoms]
+#
+#     known_hit_pos_sample = np.array(
+#         [
+#             (
+#                 tmp_pose_idx,
+#                 meta_idx,
+#                 pose_array,
+#                 atom_array,
+#                 elements_array,
+#                 rmsd,
+#                 ol_score
+#             )
+#         ],
+#         dtype=decoy_pose_sample_dtype
+#     )
+#
+#     _delta_array =np.zeros((150,))
+#     _delta_vecs_array = np.zeros((150, 3))
+#     _delta_array[:num_atoms] = _delta[:num_atoms]
+#     _delta_vecs_array[:num_atoms, :] = _delta_vecs[:num_atoms,:]
+#
+#     delta_sample = np.array([(
+#         tmp_pose_idx,
+#         # idx_pose,
+#         meta_idx,
+#         _delta_array,
+#         _delta_vecs_array,
+#     )], dtype=delta_dtype
+#     )
+#
+#     return known_hit_pos_sample, delta_sample
+
 def _get_augmented_decoy(
         known_hit_poss,
         atoms,
@@ -541,7 +618,7 @@ def main(config_path):
     #
     # Open a file in "w"rite mode
     # zarr_path = 'output/event_data_with_mtzs_2.zarr'
-    zarr_path = '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/build_data_augmented.zarr'
+    zarr_path = '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/build_data_augmented_2.zarr'
 
     root = setup_store(zarr_path)
     table_meta_sample = root['meta_sample']
