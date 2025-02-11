@@ -686,7 +686,10 @@ class LitEventScoring(lt.LightningModule):
         dataset_best = multi_event_datasets[
             multi_event_datasets['y_hat'] == multi_event_datasets.groupby('dtag')['y_hat'].transform('max')]
 
-        best_scorer_hit = len(dataset_best[dataset_best['y'] == 1.0]) / len(dataset_best)
+        if len(dataset_best) == 0:
+            best_scorer_hit = 0.0
+        else:
+            best_scorer_hit = len(dataset_best[dataset_best['y'] == 1.0]) / len(dataset_best)
         self.log('best_scorer_hit', best_scorer_hit, 4, sync_dist=True)
 
         self.test_annotations.clear()
