@@ -658,9 +658,31 @@ class LitEventScoring(lt.LightningModule):
 
         self.log('medianfpr99', np.median(fpr99s), 4, sync_dist=True)
 
-        dataset_max_ys = best_df.groupby(['dtag', ])['y'].transform('max')
-        dataset_num_ys = best_df.groupby(['dtag', ])['y'].transform('nunique')
-        multi_event_datasets = best_df[(dataset_max_ys == 1.0) & (dataset_num_ys > 1)]
+        df = pd.DataFrame(
+            [
+                {
+                    'y': float(_annotation['y']),
+                    'y_hat': float(_annotation['y_hat']),
+                    'system': str(_annotation['system']),
+                    'dtag': str(_annotation['dtag']),
+                    'event_num': int(_annotation['event_num']),
+                }
+
+        for _annotation in self.test_annotations
+        ]
+        )
+
+        print('df')
+        print(df)
+        dataset_max_ys = df.groupby(['dtag', ])['y'].transform('max')
+        print('dataset_max_ys')
+        print(dataset_max_ys)
+        dataset_num_ys = df.groupby(['dtag', ])['y'].transform('nunique')
+        print('dataset_num_ys')
+        print(dataset_num_ys)
+        multi_event_datasets = df[(dataset_max_ys == 1.0) & (dataset_num_ys > 1)]
+        print('multi_event_datasets')
+        print(multi_event_datasets)
         dataset_best = multi_event_datasets[
             multi_event_datasets['y_hat'] == multi_event_datasets.groupby('dtag')['y_hat'].transform('max')]
 
