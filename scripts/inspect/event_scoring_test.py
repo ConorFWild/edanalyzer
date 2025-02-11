@@ -790,6 +790,8 @@ def main(config_path, batch_size=12, num_workers=None):
     database_path = Path(config['working_directory']) / "database.db"
     rprint(f'loading database from: {database_path}')
 
+
+
     try:
         db.bind(provider='sqlite', filename=f"{database_path}", create_db=True)
         db.generate_mapping(create_tables=True)
@@ -798,14 +800,9 @@ def main(config_path, batch_size=12, num_workers=None):
 
     output_dir = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output')
 
+
+
     zarr_path = output_dir / 'event_data_3.zarr'
-
-    root = zarr.open(str(zarr_path), mode='r')
-
-    rprint(f'Getting train/test data...')
-    train_config, test_config = _get_train_test_idxs_full_conf(root)
-
-    rprint(f'Constructing train and test dataloaders...')
 
     # Get the model
     rprint('Constructing model...')
@@ -813,11 +810,6 @@ def main(config_path, batch_size=12, num_workers=None):
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
-
-    # Train
-    rprint('Constructing trainer...')
-
-    rprint(f'Training...')
 
     _config = {
         'lr': 0.00027608304667883787, 'wd': 0.004428399357109647, 'fraction_background_replace': 0.9977586581425819,
@@ -834,17 +826,34 @@ def main(config_path, batch_size=12, num_workers=None):
         'blocks_3': 1, 'blocks_4': 2, 'grad_clip': 0.0004551500618521706, 'batch_size': 32
     }
 
+
+
+    model = LitEventScoring.load_from_checkpoint(
+        output_dir / 'event_scoring_prod_50/351/sample-mnist-epoch=27-medianfpr99=0.07.ckpt',
+    _config,
+    output)
+    model.eval()
+    model.output = output
+
+    root = zarr.open(str(zarr_path), mode='r')
+
+    rprint(f'Getting train/test data...')
+    train_config, test_config = _get_train_test_idxs_full_conf(root)
+
+    rprint(f'Constructing train and test dataloaders...')
+
+
+
+    # Train
+    rprint('Constructing trainer...')
+
+    rprint(f'Training...')
     _test_config = {
         'zarr_path': zarr_path,
     }
     _test_config.update(test_config)
     _test_config.update(_config)
     _test_config.update({'test_train': 'test'})
-
-    model = LitEventScoring.load_from_checkpoint(
-        output_dir / 'event_scoring_prod_50/351/sample-mnist-epoch=27-medianfpr99=0.07.ckpt')
-    model.eval()
-    model.output = output
 
     dataset_test = DataLoader(
         EventScoringDataset(
