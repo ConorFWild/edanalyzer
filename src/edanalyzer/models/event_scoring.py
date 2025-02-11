@@ -658,8 +658,9 @@ class LitEventScoring(lt.LightningModule):
 
         self.log('medianfpr99', np.median(fpr99s), 4, sync_dist=True)
 
-        dataset_ys = best_df.groupby(['dtag', ])['y'].transform('nunique')
-        multi_event_datasets = best_df[dataset_ys > 1]
+        dataset_max_ys = best_df.groupby(['dtag', ])['y'].transform('max')
+        dataset_num_ys = best_df.groupby(['dtag', ])['y'].transform('nunique')
+        multi_event_datasets = best_df[(dataset_max_ys == 1.0) & (dataset_num_ys > 1)]
         dataset_best = multi_event_datasets[
             multi_event_datasets['y_hat'] == multi_event_datasets.groupby('dtag')['y_hat'].transform('max')]
 
