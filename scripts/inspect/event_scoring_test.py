@@ -855,6 +855,7 @@ def main(config_path, batch_size=12, num_workers=None):
         drop_last=False
     )
 
+    results = []
     for test_batch in dataset_test:
         idx, x, z, m, d, y = test_batch
         y = y.view(y.size(0), -1)
@@ -868,6 +869,9 @@ def main(config_path, batch_size=12, num_workers=None):
                 'y_hat': y_hat[_j],
             }
             rprint(res)
+            results.append(res)
+    df = pd.DataFrame(results)
+    df.to_csv(output / 'results.csv')
 
 
 if __name__ == "__main__":
