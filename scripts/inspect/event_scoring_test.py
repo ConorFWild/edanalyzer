@@ -896,6 +896,7 @@ def main(config_path, batch_size=12, num_workers=None):
             results.append(res)
     df = pd.DataFrame(results)
     df.to_csv(output / 'results.csv')
+    print(f'Finished!')
 
 
 if __name__ == "__main__":
