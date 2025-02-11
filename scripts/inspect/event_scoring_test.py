@@ -840,7 +840,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     model = load_model_from_checkpoint(
         output_dir / 'event_scoring_prod_50/351/sample-mnist-epoch=27-medianfpr99=0.07.ckpt',
-        LitEventScoring
+        LitEventScoring(output, _config)
     ).eval()
     # # model = .load_from_checkpoint(
     # #     ,
