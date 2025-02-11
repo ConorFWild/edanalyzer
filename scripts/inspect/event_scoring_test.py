@@ -622,6 +622,19 @@ def _dep_get_train_test_idxs_full_conf(root):
                  ]
     return train_idxs, test_idxs
 
+def load_model_from_checkpoint(path, model):
+    # From https://discuss.pytorch.org/t/how-to-load-part-of-pre-trained-model/1113/3
+    ckpt = torch.load(path, map_location='cpu')
+    pretrained_dict = ckpt['state_dict']
+    model_dict = model.state_dict()
+    # 1. filter out unnecessary keys
+    pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+    # 2. overwrite entries in the existing state dict
+    model_dict.update(pretrained_dict)
+    # 3. load the new state dict
+    model.load_state_dict(pretrained_dict)
+    return model
+
 
 def _get_train_test_idxs_full_conf(root):
     # for each z map sample
@@ -800,8 +813,6 @@ def main(config_path, batch_size=12, num_workers=None):
 
     output_dir = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output')
 
-
-
     zarr_path = output_dir / 'event_data_3.zarr'
 
     # Get the model
@@ -827,11 +838,14 @@ def main(config_path, batch_size=12, num_workers=None):
     }
 
 
-
-    model = LitEventScoring.load_from_checkpoint(
+    model = load_model_from_checkpoint(
         output_dir / 'event_scoring_prod_50/351/sample-mnist-epoch=27-medianfpr99=0.07.ckpt',
-    _config,
-    output)
+        LitEventScoring
+    )
+    # # model = .load_from_checkpoint(
+    # #     ,
+    # _config,
+    # output)
     model.eval()
     model.output = output
 
