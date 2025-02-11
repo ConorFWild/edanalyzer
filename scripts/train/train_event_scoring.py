@@ -1280,6 +1280,11 @@ def main(config_path, batch_size=12, num_workers=None):
             dirpath=str(trial_output_dir),
             filename='sample-mnist-{epoch:02d}-{medianfpr99:.2f}'
         )
+        checkpoint_callback_best_best_scorer_hit = ModelCheckpoint(
+            monitor='best_scorer_hit',
+            dirpath=str(trial_output_dir),
+            filename='sample-mnist-{epoch:02d}-{best_scorer_hit:.2f}'
+        )
 
         logger = CSVLogger(str(trial_output_dir / 'logs'))
 
@@ -1299,8 +1304,9 @@ def main(config_path, batch_size=12, num_workers=None):
                 checkpoint_callback_best_99,
                 checkpoint_callback_best_95,
                 checkpoint_callback_best_median99,
-                PyTorchLightningPruningCallback(trial, monitor='medianfpr99'),
-                EarlyStopping('medianfpr99', patience=5)
+                checkpoint_callback_best_best_scorer_hit,
+                PyTorchLightningPruningCallback(trial, monitor='best_scorer_hit'),
+                EarlyStopping('best_scorer_hit', patience=5)
             ],
             enable_progress_bar=False,
             max_epochs=60
@@ -1352,7 +1358,8 @@ def main(config_path, batch_size=12, num_workers=None):
         study = optuna.create_study(
             study_name=study_name,
             storage=storage_name,
-            direction='minimize',
+            # direction='minimize',
+            direction='maximize',
             load_if_exists=True,
             pruner=pruner,
             sampler=TPESampler(constant_liar=True)

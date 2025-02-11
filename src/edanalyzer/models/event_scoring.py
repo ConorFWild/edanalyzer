@@ -658,6 +658,14 @@ class LitEventScoring(lt.LightningModule):
 
         self.log('medianfpr99', np.median(fpr99s), 4, sync_dist=True)
 
+        dataset_ys = best_df.groupby(['dtag', ])['y'].transform('nunique')
+        multi_event_datasets = best_df[dataset_ys > 1]
+        dataset_best = multi_event_datasets[
+            multi_event_datasets['y_hat'] == multi_event_datasets.groupby('dtag')['y_hat'].transform('max')]
+
+        best_scorer_hit = len(dataset_best[dataset_best['y'] == 1.0]) / len(dataset_best)
+        self.log('best_scorer_hit', best_scorer_hit, 4, sync_dist=True)
+
         self.test_annotations.clear()
 
         # sch = self.lr_schedulers()
