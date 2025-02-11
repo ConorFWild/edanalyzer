@@ -15,6 +15,7 @@ import tables
 import zarr
 import pandas as pd
 import torch
+torch.multiprocessing.set_sharing_strategy('file_system')
 
 from edanalyzer.datasets.event_scoring import EventScoringDataset
 from edanalyzer.models.event_scoring import LitEventScoring
