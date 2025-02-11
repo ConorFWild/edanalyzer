@@ -461,6 +461,7 @@ class EventScoringDataset(Dataset):
         self.metadata_table = config['metadata_table']
         self.sampled_metadata_table = config['sampled_metadata_table']
         self.metadata_table_high_conf = config['metadata_table_high_conf']
+        self.metadata_table_med_conf = config['metadata_table_med_conf']
         self.metadata_table_low_conf = config['metadata_table_low_conf']
 
         self.unique_smiles = config['unique_smiles']
@@ -570,7 +571,7 @@ class EventScoringDataset(Dataset):
 
 
         # If training replace with a random ligand
-        if (self.test_train == 'train') & (conf == 'Low'):
+        if (self.test_train == 'train') & (conf in ['Low', 'Medium']):
             # smiles = self.unique_smiles[rng.integers(0, len(self.unique_smiles))]
             smiles = self.unique_smiles.sample(weights=self.unique_smiles_frequencies).iloc[0]
         else:

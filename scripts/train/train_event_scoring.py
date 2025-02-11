@@ -665,12 +665,14 @@ def _get_train_test_idxs_full_conf(root):
     # }
 
     pos_z_samples = []
+    med_z_samples = []
     neg_z_samples = []
     pos_conf_samples = []
     neg_conf_samples = []
     # positive_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
     # negative_ligand_sample_distribution = {_ligand: 0 for _ligand in ligand_smiles_to_conf}
     train_pos_conf = []
+    train_med_conf = []
     train_neg_conf = []
 
     # Loop over the z samples adding the inherent negative samples
@@ -678,6 +680,10 @@ def _get_train_test_idxs_full_conf(root):
     for _idx, z in train_samples[train_samples['Confidence'] == 'Low'].iterrows():
         neg_z_samples += [z['idx'], ]
         train_neg_conf.append('Low')
+
+    for _idx, z in train_samples[train_samples['Confidence'] == 'Medium'].iterrows():
+        med_z_samples.append(z['idx'])
+        train_med_conf.append('Medium')
 
     # Loop over the z samples adding positive samples for each
     print(f'Getting positive train samples')
@@ -691,10 +697,12 @@ def _get_train_test_idxs_full_conf(root):
     print(f'Got {len(neg_conf_samples)} neg decoy samples!')
 
     test_pos_z_samples = []
+    test_med_z_samples = []
     test_neg_z_samples = []
     test_pos_conf_samples = []
     test_neg_conf_samples = []
     test_pos_conf = []
+    test_med_conf = []
     test_neg_conf = []
 
     # Loop over the z samples adding the test samples
@@ -703,6 +711,10 @@ def _get_train_test_idxs_full_conf(root):
         if z['Confidence'] == 'High':
             test_pos_z_samples.append(z['idx'])
             test_pos_conf.append('High')
+
+        elif z['Confidence'] == 'Medium':
+            test_med_z_samples.append(z['idx'])
+            test_med_conf.append('Medium')
 
         elif z['Confidence'] == 'Low':
             test_neg_z_samples.append(z['idx'])
@@ -721,8 +733,8 @@ def _get_train_test_idxs_full_conf(root):
         {'z': z, 'conf': conf}
         for z, conf
         in zip(
-            pos_z_samples + neg_z_samples,
-            train_pos_conf + train_neg_conf
+            pos_z_samples + med_z_samples + neg_z_samples,
+            train_pos_conf + train_med_conf + train_neg_conf
         )
 
     ]
@@ -737,8 +749,8 @@ def _get_train_test_idxs_full_conf(root):
     })
     test_idxs = [{'z': z, 'conf': conf} for z, conf
                  in zip(
-            test_pos_z_samples + test_neg_z_samples,
-            test_pos_conf + test_neg_conf
+            test_pos_z_samples + test_med_z_samples + test_neg_z_samples,
+            test_pos_conf + test_med_conf + test_neg_conf
         )
                  ]
 
@@ -760,6 +772,10 @@ def _get_train_test_idxs_full_conf(root):
         res[train_test]['sampled_metadata_table'] = sampled_metadata_table
         res[train_test]['metadata_table_high_conf'] = sampled_metadata_table[
             sampled_metadata_table['Confidence'] == 'High']
+
+        res[train_test]['metadata_table_med_conf'] = sampled_metadata_table[
+            sampled_metadata_table['Confidence'] == 'Medium']
+
         res[train_test]['metadata_table_low_conf'] = sampled_metadata_table[
             sampled_metadata_table['Confidence'] == 'Low']
 
@@ -1018,7 +1034,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    study_name = 'event_scoring_prod_50'
+    study_name = 'event_scoring_prod_51'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
@@ -1343,39 +1359,18 @@ def main(config_path, batch_size=12, num_workers=None):
         )
         study.enqueue_trial(
             {
-                'lr': 0.1083318260118112,
-                'wd': 0.33286701037939215,
-                'fraction_background_replace': 0.6603017628273233,
-                'xmap_radius': 3.4196300755415834,
-                'max_x_blur': 0.509006239862467,
-                'max_z_blur': 0.5404658825227494,
-                'drop_rate': 0.2740422474916663,
-                'planes_1': 8,
-                'drop_1': 0.5857699954775857,
-                'planes_2': 16,
-                'drop_2': 0.55942742430428558,
-                'planes_3': 32,
-                'drop_3': 0.57119079747990835,
-                'planes_4': 32,
-                'drop_4': 0.5503045317689869,
-                'planes_5': 32,
-                'drop_5': 0.53070556902853285,
-                'drop_atom_rate': 0.9882224813506627,
-                'max_pos_atom_mask_radius': 3.8879501374819583,
-                'max_translate': 4.228243978932568,
-                'max_x_noise': 1.3199960910884487,
-                'max_z_noise': 1.2818494818488133,
-                'pos_resample_rate': 1,
-                'p_flip': 0.1435919086355283,
-                'z_mask_radius': 2.6144817327593346,
-                'z_cutoff': 2.324217445782787,
-                'combo_layer': 8,
-                'blocks_1': 1,
-                'blocks_2': 1,
-                'blocks_3': 1,
-                'blocks_4': 1,
-                'grad_clip': 1.5,
-                'batch_size': 128,
+                 'lr': 0.00027608304667883787, 'wd': 0.004428399357109647, 'fraction_background_replace': 0.9977586581425819,
+        'xmap_radius': 5.679885665547368, 'max_x_blur': 0.47417970205607624, 'max_z_blur': 0.6342802782754948,
+        'drop_rate': 0.34074819841381004, 'planes_1': 16, 'drop_1': 0.04973841976629942, 'planes_2': 32,
+        'drop_2': 0.4773445563051335, 'planes_3': 64, 'drop_3': 0.7220893799410683, 'planes_4': 32,
+        'drop_4': 0.42842911756667934,
+        'planes_5': 256, 'drop_5': 0.8164371048868642, 'drop_atom_rate': 0.6835634852890703,
+        'max_pos_atom_mask_radius': 3.5505538045507197, 'max_translate': 1.504396022687739,
+        'max_x_noise': 0.6267668374814633,
+        'max_z_noise': 0.9535320617031404, 'pos_resample_rate': 10, 'p_flip': 0.3678479092419647,
+        'z_mask_radius': 2.659870974428465, 'z_cutoff': 1.892141827304312, 'combo_layer': 64, 'blocks_1': 2,
+        'blocks_2': 2,
+        'blocks_3': 1, 'blocks_4': 2, 'grad_clip': 0.0004551500618521706, 'batch_size': 32
 
             },
             skip_if_exists=True
