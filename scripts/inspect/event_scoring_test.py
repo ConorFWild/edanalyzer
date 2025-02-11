@@ -889,8 +889,8 @@ def main(config_path, batch_size=12, num_workers=None):
                 "system": str(idx[3][_j]),
                 "dtag": str(idx[4][_j]),
                 "event_num": int(idx[5][_j]),
-                'y': y[_j],
-                'y_hat': y_hat[_j],
+                'y': float(y[_j][1]),
+                'y_hat': float(y_hat[_j][1]),
             }
             rprint(res)
             results.append(res)

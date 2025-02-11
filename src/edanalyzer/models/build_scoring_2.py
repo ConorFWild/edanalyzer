@@ -50,16 +50,16 @@ class LitBuildScoring(lt.LightningModule):
         self.z_decoder = SimpleConvolutionalDecoder(input_layers=512)
         self.mol_to_weight = nn.Linear(512, 512)
         self.bn = nn.BatchNorm1d(512)
-        self.fc = nn.Sequential(
-
-            nn.Linear(512,2),
-
-        )
-        self.fc_rmsd = nn.Sequential(
-
-            nn.Linear(512,1),
-
-        )
+        # self.fc = nn.Sequential(
+        #
+        #     nn.Linear(512,2),
+        #
+        # )
+        # self.fc_rmsd = nn.Sequential(
+        #
+        #     nn.Linear(512,1),
+        #
+        # )
         self.fc_corr = nn.Sequential(
 
             nn.Linear(512,1),
@@ -76,9 +76,9 @@ class LitBuildScoring(lt.LightningModule):
 
         # full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
 
-        score = F.softmax(self.fc(z_encoding))
+        # score = F.softmax(self.fc(z_encoding))
 
-        score = self.fc_rmsd(z_encoding)
+        # score = self.fc_rmsd(z_encoding)
 
         score = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
 
@@ -90,17 +90,17 @@ class LitBuildScoring(lt.LightningModule):
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(self.parameters(), lr=1e-2, weight_decay=1e-4)
         # optimizer = torch.optim.SGD(self.parameters(), lr=1e-1, weight_decay=1e-2)
-        lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, cooldown=10)
+        # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, cooldown=10)
         # return [optimizer], [lr_scheduler]
         return {
             "optimizer": optimizer,
-            "lr_scheduler": {
-                "scheduler": lr_scheduler,
-                "monitor": "test_loss",
-                "interval": "epoch",
-                "frequency": 1,
-                "strict": False,
-            },
+            # "lr_scheduler": {
+            #     "scheduler": lr_scheduler,
+            #     "monitor": "test_loss",
+            #     "interval": "epoch",
+            #     "frequency": 1,
+            #     "strict": False,
+            # },
         }
         # return optimizer
 
@@ -116,16 +116,16 @@ class LitBuildScoring(lt.LightningModule):
         # full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
 
         # score = F.sigmoid(self.fc(z_encoding))
-        rmsd_hat =self.fc_rmsd(z_encoding)
+        # rmsd_hat =self.fc_rmsd(z_encoding)
 
-        loss_rmsd = F.mse_loss(rmsd_hat, rmsd_)
+        # loss_rmsd = F.mse_loss(rmsd_hat, rmsd_)
 
         corr_hat = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
         loss_corr = F.mse_loss(corr_hat, corr_)
 
 
-        score = F.softmax(self.fc(z_encoding))
-        loss = categorical_loss(score, y)
+        # score = F.softmax(self.fc(z_encoding))
+        # loss = categorical_loss(score, y)
 
         # total_loss = loss_1
 
@@ -143,10 +143,10 @@ class LitBuildScoring(lt.LightningModule):
                     # "y": 0.1 * float(np.argmax(y[j].cpu().detach())),
                     # "y_hat": float(score[j]).to(torch.device("cpu")).detach().numpy()),
                     # "y_hat": 0.1 * float(np.argmax(score[j].cpu().detach())),
-                    "y": float(y[j][1].cpu().detach()),
-                    "y_hat": float(score[j][1].cpu().detach()),
-                    'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
-                    'rmsd_hat': float(rmsd_hat[j].to(torch.device("cpu")).detach().numpy()),
+                    # "y": float(y[j][1].cpu().detach()),
+                    # "y_hat": float(score[j][1].cpu().detach()),
+                    # 'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
+                    # 'rmsd_hat': float(rmsd_hat[j].to(torch.device("cpu")).detach().numpy()),
                     'corr': float(corr[j].to(torch.device("cpu")).detach().numpy()),
                     'corr_hat': float(corr_hat[j].to(torch.device("cpu")).detach().numpy()),
                     "system": str(system[j]),
@@ -172,15 +172,15 @@ class LitBuildScoring(lt.LightningModule):
         # print(f'Z Encoding: {z_encoding[0,:10]}')
         # print(f'Mol Encoding: {mol_encoding[0,:10]}')
 
-        rmsd_hat = self.fc_rmsd(z_encoding)
-        loss_rmsd = F.mse_loss(rmsd_hat, rmsd_)
+        # rmsd_hat = self.fc_rmsd(z_encoding)
+        # loss_rmsd = F.mse_loss(rmsd_hat, rmsd_)
 
         corr_hat = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
         loss_corr = F.mse_loss(corr_hat, corr_)
 
         # score = F.sigmoid(self.fc(z_encoding))
-        score = F.softmax(self.fc(z_encoding))
-        loss = categorical_loss(score, y)
+        # score = F.softmax(self.fc(z_encoding))
+        # loss = categorical_loss(score, y)
 
 
         loss = loss_corr
@@ -197,10 +197,10 @@ class LitBuildScoring(lt.LightningModule):
                     # "y": 0.1 * float(np.argmax(y[j].cpu().detach())),
                     # "y_hat": float(score[j].to(torch.device("cpu")).detach().numpy()),
                     # "y_hat": 0.1 * float(np.argmax(score[j].cpu().detach())),
-                    "y": float(y[j][1].cpu().detach()),
-                    "y_hat": float(score[j][1].cpu().detach()),
-                    'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
-                    'rmsd_hat': float(rmsd_hat[j].to(torch.device("cpu")).detach().numpy()),
+                    # "y": float(y[j][1].cpu().detach()),
+                    # "y_hat": float(score[j][1].cpu().detach()),
+                    # 'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
+                    # 'rmsd_hat': float(rmsd_hat[j].to(torch.device("cpu")).detach().numpy()),
                     'corr': float(corr[j].to(torch.device("cpu")).detach().numpy()),
                     'corr_hat': float(corr_hat[j].to(torch.device("cpu")).detach().numpy()),
                     "system": str(system[j]),
@@ -247,10 +247,10 @@ class LitBuildScoring(lt.LightningModule):
                     int(self.trainer.current_epoch),
                     int(_annotation['meta_idx']),
                     int(_annotation['decoy_idx']),
-                    float(_annotation['y']),
-                    float(_annotation['y_hat']),
-                    float(_annotation['rmsd']),
-                    float(_annotation['rmsd_hat']),
+                    # float(_annotation['y']),
+                    # float(_annotation['y_hat']),
+                    # float(_annotation['rmsd']),
+                    # float(_annotation['rmsd_hat']),
                     float(_annotation['corr']),
                     float(_annotation['corr_hat']),
                     str(_annotation['system']),
@@ -304,10 +304,10 @@ class LitBuildScoring(lt.LightningModule):
                     int(self.trainer.current_epoch),
                     int(_annotation['meta_idx']),
                     int(_annotation['decoy_idx']),
-                    float(_annotation['y']),
-                    float(_annotation['y_hat']),
-                    float(_annotation['rmsd']),
-                    float(_annotation['rmsd_hat']),
+                    # float(_annotation['y']),
+                    # float(_annotation['y_hat']),
+                    # float(_annotation['rmsd']),
+                    # float(_annotation['rmsd_hat']),
                     float(_annotation['corr']),
                     float(_annotation['corr_hat']),
                     str(_annotation['system']),

@@ -157,6 +157,19 @@ class BuildScoringDataset(Dataset):
 
         self.pos_train_pose_samples = pos_train_pose_samples
 
+        # self.fraction_background_replace = config['fraction_background_replace']
+        # self.xmap_radius = config['xmap_radius']
+        self.max_x_blur = config['max_x_blur']
+        self.max_z_blur = config['max_z_blur']
+        # self.drop_atom_rate = config['drop_atom_rate']
+        self.max_pos_atom_mask_radius = config['max_pos_atom_mask_radius']
+        # self.max_translate = config['max_translate']
+        self.max_x_noise = config['max_x_noise']
+        self.max_z_noise = config['max_z_noise']
+        self.p_flip = config['p_flip']
+        self.z_mask_radius = config['z_mask_radius']
+        self.z_cutoff = config['z_cutoff']
+
     def __len__(self):
         return len(self.sample_indexes)
 
@@ -193,7 +206,11 @@ class BuildScoringDataset(Dataset):
             (32, 32, 32),
             dtype=np.float32,
         )
-        orientation = _get_random_orientation()
+
+        if self.test_train == 'train':
+            orientation = _get_random_orientation()
+        else:
+            orientation = np.eye(3)
         transform = _get_transform_from_orientation_centroid(
             orientation,
             centroid,
@@ -239,11 +256,28 @@ class BuildScoringDataset(Dataset):
         score = _decoy['overlap_score']
 
         # Get maps
-        xmap_data = self.xmap_table[_meta['idx']]
-        zmap_data = self.zmap_table[_meta['idx']]
+        xmap_sample_data = self.xmap_table[_meta['idx']]['sample']
+        z_map_sample_data = self.zmap_table[_meta['idx']]['sample']
+        if (self.test_train == 'train') & (rng.uniform(0.0, 1.0) > self.p_flip):
+            if rng.uniform(0.0, 1.0) > 0.5:
+                xmap_sample_data = np.flip(xmap_sample_data, 0)
+                z_map_sample_data = np.flip(z_map_sample_data, 0)
+            if rng.uniform(0.0, 1.0) > 0.5:
+                xmap_sample_data = np.flip(xmap_sample_data, 1)
+                z_map_sample_data = np.flip(z_map_sample_data, 1)
+            if rng.uniform(0.0, 1.0) > 0.5:
+                xmap_sample_data = np.flip(xmap_sample_data, 2)
+                z_map_sample_data = np.flip(z_map_sample_data, 2)
 
-        xmap = _get_grid_from_hdf5(xmap_data)
-        zmap = _get_grid_from_hdf5(zmap_data)
+        if self.test_train == 'train':
+            u_s = rng.uniform(0.0, self.max_x_blur)
+            xmap_sample_data = gaussian_filter(xmap_sample_data, sigma=u_s)
+
+            u_s = rng.uniform(0.0, self.max_z_blur)
+            z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
+
+        xmap = _get_grid_from_hdf5(xmap_sample_data)
+        zmap = _get_grid_from_hdf5(z_map_sample_data)
 
         xmap_sample = _sample_xmap_and_scale(
             xmap,
@@ -256,14 +290,18 @@ class BuildScoringDataset(Dataset):
             np.copy(sample_array)
         )
 
-        if _train:
-            u_s = rng.uniform(0.0, 0.25)
+        if self.test_train == 'train':
+            u_s = rng.uniform(0.0, self.max_x_noise)
             noise = rng.normal(size=(32,32,32)) * u_s
             z_map_sample += noise.astype(np.float32)
 
-            u_s = rng.uniform(0.0, 0.25)
+            u_s = rng.uniform(0.0, self.max_z_noise)
             noise = rng.normal(size=(32,32,32)) * u_s
             xmap_sample += noise.astype(np.float32)
+
+        high_z_mask = (z_map_sample > self.z_cutoff).astype(int)
+        high_z_mask_expanded = expand_labels(high_z_mask, distance=self.z_mask_radius / 0.5)
+        high_z_mask_expanded[high_z_mask_expanded != 1] = 0
 
         rmsd = _decoy['rmsd']
         if _train:
@@ -295,9 +333,9 @@ class BuildScoringDataset(Dataset):
             torch.from_numpy(
                 np.stack(
                     [
-                        z_map_sample,# * image_decoy_mask,
-                        xmap_sample * xmap_mask_float,
-                        image_score_decoy_mask
+                        z_map_sample * high_z_mask_expanded,# * image_decoy_mask,
+                        xmap_sample * high_z_mask_expanded,
+                        # image_score_decoy_mask
                     ],
                     axis=0,
                     dtype=np.float32
