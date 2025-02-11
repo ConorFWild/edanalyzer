@@ -1307,8 +1307,8 @@ def main(config_path, batch_size=12, num_workers=None):
                 checkpoint_callback_best_95,
                 checkpoint_callback_best_median99,
                 checkpoint_callback_best_best_scorer_hit,
-                PyTorchLightningPruningCallback(trial, monitor='best_scorer_hit',),
-                EarlyStopping('best_scorer_hit', patience=5,  mode='max')
+                PyTorchLightningPruningCallback(trial, monitor='best_scorer_hit', ),
+                EarlyStopping('best_scorer_hit', patience=5, mode='max')
             ],
             enable_progress_bar=False,
             max_epochs=60
@@ -1368,18 +1368,19 @@ def main(config_path, batch_size=12, num_workers=None):
         )
         study.enqueue_trial(
             {
-                 'lr': 0.00027608304667883787, 'wd': 0.004428399357109647, 'fraction_background_replace': 0.9977586581425819,
-        'xmap_radius': 5.679885665547368, 'max_x_blur': 0.47417970205607624, 'max_z_blur': 0.6342802782754948,
-        'drop_rate': 0.34074819841381004, 'planes_1': 16, 'drop_1': 0.04973841976629942, 'planes_2': 32,
-        'drop_2': 0.4773445563051335, 'planes_3': 64, 'drop_3': 0.7220893799410683, 'planes_4': 32,
-        'drop_4': 0.42842911756667934,
-        'planes_5': 256, 'drop_5': 0.8164371048868642, 'drop_atom_rate': 0.6835634852890703,
-        'max_pos_atom_mask_radius': 3.5505538045507197, 'max_translate': 1.504396022687739,
-        'max_x_noise': 0.6267668374814633,
-        'max_z_noise': 0.9535320617031404, 'pos_resample_rate': 10, 'p_flip': 0.3678479092419647,
-        'z_mask_radius': 2.659870974428465, 'z_cutoff': 1.892141827304312, 'combo_layer': 64, 'blocks_1': 2,
-        'blocks_2': 2,
-        'blocks_3': 1, 'blocks_4': 2, 'grad_clip': 0.0004551500618521706, 'batch_size': 32
+                'lr': 0.00027608304667883787, 'wd': 0.004428399357109647,
+                'fraction_background_replace': 0.9977586581425819,
+                'xmap_radius': 5.679885665547368, 'max_x_blur': 0.47417970205607624, 'max_z_blur': 0.6342802782754948,
+                'drop_rate': 0.34074819841381004, 'planes_1': 16, 'drop_1': 0.04973841976629942, 'planes_2': 32,
+                'drop_2': 0.4773445563051335, 'planes_3': 64, 'drop_3': 0.7220893799410683, 'planes_4': 32,
+                'drop_4': 0.42842911756667934,
+                'planes_5': 256, 'drop_5': 0.8164371048868642, 'drop_atom_rate': 0.6835634852890703,
+                'max_pos_atom_mask_radius': 3.5505538045507197, 'max_translate': 1.504396022687739,
+                'max_x_noise': 0.6267668374814633,
+                'max_z_noise': 0.9535320617031404, 'pos_resample_rate': 10, 'p_flip': 0.3678479092419647,
+                'z_mask_radius': 2.659870974428465, 'z_cutoff': 1.892141827304312, 'combo_layer': 64, 'blocks_1': 2,
+                'blocks_2': 2,
+                'blocks_3': 1, 'blocks_4': 2, 'grad_clip': 0.0004551500618521706, 'batch_size': 32
 
             },
             skip_if_exists=True
