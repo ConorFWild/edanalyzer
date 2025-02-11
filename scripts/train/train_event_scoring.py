@@ -722,6 +722,7 @@ def _get_train_test_idxs_full_conf(root):
 
     rprint({
         'pos_z_samples len': len(pos_z_samples),
+        'med_z_samples len': len(med_z_samples),
         'neg_z_samples len': len(neg_z_samples),
         'pos_conf_samples len': len(pos_conf_samples),
         'neg_conf_samples len': len(neg_conf_samples),
@@ -740,6 +741,7 @@ def _get_train_test_idxs_full_conf(root):
     ]
     rprint({
         'test_pos_z_samples len': len(test_pos_z_samples),
+        'test_med_z_samples len': len(test_med_z_samples),
         'test_neg_z_samples len': len(test_neg_z_samples),
         'test_pos_conf_samples len': len(test_pos_conf_samples),
         'test_neg_conf_samples len': len(test_neg_conf_samples),
