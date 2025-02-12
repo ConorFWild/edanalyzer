@@ -653,9 +653,16 @@ def _get_train_test_idxs_full_conf(root):
     #                                                                               'ligand_canonical_smiles']))
     valid_smiles_mask = valid_smiles_df.iloc[ligand_idx_smiles_df.iloc[metadata_table['ligand_data_idx']]['idx']][
         'valid']
+
+    comments_df = pd.DataFrame(root[table_type]['comments'][:])
+    comments = np.array([''] * len(metadata_table), dtype='U250')
+    comments[comments_df['meta_idx']] = comments_df['comment']
+
+
     print(valid_smiles_mask)
-    train_samples = metadata_table[(annotation_df['partition'] == b'train') & valid_smiles_mask]
-    test_samples = metadata_table[(annotation_df['partition'] == b'test') & valid_smiles_mask]
+    filter_mask = ~pd.Series(comments).isin(['other', 'sym'])
+    train_samples = metadata_table[(annotation_df['partition'] == b'train') & valid_smiles_mask & (filter_mask)]
+    test_samples = metadata_table[(annotation_df['partition'] == b'test') & valid_smiles_mask & (filter_mask)]
 
     # print(f'Getting ligand smiles to conf mapping')
     # ligand_smiles_to_conf = {
