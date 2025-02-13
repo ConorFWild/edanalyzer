@@ -41,9 +41,9 @@ class LitBuildScoring(lt.LightningModule):
     def __init__(self, output_dir, config):
         super().__init__()
         # self.automatic_optimization = False
-        self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
+        # self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
         # self.z_encoder = SimpleConvolutionalEncoder(input_layers=2)
-        self.z_encoder = resnet10(num_classes=2, num_input=3, headless=True).float()
+        # self.z_encoder = resnet10(num_classes=2, num_input=3, headless=True).float()
         self.z_encoder = _resnet(
             'resnet10',
             BasicBlock,
