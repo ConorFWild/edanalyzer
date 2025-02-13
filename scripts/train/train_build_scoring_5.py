@@ -242,6 +242,7 @@ def main(config_path, batch_size=12, num_workers=None):
         _train_config.update({'test_train': 'train'})
         dataset_train = DataLoader(
             BuildScoringDataset(
+                zarr_path,
                 _train_config
             ),
             batch_size=_config['batch_size'],  # batch_size,
@@ -259,6 +260,7 @@ def main(config_path, batch_size=12, num_workers=None):
         _test_config.update({'test_train': 'test'})
         dataset_test = DataLoader(
             BuildScoringDataset(
+                zarr_path,
                 _test_config
             ),
             batch_size=batch_size,
