@@ -1043,7 +1043,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    study_name = 'event_scoring_prod_54'
+    study_name = 'event_scoring_prod_55'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
@@ -1315,7 +1315,8 @@ def main(config_path, batch_size=12, num_workers=None):
                 checkpoint_callback_best_median99,
                 checkpoint_callback_best_best_scorer_hit,
                 PyTorchLightningPruningCallback(trial, monitor='best_scorer_hit', ),
-                EarlyStopping('best_scorer_hit', patience=5, mode='max')
+                EarlyStopping('best_scorer_hit', patience=5, mode='max'),
+                EarlyStopping('medianfpr99', patience=5, mode='min')
             ],
             enable_progress_bar=False,
             max_epochs=60
@@ -1355,7 +1356,7 @@ def main(config_path, batch_size=12, num_workers=None):
         rprint(f"Got {len(dataset_test)} test samples")
 
         trainer.fit(model, dataset_train, dataset_test, )
-        return trainer.callback_metrics['best_scorer_hit'].item()
+        return trainer.callback_metrics['medianfpr99'].item(), trainer.callback_metrics['best_scorer_hit'].item()
 
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
     # Unique identifier of the study.
@@ -1368,9 +1369,9 @@ def main(config_path, batch_size=12, num_workers=None):
             study_name=study_name,
             storage=storage_name,
             # direction='minimize',
-            direction='maximize',
+            direction=['minimize', 'maximize'],
             load_if_exists=True,
-            pruner=pruner,
+            # pruner=pruner,
             sampler=TPESampler(constant_liar=True)
         )
         study.enqueue_trial(
@@ -1398,7 +1399,7 @@ def main(config_path, batch_size=12, num_workers=None):
             study_name=study_name,
             storage=storage_name,
             sampler=TPESampler(constant_liar=True),
-            pruner=pruner,
+            # pruner=pruner,
         )
     study.optimize(objective, n_trials=300)
 
