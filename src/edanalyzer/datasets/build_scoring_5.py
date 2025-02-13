@@ -28,6 +28,13 @@ from .base import (
     _get_ed_mask_float
 )
 
+
+from scipy.ndimage import gaussian_filter
+
+from skimage.segmentation import expand_labels
+
+
+
 patch_lower = [x for x in range(8)]
 patch_upper = [x for x in range(24,32)]
 patch_set = [patch_lower, patch_upper]
@@ -134,7 +141,7 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
 
 class BuildScoringDataset(Dataset):
 
-    def __init__(self, zarr_path, sample_indexes, pos_train_pose_samples):
+    def __init__(self, zarr_path, config):
         # self.data = data
         self.root = zarr.open(zarr_path, mode='r')
 
@@ -153,9 +160,14 @@ class BuildScoringDataset(Dataset):
         #     in self.pandda_2_annotation_table
         # }
 
-        self.sample_indexes = sample_indexes
+        self.sample_indexes = config['indexes']
+        if config['test_train'] == 'train':
+            pos_sample_indexes = [_v for _v in self.sample_indexes if _v['conf'] == 'High']
+            self.resampled_indexes = self.sample_indexes + (pos_sample_indexes * config['pos_resample_rate'])
+        else:
+            self.resampled_indexes = self.sample_indexes
 
-        self.pos_train_pose_samples = pos_train_pose_samples
+        # self.pos_train_pose_samples = pos_train_pose_samples
 
         # self.fraction_background_replace = config['fraction_background_replace']
         # self.xmap_radius = config['xmap_radius']
@@ -171,12 +183,12 @@ class BuildScoringDataset(Dataset):
         self.z_cutoff = config['z_cutoff']
 
     def __len__(self):
-        return len(self.sample_indexes)
+        return len(self.resampled_indexes)
 
     def __getitem__(self, idx: int):
         # Get the sample data
 
-        sample_data = self.sample_indexes[idx]
+        sample_data = self.resampled_indexes[idx]
 
         # Get the metadata, decoy pose and embedding
         _meta_idx, _decoy_idx, _embedding_idx, _train = sample_data['meta'], int(sample_data['decoy']), sample_data['embedding'], sample_data['train']
@@ -238,11 +250,11 @@ class BuildScoringDataset(Dataset):
         # image_decoy_mask[image_decoy_sample > 0.0] = 1.0
         # image_decoy_mask[image_decoy_sample <= 0.0] = 0.0
 
-        xmap_mask_float = _get_ed_mask_float()
+        # xmap_mask_float = _get_ed_mask_float()
 
         decoy_score_mask_grid = _get_ligand_mask_float(
             decoy_residue,
-            radius=1.0,
+            radius=self.max_pos_atom_mask_radius,
             n=90,
             r=45.0
         )
@@ -279,12 +291,12 @@ class BuildScoringDataset(Dataset):
         xmap = _get_grid_from_hdf5(xmap_sample_data)
         zmap = _get_grid_from_hdf5(z_map_sample_data)
 
-        xmap_sample = _sample_xmap_and_scale(
+        xmap_sample = _sample_xmap(
             xmap,
             transform,
             np.copy(sample_array)
         )
-        z_map_sample = _sample_xmap_and_scale(
+        z_map_sample = _sample_xmap(
             zmap,
             transform,
             np.copy(sample_array)
@@ -299,9 +311,9 @@ class BuildScoringDataset(Dataset):
             noise = rng.normal(size=(32,32,32)) * u_s
             xmap_sample += noise.astype(np.float32)
 
-        high_z_mask = (z_map_sample > self.z_cutoff).astype(int)
-        high_z_mask_expanded = expand_labels(high_z_mask, distance=self.z_mask_radius / 0.5)
-        high_z_mask_expanded[high_z_mask_expanded != 1] = 0
+        # high_z_mask = (z_map_sample > self.z_cutoff).astype(int)
+        # high_z_mask_expanded = expand_labels(high_z_mask, distance=self.z_mask_radius / 0.5)
+        # high_z_mask_expanded[high_z_mask_expanded != 1] = 0
 
         rmsd = _decoy['rmsd']
         if _train:
@@ -333,8 +345,8 @@ class BuildScoringDataset(Dataset):
             torch.from_numpy(
                 np.stack(
                     [
-                        z_map_sample * high_z_mask_expanded,# * image_decoy_mask,
-                        xmap_sample * high_z_mask_expanded,
+                        z_map_sample * image_score_decoy_mask,# * image_decoy_mask,
+                        xmap_sample * image_score_decoy_mask,
                         # image_score_decoy_mask
                     ],
                     axis=0,
