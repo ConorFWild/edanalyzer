@@ -1314,7 +1314,7 @@ def main(config_path, batch_size=12, num_workers=None):
                 checkpoint_callback_best_95,
                 checkpoint_callback_best_median99,
                 checkpoint_callback_best_best_scorer_hit,
-                PyTorchLightningPruningCallback(trial, monitor='best_scorer_hit', ),
+                # PyTorchLightningPruningCallback(trial, monitor='best_scorer_hit', ),
                 EarlyStopping('best_scorer_hit', patience=5, mode='max'),
                 EarlyStopping('medianfpr99', patience=5, mode='min')
             ],
