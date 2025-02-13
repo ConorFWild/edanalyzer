@@ -199,7 +199,7 @@ class BuildScoringDataset(Dataset):
         rprint(
             [
                 _meta_idx,
-                # _decoy_idx,
+                _decoy_idx,
                 # _embedding_idx,
                 # _train,
             ]
