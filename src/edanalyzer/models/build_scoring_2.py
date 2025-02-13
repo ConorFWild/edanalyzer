@@ -13,7 +13,9 @@ from numcodecs import Blosc, Delta
 import pandas as pd
 
 
-from .resnet import resnet18, resnet10
+# from .resnet import resnet18, resnet10
+from .resnet import _resnet, BasicBlock, resnet18, resnet10
+
 from .simple_autoencoder import SimpleConvolutionalEncoder, SimpleConvolutionalDecoder
 
 from edanalyzer.losses import categorical_loss
@@ -36,20 +38,31 @@ annotation_dtype = [
 ]
 
 class LitBuildScoring(lt.LightningModule):
-    def __init__(self, output_dir):
+    def __init__(self, output_dir, config):
         super().__init__()
         # self.automatic_optimization = False
         self.resnet = resnet10(num_classes=2, num_input=1, headless=True).float()
         # self.z_encoder = SimpleConvolutionalEncoder(input_layers=2)
         self.z_encoder = resnet10(num_classes=2, num_input=3, headless=True).float()
-        self.x_encoder = SimpleConvolutionalEncoder(input_layers=1)
+        self.z_encoder = _resnet(
+            'resnet10',
+            BasicBlock,
+            [config['blocks_1'], config['blocks_2'], config['blocks_3'], config['blocks_4'], ],
+            False, False,
+            num_classes=2,
+            num_input=2,
+            headless=True,
+            drop_rate=config['drop_rate'],
+            config=config,
+        ).float()
+        # self.x_encoder = SimpleConvolutionalEncoder(input_layers=1)
         # self.mol_encoder = SimpleConvolutionalEncoder(input_layers=1)
-        self.mol_encoder = resnet10(num_classes=2, num_input=1, headless=True).float()
-        self.mol_decoder = SimpleConvolutionalDecoder()
-        self.x_decoder = SimpleConvolutionalDecoder(input_layers=512)
-        self.z_decoder = SimpleConvolutionalDecoder(input_layers=512)
-        self.mol_to_weight = nn.Linear(512, 512)
-        self.bn = nn.BatchNorm1d(512)
+        # self.mol_encoder = resnet10(num_classes=2, num_input=1, headless=True).float()
+        # self.mol_decoder = SimpleConvolutionalDecoder()
+        # self.x_decoder = SimpleConvolutionalDecoder(input_layers=512)
+        # self.z_decoder = SimpleConvolutionalDecoder(input_layers=512)
+        # self.mol_to_weight = nn.Linear(512, 512)
+        # self.bn = nn.BatchNorm1d(512)
         # self.fc = nn.Sequential(
         #
         #     nn.Linear(512,2),
@@ -62,7 +75,8 @@ class LitBuildScoring(lt.LightningModule):
         # )
         self.fc_corr = nn.Sequential(
 
-            nn.Linear(512,1),
+            # nn.Linear(512,1),
+            nn.Linear(config['planes_5'], 2),
 
         )
         self.train_annotations = []
