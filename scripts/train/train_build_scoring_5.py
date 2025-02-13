@@ -107,6 +107,9 @@ def _get_train_test_idxs_full_conf(root, config):
     test_idxs = []
     for _idx, _meta in test_samples.iterrows():
         decoys = meta_to_decoy[_meta["idx"]]
+        if len(decoys) == 0:
+            print(f'No decoys for {_meta}!')
+            continue
         # for _decoy_idx, _decoy in decoys.iterrows():
         test_idxs.append(
             {
