@@ -145,6 +145,8 @@ class BuildScoringDataset(Dataset):
         # self.data = data
         self.root = zarr.open(zarr_path, mode='r')
 
+        self.test_train =  config['test_train']
+
         self.meta_table = self.root['meta_sample']
         self.xmap_table = self.root['xmap_sample']
         self.zmap_table = self.root['z_map_sample']
@@ -191,18 +193,20 @@ class BuildScoringDataset(Dataset):
         sample_data = self.resampled_indexes[idx]
 
         # Get the metadata, decoy pose and embedding
-        _meta_idx, _decoy_idx, _embedding_idx, _train = sample_data['meta'], int(sample_data['decoy']), sample_data['embedding'], sample_data['train']
+        # _meta_idx, _decoy_idx, _embedding_idx, _train = sample_data['meta'], int(sample_data['decoy']), sample_data['embedding'], sample_data['train']
+        _meta_idx, _decoy_idx = sample_data['meta'], sample_data['meta_to_decoy'].sample().iloc[0]['idx']
+
         rprint(
             [
                 _meta_idx,
-                _decoy_idx,
-                _embedding_idx,
-                _train,
+                # _decoy_idx,
+                # _embedding_idx,
+                # _train,
             ]
         )
         _meta = self.meta_table[_meta_idx]
         _decoy = self.decoy_table[_decoy_idx]
-        _embedding = self.decoy_table[_embedding_idx]
+        # _embedding = self.decoy_table[_embedding_idx]
 
         # Get rng
         rng = np.random.default_rng()
@@ -316,7 +320,9 @@ class BuildScoringDataset(Dataset):
         # high_z_mask_expanded[high_z_mask_expanded != 1] = 0
 
         rmsd = _decoy['rmsd']
-        if _train:
+
+        # if self.test:
+        if self.test_train == 'train':
             if rmsd < 1.5:
                 hit = [0.025, 0.975]
             elif rmsd >= 1.5:
@@ -337,7 +343,7 @@ class BuildScoringDataset(Dataset):
             [
                 _meta['idx'],
                 _decoy['idx'],
-                _embedding['idx'],
+                0,
                 str(_meta['system']),
                 str(_meta['dtag']),
                 int(_meta['event_num']),
