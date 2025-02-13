@@ -160,12 +160,12 @@ class BuildScoringDataset(Dataset):
         #     in self.pandda_2_annotation_table
         # }
 
-        self.sample_indexes = config['samples']
-        if config['test_train'] == 'train':
-            pos_sample_indexes = [_v for _v in self.sample_indexes if _v['conf'] == 'High']
-            self.resampled_indexes = self.sample_indexes + (pos_sample_indexes * config['pos_resample_rate'])
-        else:
-            self.resampled_indexes = self.sample_indexes
+        # self.sample_indexes = config['samples']
+        # if config['test_train'] == 'train':
+        #     pos_sample_indexes = [_v for _v in self.sample_indexes if _v['conf'] == 'High']
+        #     self.resampled_indexes = self.sample_indexes + (pos_sample_indexes * config['pos_resample_rate'])
+        # else:
+        self.resampled_indexes = self.sample_indexes
 
         # self.pos_train_pose_samples = pos_train_pose_samples
 
