@@ -76,7 +76,7 @@ class LitBuildScoring(lt.LightningModule):
         self.fc_corr = nn.Sequential(
 
             # nn.Linear(512,1),
-            nn.Linear(config['planes_5'], 2),
+            nn.Linear(config['planes_5'], 1),
 
         )
         self.train_annotations = []
