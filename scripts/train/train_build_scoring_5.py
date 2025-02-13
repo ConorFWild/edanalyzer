@@ -12,7 +12,7 @@ import tables
 import zarr
 import pandas as pd
 
-from edanalyzer.datasets.build_scoring_4 import BuildScoringDataset
+from edanalyzer.datasets.build_scoring_5 import BuildScoringDataset
 from edanalyzer.models.build_scoring_2 import LitBuildScoring
 from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 
