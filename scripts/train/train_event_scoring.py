@@ -1369,7 +1369,7 @@ def main(config_path, batch_size=12, num_workers=None):
             study_name=study_name,
             storage=storage_name,
             # direction='minimize',
-            direction=['minimize', 'maximize'],
+            directions=['minimize', 'maximize'],
             load_if_exists=True,
             # pruner=pruner,
             sampler=TPESampler(constant_liar=True)
