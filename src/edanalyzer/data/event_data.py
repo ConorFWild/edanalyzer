@@ -55,6 +55,11 @@ annotation_dtype = [
     ('annotation', '?'),
     ('partition', 'S32')]
 
+comment_dtype = [
+    ('idx', '<i4'),
+    ('meta_idx', '<i4'),
+    ('comment', 'U150'),
+]
 
 def _make_z_map_sample_metadata_table(group):
     table_z_map_sample_metadata = group.create_dataset(
@@ -117,6 +122,22 @@ def _make_annotation_table(group):
         chunks=(1,),
         dtype=annotation_dtype
     )
+
+    return annotation_table
+
+
+def _make_comment_table(group):
+
+
+    # def _make_z_map_sample_metadata_table(group):
+    annotation_table = group.create_dataset(
+        'comments',
+        shape=(0,),
+        chunks=(1,),
+        shards=(1000,),
+        dtype=comment_dtype
+    )
+    # return table_z_map_sample_metadata
 
     return annotation_table
 

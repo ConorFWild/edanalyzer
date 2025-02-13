@@ -27,11 +27,13 @@ from edanalyzer.data.database_schema import db, EventORM, DatasetORM, PartitionO
     ExperimentORM, LigandORM, AutobuildORM
 from edanalyzer.data.build_data import PoseSample, MTZSample, EventMapSample
 from edanalyzer.data.event_data import (
+    comment_dtype,
     _make_z_map_sample_metadata_table,
     _make_z_map_sample_table,
     _make_ligand_data_table,
     _make_known_hit_pose_table,
     _make_annotation_table,
+    _make_comment_table,
     _get_closest_res_from_dataset_dir,
     _get_z_map_sample_from_dataset_dir,
     _get_pose_sample_from_dataset_dir,
@@ -64,7 +66,7 @@ def main(config_path):
     #
     # Open a file in "w"rite mode
     # zarr_path = 'output/event_data_with_mtzs_2.zarr'
-    zarr_path = '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/event_data_3.zarr'
+    zarr_path = '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/event_data_4.zarr'
 
     root = zarr.open(zarr_path, mode='a')
 
@@ -85,6 +87,7 @@ def main(config_path):
     ligand_data_table = _make_ligand_data_table(pandda_2_group)
     known_hit_pose_table = _make_known_hit_pose_table(pandda_2_group)
     annotation_table = _make_annotation_table(pandda_2_group)
+    comment_table = _make_comment_table(pandda_2_group)
 
     # PanDDA 2 events
 
@@ -262,6 +265,19 @@ def main(config_path):
                 z_map_sample_table.append(z_map_sample)
                 xmap_sample_table.append(xmap_sample)
                 ligand_data_table.append(ligand_data_sample)
+
+                comment_sample = np.array(
+                [
+                    (
+                        z_map_sample_metadata_idx,
+                        z_map_sample_metadata_idx,
+                        _row['Comment']
+                    )
+                ],
+                dtype=comment_dtype
+            )
+                comment_table.append(comment_sample)
+
                 if conf == 'High':
                     known_hit_pose_table.append(pose_sample)
                     idx_pose += 1
