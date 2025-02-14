@@ -174,7 +174,7 @@ class BuildScoringDataset(Dataset):
                 for _idx, _row in _sample['meta_to_decoy'].iterrows():
                     new_sample = {
                         'meta': _sample['meta'],
-                        'decoy_idx': _row['idx'],
+                        'decoy_idx': int(_row['idx']),
                     }
                     self.resampled_indexes.append(new_sample)
 
