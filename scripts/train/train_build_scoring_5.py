@@ -295,8 +295,8 @@ def main(config_path, batch_size=12, num_workers=None):
         )
         study.enqueue_trial(
             {
-                'lr': 0.1083318260118112,
-                'wd': 0.33286701037939215,
+                'lr': 1e-2,
+                'wd': 1e-4,
                 'fraction_background_replace': 0.6603017628273233,
                 'xmap_radius': 3.4196300755415834,
                 'max_x_blur': 0.509006239862467,
