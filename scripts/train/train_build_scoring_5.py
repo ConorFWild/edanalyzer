@@ -282,7 +282,7 @@ def main(config_path, batch_size=12, num_workers=None):
         rprint(f"Got {len(dataset_test)} test samples")
 
         trainer.fit(model, dataset_train, dataset_test, )
-        return trainer.callback_metrics['test_loss'].item()
+        return trainer.callback_metrics['rmsd'].item()
 
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
     # Unique identifier of the study.

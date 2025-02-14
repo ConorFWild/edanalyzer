@@ -672,17 +672,17 @@ class LitEventScoring(lt.LightningModule):
         ]
         )
 
-        print('df')
-        print(df)
+        # print('df')
+        # print(df)
         dataset_max_ys = df.groupby(['dtag', ])['y'].transform('max')
-        print('dataset_max_ys')
-        print(dataset_max_ys)
+        # print('dataset_max_ys')
+        # print(dataset_max_ys)
         dataset_num_ys = df.groupby(['dtag', ])['y'].transform('nunique')
-        print('dataset_num_ys')
-        print(dataset_num_ys)
+        # print('dataset_num_ys')
+        # print(dataset_num_ys)
         multi_event_datasets = df[(dataset_max_ys == 1.0) & (dataset_num_ys > 1)]
-        print('multi_event_datasets')
-        print(multi_event_datasets)
+        # print('multi_event_datasets')
+        # print(multi_event_datasets)
         dataset_best = multi_event_datasets[
             multi_event_datasets['y_hat'] == multi_event_datasets.groupby('dtag')['y_hat'].transform('max')]
 
