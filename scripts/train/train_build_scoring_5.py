@@ -192,7 +192,7 @@ def main(config_path, batch_size=12, num_workers=None):
             'max_translate': trial.suggest_uniform('max_translate', 0.0, 5.0),
             'max_x_noise': trial.suggest_uniform('max_x_noise', 0.0, 2.0),
             'max_z_noise': trial.suggest_uniform('max_z_noise', 0.0, 2.0),
-            'pos_resample_rate': trial.suggest_int('pos_resample_rate', 0, 10),
+            'pos_resample_rate': trial.suggest_int('pos_resample_rate', 0, 50),
             'p_flip': trial.suggest_uniform('p_flip', 0.0, 1.0),
             'z_mask_radius': trial.suggest_uniform('z_mask_radius', 1.0, 3.5),
             'z_cutoff': trial.suggest_uniform('z_cutoff', 1.5, 3.0),
@@ -243,7 +243,8 @@ def main(config_path, batch_size=12, num_workers=None):
                 EarlyStopping('rmsd', patience=20)
             ],
             enable_progress_bar=False,
-            max_epochs=300
+            max_epochs=300,
+            check_val_every_n_epoch=10
         )
 
         _train_config = {
@@ -301,7 +302,7 @@ def main(config_path, batch_size=12, num_workers=None):
         )
         study.enqueue_trial(
             {
-                'lr': 0.005983342798442442, 'wd': 0.012964214431742897, 'fraction_background_replace': 0.3328440837507466, 'xmap_radius': 6.508258832375548, 'max_x_blur': 0.6510617344141543, 'max_z_blur': 2.7672927212022063, 'drop_rate': 0.18061013518045688, 'planes_1': 16, 'drop_1': 0.33640773416503167, 'planes_2': 8, 'drop_2': 0.30832338312607055, 'planes_3': 32, 'drop_3': 0.20010006341557052, 'planes_4': 32, 'drop_4': 0.26025619822558266, 'planes_5': 64, 'drop_5': 0.37172076026315093, 'drop_atom_rate': 0.10299066057162098, 'max_pos_atom_mask_radius': 1.7319249704812658, 'max_translate': 1.5441743449960699, 'max_x_noise': 0.768124255139961, 'max_z_noise': 1.7330294541618563, 'pos_resample_rate': 8, 'p_flip': 0.9358861301233835, 'z_mask_radius': 1.5663307317186794, 'z_cutoff': 2.3401003871737664, 'blocks_1': 2, 'blocks_2': 1, 'blocks_3': 1, 'blocks_4': 2, 'grad_clip': 0.03176254272214753, 'batch_size': 64
+                'lr': 0.005983342798442442, 'wd': 0.012964214431742897, 'fraction_background_replace': 0.3328440837507466, 'xmap_radius': 6.508258832375548, 'max_x_blur': 0.6510617344141543, 'max_z_blur': 2.7672927212022063, 'drop_rate': 0.18061013518045688, 'planes_1': 16, 'drop_1': 0.33640773416503167, 'planes_2': 8, 'drop_2': 0.30832338312607055, 'planes_3': 32, 'drop_3': 0.20010006341557052, 'planes_4': 32, 'drop_4': 0.26025619822558266, 'planes_5': 64, 'drop_5': 0.37172076026315093, 'drop_atom_rate': 0.10299066057162098, 'max_pos_atom_mask_radius': 1.7319249704812658, 'max_translate': 1.5441743449960699, 'max_x_noise': 0.768124255139961, 'max_z_noise': 1.7330294541618563, 'pos_resample_rate': 10, 'p_flip': 0.9358861301233835, 'z_mask_radius': 1.5663307317186794, 'z_cutoff': 2.3401003871737664, 'blocks_1': 2, 'blocks_2': 1, 'blocks_3': 1, 'blocks_4': 2, 'grad_clip': 0.03176254272214753, 'batch_size': 64
 
             },
             skip_if_exists=True
