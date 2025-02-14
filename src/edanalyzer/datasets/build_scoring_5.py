@@ -201,14 +201,14 @@ class BuildScoringDataset(Dataset):
         #     print('meta to decoy')
         #     print(sample_data['meta_to_decoy'])
 
-        rprint(
-            [
-                _meta_idx,
-                _decoy_idx,
-                # _embedding_idx,
-                # _train,
-            ]
-        )
+        # rprint(
+        #     [
+        #         _meta_idx,
+        #         _decoy_idx,
+        #         # _embedding_idx,
+        #         # _train,
+        #     ]
+        # )
         _meta = self.meta_table[_meta_idx]
         _decoy = self.decoy_table[_decoy_idx]
         # _embedding = self.decoy_table[_embedding_idx]
