@@ -387,4 +387,7 @@ class LitBuildScoring(lt.LightningModule):
         # self.log('fpr99', best_fpr_99, 4)
         # self.log('lr', )
 
+        self.log('rmsd', np.sqrt(np.mean(np.square(annotations['corr']-annotations['corr_hat']))), 4, sync_dist=True)
+
+
         self.test_annotations.clear()

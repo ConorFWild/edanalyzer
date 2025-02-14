@@ -218,6 +218,11 @@ def main(config_path, batch_size=12, num_workers=None):
             dirpath=str(trial_output_dir),
             filename='sample-mnist-{epoch:02d}-{test_loss:.2f}'
         )
+        checkpoint_callback_best_rmsd = ModelCheckpoint(
+            monitor='rmsd',
+            dirpath=str(trial_output_dir),
+            filename='sample-mnist-{epoch:02d}-{rmsd:.2f}'
+        )
         logger = CSVLogger(str(trial_output_dir / 'logs'))
 
         print(f'Compiling!')
@@ -233,8 +238,9 @@ def main(config_path, batch_size=12, num_workers=None):
             callbacks=[
                 checkpoint_callback,
                 checkpoint_callback_best,
-                PyTorchLightningPruningCallback(trial, monitor='test_loss'),
-                EarlyStopping('test_loss', patience=5)
+                checkpoint_callback_best_rmsd,
+                PyTorchLightningPruningCallback(trial, monitor='rmsd'),
+                EarlyStopping('rmsd', patience=5)
             ],
             enable_progress_bar=False,
             max_epochs=60
