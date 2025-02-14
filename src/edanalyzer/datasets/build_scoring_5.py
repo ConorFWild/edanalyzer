@@ -163,11 +163,21 @@ class BuildScoringDataset(Dataset):
         # }
 
         self.sample_indexes = config['samples']
-        # if config['test_train'] == 'train':
         #     pos_sample_indexes = [_v for _v in self.sample_indexes if _v['conf'] == 'High']
         #     self.resampled_indexes = self.sample_indexes + (pos_sample_indexes * config['pos_resample_rate'])
         # else:
-        self.resampled_indexes = self.sample_indexes
+        if config['test_train'] == 'train':
+            self.resampled_indexes = self.sample_indexes
+        elif config['test_train'] == 'test':
+            self.resampled_indexes = []
+            for _sample in self.sample_indexes:
+                for _idx, _row in _sample['meta_to_decoy'].iterrows():
+                    new_sample = {
+                        'meta': _sample['meta'],
+                        'decoy_idx': _row['idx'],
+                    }
+                    self.resampled_indexes.append(new_sample)
+
 
         # self.pos_train_pose_samples = pos_train_pose_samples
 
@@ -196,7 +206,10 @@ class BuildScoringDataset(Dataset):
         # _meta_idx, _decoy_idx, _embedding_idx, _train = sample_data['meta'], int(sample_data['decoy']), sample_data['embedding'], sample_data['train']
         _meta_idx = sample_data['meta']
         # try:
-        _decoy_idx = int(sample_data['meta_to_decoy'].sample().iloc[0]['idx'])
+        if self.test_train == 'train':
+            _decoy_idx = int(sample_data['meta_to_decoy'].sample().iloc[0]['idx'])
+        elif self.test_train == 'test':
+            _decoy_idx = sample_data['decoy_idx']
         # except:
         #     print('meta to decoy')
         #     print(sample_data['meta_to_decoy'])
