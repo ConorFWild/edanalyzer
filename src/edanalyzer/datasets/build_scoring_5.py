@@ -292,16 +292,6 @@ class BuildScoringDataset(Dataset):
         # Get maps
         xmap_sample_data = self.xmap_table[_meta['idx']]['sample']
         z_map_sample_data = self.zmap_table[_meta['idx']]['sample']
-        if (self.test_train == 'train') & (rng.uniform(0.0, 1.0) > self.p_flip):
-            if rng.uniform(0.0, 1.0) > 0.5:
-                xmap_sample_data = np.flip(xmap_sample_data, 0)
-                z_map_sample_data = np.flip(z_map_sample_data, 0)
-            if rng.uniform(0.0, 1.0) > 0.5:
-                xmap_sample_data = np.flip(xmap_sample_data, 1)
-                z_map_sample_data = np.flip(z_map_sample_data, 1)
-            if rng.uniform(0.0, 1.0) > 0.5:
-                xmap_sample_data = np.flip(xmap_sample_data, 2)
-                z_map_sample_data = np.flip(z_map_sample_data, 2)
 
         if self.test_train == 'train':
             u_s = rng.uniform(0.0, self.max_x_blur)
@@ -323,6 +313,18 @@ class BuildScoringDataset(Dataset):
             transform,
             np.copy(sample_array)
         )
+
+        if (self.test_train == 'train') & (rng.uniform(0.0, 1.0) > self.p_flip):
+            if rng.uniform(0.0, 1.0) > 0.5:
+                xmap_sample = np.flip(xmap_sample, 0)
+                z_map_sample = np.flip(z_map_sample, 0)
+            if rng.uniform(0.0, 1.0) > 0.5:
+                xmap_sample = np.flip(xmap_sample, 1)
+                z_map_sample = np.flip(z_map_sample, 1)
+            if rng.uniform(0.0, 1.0) > 0.5:
+                xmap_sample = np.flip(xmap_sample, 2)
+                z_map_sample = np.flip(z_map_sample, 2)
+
 
         if self.test_train == 'train':
             u_s = rng.uniform(0.0, self.max_x_noise)
