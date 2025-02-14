@@ -162,7 +162,7 @@ def main(config_path, batch_size=12, num_workers=None):
     rprint(f'Getting train/test data...')
     train_config, test_config = _get_train_test_idxs_full_conf(root, config)
 
-    study_name = 'build_scoring_prod_3'
+    study_name = 'build_scoring_prod_4'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
@@ -240,7 +240,7 @@ def main(config_path, batch_size=12, num_workers=None):
                 checkpoint_callback_best,
                 checkpoint_callback_best_rmsd,
                 PyTorchLightningPruningCallback(trial, monitor='rmsd'),
-                EarlyStopping('rmsd', patience=20)
+                EarlyStopping('rmsd', patience=5)
             ],
             enable_progress_bar=False,
             max_epochs=300,
