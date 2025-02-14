@@ -83,6 +83,10 @@ class LitBuildScoring(lt.LightningModule):
         self.test_annotations = []
 
         self.output = output_dir
+        # self.output = output_dir
+        self.lr = config['lr']
+        self.wd = config['wd']
+        self.batch_size = config['batch_size']
 
     def forward(self, z,):
         # mol_encoding = self.mol_encoder(m)
@@ -102,7 +106,8 @@ class LitBuildScoring(lt.LightningModule):
         return score
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.parameters(), lr=1e-2, weight_decay=1e-4)
+        optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr, weight_decay=self.wd)
+        # optimizer = torch.optim.AdamW(self.parameters(), lr=1e-2, weight_decay=1e-4)
         # optimizer = torch.optim.SGD(self.parameters(), lr=1e-1, weight_decay=1e-2)
         # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, cooldown=10)
         # return [optimizer], [lr_scheduler]
@@ -145,7 +150,7 @@ class LitBuildScoring(lt.LightningModule):
 
         loss = loss_corr
 
-        self.log('train_loss', loss )
+        self.log('train_loss', loss , 4, batch_size=self.batch_size, sync_dist=True)
 
 
         for j in range(len(meta_idx)):
@@ -200,7 +205,7 @@ class LitBuildScoring(lt.LightningModule):
         loss = loss_corr
         # loss = F.mse_loss(score, y)
 
-        self.log('test_loss', loss)
+        self.log('test_loss', loss, 4, batch_size=self.batch_size, sync_dist=True)
 
         for j in range(len(meta_idx)):
             self.test_annotations.append(
