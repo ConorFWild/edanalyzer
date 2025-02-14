@@ -215,13 +215,13 @@ def main(config_path, batch_size=12, num_workers=None):
         rprint('Constructing trainer...')
         checkpoint_callback_best = ModelCheckpoint(
             monitor='test_loss',
-            dirpath=str(output),
+            dirpath=str(trial_output_dir),
             filename='sample-mnist-{epoch:02d}-{test_loss:.2f}'
         )
         logger = CSVLogger(str(trial_output_dir / 'logs'))
 
         print(f'Compiling!')
-        model = LitBuildScoring(output, _config)
+        model = LitBuildScoring(trial_output_dir, _config)
         # model = torch.compile(LitEventScoring(output, _config))
         print('Compiled!')
 
