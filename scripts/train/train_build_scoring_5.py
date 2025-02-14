@@ -240,10 +240,10 @@ def main(config_path, batch_size=12, num_workers=None):
                 checkpoint_callback_best,
                 checkpoint_callback_best_rmsd,
                 PyTorchLightningPruningCallback(trial, monitor='rmsd'),
-                EarlyStopping('rmsd', patience=5)
+                EarlyStopping('rmsd', patience=20)
             ],
             enable_progress_bar=False,
-            max_epochs=60
+            max_epochs=300
         )
 
         _train_config = {
@@ -288,7 +288,7 @@ def main(config_path, batch_size=12, num_workers=None):
     # Unique identifier of the study.
     storage_name = f"sqlite:///{output_dir}/{study_name}.db"
     pruner = optuna.pruners.HyperbandPruner(
-        min_resource=2, max_resource=60,
+        min_resource=2, max_resource=300,
     )
     if output_dir.exists():
         study = optuna.create_study(
