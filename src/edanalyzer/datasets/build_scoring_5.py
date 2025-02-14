@@ -314,16 +314,7 @@ class BuildScoringDataset(Dataset):
             np.copy(sample_array)
         )
 
-        if (self.test_train == 'train') & (rng.uniform(0.0, 1.0) > self.p_flip):
-            if rng.uniform(0.0, 1.0) > 0.5:
-                xmap_sample = np.flip(xmap_sample, 0)
-                z_map_sample = np.flip(z_map_sample, 0)
-            if rng.uniform(0.0, 1.0) > 0.5:
-                xmap_sample = np.flip(xmap_sample, 1)
-                z_map_sample = np.flip(z_map_sample, 1)
-            if rng.uniform(0.0, 1.0) > 0.5:
-                xmap_sample = np.flip(xmap_sample, 2)
-                z_map_sample = np.flip(z_map_sample, 2)
+
 
 
         if self.test_train == 'train':
@@ -334,6 +325,20 @@ class BuildScoringDataset(Dataset):
             u_s = rng.uniform(0.0, self.max_z_noise)
             noise = rng.normal(size=(32,32,32)) * u_s
             xmap_sample += noise.astype(np.float32)
+
+        xmap_sample = xmap_sample * image_score_decoy_mask
+        z_map_sample = z_map_sample * image_score_decoy_mask
+
+        if (self.test_train == 'train') & (rng.uniform(0.0, 1.0) > self.p_flip):
+            if rng.uniform(0.0, 1.0) > 0.5:
+                xmap_sample = np.flip(xmap_sample, 0)
+                z_map_sample = np.flip(z_map_sample, 0)
+            if rng.uniform(0.0, 1.0) > 0.5:
+                xmap_sample = np.flip(xmap_sample, 1)
+                z_map_sample = np.flip(z_map_sample, 1)
+            if rng.uniform(0.0, 1.0) > 0.5:
+                xmap_sample = np.flip(xmap_sample, 2)
+                z_map_sample = np.flip(z_map_sample, 2)
 
         # high_z_mask = (z_map_sample > self.z_cutoff).astype(int)
         # high_z_mask_expanded = expand_labels(high_z_mask, distance=self.z_mask_radius / 0.5)
@@ -371,8 +376,8 @@ class BuildScoringDataset(Dataset):
             torch.from_numpy(
                 np.stack(
                     [
-                        z_map_sample * image_score_decoy_mask,# * image_decoy_mask,
-                        xmap_sample * image_score_decoy_mask,
+                        z_map_sample,# * image_score_decoy_mask,# * image_decoy_mask,
+                        xmap_sample,# * image_score_decoy_mask,
                         # image_score_decoy_mask
                     ],
                     axis=0,
