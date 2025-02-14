@@ -195,11 +195,11 @@ class BuildScoringDataset(Dataset):
         # Get the metadata, decoy pose and embedding
         # _meta_idx, _decoy_idx, _embedding_idx, _train = sample_data['meta'], int(sample_data['decoy']), sample_data['embedding'], sample_data['train']
         _meta_idx = sample_data['meta']
-        try:
-            _decoy_idx = int(sample_data['meta_to_decoy'].sample().iloc[0]['idx'])
-        except:
-            print('meta to decoy')
-            print(sample_data['meta_to_decoy'])
+        # try:
+        _decoy_idx = int(sample_data['meta_to_decoy'].sample().iloc[0]['idx'])
+        # except:
+        #     print('meta to decoy')
+        #     print(sample_data['meta_to_decoy'])
 
         rprint(
             [
