@@ -92,17 +92,17 @@ class LitBuildScoring(lt.LightningModule):
         # mol_encoding = self.mol_encoder(m)
         z_encoding = self.z_encoder(z)
 
-        # full_encoding = z_encoding * F.sigmoid(mol_encoding, min_val=-1.0, max_val=1.0)
+        # full_encoding = z_encoding * F.tanh(mol_encoding, min_val=-1.0, max_val=1.0)
 
         # score = F.softmax(self.fc(z_encoding))
 
         # score = self.fc_rmsd(z_encoding)
 
         # score = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
-        corr_hat = F.sigmoid(self.fc_corr(z_encoding), )
+        corr_hat = F.tanh(self.fc_corr(z_encoding), )
 
 
-        # score = F.sigmoid(self.fc(z_encoding))
+        # score = F.tanh(self.fc(z_encoding))
 
         return corr_hat
 
@@ -135,13 +135,13 @@ class LitBuildScoring(lt.LightningModule):
 
         # full_encoding = z_encoding * F.hardtanh(mol_encoding, min_val=-1.0, max_val=1.0)
 
-        # score = F.sigmoid(self.fc(z_encoding))
+        # score = F.tanh(self.fc(z_encoding))
         # rmsd_hat =self.fc_rmsd(z_encoding)
 
         # loss_rmsd = F.mse_loss(rmsd_hat, rmsd_)
 
         # corr_hat = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
-        corr_hat = F.sigmoid(self.fc_corr(z_encoding), )
+        corr_hat = F.tanh(self.fc_corr(z_encoding), )
         loss_corr = F.mse_loss(corr_hat, corr_)
 
 
@@ -188,7 +188,7 @@ class LitBuildScoring(lt.LightningModule):
         # mol_encoding = self.mol_encoder(m)
         z_encoding = self.z_encoder(z)
 
-        # full_encoding = z_encoding * F.sigmoid(mol_encoding, min_val=-1.0, max_val=1.0)
+        # full_encoding = z_encoding * F.tanh(mol_encoding, min_val=-1.0, max_val=1.0)
 
         # print(f'Z Encoding: {z_encoding[0,:10]}')
         # print(f'Mol Encoding: {mol_encoding[0,:10]}')
@@ -197,7 +197,7 @@ class LitBuildScoring(lt.LightningModule):
         # loss_rmsd = F.mse_loss(rmsd_hat, rmsd_)
 
         # corr_hat = F.sigmoid(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
-        corr_hat = F.sigmoid(self.fc_corr(z_encoding), )
+        corr_hat = F.tanh(self.fc_corr(z_encoding), )
         loss_corr = F.mse_loss(corr_hat, corr_)
 
         # score = F.sigmoid(self.fc(z_encoding))
