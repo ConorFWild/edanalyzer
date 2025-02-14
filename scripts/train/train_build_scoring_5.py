@@ -162,7 +162,7 @@ def main(config_path, batch_size=12, num_workers=None):
     rprint(f'Getting train/test data...')
     train_config, test_config = _get_train_test_idxs_full_conf(root, config)
 
-    study_name = 'build_scoring_prod_2'
+    study_name = 'build_scoring_prod_3'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
