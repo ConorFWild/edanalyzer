@@ -12,7 +12,7 @@ import tables
 import zarr
 import pandas as pd
 
-from edanalyzer.datasets.build_scoring_5 import BuildScoringDataset
+from edanalyzer.datasets.build_scoring_6 import BuildScoringDataset
 from edanalyzer.models.build_scoring_2 import LitBuildScoring
 from edanalyzer.data.database_schema import db, EventORM, AutobuildORM
 
@@ -162,7 +162,7 @@ def main(config_path, batch_size=12, num_workers=None):
     rprint(f'Getting train/test data...')
     train_config, test_config = _get_train_test_idxs_full_conf(root, config)
 
-    study_name = 'build_scoring_prod_4'
+    study_name = 'build_scoring_prod_5'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
@@ -289,7 +289,8 @@ def main(config_path, batch_size=12, num_workers=None):
     # Unique identifier of the study.
     storage_name = f"sqlite:///{output_dir}/{study_name}.db"
     pruner = optuna.pruners.HyperbandPruner(
-        min_resource=2, max_resource=300,
+        min_resource=2,
+        max_resource=300,
     )
     if output_dir.exists():
         study = optuna.create_study(
