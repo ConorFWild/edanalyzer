@@ -146,7 +146,7 @@ class LitBuildScoring(lt.LightningModule):
         # corr_hat = (F.tanh(self.fc_corr(z_encoding), ) + 1) / 2
         # loss_corr = F.mse_loss(corr_hat, corr_)
 
-        corr_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) * self.max_pos_atom_mask_radius
+        corr_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) #* self.max_pos_atom_mask_radius
         loss_corr = F.mse_loss(corr_hat, rmsd_)
 
 
@@ -205,7 +205,7 @@ class LitBuildScoring(lt.LightningModule):
         # corr_hat = F.sigmoid(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
         # corr_hat = (F.tanh(self.fc_corr(z_encoding), ) + 1 )/ 2
         # loss_corr = F.mse_loss(corr_hat, corr_)
-        corr_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) * self.max_pos_atom_mask_radius
+        corr_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) #* self.max_pos_atom_mask_radius
         loss_corr = F.mse_loss(corr_hat, rmsd_)
         # score = F.sigmoid(self.fc(z_encoding))
         # score = F.softmax(self.fc(z_encoding))

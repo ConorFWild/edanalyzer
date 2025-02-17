@@ -395,7 +395,7 @@ class BuildScoringDataset(Dataset):
         # rmsd = _decoy['rmsd']
         deltas = self.delta_table[_decoy_idx]
         delta = deltas['delta'][drop_index]
-        rmsd = np.clip(delta, a_min=0.0, a_max = self.max_pos_atom_mask_radius)
+        rmsd = delta / self.max_pos_atom_mask_radius
 
         # if self.test:
         if self.test_train == 'train':
