@@ -544,12 +544,12 @@ class EventScoringDataset(Dataset):
             # Mask around ligand and paste in new background
             _valid_mask = pose_data['elements'] > 1
             if (self.test_train == 'train') & (rng.random() > self.drop_atom_rate):
-                valid_indicies = np.nonzero(_valid_mask)
-                num_valid = len(valid_indicies)
-                for _j in range(rng.integers(0, max(num_valid-5, 1))):
-                    valid_indicies = np.nonzero(_valid_mask)
-                    random_drop_index = rng.integers(0, len(valid_indicies))
-                    drop_index = valid_indicies[random_drop_index]
+                _valid_indicies = np.nonzero(_valid_mask)
+                num_valid = len(_valid_indicies[0])
+                for _j in range(rng.integers(0, max(num_valid - 5, 1))):
+                    _valid_indicies = np.nonzero(_valid_mask)
+                    _random_drop_index = rng.integers(0, len(_valid_indicies[0]))
+                    drop_index = _valid_indicies[0][_random_drop_index]
                     _valid_mask[drop_index] = False
             _valid_poss = pose_data['positions'][_valid_mask]
             _valid_elements = pose_data['elements'][_valid_mask]
