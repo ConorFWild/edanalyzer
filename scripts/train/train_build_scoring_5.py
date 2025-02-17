@@ -189,7 +189,7 @@ def main(config_path, batch_size=12, num_workers=None):
             'drop_5': trial.suggest_uniform('drop_5', 0.0, 1.0),
             'drop_atom_rate': trial.suggest_uniform('drop_atom_rate', 0.0, 1.0),
             # 'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 1.01, 7.0),
-            'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 6.99, 7.01),
+            'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 5.99, 6.01),
 
             'max_translate': trial.suggest_uniform('max_translate', 0.0, 5.0),
             'max_x_noise': trial.suggest_uniform('max_x_noise', 0.0, 2.0),
