@@ -169,19 +169,19 @@ class BuildScoringDataset(Dataset):
         #     self.resampled_indexes = self.sample_indexes + (pos_sample_indexes * config['pos_resample_rate'])
         # else:
         if config['test_train'] == 'train':
-            self.resampled_indexes = self.sample_indexes #+ (self.resampled_indexes * config['pos_resample_rate'])
-            # self.resampled_indexes = []
-            # for _sample in self.sample_indexes:
-            #     decoy_table = _sample['meta_to_decoy']
-            #     valid_decoys = decoy_table[decoy_table['rmsd'] < 6.0].reset_index()
-            #     bins = pd.cut(valid_decoys['rmsd'], bins=np.linspace(0.0, 6.0, num=61))
-            #     frequencies = 1 / bins.value_counts()
-            #     valid_decoys['p'] = frequencies[bins].reset_index()['rmsd']
-            #     new_sample = {
-            #         'meta': _sample['meta'],
-            #         'meta_to_decoy': valid_decoys,
-            #     }
-            #     self.resampled_indexes.append(new_sample)
+            # self.resampled_indexes = self.sample_indexes #+ (self.resampled_indexes * config['pos_resample_rate'])
+            self.resampled_indexes = []
+            for _sample in self.sample_indexes:
+                decoy_table = _sample['meta_to_decoy']
+                valid_decoys = decoy_table[decoy_table['rmsd'] < 6.0].reset_index()
+                bins = pd.cut(valid_decoys['rmsd'], bins=np.linspace(0.0, 6.0, num=61))
+                frequencies = 1 / bins.value_counts()
+                valid_decoys['p'] = frequencies[bins].reset_index()['rmsd']
+                new_sample = {
+                    'meta': _sample['meta'],
+                    'meta_to_decoy': valid_decoys,
+                }
+                self.resampled_indexes.append(new_sample)
 
         elif config['test_train'] == 'test':
             self.resampled_indexes = []
