@@ -209,7 +209,7 @@ class LitEventScoring(lt.LightningModule):
             BasicBlock,
             [config['blocks_1'], config['blocks_2'], config['blocks_3'], config['blocks_4'], ],
             False, False,
-            num_classes=2, num_input=2, headless=True,
+            num_classes=3, num_input=2, headless=True,
                                   drop_rate=config['drop_rate'], config=config).float()
         # self.x_encoder = SimpleConvolutionalEncoder(input_layers=1)
         # self.mol_encoder = SimpleConvolutionalEncoder(input_layers=1)
@@ -245,7 +245,7 @@ class LitEventScoring(lt.LightningModule):
             # nn.Linear(512, 256),
             # nn.Dropout(),
             # nn.Linear(16, 2),
-            nn.Linear(config['planes_5'] , 2),
+            nn.Linear(config['planes_5'] , 3),
 
         )
         self.train_annotations = []
@@ -359,8 +359,8 @@ class LitEventScoring(lt.LightningModule):
                     'table': str(idx[0][j]),
                     # "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][0],
                     # "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
-                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][1],
-                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][1],
+                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][2],
+                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][2],
                     'set': 0,
                     "system": str(idx[3][j]),
                     "dtag": str(idx[4][j]),
@@ -420,8 +420,8 @@ class LitEventScoring(lt.LightningModule):
                     'table': str(idx[0][j]),
                     # "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][0],
                     # "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
-                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][1],
-                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][1],
+                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][2],
+                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][2],
                     'set': 1,
                     "system": str(idx[3][j]),
                     "dtag": str(idx[4][j]),

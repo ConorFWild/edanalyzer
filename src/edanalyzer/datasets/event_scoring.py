@@ -769,30 +769,41 @@ class EventScoringDataset(Dataset):
         image_mol_float = image_mol.astype(np.float32)
 
 
-        if self.test_train == 'train':
-            # if conf == 'High':
-            #     hit = [self.label_noise, 1-self.label_noise]
-            # elif conf == 'Medium':
-            #     hit = [0.5, 0.5]
-            # elif conf == 'Low':
-            #     hit = [1-self.label_noise, self.label_noise]
-            if conf == 'High':
-                hit = [0.0, 1.0]
-            elif conf == 'Medium':
-                hit = [0.5, 0.5]
-            elif conf == 'Low':
-                hit = [1.0, 0.0]
-            else:
-                raise Exception
+        # if self.test_train == 'train':
+        #     # if conf == 'High':
+        #     #     hit = [self.label_noise, 1-self.label_noise]
+        #     # elif conf == 'Medium':
+        #     #     hit = [0.5, 0.5]
+        #     # elif conf == 'Low':
+        #     #     hit = [1-self.label_noise, self.label_noise]
+        #     if conf == 'High':
+        #         hit = [0.0, 1.0]
+        #     elif conf == 'Medium':
+        #         hit = [0.5, 0.5]
+        #     elif conf == 'Low':
+        #         hit = [1.0, 0.0]
+        #     else:
+        #         raise Exception
+        # else:
+        #     if conf == 'High':
+        #         hit = [0.0, 1.0]
+        #     elif conf == 'Medium':
+        #         hit = [0.5, 0.5]
+        #     elif conf == 'Low':
+        #         hit = [1.0, 0.0]
+        #     else:
+        #         raise Exception
+
+
+        if conf == 'High':
+            hit = [0.0, 0.0, 1.0]
+        elif conf == 'Medium':
+            hit = [0.0, 1.0, 0.0]
+        elif conf == 'Low':
+            hit = [1.0, 0.0, 0.0]
         else:
-            if conf == 'High':
-                hit = [0.0, 1.0]
-            elif conf == 'Medium':
-                hit = [0.5, 0.5]
-            elif conf == 'Low':
-                hit = [1.0, 0.0]
-            else:
-                raise Exception
+            raise Exception
+
 
         label = np.array(hit)
         label_float = label.astype(np.float32)
