@@ -298,12 +298,13 @@ class BuildScoringDataset(Dataset):
             n=90,
             r=45.0
         )
-        # image_selected_atom_mask = _sample_xmap(
-        #     selected_atom_mask_grid,
-        #     transform,
-        #     np.copy(sample_array)
-        # )
-
+        image_selected_atom_mask = _sample_xmap(
+            selected_atom_mask_grid,
+            transform,
+            np.copy(sample_array)
+        )
+        image_selected_atom_mask[image_selected_atom_mask < 0.5] = 0.0
+        image_selected_atom_mask[image_selected_atom_mask >= 0.5] = 1.0
 
 
         # Get the ligand mask
@@ -337,8 +338,8 @@ class BuildScoringDataset(Dataset):
 
         # mask
         selected_atom_mask_array = np.array(selected_atom_mask_grid)
-        xmap_sample_data = xmap_sample_data * selected_atom_mask_array
-        z_map_sample_data = z_map_sample_data * selected_atom_mask_array
+        # xmap_sample_data = xmap_sample_data * selected_atom_mask_array
+        # z_map_sample_data = z_map_sample_data * selected_atom_mask_array
 
         if self.test_train == 'train':
             u_s = rng.uniform(0.0, self.max_x_blur)
@@ -426,8 +427,8 @@ class BuildScoringDataset(Dataset):
             torch.from_numpy(
                 np.stack(
                     [
-                        z_map_sample,# * image_score_decoy_mask,# * image_decoy_mask,
-                        xmap_sample,# * image_score_decoy_mask,
+                        z_map_sample * image_selected_atom_mask,# * image_score_decoy_mask,# * image_decoy_mask,
+                        xmap_sample * image_selected_atom_mask,# * image_score_decoy_mask,
                         image_score_decoy_mask
                         # image_score_decoy_mask
                     ],
