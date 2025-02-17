@@ -247,8 +247,8 @@ class BuildScoringDataset(Dataset):
         # Get the decoy
         valid_mask = _decoy['elements'] != 0
         valid_indicies = np.nonzero(valid_mask)
-        random_drop_index = rng.integers(0, len(valid_indicies))
-        drop_index = valid_indicies[random_drop_index]
+        random_drop_index = rng.integers(0, len(valid_indicies[0]))
+        drop_index = valid_indicies[0][random_drop_index]
         valid_poss = _decoy['positions'][drop_index].reshape((1, 3))
         valid_elements = _decoy['elements'][drop_index].reshape((1, 3))
 
