@@ -50,7 +50,7 @@ class LitBuildScoring(lt.LightningModule):
             [config['blocks_1'], config['blocks_2'], config['blocks_3'], config['blocks_4'], ],
             False, False,
             num_classes=2,
-            num_input=2,
+            num_input=3,
             headless=True,
             drop_rate=config['drop_rate'],
             config=config,
@@ -87,6 +87,7 @@ class LitBuildScoring(lt.LightningModule):
         self.lr = config['lr']
         self.wd = config['wd']
         self.batch_size = config['batch_size']
+        self.max_pos_atom_mask_radius = config['max_pos_atom_mask_radius']
 
     def forward(self, z,):
         # mol_encoding = self.mol_encoder(m)
@@ -100,7 +101,7 @@ class LitBuildScoring(lt.LightningModule):
 
         # score = F.hardtanh(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
         # corr_hat = (F.tanh(self.fc_corr(z_encoding), ) + 1) / 2
-        corr_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) * 6
+        corr_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) * self.max_pos_atom_mask_radius
         # loss_corr = F.mse_loss(corr_hat, rmsd)
 
         # score = F.tanh(self.fc(z_encoding))
@@ -145,7 +146,7 @@ class LitBuildScoring(lt.LightningModule):
         # corr_hat = (F.tanh(self.fc_corr(z_encoding), ) + 1) / 2
         # loss_corr = F.mse_loss(corr_hat, corr_)
 
-        corr_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) * 6
+        corr_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) * self.max_pos_atom_mask_radius
         loss_corr = F.mse_loss(corr_hat, rmsd_)
 
 
@@ -204,7 +205,7 @@ class LitBuildScoring(lt.LightningModule):
         # corr_hat = F.sigmoid(self.fc_corr(z_encoding), min_val=0.0, max_val=10.0) / 10
         # corr_hat = (F.tanh(self.fc_corr(z_encoding), ) + 1 )/ 2
         # loss_corr = F.mse_loss(corr_hat, corr_)
-        corr_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) * 6
+        corr_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) * self.max_pos_atom_mask_radius
         loss_corr = F.mse_loss(corr_hat, rmsd_)
         # score = F.sigmoid(self.fc(z_encoding))
         # score = F.softmax(self.fc(z_encoding))

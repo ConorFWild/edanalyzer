@@ -162,7 +162,7 @@ def main(config_path, batch_size=12, num_workers=None):
     rprint(f'Getting train/test data...')
     train_config, test_config = _get_train_test_idxs_full_conf(root, config)
 
-    study_name = 'build_scoring_prod_5'
+    study_name = 'build_scoring_prod_6'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
@@ -188,7 +188,7 @@ def main(config_path, batch_size=12, num_workers=None):
             'planes_5': trial.suggest_categorical('planes_5', [32, 64, 128, 256, ]),
             'drop_5': trial.suggest_uniform('drop_5', 0.0, 1.0),
             'drop_atom_rate': trial.suggest_uniform('drop_atom_rate', 0.0, 1.0),
-            'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 1.01, 4.0),
+            'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 1.01, 7.0),
             'max_translate': trial.suggest_uniform('max_translate', 0.0, 5.0),
             'max_x_noise': trial.suggest_uniform('max_x_noise', 0.0, 2.0),
             'max_z_noise': trial.suggest_uniform('max_z_noise', 0.0, 2.0),
@@ -303,7 +303,17 @@ def main(config_path, batch_size=12, num_workers=None):
         )
         study.enqueue_trial(
             {
-                'lr': 0.005983342798442442, 'wd': 0.012964214431742897, 'fraction_background_replace': 0.3328440837507466, 'xmap_radius': 6.508258832375548, 'max_x_blur': 0.6510617344141543, 'max_z_blur': 2.7672927212022063, 'drop_rate': 0.18061013518045688, 'planes_1': 16, 'drop_1': 0.33640773416503167, 'planes_2': 8, 'drop_2': 0.30832338312607055, 'planes_3': 32, 'drop_3': 0.20010006341557052, 'planes_4': 32, 'drop_4': 0.26025619822558266, 'planes_5': 64, 'drop_5': 0.37172076026315093, 'drop_atom_rate': 0.10299066057162098, 'max_pos_atom_mask_radius': 1.7319249704812658, 'max_translate': 1.5441743449960699, 'max_x_noise': 0.768124255139961, 'max_z_noise': 1.7330294541618563, 'pos_resample_rate': 10, 'p_flip': 0.9358861301233835, 'z_mask_radius': 1.5663307317186794, 'z_cutoff': 2.3401003871737664, 'blocks_1': 2, 'blocks_2': 1, 'blocks_3': 1, 'blocks_4': 2, 'grad_clip': 0.03176254272214753, 'batch_size': 64
+                'lr': 0.005983342798442442,
+                'wd': 0.012964214431742897,
+                'fraction_background_replace': 0.3328440837507466,
+                'xmap_radius': 6.508258832375548,
+                'max_x_blur': 0.6510617344141543,
+                'max_z_blur': 2.7672927212022063, 'drop_rate': 0.18061013518045688,
+                'planes_1': 16, 'drop_1': 0.33640773416503167, 'planes_2': 8, 'drop_2': 0.30832338312607055,
+                'planes_3': 32, 'drop_3': 0.20010006341557052, 'planes_4': 32, 'drop_4': 0.26025619822558266,
+                'planes_5': 64, 'drop_5': 0.37172076026315093, 'drop_atom_rate': 0.10299066057162098,
+                'max_pos_atom_mask_radius': 6.0, 'max_translate': 1.5441743449960699,
+                'max_x_noise': 0.768124255139961, 'max_z_noise': 1.7330294541618563, 'pos_resample_rate': 10, 'p_flip': 0.9358861301233835, 'z_mask_radius': 1.5663307317186794, 'z_cutoff': 2.3401003871737664, 'blocks_1': 2, 'blocks_2': 1, 'blocks_3': 1, 'blocks_4': 2, 'grad_clip': 0.03176254272214753, 'batch_size': 64
 
             },
             skip_if_exists=True
