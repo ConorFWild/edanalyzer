@@ -242,7 +242,7 @@ def main(config_path, batch_size=12, num_workers=None):
                 checkpoint_callback_best,
                 checkpoint_callback_best_rmsd,
                 PyTorchLightningPruningCallback(trial, monitor='rmsd'),
-                EarlyStopping('rmsd', patience=5)
+                EarlyStopping('rmsd', patience=10)
             ],
             enable_progress_bar=False,
             max_epochs=300,
