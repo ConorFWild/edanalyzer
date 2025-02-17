@@ -188,7 +188,9 @@ def main(config_path, batch_size=12, num_workers=None):
             'planes_5': trial.suggest_categorical('planes_5', [32, 64, 128, 256, ]),
             'drop_5': trial.suggest_uniform('drop_5', 0.0, 1.0),
             'drop_atom_rate': trial.suggest_uniform('drop_atom_rate', 0.0, 1.0),
-            'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 1.01, 7.0),
+            # 'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 1.01, 7.0),
+            'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 6.5, 7.0),
+
             'max_translate': trial.suggest_uniform('max_translate', 0.0, 5.0),
             'max_x_noise': trial.suggest_uniform('max_x_noise', 0.0, 2.0),
             'max_z_noise': trial.suggest_uniform('max_z_noise', 0.0, 2.0),
