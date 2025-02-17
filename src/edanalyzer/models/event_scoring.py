@@ -37,7 +37,8 @@ annotation_dtype = [
     ('y_hat', '<f4'),
     ('system', '<U32'),
     ('dtag', '<U32'),
-    ('event_num', 'i8')
+    ('event_num', 'i8'),
+    ('Confidence', '<U32')
 ]
 
 
@@ -364,7 +365,8 @@ class LitEventScoring(lt.LightningModule):
                     'set': 0,
                     "system": str(idx[3][j]),
                     "dtag": str(idx[4][j]),
-                    "event_num": int(idx[5][j])
+                    "event_num": int(idx[5][j]),
+                    'Confidence': str(idx[-1][j])
                 }
             )
         # self.annotations[]
@@ -425,7 +427,8 @@ class LitEventScoring(lt.LightningModule):
                     'set': 1,
                     "system": str(idx[3][j]),
                     "dtag": str(idx[4][j]),
-                    "event_num": int(idx[5][j])
+                    "event_num": int(idx[5][j]),
+                    'Confidence': str(idx[-1][j])
                 }
             )
 
@@ -506,7 +509,8 @@ class LitEventScoring(lt.LightningModule):
                         float(_annotation['y_hat']),
                         str(_annotation['system']),
                         str(_annotation['dtag']),
-                        int(_annotation['event_num'])
+                        int(_annotation['event_num']),
+                        str(_annotation['Confidence'])
                     )
                     for _annotation in self.train_annotations
                 ],
@@ -589,8 +593,10 @@ class LitEventScoring(lt.LightningModule):
                         float(_annotation['y_hat']),
                         str(_annotation['system']),
                         str(_annotation['dtag']),
-                        int(_annotation['event_num'])
-                    )
+                        int(_annotation['event_num']),
+                        str(_annotation['Confidence'])
+
+        )
                     for _annotation in self.test_annotations
                 ],
                 dtype=annotation_dtype
