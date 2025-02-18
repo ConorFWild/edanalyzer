@@ -168,21 +168,33 @@ class BuildScoringDataset(Dataset):
         #     pos_sample_indexes = [_v for _v in self.sample_indexes if _v['conf'] == 'High']
         #     self.resampled_indexes = self.sample_indexes + (pos_sample_indexes * config['pos_resample_rate'])
         # else:
-        if config['test_train'] == 'train':
-            # self.resampled_indexes = self.sample_indexes #+ (self.resampled_indexes * config['pos_resample_rate'])
-            self.resampled_indexes = []
-            for _sample in self.sample_indexes:
-                decoy_table = _sample['meta_to_decoy']
-                valid_decoys = decoy_table[decoy_table['rmsd'] < 6.0].reset_index()
-                bins = pd.cut(valid_decoys['rmsd'], bins=np.linspace(0.0, 6.0, num=61))
-                frequencies = 1 / bins.value_counts()
-                valid_decoys['p'] = frequencies[bins].reset_index()['rmsd']
-                new_sample = {
-                    'meta': _sample['meta'],
-                    'meta_to_decoy': valid_decoys,
-                }
-                self.resampled_indexes.append(new_sample)
+        # if config['test_train'] == 'train':
+        #     # self.resampled_indexes = self.sample_indexes #+ (self.resampled_indexes * config['pos_resample_rate'])
+        #     self.resampled_indexes = []
+        #     for _sample in self.sample_indexes:
+        #         decoy_table = _sample['meta_to_decoy']
+        #         valid_decoys = decoy_table[decoy_table['rmsd'] < 6.0].reset_index()
+        #         bins = pd.cut(valid_decoys['rmsd'], bins=np.linspace(0.0, 6.0, num=61))
+        #         frequencies = 1 / bins.value_counts()
+        #         valid_decoys['p'] = frequencies[bins].reset_index()['rmsd']
+        #         new_sample = {
+        #             'meta': _sample['meta'],
+        #             'meta_to_decoy': valid_decoys,
+        #         }
+        #         self.resampled_indexes.append(new_sample)
+        #
+        # elif config['test_train'] == 'test':
+        #     self.resampled_indexes = []
+        #     for _sample in self.sample_indexes:
+        #         for _idx, _row in _sample['meta_to_decoy'].iterrows():
+        #             new_sample = {
+        #                 'meta': _sample['meta'],
+        #                 'decoy_idx': int(_row['idx']),
+        #             }
+        #             self.resampled_indexes.append(new_sample)
 
+        if config['test_train'] == 'train':
+            self.resampled_indexes = self.sample_indexes #+ (self.resampled_indexes * config['pos_resample_rate'])
         elif config['test_train'] == 'test':
             self.resampled_indexes = []
             for _sample in self.sample_indexes:
@@ -192,7 +204,6 @@ class BuildScoringDataset(Dataset):
                         'decoy_idx': int(_row['idx']),
                     }
                     self.resampled_indexes.append(new_sample)
-
 
         # self.pos_train_pose_samples = pos_train_pose_samples
 
@@ -222,7 +233,9 @@ class BuildScoringDataset(Dataset):
         _meta_idx = sample_data['meta']
         # try:
         if self.test_train == 'train':
-            _decoy_idx = int(sample_data['meta_to_decoy'].sample(weights=sample_data['meta_to_decoy']['p']).iloc[0]['idx'])
+            # _decoy_idx = int(sample_data['meta_to_decoy'].sample(weights=sample_data['meta_to_decoy']['p']).iloc[0]['idx'])
+            _decoy_idx = int(sample_data['meta_to_decoy'].sample().iloc[0]['idx'])
+
         elif self.test_train == 'test':
             _decoy_idx = sample_data['decoy_idx']
         # except:
@@ -250,15 +263,17 @@ class BuildScoringDataset(Dataset):
         valid_indicies = np.nonzero(valid_mask)
         random_drop_index = rng.integers(0, len(valid_indicies[0]))
         # print(f'Random drop index: {random_drop_index}')
-        drop_index = valid_indicies[0][random_drop_index]
-        valid_poss = _decoy['positions'][(drop_index,),]
-        valid_elements = _decoy['elements'][(drop_index,),]
+        # drop_index = valid_indicies[0][random_drop_index]
+        # valid_poss = _decoy['positions'][(drop_index,),]
+        # valid_elements = _decoy['elements'][(drop_index,),]
+        valid_poss = _decoy['positions'][valid_mask]
+        valid_elements = _decoy['elements'][valid_mask]
 
         centroid = np.mean(valid_poss, axis=0)
         # print(f'Centroid: {centroid}')
 
         sample_array = np.zeros(
-            (32, 32, 32),
+            (64, 64, 64),
             dtype=np.float32,
         )
 
@@ -269,7 +284,8 @@ class BuildScoringDataset(Dataset):
         transform = _get_transform_from_orientation_centroid(
             orientation,
             centroid,
-            n=32
+            n=64,
+            sd=0.25
         )
 
         decoy_residue = _get_res_from_arrays(
@@ -295,34 +311,34 @@ class BuildScoringDataset(Dataset):
 
         # xmap_mask_float = _get_ed_mask_float()
 
-        selected_atom_mask_grid = _get_ligand_mask_float(
-            decoy_residue,
-            radius=self.max_pos_atom_mask_radius,
-            n=90,
-            r=45.0
-        )
-        image_selected_atom_mask = _sample_xmap(
-            selected_atom_mask_grid,
-            transform,
-            np.copy(sample_array)
-        )
-        image_selected_atom_mask[image_selected_atom_mask < 0.5] = 0.0
-        image_selected_atom_mask[image_selected_atom_mask >= 0.5] = 1.0
+        # selected_atom_mask_grid = _get_ligand_mask_float(
+        #     decoy_residue,
+        #     radius=self.max_pos_atom_mask_radius,
+        #     n=90,
+        #     r=45.0
+        # )
+        # image_selected_atom_mask = _sample_xmap(
+        #     selected_atom_mask_grid,
+        #     transform,
+        #     np.copy(sample_array)
+        # )
+        # image_selected_atom_mask[image_selected_atom_mask < 0.5] = 0.0
+        # image_selected_atom_mask[image_selected_atom_mask >= 0.5] = 1.0
         # image_selected_atom_mask[:,:,:] = 1.0
 
         # Get the ligand mask
-        valid_mask = _decoy['elements'] != 0
-        valid_poss = _decoy['positions'][valid_mask]
-        valid_elements = _decoy['elements'][valid_mask]
-        decoy_residue = _get_res_from_arrays(
-            valid_poss,
-            valid_elements,
-        )
+        # valid_mask = _decoy['elements'] != 0
+        # valid_poss = _decoy['positions'][valid_mask]
+        # valid_elements = _decoy['elements'][valid_mask]
+        # decoy_residue = _get_res_from_arrays(
+        #     valid_poss,
+        #     valid_elements,
+        # )
 
         decoy_score_mask_grid = _get_ligand_mask_float(
             decoy_residue,
-            radius=1.5,
-            n=90,
+            radius=self.max_pos_atom_mask_radius,
+            n=180,
             r=45.0
         )
         image_score_decoy_mask = _sample_xmap(
@@ -330,6 +346,8 @@ class BuildScoringDataset(Dataset):
             transform,
             np.copy(sample_array)
         )
+        image_score_decoy_mask[image_score_decoy_mask < 0.5] = 0.0
+        image_score_decoy_mask[image_score_decoy_mask >= 0.5] = 1.0
 
         # Get mask of hit for score calculation
         score = _decoy['overlap_score']
@@ -341,7 +359,7 @@ class BuildScoringDataset(Dataset):
         # selected_atom_mask_array = np.array(selected_atom_mask_grid)
 
         # mask
-        selected_atom_mask_array = np.array(selected_atom_mask_grid)
+        # selected_atom_mask_array = np.array(selected_atom_mask_grid)
         # xmap_sample_data = xmap_sample_data * selected_atom_mask_array
         # z_map_sample_data = z_map_sample_data * selected_atom_mask_array
 
@@ -384,29 +402,29 @@ class BuildScoringDataset(Dataset):
                 xmap_sample = np.flip(xmap_sample, 0)
                 z_map_sample = np.flip(z_map_sample, 0)
                 image_score_decoy_mask = np.flip(image_score_decoy_mask, 0)
-                image_selected_atom_mask = np.flip(image_selected_atom_mask, 0)
+                # image_selected_atom_mask = np.flip(image_selected_atom_mask, 0)
 
             if rng.uniform(0.0, 1.0) > 0.5:
                 xmap_sample = np.flip(xmap_sample, 1)
                 z_map_sample = np.flip(z_map_sample, 1)
                 image_score_decoy_mask = np.flip(image_score_decoy_mask, 1)
-                image_selected_atom_mask = np.flip(image_selected_atom_mask, 1)
+                # image_selected_atom_mask = np.flip(image_selected_atom_mask, 1)
 
             if rng.uniform(0.0, 1.0) > 0.5:
                 xmap_sample = np.flip(xmap_sample, 2)
                 z_map_sample = np.flip(z_map_sample, 2)
                 image_score_decoy_mask = np.flip(image_score_decoy_mask, 2)
-                image_selected_atom_mask = np.flip(image_selected_atom_mask, 2)
+                # image_selected_atom_mask = np.flip(image_selected_atom_mask, 2)
 
 
         # high_z_mask = (z_map_sample > self.z_cutoff).astype(int)
         # high_z_mask_expanded = expand_labels(high_z_mask, distance=self.z_mask_radius / 0.5)
         # high_z_mask_expanded[high_z_mask_expanded != 1] = 0
 
-        # rmsd = _decoy['rmsd']
-        deltas = self.delta_table[_decoy_idx]
-        delta = deltas['delta'][drop_index]
-        rmsd = np.clip(delta / self.max_pos_atom_mask_radius, a_min = 0.0, a_max=1.0)
+        rmsd = _decoy['rmsd']
+        # deltas = self.delta_table[_decoy_idx]
+        # delta = deltas['delta'][drop_index]
+        # rmsd = np.clip(delta / self.max_pos_atom_mask_radius, a_min = 0.0, a_max=1.0)
 
         # if self.test:
         if self.test_train == 'train':
@@ -438,8 +456,8 @@ class BuildScoringDataset(Dataset):
             torch.from_numpy(
                 np.stack(
                     [
-                        z_map_sample * image_selected_atom_mask,# * image_score_decoy_mask,# * image_decoy_mask,
-                        xmap_sample * image_selected_atom_mask ,# * image_score_decoy_mask,
+                        z_map_sample * image_score_decoy_mask,# * image_score_decoy_mask,# * image_decoy_mask,
+                        xmap_sample * image_score_decoy_mask ,# * image_score_decoy_mask,
                         image_score_decoy_mask
                         # image_score_decoy_mask
                     ],

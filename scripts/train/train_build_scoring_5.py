@@ -162,7 +162,7 @@ def main(config_path, batch_size=12, num_workers=None):
     rprint(f'Getting train/test data...')
     train_config, test_config = _get_train_test_idxs_full_conf(root, config)
 
-    study_name = 'build_scoring_prod_7'
+    study_name = 'build_scoring_prod_8'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
@@ -188,8 +188,8 @@ def main(config_path, batch_size=12, num_workers=None):
             'planes_5': trial.suggest_categorical('planes_5', [32, 64, 128, 256, ]),
             'drop_5': trial.suggest_uniform('drop_5', 0.0, 1.0),
             'drop_atom_rate': trial.suggest_uniform('drop_atom_rate', 0.0, 1.0),
-            # 'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 1.01, 7.0),
-            'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 5.99, 6.01),
+            'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 1.01, 4.0),
+            # 'max_pos_atom_mask_radius': trial.suggest_uniform('max_pos_atom_mask_radius', 5.99, 6.01),
 
             'max_translate': trial.suggest_uniform('max_translate', 0.0, 5.0),
             'max_x_noise': trial.suggest_uniform('max_x_noise', 0.0, 2.0),
@@ -246,7 +246,7 @@ def main(config_path, batch_size=12, num_workers=None):
             ],
             enable_progress_bar=False,
             max_epochs=3000,
-            check_val_every_n_epoch=100
+            check_val_every_n_epoch=50
         )
 
         _train_config = {
@@ -314,7 +314,7 @@ def main(config_path, batch_size=12, num_workers=None):
                 'planes_1': 16, 'drop_1': 0.33640773416503167, 'planes_2': 8, 'drop_2': 0.30832338312607055,
                 'planes_3': 32, 'drop_3': 0.20010006341557052, 'planes_4': 32, 'drop_4': 0.26025619822558266,
                 'planes_5': 64, 'drop_5': 0.37172076026315093, 'drop_atom_rate': 0.10299066057162098,
-                'max_pos_atom_mask_radius': 6.0, 'max_translate': 1.5441743449960699,
+                'max_pos_atom_mask_radius': 3.0, 'max_translate': 1.5441743449960699,
                 'max_x_noise': 0.568124255139961,
                 'max_z_noise': 0.5330294541618563, 'pos_resample_rate': 10,
                 'p_flip': 0.9358861301233835, 'z_mask_radius': 1.5663307317186794,
