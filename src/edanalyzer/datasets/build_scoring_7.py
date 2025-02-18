@@ -183,7 +183,7 @@ class BuildScoringDataset(Dataset):
                 }
                 self.resampled_indexes.append(new_sample)
 
-        elif config['test_train'] == 'test':
+        elif config['test_train'] == 'train':
             self.resampled_indexes = []
             for _sample in self.sample_indexes:
                 for _idx, _row in _sample['meta_to_decoy'].iterrows():
