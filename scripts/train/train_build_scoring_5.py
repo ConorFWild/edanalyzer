@@ -315,7 +315,11 @@ def main(config_path, batch_size=12, num_workers=None):
                 'planes_3': 32, 'drop_3': 0.20010006341557052, 'planes_4': 32, 'drop_4': 0.26025619822558266,
                 'planes_5': 64, 'drop_5': 0.37172076026315093, 'drop_atom_rate': 0.10299066057162098,
                 'max_pos_atom_mask_radius': 6.0, 'max_translate': 1.5441743449960699,
-                'max_x_noise': 0.568124255139961, 'max_z_noise': 0.5330294541618563, 'pos_resample_rate': 10, 'p_flip': 0.9358861301233835, 'z_mask_radius': 1.5663307317186794, 'z_cutoff': 2.3401003871737664, 'blocks_1': 2, 'blocks_2': 1, 'blocks_3': 1, 'blocks_4': 2, 'grad_clip': 0.03176254272214753, 'batch_size': 64
+                'max_x_noise': 0.568124255139961,
+                'max_z_noise': 0.5330294541618563, 'pos_resample_rate': 10,
+                'p_flip': 0.9358861301233835, 'z_mask_radius': 1.5663307317186794,
+                'z_cutoff': 2.3401003871737664, 'blocks_1': 2, 'blocks_2': 1, 'blocks_3': 1, 'blocks_4': 2,
+                'grad_clip': 0.03176254272214753, 'batch_size': 64
 
             },
             skip_if_exists=True
