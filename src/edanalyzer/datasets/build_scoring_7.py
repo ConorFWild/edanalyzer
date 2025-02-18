@@ -255,6 +255,7 @@ class BuildScoringDataset(Dataset):
         valid_elements = _decoy['elements'][(drop_index,),]
 
         centroid = np.mean(valid_poss, axis=0)
+        print(f'Centroid: {centroid}')
 
         sample_array = np.zeros(
             (32, 32, 32),
