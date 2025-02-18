@@ -147,7 +147,7 @@ class LitBuildScoring(lt.LightningModule):
         # loss_corr = F.mse_loss(corr_hat, corr_)
 
         corr_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) #* self.max_pos_atom_mask_radius
-        loss_corr = F.mse_loss(corr_hat, rmsd_)
+        loss_corr = F.mse_loss(corr_hat, corr_)
 
 
         # score = F.softmax(self.fc(z_encoding))
@@ -174,7 +174,7 @@ class LitBuildScoring(lt.LightningModule):
                     # 'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
                     # 'rmsd_hat': float(rmsd_hat[j].to(torch.device("cpu")).detach().numpy()),
                     # 'corr': float(corr[j].to(torch.device("cpu")).detach().numpy()),
-                    'corr': float(rmsd_[j].to(torch.device("cpu")).detach().numpy()),
+                    'corr': float(corr_[j].to(torch.device("cpu")).detach().numpy()),
                     'corr_hat': float(corr_hat[j].to(torch.device("cpu")).detach().numpy()),
                     "system": str(system[j]),
                     "dtag": str(dtag[j]),
@@ -206,7 +206,7 @@ class LitBuildScoring(lt.LightningModule):
         # corr_hat = (F.tanh(self.fc_corr(z_encoding), ) + 1 )/ 2
         # loss_corr = F.mse_loss(corr_hat, corr_)
         corr_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) #* self.max_pos_atom_mask_radius
-        loss_corr = F.mse_loss(corr_hat, rmsd_)
+        loss_corr = F.mse_loss(corr_hat, corr_)
         # score = F.sigmoid(self.fc(z_encoding))
         # score = F.softmax(self.fc(z_encoding))
         # loss = categorical_loss(score, y)
@@ -231,7 +231,7 @@ class LitBuildScoring(lt.LightningModule):
                     # 'rmsd': float(rmsd[j].to(torch.device("cpu")).detach().numpy()),
                     # 'rmsd_hat': float(rmsd_hat[j].to(torch.device("cpu")).detach().numpy()),
                     # 'corr': float(corr[j].to(torch.device("cpu")).detach().numpy()),
-                    'corr': float(rmsd_[j].to(torch.device("cpu")).detach().numpy()),
+                    'corr': float(corr_[j].to(torch.device("cpu")).detach().numpy()),
                     'corr_hat': float(corr_hat[j].to(torch.device("cpu")).detach().numpy()),
                     "system": str(system[j]),
                     "dtag": str(dtag[j]),
