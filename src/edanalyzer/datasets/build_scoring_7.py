@@ -306,9 +306,9 @@ class BuildScoringDataset(Dataset):
             transform,
             np.copy(sample_array)
         )
-        # image_selected_atom_mask[image_selected_atom_mask < 0.5] = 0.0
-        # image_selected_atom_mask[image_selected_atom_mask >= 0.5] = 1.0
-        image_selected_atom_mask[:,:,:] = 1.0
+        image_selected_atom_mask[image_selected_atom_mask < 0.5] = 0.0
+        image_selected_atom_mask[image_selected_atom_mask >= 0.5] = 1.0
+        # image_selected_atom_mask[:,:,:] = 1.0
 
         # Get the ligand mask
         valid_mask = _decoy['elements'] != 0
