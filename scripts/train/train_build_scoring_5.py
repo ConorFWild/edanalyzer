@@ -292,7 +292,7 @@ def main(config_path, batch_size=12, num_workers=None):
     storage_name = f"sqlite:///{output_dir}/{study_name}.db"
     pruner = optuna.pruners.HyperbandPruner(
         min_resource=2,
-        max_resource=300,
+        max_resource=3000,
     )
     if output_dir.exists():
         study = optuna.create_study(
