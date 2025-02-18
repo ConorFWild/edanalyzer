@@ -335,11 +335,8 @@ class BuildScoringDataset(Dataset):
         # Get maps
         xmap_sample_data = self.xmap_table[_meta['idx']]['sample']
         z_map_sample_data = self.zmap_table[_meta['idx']]['sample']
-        selected_atom_mask_array = np.array(selected_atom_mask_grid)
-        xmap_sample_data = xmap_sample_data * selected_atom_mask_array
-        z_map_sample_data = z_map_sample_data * selected_atom_mask_array
 
-
+        # selected_atom_mask_array = np.array(selected_atom_mask_grid)
 
         # mask
         selected_atom_mask_array = np.array(selected_atom_mask_grid)
@@ -356,7 +353,6 @@ class BuildScoringDataset(Dataset):
         xmap = _get_grid_from_hdf5(xmap_sample_data)
         zmap = _get_grid_from_hdf5(z_map_sample_data)
 
-
         xmap_sample = _sample_xmap(
             xmap,
             transform,
@@ -368,9 +364,6 @@ class BuildScoringDataset(Dataset):
             np.copy(sample_array)
         )
 
-
-
-
         if self.test_train == 'train':
             u_s = rng.uniform(0.0, self.max_x_noise)
             noise = rng.normal(size=(32,32,32)) * u_s
@@ -380,26 +373,28 @@ class BuildScoringDataset(Dataset):
             noise = rng.normal(size=(32,32,32)) * u_s
             xmap_sample += noise.astype(np.float32)
 
-        xmap_sample = xmap_sample
-        z_map_sample = z_map_sample
-
-
+        # xmap_sample = xmap_sample
+        # z_map_sample = z_map_sample
+        #
 
         if (self.test_train == 'train') & (rng.uniform(0.0, 1.0) > self.p_flip):
             if rng.uniform(0.0, 1.0) > 0.5:
                 xmap_sample = np.flip(xmap_sample, 0)
                 z_map_sample = np.flip(z_map_sample, 0)
                 image_score_decoy_mask = np.flip(image_score_decoy_mask, 0)
+                image_selected_atom_mask = np.flip(image_selected_atom_mask, 0)
 
             if rng.uniform(0.0, 1.0) > 0.5:
                 xmap_sample = np.flip(xmap_sample, 1)
                 z_map_sample = np.flip(z_map_sample, 1)
                 image_score_decoy_mask = np.flip(image_score_decoy_mask, 1)
+                image_selected_atom_mask = np.flip(image_selected_atom_mask, 1)
 
             if rng.uniform(0.0, 1.0) > 0.5:
                 xmap_sample = np.flip(xmap_sample, 2)
                 z_map_sample = np.flip(z_map_sample, 2)
                 image_score_decoy_mask = np.flip(image_score_decoy_mask, 2)
+                image_selected_atom_mask = np.flip(image_selected_atom_mask, 2)
 
 
         # high_z_mask = (z_map_sample > self.z_cutoff).astype(int)
@@ -441,8 +436,8 @@ class BuildScoringDataset(Dataset):
             torch.from_numpy(
                 np.stack(
                     [
-                        z_map_sample,# * image_score_decoy_mask,# * image_decoy_mask,
-                        xmap_sample ,# * image_score_decoy_mask,
+                        z_map_sample * image_selected_atom_mask,# * image_score_decoy_mask,# * image_decoy_mask,
+                        xmap_sample * image_selected_atom_mask ,# * image_score_decoy_mask,
                         image_score_decoy_mask
                         # image_score_decoy_mask
                     ],
