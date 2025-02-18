@@ -168,7 +168,7 @@ class BuildScoringDataset(Dataset):
         #     pos_sample_indexes = [_v for _v in self.sample_indexes if _v['conf'] == 'High']
         #     self.resampled_indexes = self.sample_indexes + (pos_sample_indexes * config['pos_resample_rate'])
         # else:
-        if config['test_train'] == 'train':
+        if config['test_train'] == 'test':
             # self.resampled_indexes = self.sample_indexes #+ (self.resampled_indexes * config['pos_resample_rate'])
             self.resampled_indexes = []
             for _sample in self.sample_indexes:
