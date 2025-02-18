@@ -226,6 +226,8 @@ class BuildScoringDataset(Dataset):
     def __getitem__(self, idx: int):
         # Get the sample data
 
+        grid_size = 64
+
         sample_data = self.resampled_indexes[idx]
 
         # Get the metadata, decoy pose and embedding
@@ -273,7 +275,7 @@ class BuildScoringDataset(Dataset):
         # print(f'Centroid: {centroid}')
 
         sample_array = np.zeros(
-            (64, 64, 64),
+            (grid_size, grid_size, grid_size),
             dtype=np.float32,
         )
 
@@ -284,7 +286,7 @@ class BuildScoringDataset(Dataset):
         transform = _get_transform_from_orientation_centroid(
             orientation,
             centroid,
-            n=64,
+            n=grid_size,
             sd=0.25
         )
 
@@ -386,11 +388,11 @@ class BuildScoringDataset(Dataset):
 
         if self.test_train == 'train':
             u_s = rng.uniform(0.0, self.max_x_noise)
-            noise = rng.normal(size=(32,32,32)) * u_s
+            noise = rng.normal(size=(grid_size,grid_size,grid_size)) * u_s
             z_map_sample += noise.astype(np.float32)
 
             u_s = rng.uniform(0.0, self.max_z_noise)
-            noise = rng.normal(size=(32,32,32)) * u_s
+            noise = rng.normal(size=(grid_size,grid_size,grid_size)) * u_s
             xmap_sample += noise.astype(np.float32)
 
         # xmap_sample = xmap_sample

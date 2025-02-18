@@ -202,6 +202,8 @@ class BuildScoringDataset(Dataset):
 
         sample_data = self.resampled_indexes[idx]
 
+        grid_size = 64
+
         # Get the metadata, decoy pose and embedding
         # _meta_idx, _decoy_idx, _embedding_idx, _train = sample_data['meta'], int(sample_data['decoy']), sample_data['embedding'], sample_data['train']
         _meta_idx = sample_data['meta']
@@ -319,11 +321,11 @@ class BuildScoringDataset(Dataset):
 
         if self.test_train == 'train':
             u_s = rng.uniform(0.0, self.max_x_noise)
-            noise = rng.normal(size=(32,32,32)) * u_s
+            noise = rng.normal(size=(grid_size,grid_size,grid_size)) * u_s
             z_map_sample += noise.astype(np.float32)
 
             u_s = rng.uniform(0.0, self.max_z_noise)
-            noise = rng.normal(size=(32,32,32)) * u_s
+            noise = rng.normal(size=(grid_size,grid_size,grid_size)) * u_s
             xmap_sample += noise.astype(np.float32)
 
         xmap_sample = xmap_sample * image_score_decoy_mask
