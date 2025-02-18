@@ -245,8 +245,8 @@ def main(config_path, batch_size=12, num_workers=None):
                 EarlyStopping('rmsd', patience=10)
             ],
             enable_progress_bar=False,
-            max_epochs=300,
-            check_val_every_n_epoch=10
+            max_epochs=3000,
+            check_val_every_n_epoch=100
         )
 
         _train_config = {
