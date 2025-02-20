@@ -688,9 +688,9 @@ def _get_train_test_idxs_full_conf(root):
         neg_z_samples += [z['idx'], ]
         train_neg_conf.append('Low')
 
-    for _idx, z in train_samples[train_samples['Confidence'] == 'Medium'].iterrows():
-        med_z_samples.append(z['idx'])
-        train_med_conf.append('Medium')
+    # for _idx, z in train_samples[train_samples['Confidence'] == 'Medium'].iterrows():
+    #     med_z_samples.append(z['idx'])
+    #     train_med_conf.append('Medium')
 
     # Loop over the z samples adding positive samples for each
     print(f'Getting positive train samples')
@@ -1043,7 +1043,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    study_name = 'event_scoring_prod_59'
+    study_name = 'event_scoring_prod_60'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
