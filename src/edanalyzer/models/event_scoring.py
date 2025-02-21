@@ -729,8 +729,10 @@ class LitEventScoring(lt.LightningModule):
 
 
 def get_fpr(best_df, recall):
-    true_hit_best_df = best_df[best_df['y'] > 0.9]
-    negative_best_df = best_df[best_df['y'] <= 0.1]
+    # true_hit_best_df = best_df[best_df['y'] > 0.9]
+    # negative_best_df = best_df[best_df['y'] <= 0.1]
+    true_hit_best_df = best_df[best_df['Confidence'] != 'Low']
+    negative_best_df = best_df[best_df['Confidence'] == 'Low']
 
     cutoff = true_hit_best_df['y_hat'].quantile(recall)
 
