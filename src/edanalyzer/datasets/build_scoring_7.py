@@ -226,7 +226,8 @@ class BuildScoringDataset(Dataset):
     def __getitem__(self, idx: int):
         # Get the sample data
 
-        grid_size = 64
+        grid_size = 32
+        sd = 16/grid_size
 
         sample_data = self.resampled_indexes[idx]
 
@@ -287,7 +288,7 @@ class BuildScoringDataset(Dataset):
             orientation,
             centroid,
             n=grid_size,
-            sd=0.25
+            sd=sd
         )
 
         decoy_residue = _get_res_from_arrays(
