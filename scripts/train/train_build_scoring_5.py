@@ -305,21 +305,17 @@ def main(config_path, batch_size=12, num_workers=None):
         )
         study.enqueue_trial(
             {
-                'lr': 0.005983342798442442,
-                'wd': 0.012964214431742897,
-                'fraction_background_replace': 0.3328440837507466,
-                'xmap_radius': 6.508258832375548,
-                'max_x_blur': 0.6510617344141543,
-                'max_z_blur': 2.7672927212022063, 'drop_rate': 0.18061013518045688,
-                'planes_1': 16, 'drop_1': 0.33640773416503167, 'planes_2': 8, 'drop_2': 0.30832338312607055,
-                'planes_3': 32, 'drop_3': 0.20010006341557052, 'planes_4': 32, 'drop_4': 0.26025619822558266,
-                'planes_5': 64, 'drop_5': 0.37172076026315093, 'drop_atom_rate': 0.10299066057162098,
-                'max_pos_atom_mask_radius': 3.0, 'max_translate': 1.5441743449960699,
-                'max_x_noise': 0.568124255139961,
-                'max_z_noise': 0.5330294541618563, 'pos_resample_rate': 10,
-                'p_flip': 0.9358861301233835, 'z_mask_radius': 1.5663307317186794,
-                'z_cutoff': 2.3401003871737664, 'blocks_1': 2, 'blocks_2': 1, 'blocks_3': 1, 'blocks_4': 2,
-                'grad_clip': 0.03176254272214753, 'batch_size': 64
+                'lr': 0.00011438351645738927, 'wd': 0.004660900954194315,
+                'fraction_background_replace': 0.8456736753906298, 'xmap_radius': 4.1308903965340065,
+                'max_x_blur': 2.820896567200296, 'max_z_blur': 0.6891269656644818, 'drop_rate': 0.7688958132818271,
+                'planes_1': 16, 'drop_1': 0.01720841750409113, 'planes_2': 32, 'drop_2': 0.05160404771554821,
+                'planes_3': 64, 'drop_3': 0.003800989203779803, 'planes_4': 128, 'drop_4': 0.05806019760101572,
+                'planes_5': 256, 'drop_5': 0.6291779900450685, 'drop_atom_rate': 0.5348397956124168,
+                'max_pos_atom_mask_radius': 2.693877997882939, 'max_translate': 3.960735194773154,
+                'max_x_noise': 0.276422691457226, 'max_z_noise': 0.0685760724760862, 'pos_resample_rate': 23,
+                'p_flip': 0.6278772700882774, 'z_mask_radius': 2.005754066726283, 'z_cutoff': 1.7837797684839956,
+                'blocks_1': 2, 'blocks_2': 2, 'blocks_3': 2, 'blocks_4': 1, 'grad_clip': 0.0177383347423051,
+                'batch_size': 32
 
             },
             skip_if_exists=True
