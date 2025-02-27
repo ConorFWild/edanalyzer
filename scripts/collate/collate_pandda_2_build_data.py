@@ -244,7 +244,7 @@ def _dep_overlap_score(decoy, pose):
     return overlap
 
 
-def overlap_score(known_hit_predicted_density, decoy_predicted_density, known_hit_pose_residue, decoy_residue):
+def _dep_overlap_score_2(known_hit_predicted_density, decoy_predicted_density, known_hit_pose_residue, decoy_residue):
 
 
     # known_hit_score_mask_grid = _get_ligand_mask_float(
@@ -274,6 +274,54 @@ def overlap_score(known_hit_predicted_density, decoy_predicted_density, known_hi
 
 
     score = 1- ( np.sum(np.clip(decoy_predicted_density_sel - known_hit_predicted_density_sel, 0.0, None)) / np.sum(decoy_predicted_density_sel))
+
+    return score
+
+def overlap_score(known_hit_predicted_density, decoy_predicted_density, known_hit_pose_residue, decoy_residue):
+
+
+    # known_hit_score_mask_grid = _get_ligand_mask_float(
+    #     known_hit_pose_residue,
+    #     radius=2.5,
+    #     n=90,
+    #     r=45.0
+    # )
+
+    decoy_score_mask_grid = _get_ligand_mask_float(
+        decoy_residue,
+        radius=2.5,
+        n=180,
+        r=45.0
+    )
+
+    decoy_score_mask_arr = np.array(decoy_score_mask_grid, copy=False)
+    decoy_predicted_density_arr = np.array(decoy_predicted_density, copy=False)
+    # known_hit_score_mask_arr = np.array(known_hit_score_mask_grid, copy=False)
+    known_hit_predicted_density_arr = np.array(known_hit_predicted_density, copy=False)
+
+
+    sel = decoy_score_mask_arr > 0.0
+
+    decoy_predicted_density_sel = decoy_predicted_density_arr[sel]
+    known_hit_predicted_density_sel = known_hit_predicted_density_arr[sel]
+
+    decoy_predicted_density_expectation = np.mean(decoy_predicted_density_sel)
+    known_hit_predicted_density_expectation = np.mean(known_hit_predicted_density_sel)
+
+    decoy_predicted_density_deltas = decoy_predicted_density_sel - decoy_predicted_density_expectation
+    known_hit_predicted_density_deltas = known_hit_predicted_density_sel - known_hit_predicted_density_expectation
+
+    nominator = np.sum(
+        (decoy_predicted_density_deltas) * (known_hit_predicted_density_deltas)
+    )
+    denominator = np.sqrt(
+        np.sum(np.square(decoy_predicted_density_deltas)) * np.sum(np.square(known_hit_predicted_density_deltas))
+    )
+
+    score = nominator / denominator
+
+
+    # score = 1- ( np.sum(np.clip(decoy_predicted_density_sel - known_hit_predicted_density_sel, 0.0, None)) / np.sum(decoy_predicted_density_sel))
 
     return score
 
@@ -618,7 +666,7 @@ def main(config_path):
     #
     # Open a file in "w"rite mode
     # zarr_path = 'output/event_data_with_mtzs_2.zarr'
-    zarr_path = '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/build_data_augmented_2.zarr'
+    zarr_path = '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/build_data_augmented_3.zarr'
 
     root = setup_store(zarr_path)
     table_meta_sample = root['meta_sample']
