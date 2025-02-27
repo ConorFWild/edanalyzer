@@ -318,7 +318,7 @@ def overlap_score(known_hit_predicted_density, decoy_predicted_density, known_hi
         np.sum(np.square(decoy_predicted_density_deltas)) * np.sum(np.square(known_hit_predicted_density_deltas))
     )
 
-    score = nominator / denominator
+    score = np.clip(nominator / denominator, 0.0, 1.0)
 
 
     # score = 1- ( np.sum(np.clip(decoy_predicted_density_sel - known_hit_predicted_density_sel, 0.0, None)) / np.sum(decoy_predicted_density_sel))
