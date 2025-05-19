@@ -482,6 +482,8 @@ class EventScoringDataset(Dataset):
         self.z_mask_radius = config['z_mask_radius']
         self.z_cutoff = config['z_cutoff']
 
+        self.ligand = config['ligand']
+
     def __len__(self):
         return len(self.resampled_indexes)
 
@@ -691,8 +693,6 @@ class EventScoringDataset(Dataset):
         else:
             mask = np.ones((32,32,32), dtype=np.float32)
 
-        xmap_mask_float = _get_ed_mask_float(radius=self.xmap_radius)
-
         # Get sample images
         xmap_sample = _sample_xmap(
             xmap,
@@ -724,22 +724,27 @@ class EventScoringDataset(Dataset):
             xmap_sample += noise.astype(np.float32)
 
         # Make the image
-        image_ligand_mask = _sample_xmap(
-            ligand_mask_grid,
-            ligand_map_transform,
-            np.copy(ligand_sample_array)
-        )
+        if self.ligand:
+            image_ligand_mask = _sample_xmap(
+                ligand_mask_grid,
+                ligand_map_transform,
+                np.copy(ligand_sample_array)
+            )
+        else:
+            image_ligand_mask = np.copy(sample_array)
 
-        high_z_mask = (z_map_sample > self.z_cutoff).astype(int)
-        # high_z_mask[high_z_mask == 0] = -1
-        high_z_mask_expanded = expand_labels(high_z_mask, distance=self.z_mask_radius / 0.5)
-        high_z_mask_expanded[high_z_mask_expanded != 1] = 0
-
+        if self.ligand:
+            _density_mask = (z_map_sample > self.z_cutoff).astype(int)
+            # high_z_mask[high_z_mask == 0] = -1
+            density_mask = expand_labels(_density_mask, distance=self.z_mask_radius / 0.5)
+            density_mask[density_mask != 1] = 0
+        else:
+            density_mask = _get_ed_mask_float(radius=self.xmap_radius)
 
         image_z = np.stack(
             [
-                z_map_sample * high_z_mask_expanded,
-                xmap_sample * high_z_mask_expanded# xmap_mask_float
+                z_map_sample * density_mask,
+                xmap_sample * density_mask
             ],
             axis=0
         )
