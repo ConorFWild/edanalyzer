@@ -332,6 +332,7 @@ def main(config_path, batch_size=12, num_workers=None):
         logger = CSVLogger(str(trial_output_dir / 'logs'))
 
         print(f'Compiling!')
+        _config.update({'ligand': False})
         model = LitEventScoring(trial_output_dir, _config)
         print('Compiled!')
 
@@ -358,7 +359,7 @@ def main(config_path, batch_size=12, num_workers=None):
         }
         _train_config.update(train_config)
         _train_config.update(_config)
-        _train_config.update({'test_train': 'train', 'ligand': False})
+        _train_config.update({'test_train': 'train', })
         dataset_train = DataLoader(
             EventScoringDataset(
                 _train_config
@@ -375,7 +376,7 @@ def main(config_path, batch_size=12, num_workers=None):
         }
         _test_config.update(test_config)
         _test_config.update(_config)
-        _test_config.update({'test_train': 'test', 'ligand': False})
+        _test_config.update({'test_train': 'test', })
         dataset_test = DataLoader(
             EventScoringDataset(
                 _test_config
