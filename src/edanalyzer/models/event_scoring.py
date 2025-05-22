@@ -313,6 +313,19 @@ class LitEventScoring(lt.LightningModule):
         idx, x, z, m, d, y = train_batch
         y = y.view(y.size(0), -1)
 
+        _sample = z[0,0,:,:,:].numpy()
+        print(
+            (
+                f'z\n'
+                f'Mean: {np.mean(_sample)}\n'
+                f'std: {np.std(_sample)}\n'
+                f'zeros: {_sample[_sample == 0].size} / {_sample.size}\n'
+
+            )
+        )
+
+        print('x')
+
         mol_encoding = self.mol_encoder(m)
         # mol_decoding = F.hardtanh(self.mol_decoder(mol_encoding), min_val=0.0, max_val=1.0,)
 
