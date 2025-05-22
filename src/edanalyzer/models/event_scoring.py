@@ -314,9 +314,11 @@ class LitEventScoring(lt.LightningModule):
         y = y.view(y.size(0), -1)
 
         _sample = z[0,0,:,:,:].numpy()
+        _sample_annotation = y[0].numpy()
         print(
             (
                 f'z\n'
+                f'Annotation: {_sample_annotation}\n'
                 f'Mean: {np.mean(_sample)}\n'
                 f'std: {np.std(_sample)}\n'
                 f'zeros: {_sample[_sample == 0].size} / {_sample.size}\n'
