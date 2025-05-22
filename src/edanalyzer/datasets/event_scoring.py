@@ -518,6 +518,18 @@ class EventScoringDataset(Dataset):
         #     z_map_sample_data = self.pandda_2_z_map_sample_table[low_conf_sample['idx']]
 
         #
+        if (rng.uniform(0.0, 1.0) > self.p_flip) & (self.test_train == 'train'):
+            if rng.uniform(0.0, 1.0) > 0.5:
+                xmap_sample_data = np.flip(xmap_sample_data, 0)
+                z_map_sample_data = np.flip(z_map_sample_data, 0)
+            if rng.uniform(0.0, 1.0) > 0.5:
+                xmap_sample_data = np.flip(xmap_sample_data, 1)
+                z_map_sample_data = np.flip(z_map_sample_data, 1)
+            if rng.uniform(0.0, 1.0) > 0.5:
+                xmap_sample_data = np.flip(xmap_sample_data, 2)
+                z_map_sample_data = np.flip(z_map_sample_data, 2)
+
+        # If training
         pose_data_idx = z_map_sample_metadata['pose_data_idx']
         if (rng.uniform(0.0, 1.0) > self.fraction_background_replace) & (self.test_train == 'train'):
             if pose_data_idx != -1:  # High confidence sample: chop in low confidence background
@@ -526,17 +538,6 @@ class EventScoringDataset(Dataset):
                 high_conf_sample = self.metadata_table_high_conf.sample().iloc[0]
                 pose_data_idx = high_conf_sample['pose_data_idx']
                 pose_data = self.pandda_2_pose_table[pose_data_idx]
-
-            if rng.uniform(0.0, 1.0) > self.p_flip:
-                if rng.uniform(0.0, 1.0) > 0.5:
-                    xmap_sample_data = np.flip(xmap_sample_data, 0)
-                    z_map_sample_data = np.flip(z_map_sample_data, 0)
-                if rng.uniform(0.0, 1.0) > 0.5:
-                    xmap_sample_data = np.flip(xmap_sample_data, 1)
-                    z_map_sample_data = np.flip(z_map_sample_data, 1)
-                if rng.uniform(0.0, 1.0) > 0.5:
-                    xmap_sample_data = np.flip(xmap_sample_data, 2)
-                    z_map_sample_data = np.flip(z_map_sample_data, 2)
 
             # Select new background
             low_conf_sample = self.metadata_table_low_conf.sample().iloc[0]
