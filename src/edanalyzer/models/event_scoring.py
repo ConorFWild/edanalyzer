@@ -314,31 +314,31 @@ class LitEventScoring(lt.LightningModule):
         idx, x, z, m, d, y = train_batch
         y = y.view(y.size(0), -1)
 
-        _sample = z[0,0,:,:,:].numpy()
-        _sample_annotation = y[0].numpy()
-        print(
-            (
-                f'z\n'
-                f'Annotation: {_sample_annotation}\n'
-                f'Mean: {np.mean(_sample)}\n'
-                f'std: {np.std(_sample)}\n'
-                f'zeros: {_sample[_sample == 0].size} / {_sample.size}\n'
-
-            )
-        )
-
-        _sample_x = z[0,0,:,:,:].numpy()
-        _sample_x_annotation = y[0].numpy()
-        print(
-            (
-                f'x\n'
-                f'Annotation: {_sample_x_annotation}\n'
-                f'Mean: {np.mean(_sample_x)}\n'
-                f'std: {np.std(_sample_x)}\n'
-                f'zeros: {_sample_x[_sample_x == 0].size} / {_sample_x.size}\n'
-
-            )
-        )
+        # _sample = z[0,0,:,:,:].numpy()
+        # _sample_annotation = y[0].numpy()
+        # print(
+        #     (
+        #         f'z\n'
+        #         f'Annotation: {_sample_annotation}\n'
+        #         f'Mean: {np.mean(_sample)}\n'
+        #         f'std: {np.std(_sample)}\n'
+        #         f'zeros: {_sample[_sample == 0].size} / {_sample.size}\n'
+        #
+        #     )
+        # )
+        #
+        # _sample_x = z[0,0,:,:,:].numpy()
+        # _sample_x_annotation = y[0].numpy()
+        # print(
+        #     (
+        #         f'x\n'
+        #         f'Annotation: {_sample_x_annotation}\n'
+        #         f'Mean: {np.mean(_sample_x)}\n'
+        #         f'std: {np.std(_sample_x)}\n'
+        #         f'zeros: {_sample_x[_sample_x == 0].size} / {_sample_x.size}\n'
+        #
+        #     )
+        # )
 
         # mol_decoding = F.hardtanh(self.mol_decoder(mol_encoding), min_val=0.0, max_val=1.0,)
 
