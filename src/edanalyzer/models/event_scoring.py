@@ -262,11 +262,12 @@ class LitEventScoring(lt.LightningModule):
         self.ligand = config['ligand']
 
     def forward(self, x, z, m, d):
-        mol_encoding = self.mol_encoder(m)
+        z_encoding = self.z_encoder(z)
+
         if self.ligand:
-            z_encoding = self.z_encoder(z)
+            mol_encoding = self.mol_encoder(m)
         else:
-            z_encoding = torch.ones(mol_encoding.size()).to('cuda:0')
+            mol_encoding = torch.ones(z_encoding.size()).to('cuda:0')
         # x_encoding = self.x_encoder(x)
 
         # z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
@@ -338,13 +339,16 @@ class LitEventScoring(lt.LightningModule):
 
             )
         )
-        mol_encoding = self.mol_encoder(m)
+
         # mol_decoding = F.hardtanh(self.mol_decoder(mol_encoding), min_val=0.0, max_val=1.0,)
 
+        z_encoding = self.z_encoder(z)
+
         if self.ligand:
-            z_encoding = self.z_encoder(z)
+            mol_encoding = self.mol_encoder(m)
         else:
-            z_encoding = torch.ones(mol_encoding.size()).to('cuda:0')
+            mol_encoding = torch.ones(z_encoding.size()).to('cuda:0')
+
         # z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         # z_decoding = F.hardtanh(self.z_decoder(z_mol_encoding), min_val=0.0, max_val=1.0)
 
@@ -416,11 +420,12 @@ class LitEventScoring(lt.LightningModule):
 
         # print(f'Mol Sum Density: {torch.sum(m[0,:,:,:])}')
 
-        mol_encoding = self.mol_encoder(m)
+        z_encoding = self.z_encoder(z)
+
         if self.ligand:
-            z_encoding =  self.z_encoder(z)
+            mol_encoding = self.mol_encoder(m)
         else:
-            z_encoding = torch.ones(mol_encoding.size()).to('cuda:0')
+            mol_encoding = torch.ones(z_encoding.size()).to('cuda:0')
         # x_encoding = F.sigmoid( self.x_encoder(x))
         # z_mol_encoding = torch.cat([z_encoding, mol_encoding], dim=1)
         # z_decoding = F.hardtanh(self.density_decoder(z_mol_encoding), min_val=0.0, max_val=1.0,)
