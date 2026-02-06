@@ -7,7 +7,7 @@ from rich import print as rprint
 import lightning as lt
 from torch.utils.data import DataLoader
 import pony
-from pony.orm import db_session
+from pony.orm import db_session, show
 import numpy as np
 import pandas as pd
 
@@ -137,7 +137,7 @@ def _get_train_test_idxs_full_conf(root, config):
 
 def _get_train_config(config, db):
     rprint(db)
-    db.show(WaterAnnotation)
+    show(WaterAnnotation)
     with db_session:
         query = db.select(c for c in WaterAnnotation)
         print(query[:])
