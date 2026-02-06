@@ -135,7 +135,7 @@ def _get_train_test_idxs_full_conf(root, config):
     return train_config, test_config
 
 
-def _get_train_config(config, db):
+def _get_train_config(config, input_data, db):
     rprint(db)
     show(WaterAnnotation)
     with db_session:
