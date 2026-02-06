@@ -154,14 +154,15 @@ def _get_train_config(config, input_data, db):
         
         annotation_data = {(x[0], x[1]): x[2] for x in query}
 
+    train_data = {}
     for data_idx, data in input_data.items():
         for landmark_idx in data['landmarks']:
             if (data_idx, landmark_idx) in annotation_data:
-                data['annotation'] = annotation_data[(data_idx, landmark_idx)]
+                train_data[(data_idx, landmark_idx)] = data
+                train_data[((data_idx, landmark_idx))]['annotation'] = annotation_data[(data_idx, landmark_idx)]
 
 
-    rprint(annotation_data)
-    rprint(data)
+    rprint(train_data)
 
 
 def _get_test_config(config, db):
