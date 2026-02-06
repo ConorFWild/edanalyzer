@@ -11,6 +11,6 @@ class WaterAnnotation(db.Entity):
 
     id = PrimaryKey(int, auto=True)
 
-    dataIdx = Required(int, unique=True)  
+    dataIdx = Required(int, )  
     landmarkIdx = Required(int)
     annotation = Required(str)
