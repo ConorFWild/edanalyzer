@@ -142,7 +142,16 @@ def _get_train_config(config, input_data, db):
         WaterAnnotation.select().show()
         test_data_idxs = (x for x in config['test_data_idxs'])
         rprint(test_data_idxs)
-        query = select((c.dataIdx, c.landmarkIdx, c.annotation) for c in WaterAnnotation if c.dataIdx not in test_data_idxs)
+        query = select(
+            (c.dataIdx, c.landmarkIdx, c.annotation) 
+            for c in WaterAnnotation 
+            )
+        query = select(
+            (c.dataIdx, c.landmarkIdx, c.annotation) 
+            for c in WaterAnnotation 
+            if c.dataIdx not in test_data_idxs
+            )
+        
         data = [
             x for x in query
         ]
