@@ -138,8 +138,8 @@ def _get_train_test_idxs_full_conf(root, config):
 def _get_train_config(config, db):
     rprint(db)
     show(WaterAnnotation)
-    WaterAnnotation.select().show()
     with db_session:
+        WaterAnnotation.select().show()
         query = select(c for c in WaterAnnotation)
         for _x in query[:]:
             print(_x)
