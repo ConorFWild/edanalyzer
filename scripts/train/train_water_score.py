@@ -140,7 +140,8 @@ def _get_train_config(config, db):
     show(WaterAnnotation)
     with db_session:
         query = select(c for c in WaterAnnotation)
-        print(query[:])
+        for x in query[:]:
+            show(x)
 
 
 def _get_test_config(config, db):
