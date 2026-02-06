@@ -152,7 +152,7 @@ def _get_train_config(config, input_data, db):
             if c.dataIdx not in test_data_idxs
             )
         
-        annotation_data = {(x[0], [1]): x[2] for x in query}
+        annotation_data = {(x[0], x[1]): x[2] for x in query}
 
     for data_idx, data in input_data.items():
         for landmark_idx in data['landmarks']:
