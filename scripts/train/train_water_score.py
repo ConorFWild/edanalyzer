@@ -160,7 +160,7 @@ def _get_train_config(config, input_data, db):
     train_data = {}
     for data_idx, data in input_data.items():
         for landmark_idx in data['landmarks']:
-            idx = (data_idx, landmark_idx)
+            idx = (int(data_idx), int(landmark_idx))
             rprint(idx)
             if idx in annotation_data:
                 train_data[(data_idx, landmark_idx)] = data
