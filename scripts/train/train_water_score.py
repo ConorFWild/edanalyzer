@@ -152,10 +152,15 @@ def _get_train_config(config, input_data, db):
             if c.dataIdx not in test_data_idxs
             )
         
-        data = [
-            x for x in query
-        ]
+        annotation_data = {(x[0], [1]): x[2] for x in query}
 
+    for data_idx, data in input_data.items():
+        for landmark_idx in data['landmarks']:
+            if (data_idx, landmark_idx) in annotation_data:
+                data['annotation'] = annotation_data[(data_idx, landmark_idx)]
+
+
+    rprint(annotation_data)
     rprint(data)
 
 
