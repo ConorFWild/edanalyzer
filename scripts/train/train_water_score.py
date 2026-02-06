@@ -140,10 +140,12 @@ def _get_train_config(config, db):
     show(WaterAnnotation)
     with db_session:
         WaterAnnotation.select().show()
-        query = select(c for c in WaterAnnotation)
-        for _x in query[:]:
-            print(_x)
-            show(_x)
+        query = select((c.dataIdx, c.landmarkIdx, c.annotation) for c in WaterAnnotation if c.dataIdx not in (x for x in config['test_data_idxs']))
+        data = [
+            x for x in query
+        ]
+
+    rprint(data)
 
 
 def _get_test_config(config, db):
@@ -299,10 +301,18 @@ def main(config_path, batch_size=12, num_workers=None):
     output_dir = Path(config['output_path'])
     rprint(f'Output dir is: {output_dir}')
 
+    # Load the input data
+    import json
+
+    with open(config['input_data_path'], 'r') as f:
+        input_data = json.load(f)
+        
+    rprint(input_data)
+
     # Get the training and test data
     rprint(f'Getting train/test data...')
-    train_config = _get_train_config(config, db)
-    test_config = _get_test_config(config, db)
+    train_config = _get_train_config(config, input_data, db)
+    test_config = _get_test_config(config, input_data, db)
 
     # Setup study logging
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
