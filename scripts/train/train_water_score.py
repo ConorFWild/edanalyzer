@@ -445,6 +445,7 @@ def test_model(trial_output_dir, dataset, config):
     data = dataset[0]
     rprint(data)
     result = model(data[1].unsqueeze(0))
+    rprint(f'Result: {result}')
     return result
 
     ...
@@ -495,7 +496,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     dataset = test_dataset(train_data, config)
     model = test_model(output, dataset, config)
-    # exit()
+    exit()
 
 
     storage_name = f"sqlite:///{output_dir}/{study_name}.db"
