@@ -396,15 +396,18 @@ def test_dataset(train_data, config):
     }
     _train_config.update(hyperparameters)
     _train_config.update(config)
-    dataset_train = DataLoader(
-        WaterScoringDataset(
+    # dataset_train = DataLoader(
+    #     WaterScoringDataset(
+    #         _train_config
+    #     ),
+    #     batch_size=_train_config['batch_size'],  # batch_size,
+    #     shuffle=True,
+    #     num_workers=_train_config['num_workers'],
+    #     drop_last=True
+    # )
+    dataset_train= WaterScoringDataset(
             _train_config
-        ),
-        batch_size=_train_config['batch_size'],  # batch_size,
-        shuffle=True,
-        num_workers=_train_config['num_workers'],
-        drop_last=True
-    )
+        )
     rprint(dataset_train[0])
 
 def main(config_path, batch_size=12, num_workers=None):
