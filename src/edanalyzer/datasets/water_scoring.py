@@ -185,6 +185,8 @@ def get_structure_masks(st, water_atom, template, radius=1.5):
         rprint(mark)
         pos = mark.pos()
         rprint([pos.x, pos.y, pos.z])
+        image = st.cell.find_nearest_pbc_image(water_atom.pos, mark.to_cra(st[0]).atom.pos, mark.image_idx)
+        rprint(image)
         if mark.element.name == 'C':
             mask_carbon.set_points_around(pos, radius, 1.0)
         elif mark.element.name == 'O':
