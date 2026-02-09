@@ -154,7 +154,7 @@ def get_xmap(path):
 def get_water(st, water):
     return st[0][str(water[0])][str(water[1])][0]
 
-def get_structure_masks(st, water_atom, template, radius=1.5):
+def get_structure_masks(st, water_atom, template, radius=1.5, debug=False):
     ns = gemmi.NeighborSearch(st[0], st.cell, 5)
     for n_chain, chain in enumerate(st[0]):
         for n_res, res in enumerate(chain):
@@ -164,7 +164,8 @@ def get_structure_masks(st, water_atom, template, radius=1.5):
                 ns.add_atom(atom, n_chain, n_res, n_atom)
 
     marks = ns.find_neighbors(water_atom, min_dist=0.1, max_dist=4)
-    rprint(f'Got {len(marks)} marks in cell {ns}!')
+    if debug:
+        rprint(f'Got {len(marks)} marks in cell {ns}!')
 
     # Setup the grids
     mask_carbon = gemmi.FloatGrid(template.nu, template.nv, template.nw)
@@ -182,9 +183,11 @@ def get_structure_masks(st, water_atom, template, radius=1.5):
 
     # Go through marks
     for mark in marks:
-        rprint(mark)
+        if debug:
+            rprint(mark)
         pos = mark.pos()
-        rprint([pos.x, pos.y, pos.z])
+        if debug:
+            rprint([pos.x, pos.y, pos.z])
         # image = st.cell.find_nearest_pbc_image(water_atom.pos, mark.to_cra(st[0]).atom.pos, mark.image_idx)
         # rprint(image)
         if mark.element.name == 'C':
@@ -204,17 +207,18 @@ def get_structure_masks(st, water_atom, template, radius=1.5):
     mask_nitrogen.symmetrize_max()
     mask_sulfur.symmetrize_max()
 
-    rprint(f'Total carbon volume: {np.array(mask_carbon).sum()}')
-    rprint(f'Total oxygen volume: {np.array(mask_oxygen).sum()}')
-    rprint(f'Total nitrogen volume: {np.array(mask_nitrogen).sum()}')
-    rprint(f'Total sulfur volume: {np.array(mask_sulfur).sum()}')
-    
+    if debug:
+        rprint(f'Total carbon volume: {np.array(mask_carbon).sum()}')
+        rprint(f'Total oxygen volume: {np.array(mask_oxygen).sum()}')
+        rprint(f'Total nitrogen volume: {np.array(mask_nitrogen).sum()}')
+        rprint(f'Total sulfur volume: {np.array(mask_sulfur).sum()}')
+        
     # Return grids
     return mask_carbon, mask_oxygen, mask_nitrogen, mask_sulfur 
 
 class WaterScoringDataset(Dataset):
 
-    def __init__(self, config):
+    def __init__(self, config, debug=False):
         # self.data = data
         self.test_train =  config['test_train']
         self.data = config['data']
@@ -239,6 +243,7 @@ class WaterScoringDataset(Dataset):
 
         self.rng = np.random.default_rng()
 
+        self.debug = debug
 
     def __len__(self):
         return len(self.data_idx_mapping)
@@ -275,16 +280,18 @@ class WaterScoringDataset(Dataset):
             n=self.grid_sampling,
             sd=self.grid_step
         )
-        rprint('Transform')
-        rprint(self.grid_sampling)
-        rprint(self.grid_step)
-        rprint(transform.vec.tolist())
-        rprint(transform.mat.tolist())
+        if self.debug:
+            rprint('Transform')
+            rprint(self.grid_sampling)
+            rprint(self.grid_step)
+            rprint(transform.vec.tolist())
+            rprint(transform.mat.tolist())
         
         # Get the xmap sample
-        rprint(xmap)
-        rprint(xmap.spacegroup)
-        rprint(xmap.unit_cell)
+        if self.debug:
+            rprint(xmap)
+            rprint(xmap.spacegroup)
+            rprint(xmap.unit_cell)
         xmap_sample_data = _sample_xmap(
             xmap,
             transform,
@@ -312,16 +319,18 @@ class WaterScoringDataset(Dataset):
         # Sample the structure masks
         structure_mask_samples = []
         for structure_mask in structure_masks:
-            rprint(structure_mask)
-            rprint(structure_mask.spacegroup)
-            rprint(structure_mask.unit_cell)
-            rprint(f'Total mask volume: {np.array(structure_mask).sum()}')
+            if self.debug:
+                rprint(structure_mask)
+                rprint(structure_mask.spacegroup)
+                rprint(structure_mask.unit_cell)
+                rprint(f'Total mask volume: {np.array(structure_mask).sum()}')
             sample = _sample_xmap(
                 structure_mask, 
                 transform, 
                 np.copy(self.sample_array),
                 )
-            rprint(sample.sum())
+            if self.debug:
+                rprint(sample.sum())
             structure_mask_samples.append(
                 sample 
             )

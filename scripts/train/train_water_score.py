@@ -28,6 +28,41 @@ import logging
 import sys
 import os
 
+hyperparameters = {
+        "lr":  1e0,
+        "wd":  1e0,
+        'fraction_background_replace':  1e0,
+        'xmap_radius':  7.0,
+        'max_x_blur':  3.0,
+        'max_z_blur':  3.0,
+        'drop_rate':  1.0,
+        'planes_1':  16, 
+        'drop_1':  1.0,
+        'planes_2':  32,
+        'drop_2':  1.0,
+        'planes_3':  64,
+        'drop_3':  1.0,
+        'planes_4':  128,
+        'drop_4':  1.0,
+        'planes_5':  256,
+        'drop_5':  1.0,
+        'drop_atom_rate':  1.0,
+        'max_pos_atom_mask_radius':  4.0,
+        'max_translate':  5.0,
+        'max_x_noise':  2.0,
+        'max_z_noise':  2.0,
+        'pos_resample_rate':  50,
+        'p_flip':  1.0,
+        'z_mask_radius':  3.5,
+        'z_cutoff':  3.0,
+        'blocks_1':  2,
+        'blocks_2':  2,
+        'blocks_3':  2,
+        'blocks_4':  2,
+        'grad_clip':  1e1,
+        'batch_size':  128,
+    }
+
 def sample(iterable, num, replace, weights):
     df = pd.Series(iterable)
     return [_x for _x in df.sample(num, replace=replace, weights=weights)]
@@ -356,40 +391,7 @@ def objective(
     return trainer.callback_metrics['rmsd'].item()
 
 def test_dataset(train_data, config):
-    hyperparameters = {
-        "lr":  1e0,
-        "wd":  1e0,
-        'fraction_background_replace':  1e0,
-        'xmap_radius':  7.0,
-        'max_x_blur':  3.0,
-        'max_z_blur':  3.0,
-        'drop_rate':  1.0,
-        'planes_1':  16, 
-        'drop_1':  1.0,
-        'planes_2':  32,
-        'drop_2':  1.0,
-        'planes_3':  64,
-        'drop_3':  1.0,
-        'planes_4':  128,
-        'drop_4':  1.0,
-        'planes_5':  256,
-        'drop_5':  1.0,
-        'drop_atom_rate':  1.0,
-        'max_pos_atom_mask_radius':  4.0,
-        'max_translate':  5.0,
-        'max_x_noise':  2.0,
-        'max_z_noise':  2.0,
-        'pos_resample_rate':  50,
-        'p_flip':  1.0,
-        'z_mask_radius':  3.5,
-        'z_cutoff':  3.0,
-        'blocks_1':  2,
-        'blocks_2':  2,
-        'blocks_3':  2,
-        'blocks_4':  2,
-        'grad_clip':  1e1,
-        'batch_size':  128,
-    }
+    
     _train_config = {
         'test_train': 'train',
         'data': train_data
@@ -432,6 +434,19 @@ def test_dataset(train_data, config):
     rprint(sample[2])
     rprint('Coord')
     rprint(sample[3])
+    return dataset_train
+
+def test_model(trial_output_dir, dataset, config):
+    model = LitWaterScoring(
+        trial_output_dir, 
+        hyperparameters,
+        )
+    
+    data = dataset[0]
+    result = model[data]
+    return result
+
+    ...
 
 def main(config_path, batch_size=12, num_workers=None):
     rprint(f'Running train training from config file: {config_path}')
@@ -466,8 +481,6 @@ def main(config_path, batch_size=12, num_workers=None):
     train_data = _get_train_data(config, input_data, )
     test_data = _get_test_data(config, input_data, )
 
-    test_dataset(train_data, config)
-    exit()
 
     # Setup study logging
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
@@ -478,6 +491,11 @@ def main(config_path, batch_size=12, num_workers=None):
     if not output.exists():
         os.mkdir(output)
     rprint(f'Outputting results to: {output}')
+
+    dataset = test_dataset(train_data, config)
+    model = test_model(output, config)
+    # exit()
+
 
     storage_name = f"sqlite:///{output_dir}/{study_name}.db"
     rprint(f'Storing training data at: {storage_name}')

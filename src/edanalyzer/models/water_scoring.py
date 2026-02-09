@@ -50,7 +50,7 @@ class LitWaterScoring(lt.LightningModule):
             [config['blocks_1'], config['blocks_2'], config['blocks_3'], config['blocks_4'], ],
             False, False,
             num_classes=2,
-            num_input=3,
+            num_input=5,
             headless=True,
             drop_rate=config['drop_rate'],
             config=config,
