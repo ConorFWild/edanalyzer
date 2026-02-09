@@ -444,7 +444,7 @@ def test_model(trial_output_dir, dataset, config):
     
     data = dataset[0]
     rprint(data)
-    result = model(data[1])
+    result = model(data[1].unsqueeze(0))
     return result
 
     ...
