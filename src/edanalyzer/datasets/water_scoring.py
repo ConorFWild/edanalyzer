@@ -354,6 +354,8 @@ class WaterScoringDataset(Dataset):
                 data_idx[0],
                 data_idx[1],
                 str(sample_data['dtag']),
+                sample_data['landmark'][0],
+                sample_data['landmark'][1],
             ],
             torch.from_numpy(
                 np.stack(
