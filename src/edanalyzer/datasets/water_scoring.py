@@ -138,6 +138,55 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
 
     return score
 
+def get_structure(path):
+    return gemmi.read_structure(str(path))
+
+def get_xmap(path):
+    m = gemmi.read_ccp4_map(str(path), setup=True)
+    return m.grid
+
+def get_water(st, water):
+    return st[0][str(water[0])][str(water[1])][0]
+
+def get_structure_masks(st, water_atom, grid_size, radius=1.5):
+    ns = gemmi.NeighborSearch(st[0], st.cell, 5).populate(include_h=False)
+    marks = ns.find_neighbors(water_atom, min_dist=0.1, max_dist=6)
+
+    # Setup the grids
+    mask_carbon = gemmi.FloatGrid(grid_size, grid_size, grid_size)
+    mask_carbon.spacegroup = gemmi.find_spacegroup_by_name(st.spacegroup_hm)
+    mask_carbon.set_unit_cell(st.cell)
+    mask_sulfur = gemmi.FloatGrid(grid_size, grid_size, grid_size)
+    mask_sulfur.spacegroup = gemmi.find_spacegroup_by_name(st.spacegroup_hm)
+    mask_sulfur.set_unit_cell(st.cell)
+    mask_nitrogen = gemmi.FloatGrid(grid_size, grid_size, grid_size)
+    mask_nitrogen.spacegroup = gemmi.find_spacegroup_by_name(st.spacegroup_hm)
+    mask_nitrogen.set_unit_cell(st.cell)
+    mask_oxygen = gemmi.FloatGrid(grid_size, grid_size, grid_size)
+    mask_oxygen.spacegroup = gemmi.find_spacegroup_by_name(st.spacegroup_hm)
+    mask_oxygen.set_unit_cell(st.cell)
+
+    # Go through marks
+    for mark in marks:
+        if mark.element.name == 'C':
+            mask_carbon.set_points_around(mark.pos, radius, 1.0)
+        elif mark.element.name == 'O':
+            mask_oxygen.set_points_around(mark.pos, radius, 1.0)
+        elif mark.element.name == 'N':
+            mask_nitrogen.set_points_around(mark.pos, radius, 1.0)
+        elif mark.element.name == 'S':
+            mask_sulfur.set_points_around(mark.pos, radius, 1.0)
+        else:
+            continue
+
+    # Symetrize grids on max
+    mask_carbon.symmetrize_max()
+    mask_oxygen.symmetrize_max()
+    mask_nitrogen.symmetrize_max()
+    mask_sulfur.symmetrize_max()
+    
+    # Return grids
+    return mask_carbon, mask_oxygen, mask_nitrogen, mask_sulfur 
 
 class WaterScoringDataset(Dataset):
 
@@ -182,21 +231,20 @@ class WaterScoringDataset(Dataset):
         xmap = get_xmap(sample_data['xmap'])
 
         # Get the relevant water
-        water = get_water(st, )
-
-        # Get the 
-
+        water_residue = get_water(st, sample_data['landmark'])
+        water_atom = water_residue[0]
        
         # Get the cartesian centroid of the water
-        centroid = np.mean(valid_poss, axis=0)
-        # print(f'Centroid: {centroid}')
-
+        pos = water_atom.pos
+        centroid = np.array([pos.x, pos.y, pos.z])
 
         # Get A random orientation around the water
         if self.test_train == 'train':
             orientation = _get_random_orientation()
         else:
             orientation = np.eye(3)
+
+        # Get the transform to the sample frame
         transform = _get_transform_from_orientation_centroid(
             orientation,
             centroid,
@@ -206,7 +254,7 @@ class WaterScoringDataset(Dataset):
 
         # Get the xmap mask
         decoy_score_mask_grid = _get_ligand_mask_float(
-            decoy_residue,
+            water_residue,
             radius=self.max_pos_atom_mask_radius,
             n=180,
             r=45.0
@@ -214,11 +262,20 @@ class WaterScoringDataset(Dataset):
         image_score_decoy_mask = _sample_xmap(
             decoy_score_mask_grid,
             transform,
-            np.copy(sample_array)
+            np.copy(self.sample_array)
         )
         image_score_decoy_mask[image_score_decoy_mask < 0.5] = 0.0
         image_score_decoy_mask[image_score_decoy_mask >= 0.5] = 1.0
 
+        # Get the structure mask
+        structure_masks = get_structure_masks(st, water_residue)
+
+        # Sample the structure masks
+        structure_mask_samples = [
+            _sample_xmap(structure_mask, transform, np.copy(self.sample_array)) 
+            for structure_mask 
+            in structure_masks
+            ]
        
         # Gaussian filter the map
         if self.test_train == 'train':
@@ -234,25 +291,25 @@ class WaterScoringDataset(Dataset):
 
         # Noise the map
         if self.test_train == 'train':
-            u_s = rng.uniform(0.0, self.max_z_noise)
-            noise = rng.normal(size=(grid_size,grid_size,grid_size)) * u_s
+            u_s = self.rng.uniform(0.0, self.max_z_noise)
+            noise = self.rng.normal(size=(self.grid_size,self.grid_size,self.grid_size)) * u_s
             xmap_sample += noise.astype(np.float32)
 
         # Potentially flip the maps
-        if (self.test_train == 'train') & (rng.uniform(0.0, 1.0) > self.p_flip):
-            if rng.uniform(0.0, 1.0) > 0.5:
+        if (self.test_train == 'train') & (self.rng.uniform(0.0, 1.0) > self.p_flip):
+            if self.rng.uniform(0.0, 1.0) > 0.5:
                 xmap_sample = np.flip(xmap_sample, 0)
                 z_map_sample = np.flip(z_map_sample, 0)
                 image_score_decoy_mask = np.flip(image_score_decoy_mask, 0)
                 # image_selected_atom_mask = np.flip(image_selected_atom_mask, 0)
 
-            if rng.uniform(0.0, 1.0) > 0.5:
+            if self.rng.uniform(0.0, 1.0) > 0.5:
                 xmap_sample = np.flip(xmap_sample, 1)
                 z_map_sample = np.flip(z_map_sample, 1)
                 image_score_decoy_mask = np.flip(image_score_decoy_mask, 1)
                 # image_selected_atom_mask = np.flip(image_selected_atom_mask, 1)
 
-            if rng.uniform(0.0, 1.0) > 0.5:
+            if self.rng.uniform(0.0, 1.0) > 0.5:
                 xmap_sample = np.flip(xmap_sample, 2)
                 z_map_sample = np.flip(z_map_sample, 2)
                 image_score_decoy_mask = np.flip(image_score_decoy_mask, 2)
@@ -279,20 +336,20 @@ class WaterScoringDataset(Dataset):
         # Return data
         return (
             [
-                _meta['idx'],
-                _decoy['idx'],
-                0,
-                str(_meta['system']),
-                str(_meta['dtag']),
-                int(_meta['event_num']),
+                idx,
+                data_idx[0],
+                data_idx[1],
+                str(sample_data['dtag']),
             ],
             torch.from_numpy(
                 np.stack(
                     [
-                        z_map_sample * image_score_decoy_mask,# * image_score_decoy_mask,# * image_decoy_mask,
                         xmap_sample * image_score_decoy_mask ,# * image_score_decoy_mask,
+                        structure_mask_samples[0] * image_score_decoy_mask,
+                        structure_mask_samples[1] * image_score_decoy_mask,
+                        structure_mask_samples[2] * image_score_decoy_mask,
+                        structure_mask_samples[3] * image_score_decoy_mask,
                         image_score_decoy_mask
-                        # image_score_decoy_mask
                     ],
                     axis=0,
                     dtype=np.float32

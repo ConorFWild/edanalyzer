@@ -345,6 +345,57 @@ def objective(
     trainer.fit(model, dataset_train, dataset_test, )
     return trainer.callback_metrics['rmsd'].item()
 
+def test_dataset(train_data, config):
+    hyperparameters = {
+        "lr":  1e0,
+        "wd":  1e0,
+        'fraction_background_replace':  1e0,
+        'xmap_radius':  7.0,
+        'max_x_blur':  3.0,
+        'max_z_blur':  3.0,
+        'drop_rate':  1.0,
+        'planes_1':  16, 
+        'drop_1':  1.0,
+        'planes_2':  32,
+        'drop_2':  1.0,
+        'planes_3':  64,
+        'drop_3':  1.0,
+        'planes_4':  128,
+        'drop_4':  1.0,
+        'planes_5':  256,
+        'drop_5':  1.0,
+        'drop_atom_rate':  1.0,
+        'max_pos_atom_mask_radius':  4.0,
+        'max_translate':  5.0,
+        'max_x_noise':  2.0,
+        'max_z_noise':  2.0,
+        'pos_resample_rate':  50,
+        'p_flip':  1.0,
+        'z_mask_radius':  3.5,
+        'z_cutoff':  3.0,
+        'blocks_1':  2,
+        'blocks_2':  2,
+        'blocks_3':  2,
+        'blocks_4':  2,
+        'grad_clip':  1e1,
+        'batch_size':  128,
+    }
+    _train_config = {
+        'test_train': 'train',
+        'data': train_data
+    }
+    _train_config.update(hyperparameters)
+    _train_config.update(config)
+    dataset_train = DataLoader(
+        WaterScoringDataset(
+            _train_config
+        ),
+        batch_size=_train_config['batch_size'],  # batch_size,
+        shuffle=True,
+        num_workers=_train_config['num_workers'],
+        drop_last=True
+    )
+    rprint(dataset_train[0])
 
 def main(config_path, batch_size=12, num_workers=None):
     rprint(f'Running train training from config file: {config_path}')
