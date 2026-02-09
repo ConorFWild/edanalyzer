@@ -141,145 +141,58 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
 
 class WaterScoringDataset(Dataset):
 
-    def __init__(self, zarr_path, config):
+    def __init__(self, config):
         # self.data = data
-        self.root = zarr.open(zarr_path, mode='r')
-
         self.test_train =  config['test_train']
+        self.data = config['data']
+        self.data_idx_mapping = {j: data_idx for j, data_idx in enumerate(self.data)}
 
-        self.meta_table = self.root['meta_sample']
-        self.xmap_table = self.root['xmap_sample']
-        self.zmap_table = self.root['z_map_sample']
-        self.decoy_table = self.root['decoy_pose_sample']
-        self.ligand_data_table = self.root['ligand_data']
-        self.known_hit_pose = self.root['known_hit_pose']
-        self.delta_table = self.root['delta']
-
-        # self.pandda_2_annotation_table = self.root['annotation']
-        # self.pandda_2_frag_table = self.root['ligand_confs']  # ['ligand_fragments']
-
-        # self.pandda_2_annotations = {
-        #     _x['event_idx']: _x
-        #     for _x
-        #     in self.pandda_2_annotation_table
-        # }
-
-        self.sample_indexes = config['samples']
-        #     pos_sample_indexes = [_v for _v in self.sample_indexes if _v['conf'] == 'High']
-        #     self.resampled_indexes = self.sample_indexes + (pos_sample_indexes * config['pos_resample_rate'])
-        # else:
-        # if config['test_train'] == 'train':
-        #     # self.resampled_indexes = self.sample_indexes #+ (self.resampled_indexes * config['pos_resample_rate'])
-        #     self.resampled_indexes = []
-        #     for _sample in self.sample_indexes:
-        #         decoy_table = _sample['meta_to_decoy']
-        #         valid_decoys = decoy_table[decoy_table['rmsd'] < 6.0].reset_index()
-        #         bins = pd.cut(valid_decoys['rmsd'], bins=np.linspace(0.0, 6.0, num=61))
-        #         frequencies = 1 / bins.value_counts()
-        #         valid_decoys['p'] = frequencies[bins].reset_index()['rmsd']
-        #         new_sample = {
-        #             'meta': _sample['meta'],
-        #             'meta_to_decoy': valid_decoys,
-        #         }
-        #         self.resampled_indexes.append(new_sample)
-        #
-        # elif config['test_train'] == 'test':
-        #     self.resampled_indexes = []
-        #     for _sample in self.sample_indexes:
-        #         for _idx, _row in _sample['meta_to_decoy'].iterrows():
-        #             new_sample = {
-        #                 'meta': _sample['meta'],
-        #                 'decoy_idx': int(_row['idx']),
-        #             }
-        #             self.resampled_indexes.append(new_sample)
-
-        if config['test_train'] == 'train':
-            self.resampled_indexes = self.sample_indexes #+ (self.resampled_indexes * config['pos_resample_rate'])
-        elif config['test_train'] == 'test':
-            self.resampled_indexes = []
-            for _sample in self.sample_indexes:
-                for _idx, _row in _sample['meta_to_decoy'].iterrows():
-                    new_sample = {
-                        'meta': _sample['meta'],
-                        'decoy_idx': int(_row['idx']),
-                    }
-                    self.resampled_indexes.append(new_sample)
-
-        # self.pos_train_pose_samples = pos_train_pose_samples
-
-        # self.fraction_background_replace = config['fraction_background_replace']
-        # self.xmap_radius = config['xmap_radius']
         self.max_x_blur = config['max_x_blur']
         self.max_z_blur = config['max_z_blur']
-        # self.drop_atom_rate = config['drop_atom_rate']
         self.max_pos_atom_mask_radius = config['max_pos_atom_mask_radius']
-        # self.max_translate = config['max_translate']
         self.max_x_noise = config['max_x_noise']
         self.max_z_noise = config['max_z_noise']
         self.p_flip = config['p_flip']
         self.z_mask_radius = config['z_mask_radius']
         self.z_cutoff = config['z_cutoff']
 
+        self.grid_sampling = config['grid_sampling'] #32
+        self.grid_length = config['grid_length'] / self.grid_size
+        self.grid_step = self.grid_length / self.grid_sampling
+        self.sample_array = np.zeros(
+            (self.grid_size, self.grid_size, self.grid_size),
+            dtype=np.float32,
+        )
+
+        self.rng = np.random.default_rng()
+
+
     def __len__(self):
         return len(self.resampled_indexes)
 
     def __getitem__(self, idx: int):
-        # Get the sample data
+        # Get the data
+        data_idx = self.data_idx_mapping[idx]
+        sample_data = self.data[data_idx]
 
-        grid_size = 32
-        sd = 16/grid_size
+        # Get the structure
+        st = get_structure(sample_data['pdb'])
 
-        sample_data = self.resampled_indexes[idx]
+        # Get the xmap
+        xmap = get_xmap(sample_data['xmap'])
 
-        # Get the metadata, decoy pose and embedding
-        # _meta_idx, _decoy_idx, _embedding_idx, _train = sample_data['meta'], int(sample_data['decoy']), sample_data['embedding'], sample_data['train']
-        _meta_idx = sample_data['meta']
-        # try:
-        if self.test_train == 'train':
-            # _decoy_idx = int(sample_data['meta_to_decoy'].sample(weights=sample_data['meta_to_decoy']['p']).iloc[0]['idx'])
-            _decoy_idx = int(sample_data['meta_to_decoy'].sample().iloc[0]['idx'])
+        # Get the relevant water
+        water = get_water(st, )
 
-        elif self.test_train == 'test':
-            _decoy_idx = sample_data['decoy_idx']
-        # except:
-        #     print('meta to decoy')
-        #     print(sample_data['meta_to_decoy'])
+        # Get the 
 
-        # rprint(
-        #     [
-        #         _meta_idx,
-        #         _decoy_idx,
-        #         # _embedding_idx,
-        #         # _train,
-        #     ]
-        # )
-        _meta = self.meta_table[_meta_idx]
-        _decoy = self.decoy_table[_decoy_idx]
-        # _embedding = self.decoy_table[_embedding_idx]
-
-        # Get rng
-        rng = np.random.default_rng()
-
-        # Get the decoy
-        # if self.test_train == 'train':
-        valid_mask = _decoy['elements'] != 0
-        valid_indicies = np.nonzero(valid_mask)
-        random_drop_index = rng.integers(0, len(valid_indicies[0]))
-        # print(f'Random drop index: {random_drop_index}')
-        # drop_index = valid_indicies[0][random_drop_index]
-        # valid_poss = _decoy['positions'][(drop_index,),]
-        # valid_elements = _decoy['elements'][(drop_index,),]
-        valid_poss = _decoy['positions'][valid_mask]
-        valid_elements = _decoy['elements'][valid_mask]
-
+       
+        # Get the cartesian centroid of the water
         centroid = np.mean(valid_poss, axis=0)
         # print(f'Centroid: {centroid}')
 
-        sample_array = np.zeros(
-            (grid_size, grid_size, grid_size),
-            dtype=np.float32,
-        )
 
+        # Get A random orientation around the water
         if self.test_train == 'train':
             orientation = _get_random_orientation()
         else:
@@ -287,57 +200,11 @@ class WaterScoringDataset(Dataset):
         transform = _get_transform_from_orientation_centroid(
             orientation,
             centroid,
-            n=grid_size,
-            sd=sd
+            n=self.grid_size,
+            sd=self.grid_step
         )
 
-        decoy_residue = _get_res_from_arrays(
-            valid_poss,
-            valid_elements,
-        )
-
-        # decoy_mask_grid = _get_ligand_mask_float(
-        #     decoy_residue,
-        #     radius=2.0,
-        #     n=90,
-        #     r=45.0
-        # )
-        # image_decoy_sample = _sample_xmap(
-        #     decoy_mask_grid,
-        #     transform,
-        #     np.copy(sample_array)
-        # )
-        #
-        # image_decoy_mask = np.copy(sample_array)
-        # image_decoy_mask[image_decoy_sample > 0.0] = 1.0
-        # image_decoy_mask[image_decoy_sample <= 0.0] = 0.0
-
-        # xmap_mask_float = _get_ed_mask_float()
-
-        # selected_atom_mask_grid = _get_ligand_mask_float(
-        #     decoy_residue,
-        #     radius=self.max_pos_atom_mask_radius,
-        #     n=90,
-        #     r=45.0
-        # )
-        # image_selected_atom_mask = _sample_xmap(
-        #     selected_atom_mask_grid,
-        #     transform,
-        #     np.copy(sample_array)
-        # )
-        # image_selected_atom_mask[image_selected_atom_mask < 0.5] = 0.0
-        # image_selected_atom_mask[image_selected_atom_mask >= 0.5] = 1.0
-        # image_selected_atom_mask[:,:,:] = 1.0
-
-        # Get the ligand mask
-        # valid_mask = _decoy['elements'] != 0
-        # valid_poss = _decoy['positions'][valid_mask]
-        # valid_elements = _decoy['elements'][valid_mask]
-        # decoy_residue = _get_res_from_arrays(
-        #     valid_poss,
-        #     valid_elements,
-        # )
-
+        # Get the xmap mask
         decoy_score_mask_grid = _get_ligand_mask_float(
             decoy_residue,
             radius=self.max_pos_atom_mask_radius,
@@ -352,54 +219,26 @@ class WaterScoringDataset(Dataset):
         image_score_decoy_mask[image_score_decoy_mask < 0.5] = 0.0
         image_score_decoy_mask[image_score_decoy_mask >= 0.5] = 1.0
 
-        # Get mask of hit for score calculation
-        score = _decoy['overlap_score']
-
-        # Get maps
-        xmap_sample_data = self.xmap_table[_meta['idx']]['sample']
-        z_map_sample_data = self.zmap_table[_meta['idx']]['sample']
-
-        # selected_atom_mask_array = np.array(selected_atom_mask_grid)
-
-        # mask
-        # selected_atom_mask_array = np.array(selected_atom_mask_grid)
-        # xmap_sample_data = xmap_sample_data * selected_atom_mask_array
-        # z_map_sample_data = z_map_sample_data * selected_atom_mask_array
-
+       
+        # Gaussian filter the map
         if self.test_train == 'train':
-            u_s = rng.uniform(0.0, self.max_x_blur)
+            u_s = self.rng.uniform(0.0, self.max_x_blur)
             xmap_sample_data = gaussian_filter(xmap_sample_data, sigma=u_s)
 
-            u_s = rng.uniform(0.0, self.max_z_blur)
-            z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
-
-        xmap = _get_grid_from_hdf5(xmap_sample_data)
-        zmap = _get_grid_from_hdf5(z_map_sample_data)
-
+        # Sample the xmap
         xmap_sample = _sample_xmap(
             xmap,
             transform,
-            np.copy(sample_array)
-        )
-        z_map_sample = _sample_xmap(
-            zmap,
-            transform,
-            np.copy(sample_array)
+            np.copy(self.sample_array)
         )
 
+        # Noise the map
         if self.test_train == 'train':
-            u_s = rng.uniform(0.0, self.max_x_noise)
-            noise = rng.normal(size=(grid_size,grid_size,grid_size)) * u_s
-            z_map_sample += noise.astype(np.float32)
-
             u_s = rng.uniform(0.0, self.max_z_noise)
             noise = rng.normal(size=(grid_size,grid_size,grid_size)) * u_s
             xmap_sample += noise.astype(np.float32)
 
-        # xmap_sample = xmap_sample
-        # z_map_sample = z_map_sample
-        #
-
+        # Potentially flip the maps
         if (self.test_train == 'train') & (rng.uniform(0.0, 1.0) > self.p_flip):
             if rng.uniform(0.0, 1.0) > 0.5:
                 xmap_sample = np.flip(xmap_sample, 0)
@@ -420,27 +259,18 @@ class WaterScoringDataset(Dataset):
                 # image_selected_atom_mask = np.flip(image_selected_atom_mask, 2)
 
 
-        # high_z_mask = (z_map_sample > self.z_cutoff).astype(int)
-        # high_z_mask_expanded = expand_labels(high_z_mask, distance=self.z_mask_radius / 0.5)
-        # high_z_mask_expanded[high_z_mask_expanded != 1] = 0
-
-        rmsd = _decoy['rmsd']
-        # deltas = self.delta_table[_decoy_idx]
-        # delta = deltas['delta'][drop_index]
-        # rmsd = np.clip(delta / self.max_pos_atom_mask_radius, a_min = 0.0, a_max=1.0)
-
-        # if self.test:
+        # Get the score tensor
         if self.test_train == 'train':
-            if rmsd < 1.5:
+            if sample_data['annotation'] == 'truePositive':
                 hit = [0.025, 0.975]
-            elif rmsd >= 1.5:
+            elif sample_data['annotation'] == 'falsePositive':
                 hit = [0.975, 0.025]
             else:
                 raise Exception
         else:
-            if rmsd < 1.5:
+            if sample_data['annotation'] == 'truePositive':
                 hit = [0.0, 1.0]
-            elif rmsd >= 1.5:
+            elif sample_data['annotation'] == 'falsePositive':
                 hit = [1.0, 0.0]
             else:
                 raise Exception

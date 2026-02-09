@@ -10,6 +10,7 @@ import pony
 from pony.orm import db_session, show, select
 import numpy as np
 import pandas as pd
+import json
 
 from edanalyzer.datasets.water_scoring import WaterScoringDataset
 from edanalyzer.models.water_scoring import LitWaterScoring
@@ -135,7 +136,7 @@ def _get_train_test_idxs_full_conf(root, config):
     return train_config, test_config
 
 
-def _get_train_config(config, input_data, ):
+def _get_train_data(config, input_data, ):
     # rprint(db)
     # show(WaterAnnotation)
     with db_session:
@@ -165,6 +166,8 @@ def _get_train_config(config, input_data, ):
             if idx in annotation_data:
                 train_data[idx] = data
                 train_data[idx]['annotation'] = annotation_data[idx]
+                train_data[idx]['landmark'] = annotation_data[idx]['landmarks'][int(landmark_idx)]
+                del train_data[idx]['landmarks']
 
     rprint('Train Data')
     rprint(train_data)
@@ -172,7 +175,7 @@ def _get_train_config(config, input_data, ):
     return train_data
 
 
-def _get_test_config(config, input_data, ):
+def _get_test_data(config, input_data, ):
     # Get datasets from the database
     with db_session:
         WaterAnnotation.select().show()
@@ -208,9 +211,15 @@ def _get_test_config(config, input_data, ):
     return test_data
     
 
-def objective(trial, output=None, train_config=None, test_config=None):
+def objective(
+        trial, 
+        config=None, 
+        output=None, 
+        train_data=None, 
+        test_data=None,
+        ):
     # Suggest hyperparameters
-    _config = {
+    hyperparameters = {
         "lr": trial.suggest_loguniform('lr', 1e-4, 1e0),
         "wd": trial.suggest_loguniform('wd', 1e-4, 1e0),
         'fraction_background_replace': trial.suggest_uniform('fraction_background_replace', 0.0, 1e0),
@@ -246,7 +255,7 @@ def objective(trial, output=None, train_config=None, test_config=None):
     }
 
     rprint(f'Running trial with config:')
-    rprint(_config)
+    rprint(hyperparameters)
 
     # Setup trial output
     trial_output_dir = output / f'{trial.number}'
@@ -273,14 +282,17 @@ def objective(trial, output=None, train_config=None, test_config=None):
 
     # Create the model
     rprint(f'Compiling model!')
-    model = LitWaterScoring(trial_output_dir, _config)
+    model = LitWaterScoring(
+        trial_output_dir, 
+        hyperparameters,
+        )
     rprint('Compiled!')
 
     # Create the trainer
     trainer = lt.Trainer(
         # devices="auto",
         accelerator="gpu",
-        gradient_clip_val=_config['grad_clip'],
+        gradient_clip_val=hyperparameters['grad_clip'],
         logger=logger,
         callbacks=[
             checkpoint_callback,
@@ -296,10 +308,11 @@ def objective(trial, output=None, train_config=None, test_config=None):
 
     # Create the training dataset
     _train_config = {
+        'test_train': 'train',
+        'data': train_data
     }
-    _train_config.update(train_config)
-    _train_config.update(_config)
-    _train_config.update({'test_train': 'train'})
+    _train_config.update(hyperparameters)
+    _train_config.update(config)
     dataset_train = DataLoader(
         WaterScoringDataset(
             _train_config
@@ -313,10 +326,11 @@ def objective(trial, output=None, train_config=None, test_config=None):
 
     # Create the testing Dataset
     _test_config = {
+        'test_train': 'test',
+        'data': test_data
     }
-    _test_config.update(test_config)
-    _test_config.update(_config)
-    _test_config.update({'test_train': 'test'})
+    _test_config.update(hyperparameters)
+    _test_config.update(config)
     dataset_test = DataLoader(
         WaterScoringDataset(
             _test_config
@@ -356,17 +370,14 @@ def main(config_path, batch_size=12, num_workers=None):
     rprint(f'Output dir is: {output_dir}')
 
     # Load the input data
-    import json
-
     with open(config['input_data_path'], 'r') as f:
         input_data = json.load(f)
-        
     rprint(input_data)
 
     # Get the training and test data
     rprint(f'Getting train/test data...')
-    train_config = _get_train_config(config, input_data, )
-    test_config = _get_test_config(config, input_data, )
+    train_data = _get_train_data(config, input_data, )
+    test_data = _get_test_data(config, input_data, )
 
     # Setup study logging
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
@@ -432,7 +443,6 @@ def main(config_path, batch_size=12, num_workers=None):
             },
             skip_if_exists=True
         )
-
     else:
         print(f'Loading study!')
         study = optuna.load_study(
@@ -446,9 +456,10 @@ def main(config_path, batch_size=12, num_workers=None):
     study.optimize(
         lambda _x: objective(
             _x, 
+            config=config,
             output=output_dir, 
-            train_config=train_config, 
-            test_config=test_config,
+            train_data=train_data, 
+            test_data=test_data,
             ), 
         n_trials=300,
         )
