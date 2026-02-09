@@ -156,7 +156,7 @@ def _get_train_data(config, input_data, ):
         annotation_data = {(x[0], x[1]): x[2] for x in query}
 
     rprint('annotation data')
-    rprint(annotation_data)
+    # rprint(annotation_data)
 
     train_data = {}
     for data_idx, data in input_data.items():
@@ -169,12 +169,12 @@ def _get_train_data(config, input_data, ):
                     'pdb': data['pdb'],
                     'xmap': data['xmap'],
                 }
-                rprint(data)
+                # rprint(data)
                 train_data[idx]['annotation'] = annotation_data[idx]
                 train_data[idx]['landmark'] = data['landmarks'][landmark_idx]
 
-    rprint('Train Data')
-    rprint(train_data)
+    # rprint('Train Data')
+    # rprint(train_data)
 
     return train_data
 
@@ -197,8 +197,8 @@ def _get_test_data(config, input_data, ):
         
         annotation_data = {(x[0], x[1]): x[2] for x in query}
 
-    rprint('annotation data')
-    rprint(annotation_data)
+    # rprint('annotation data')
+    # rprint(annotation_data)
 
     test_data = {}
     for data_idx, data in input_data.items():
@@ -206,11 +206,17 @@ def _get_test_data(config, input_data, ):
             idx = (int(data_idx), int(landmark_idx))
             # rprint(idx)
             if idx in annotation_data:
-                test_data[idx] = data
+                test_data[idx] = {
+                    'dtag': data['dtag'],
+                    'pdb': data['pdb'],
+                    'xmap': data['xmap'],
+                }
+                # rprint(data)
                 test_data[idx]['annotation'] = annotation_data[idx]
+                test_data[idx]['landmark'] = data['landmarks'][landmark_idx]
 
-    rprint('Test Data')
-    rprint(test_data)
+    # rprint('Test Data')
+    # rprint(test_data)
     
     return test_data
     
@@ -427,7 +433,7 @@ def main(config_path, batch_size=12, num_workers=None):
     # Load the input data
     with open(config['input_data_path'], 'r') as f:
         input_data = json.load(f)
-    rprint(input_data)
+    # rprint(input_data)
 
     # Get the training and test data
     rprint(f'Getting train/test data...')
