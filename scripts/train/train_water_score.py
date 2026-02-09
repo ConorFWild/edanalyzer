@@ -425,8 +425,11 @@ def test_dataset(train_data, config):
     rprint('Sulfur')
     rprint(sample[1][4].sum())
     rprint(sample[1][4])
-    rprint('Coord')
+    rprint('Hit')
     rprint(sample[2])
+    rprint('Coord')
+    rprint(sample[3])
+
 def main(config_path, batch_size=12, num_workers=None):
     rprint(f'Running train training from config file: {config_path}')
     # Load config
