@@ -356,8 +356,8 @@ def objective(
         'test_train': 'train',
         'data': train_data
     }
-    _train_config.update(hyperparameters)
     _train_config.update(config)
+    _train_config.update(hyperparameters)
     dataset_train = DataLoader(
         WaterScoringDataset(
             _train_config
@@ -374,8 +374,8 @@ def objective(
         'test_train': 'test',
         'data': test_data
     }
-    _test_config.update(hyperparameters)
     _test_config.update(config)
+    _test_config.update(hyperparameters)
     dataset_test = DataLoader(
         WaterScoringDataset(
             _test_config
