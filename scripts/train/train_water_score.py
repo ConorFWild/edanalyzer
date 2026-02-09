@@ -376,8 +376,11 @@ def main(config_path, batch_size=12, num_workers=None):
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
+    rprint(f'Outputting results to: {output}')
 
     storage_name = f"sqlite:///{output_dir}/{study_name}.db"
+    rprint(f'Storing training data at: {storage_name}')
+
     pruner = optuna.pruners.HyperbandPruner(
         min_resource=2,
         max_resource=3000,
