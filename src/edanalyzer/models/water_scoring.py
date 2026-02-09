@@ -220,7 +220,7 @@ class LitWaterScoring(lt.LightningModule):
                 }
             )
 
-    # def on_train_epoch_end(self):
+    def on_train_epoch_end(self):
     #     # Log the predictions
     #     predictions = self.train_annotations
 
@@ -275,9 +275,9 @@ class LitWaterScoring(lt.LightningModule):
     #     )
     #     train_annotation_table.append(annotations)
 
-    #     self.train_annotations.clear()
+        self.train_annotations.clear()
 
-    # def on_validation_epoch_end(self):
+    def on_validation_epoch_end(self):
         # Log the predictions
         # predictions = self.test_annotations
 
@@ -382,4 +382,4 @@ class LitWaterScoring(lt.LightningModule):
         # self.log('rmsd', np.sqrt(np.mean(np.square(annotations['corr']-annotations['corr_hat']))), 4, sync_dist=True)
 
 
-        # self.test_annotations.clear()
+        self.test_annotations.clear()

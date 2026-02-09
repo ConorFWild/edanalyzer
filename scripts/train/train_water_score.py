@@ -483,7 +483,6 @@ def main(config_path, batch_size=12, num_workers=None):
     train_data = _get_train_data(config, input_data, )
     test_data = _get_test_data(config, input_data, )
 
-
     # Setup study logging
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
 
