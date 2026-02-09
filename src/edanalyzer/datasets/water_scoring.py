@@ -154,21 +154,21 @@ def get_xmap(path):
 def get_water(st, water):
     return st[0][str(water[0])][str(water[1])][0]
 
-def get_structure_masks(st, water_atom, grid_size, radius=1.5):
+def get_structure_masks(st, water_atom, template, radius=1.5):
     ns = gemmi.NeighborSearch(st[0], st.cell, 5).populate(include_h=False)
     marks = ns.find_neighbors(water_atom, min_dist=0.1, max_dist=6)
 
     # Setup the grids
-    mask_carbon = gemmi.FloatGrid(grid_size, grid_size, grid_size)
+    mask_carbon = gemmi.FloatGrid(template.nu, template.nv, template.nw)
     mask_carbon.spacegroup = gemmi.find_spacegroup_by_name(st.spacegroup_hm)
     mask_carbon.set_unit_cell(st.cell)
-    mask_sulfur = gemmi.FloatGrid(grid_size, grid_size, grid_size)
+    mask_sulfur = gemmi.FloatGrid(template.nu, template.nv, template.nw)
     mask_sulfur.spacegroup = gemmi.find_spacegroup_by_name(st.spacegroup_hm)
     mask_sulfur.set_unit_cell(st.cell)
-    mask_nitrogen = gemmi.FloatGrid(grid_size, grid_size, grid_size)
+    mask_nitrogen = gemmi.FloatGrid(template.nu, template.nv, template.nw)
     mask_nitrogen.spacegroup = gemmi.find_spacegroup_by_name(st.spacegroup_hm)
     mask_nitrogen.set_unit_cell(st.cell)
-    mask_oxygen = gemmi.FloatGrid(grid_size, grid_size, grid_size)
+    mask_oxygen = gemmi.FloatGrid(template.nu, template.nv, template.nw)
     mask_oxygen.spacegroup = gemmi.find_spacegroup_by_name(st.spacegroup_hm)
     mask_oxygen.set_unit_cell(st.cell)
 
@@ -274,7 +274,7 @@ class WaterScoringDataset(Dataset):
         image_score_decoy_mask[image_score_decoy_mask >= 0.5] = 1.0
 
         # Get the structure mask
-        structure_masks = get_structure_masks(st, water_residue)
+        structure_masks = get_structure_masks(st, water_residue, xmap)
 
         # Sample the structure masks
         structure_mask_samples = [
