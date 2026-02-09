@@ -306,7 +306,7 @@ class WaterScoringDataset(Dataset):
         # Noise the map
         if self.test_train == 'train':
             u_s = self.rng.uniform(0.0, self.max_z_noise)
-            noise = self.rng.normal(size=(self.grid_size,self.grid_size,self.grid_size)) * u_s
+            noise = self.rng.normal(size=(self.grid_sampling,self.grid_sampling,self.grid_sampling)) * u_s
             xmap_sample += noise.astype(np.float32)
 
         # Potentially flip the maps
