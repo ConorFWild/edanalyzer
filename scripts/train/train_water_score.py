@@ -494,9 +494,9 @@ def main(config_path, batch_size=12, num_workers=None):
         os.mkdir(output)
     rprint(f'Outputting results to: {output}')
 
-    dataset = test_dataset(train_data, config)
-    model = test_model(output, dataset, config)
-    exit()
+    # dataset = test_dataset(train_data, config)
+    # model = test_model(output, dataset, config)
+    # exit()
 
 
     storage_name = f"sqlite:///{output_dir}/{study_name}.db"
@@ -561,7 +561,7 @@ def main(config_path, batch_size=12, num_workers=None):
             sampler=TPESampler(constant_liar=True),
             pruner=pruner,
         )
-    exit()
+    # exit()
     study.optimize(
         lambda _x: objective(
             _x, 
