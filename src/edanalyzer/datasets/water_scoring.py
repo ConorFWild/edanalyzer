@@ -300,11 +300,15 @@ class WaterScoringDataset(Dataset):
         structure_masks = get_structure_masks(st, water_atom, xmap)
 
         # Sample the structure masks
-        structure_mask_samples = [
-            _sample_xmap(structure_mask, transform, np.copy(self.sample_array)) 
-            for structure_mask 
-            in structure_masks
-            ]
+        structure_mask_samples = []
+        for structure_mask in structure_masks:
+            structure_mask_samples.append(
+                _sample_xmap(
+                structure_mask, 
+                transform, 
+                np.copy(self.sample_array),
+                ) 
+            )
        
         # Gaussian filter the map
         if self.test_train == 'train':
