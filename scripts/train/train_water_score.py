@@ -408,8 +408,20 @@ def test_dataset(train_data, config):
     dataset_train= WaterScoringDataset(
             _train_config
         )
+    rprint('Xmap')
     rprint(dataset_train[0])
-
+    rprint('carbon')
+    rprint(dataset_train[3][0].sum())
+    rprint(dataset_train[1][0])
+    rprint('Oxygen')
+    rprint(dataset_train[2][0].sum())
+    rprint(dataset_train[2][0])
+    rprint('Nitrogen')
+    rprint(dataset_train[3][0].sum())
+    rprint(dataset_train[3][0])
+    rprint('Sulfur')
+    rprint(dataset_train[4][0].sum())
+    rprint(dataset_train[4][0])
 def main(config_path, batch_size=12, num_workers=None):
     rprint(f'Running train training from config file: {config_path}')
     # Load config
