@@ -155,7 +155,14 @@ def get_water(st, water):
     return st[0][str(water[0])][str(water[1])][0]
 
 def get_structure_masks(st, water_atom, template, radius=1.5):
-    ns = gemmi.NeighborSearch(st[0], st.cell, 5).populate(include_h=False)
+    ns = gemmi.NeighborSearch(st[0], st.cell, 5)
+    for n_chain, chain in enumerate(st[0]):
+        for n_res, res in enumerate(chain):
+            if res.name in ['HOH', 'LIG', 'XXX']:
+                continue
+            for n_atom, atom in enumerate(res):
+                ns.add_atom(atom, n_chain, n_res, n_atom)
+
     marks = ns.find_neighbors(water_atom, min_dist=0.1, max_dist=6)
     rprint(f'Got {len(marks)} marks in cell {ns}!')
 
