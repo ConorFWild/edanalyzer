@@ -310,6 +310,8 @@ class WaterScoringDataset(Dataset):
             rprint(structure_mask)
             rprint(structure_mask.spacegroup)
             rprint(structure_mask.unit_cell)
+            rprint(f'Total mask volume: {np.array(structure_mask).sum()}')
+
             structure_mask_samples.append(
                 _sample_xmap(
                 structure_mask, 
