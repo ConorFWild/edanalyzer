@@ -302,6 +302,9 @@ class WaterScoringDataset(Dataset):
         # Sample the structure masks
         structure_mask_samples = []
         for structure_mask in structure_masks:
+            rprint(structure_mask)
+            rprint(structure_mask.spacegroup)
+            rprint(structure_mask.unit_cell)
             structure_mask_samples.append(
                 _sample_xmap(
                 structure_mask, 
