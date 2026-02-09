@@ -140,9 +140,9 @@ def _get_train_data(config, input_data, ):
     # rprint(db)
     # show(WaterAnnotation)
     with db_session:
-        WaterAnnotation.select().show()
+        # WaterAnnotation.select().show()
         test_data_idxs = tuple(x for x in config['test_data_idxs'])
-        rprint(test_data_idxs)
+        # rprint(test_data_idxs)
         query = select(
             (c.dataIdx, c.landmarkIdx, c.annotation) 
             for c in WaterAnnotation 
@@ -182,9 +182,9 @@ def _get_train_data(config, input_data, ):
 def _get_test_data(config, input_data, ):
     # Get datasets from the database
     with db_session:
-        WaterAnnotation.select().show()
+        # WaterAnnotation.select().show()
         test_data_idxs = tuple(x for x in config['test_data_idxs'])
-        rprint(test_data_idxs)
+        # rprint(test_data_idxs)
         query = select(
             (c.dataIdx, c.landmarkIdx, c.annotation) 
             for c in WaterAnnotation 
