@@ -502,7 +502,7 @@ def main(config_path, batch_size=12, num_workers=None):
             sampler=TPESampler(constant_liar=True),
             pruner=pruner,
         )
-
+    test_dataset(train_data, config)
     exit()
     study.optimize(
         lambda _x: objective(
