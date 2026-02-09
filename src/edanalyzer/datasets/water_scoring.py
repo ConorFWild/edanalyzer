@@ -157,6 +157,7 @@ def get_water(st, water):
 def get_structure_masks(st, water_atom, template, radius=1.5):
     ns = gemmi.NeighborSearch(st[0], st.cell, 5).populate(include_h=False)
     marks = ns.find_neighbors(water_atom, min_dist=0.1, max_dist=6)
+    rprint(f'Got {len(marks)} marks in cell {ns}!')
 
     # Setup the grids
     mask_carbon = gemmi.FloatGrid(template.nu, template.nv, template.nw)
