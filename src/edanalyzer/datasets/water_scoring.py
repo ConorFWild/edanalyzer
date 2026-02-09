@@ -357,20 +357,28 @@ class WaterScoringDataset(Dataset):
         if (self.test_train == 'train') & (self.rng.uniform(0.0, 1.0) > self.p_flip):
             if self.rng.uniform(0.0, 1.0) > 0.5:
                 xmap_sample = np.flip(xmap_sample, 0)
-                z_map_sample = np.flip(z_map_sample, 0)
+                # z_map_sample = np.flip(z_map_sample, 0)
+
                 image_score_decoy_mask = np.flip(image_score_decoy_mask, 0)
+                for j in range(len(structure_mask_samples)):
+                    structure_mask_samples[j] = np.flip(structure_mask_samples[j], 0)
                 # image_selected_atom_mask = np.flip(image_selected_atom_mask, 0)
 
             if self.rng.uniform(0.0, 1.0) > 0.5:
                 xmap_sample = np.flip(xmap_sample, 1)
-                z_map_sample = np.flip(z_map_sample, 1)
+                # z_map_sample = np.flip(z_map_sample, 1)
                 image_score_decoy_mask = np.flip(image_score_decoy_mask, 1)
+                for j in range(len(structure_mask_samples)):
+                    structure_mask_samples[j] = np.flip(structure_mask_samples[j], 1)
+
                 # image_selected_atom_mask = np.flip(image_selected_atom_mask, 1)
 
             if self.rng.uniform(0.0, 1.0) > 0.5:
                 xmap_sample = np.flip(xmap_sample, 2)
-                z_map_sample = np.flip(z_map_sample, 2)
+                # z_map_sample = np.flip(z_map_sample, 2)
                 image_score_decoy_mask = np.flip(image_score_decoy_mask, 2)
+                for j in range(len(structure_mask_samples)):
+                    structure_mask_samples[j] = np.flip(structure_mask_samples[j], 2)
                 # image_selected_atom_mask = np.flip(image_selected_atom_mask, 2)
 
 
