@@ -147,10 +147,10 @@ class LitWaterScoring(lt.LightningModule):
         # loss_corr = F.mse_loss(corr_hat, corr_)
 
         y_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) #* self.max_pos_atom_mask_radius
-        rprint(y_hat)
-        rprint(y)
-        rprint(y[:,1 ])
-        loss = F.mse_loss(y_hat, y)
+        # rprint(y_hat)
+        # rprint(y)
+        # rprint(y[:,1 ])
+        loss = F.mse_loss(y_hat, y[:,1].view(y[:,1].size(0), -1))
 
         # score = F.softmax(self.fc(z_encoding))
         # loss = categorical_loss(score, y)
@@ -170,8 +170,8 @@ class LitWaterScoring(lt.LightningModule):
                     'dtag': str(dtag[j]),
                     'chain': str(chain[j]),
                     'seqid': str(seqid[j]),
-                    'y': float(y[j].to(torch.device("cpu")).detach().numpy()),
-                    'y_hat': float(y_hat[j].to(torch.device("cpu")).detach().numpy()),
+                    'y': float(y[j][1].to(torch.device("cpu")).detach().numpy()),
+                    'y_hat': float(y_hat[j][0].to(torch.device("cpu")).detach().numpy()),
                 }
             )
         # self.annotations[]
@@ -199,10 +199,10 @@ class LitWaterScoring(lt.LightningModule):
         # corr_hat = (F.tanh(self.fc_corr(z_encoding), ) + 1 )/ 2
         # loss_corr = F.mse_loss(corr_hat, corr_)
         y_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) #* self.max_pos_atom_mask_radius
-        rprint(y_hat)
-        rprint(y)
-        rprint(y[:, 1])
-        loss = F.mse_loss(y_hat, y)
+        # rprint(y_hat)
+        # rprint(y)
+        # rprint(y[:, 1])
+        loss = F.mse_loss(y_hat, y[:,1].view(y[:,1].size(0), -1))
         # score = F.sigmoid(self.fc(z_encoding))
         # score = F.softmax(self.fc(z_encoding))
         # loss = categorical_loss(score, y)
@@ -221,8 +221,8 @@ class LitWaterScoring(lt.LightningModule):
                     'dtag': str(dtag[j]),
                     'chain': str(chain[j]),
                     'seqid': str(seqid[j]),
-                    'y': float(y[j].to(torch.device("cpu")).detach().numpy()),
-                    'y_hat': float(y_hat[j].to(torch.device("cpu")).detach().numpy()),
+                    'y': float(y[j][1].to(torch.device("cpu")).detach().numpy()),
+                    'y_hat': float(y_hat[j][0].to(torch.device("cpu")).detach().numpy()),
                 }
             )
 
