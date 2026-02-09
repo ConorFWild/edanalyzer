@@ -174,14 +174,15 @@ def get_structure_masks(st, water_atom, template, radius=1.5):
 
     # Go through marks
     for mark in marks:
+        pos = mark.pos()
         if mark.element.name == 'C':
-            mask_carbon.set_points_around(mark.pos, radius, 1.0)
+            mask_carbon.set_points_around(pos, radius, 1.0)
         elif mark.element.name == 'O':
-            mask_oxygen.set_points_around(mark.pos, radius, 1.0)
+            mask_oxygen.set_points_around(pos, radius, 1.0)
         elif mark.element.name == 'N':
-            mask_nitrogen.set_points_around(mark.pos, radius, 1.0)
+            mask_nitrogen.set_points_around(pos, radius, 1.0)
         elif mark.element.name == 'S':
-            mask_sulfur.set_points_around(mark.pos, radius, 1.0)
+            mask_sulfur.set_points_around(pos, radius, 1.0)
         else:
             continue
 
