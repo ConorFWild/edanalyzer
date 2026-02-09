@@ -135,9 +135,9 @@ def _get_train_test_idxs_full_conf(root, config):
     return train_config, test_config
 
 
-def _get_train_config(config, input_data, db):
-    rprint(db)
-    show(WaterAnnotation)
+def _get_train_config(config, input_data, ):
+    # rprint(db)
+    # show(WaterAnnotation)
     with db_session:
         WaterAnnotation.select().show()
         test_data_idxs = tuple(x for x in config['test_data_idxs'])
@@ -161,20 +161,52 @@ def _get_train_config(config, input_data, db):
     for data_idx, data in input_data.items():
         for landmark_idx in data['landmarks']:
             idx = (int(data_idx), int(landmark_idx))
-            rprint(idx)
+            # rprint(idx)
             if idx in annotation_data:
-                train_data[(data_idx, landmark_idx)] = data
-                train_data[(data_idx, landmark_idx)]['annotation'] = annotation_data[(data_idx, landmark_idx)]
+                train_data[idx] = data
+                train_data[idx]['annotation'] = annotation_data[idx]
 
     rprint('Train Data')
     rprint(train_data)
 
+    return train_data
 
-def _get_test_config(config, db):
+
+def _get_test_config(config, input_data, ):
     # Get datasets from the database
+    with db_session:
+        WaterAnnotation.select().show()
+        test_data_idxs = tuple(x for x in config['test_data_idxs'])
+        rprint(test_data_idxs)
+        query = select(
+            (c.dataIdx, c.landmarkIdx, c.annotation) 
+            for c in WaterAnnotation 
+            )
+        query = select(
+            (c.dataIdx, c.landmarkIdx, c.annotation) 
+            for c in WaterAnnotation 
+            if c.dataIdx in test_data_idxs
+            )
+        
+        annotation_data = {(x[0], x[1]): x[2] for x in query}
 
-    # 
-    ...
+    rprint('annotation data')
+    rprint(annotation_data)
+
+    test_data = {}
+    for data_idx, data in input_data.items():
+        for landmark_idx in data['landmarks']:
+            idx = (int(data_idx), int(landmark_idx))
+            # rprint(idx)
+            if idx in annotation_data:
+                test_data[idx] = data
+                test_data[idx]['annotation'] = annotation_data[idx]
+
+    rprint('Test Data')
+    rprint(test_data)
+    
+    return test_data
+    
 
 def objective(trial, output=None, train_config=None, test_config=None):
     # Suggest hyperparameters
@@ -333,8 +365,8 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the training and test data
     rprint(f'Getting train/test data...')
-    train_config = _get_train_config(config, input_data, db)
-    test_config = _get_test_config(config, input_data, db)
+    train_config = _get_train_config(config, input_data, )
+    test_config = _get_test_config(config, input_data, )
 
     # Setup study logging
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
