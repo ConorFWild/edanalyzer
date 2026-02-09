@@ -175,6 +175,7 @@ def get_structure_masks(st, water_atom, template, radius=1.5):
 
     # Go through marks
     for mark in marks:
+        rprint(mark)
         pos = mark.pos()
         if mark.element.name == 'C':
             mask_carbon.set_points_around(pos, radius, 1.0)
