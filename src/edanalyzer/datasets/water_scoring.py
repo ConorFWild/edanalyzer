@@ -230,7 +230,7 @@ class WaterScoringDataset(Dataset):
         self.z_cutoff = config['z_cutoff']
 
         self.grid_sampling = int(config['grid_sampling']) #32
-        self.grid_length = float(config['grid_length']) / self.grid_sampling
+        self.grid_length = float(config['grid_length']) 
         self.grid_step = self.grid_length / self.grid_sampling
         self.sample_array = np.zeros(
             (self.grid_sampling, self.grid_sampling, self.grid_sampling),
