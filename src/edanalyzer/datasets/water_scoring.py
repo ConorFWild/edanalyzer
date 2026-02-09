@@ -276,6 +276,8 @@ class WaterScoringDataset(Dataset):
             sd=self.grid_step
         )
         rprint('Transform')
+        rprint(self.grid_sampling)
+        rprint(self.grid_step)
         rprint(transform.vec.tolist())
         rprint(transform.mat.tolist())
         
