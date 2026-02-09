@@ -443,7 +443,7 @@ def test_model(trial_output_dir, dataset, config):
         )
     
     data = dataset[0]
-    result = model[data]
+    result = model(data)
     return result
 
     ...
