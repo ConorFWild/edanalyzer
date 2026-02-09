@@ -275,7 +275,10 @@ class WaterScoringDataset(Dataset):
             n=self.grid_sampling,
             sd=self.grid_step
         )
-
+        rprint('Transform')
+        rprint(transform.vec.tolist())
+        rprint(transform.mat.tolist())
+        
         # Get the xmap sample
         rprint(xmap)
         rprint(xmap.spacegroup)
@@ -311,13 +314,14 @@ class WaterScoringDataset(Dataset):
             rprint(structure_mask.spacegroup)
             rprint(structure_mask.unit_cell)
             rprint(f'Total mask volume: {np.array(structure_mask).sum()}')
-
-            structure_mask_samples.append(
-                _sample_xmap(
+            sample = _sample_xmap(
                 structure_mask, 
                 transform, 
                 np.copy(self.sample_array),
-                ) 
+                )
+            rprint(sample.sum())
+            structure_mask_samples.append(
+                sample 
             )
        
         # Gaussian filter the map
