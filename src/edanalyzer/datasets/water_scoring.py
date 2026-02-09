@@ -194,6 +194,11 @@ def get_structure_masks(st, water_atom, template, radius=1.5):
     mask_oxygen.symmetrize_max()
     mask_nitrogen.symmetrize_max()
     mask_sulfur.symmetrize_max()
+
+    rprint(f'Total carbon volume: {np.array(mask_carbon).sum()}')
+    rprint(f'Total oxygen volume: {np.array(mask_oxygen).sum()}')
+    rprint(f'Total nitrogen volume: {np.array(mask_nitrogen).sum()}')
+    rprint(f'Total sulfur volume: {np.array(mask_sulfur).sum()}')
     
     # Return grids
     return mask_carbon, mask_oxygen, mask_nitrogen, mask_sulfur 
