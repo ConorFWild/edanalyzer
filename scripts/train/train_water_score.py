@@ -165,6 +165,7 @@ def _get_train_data(config, input_data, ):
             # rprint(idx)
             if idx in annotation_data:
                 train_data[idx] = data
+                rprint(data)
                 train_data[idx]['annotation'] = annotation_data[idx]
                 train_data[idx]['landmark'] = data['landmarks'][landmark_idx]
                 del train_data[idx]['landmarks']
