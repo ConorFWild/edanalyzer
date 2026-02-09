@@ -316,11 +316,11 @@ def objective(
         dirpath=str(trial_output_dir),
         filename='sample-mnist-{epoch:02d}-{test_loss:.2f}'
     )
-    checkpoint_callback_best_rmsd = ModelCheckpoint(
-        monitor='rmsd',
-        dirpath=str(trial_output_dir),
-        filename='sample-mnist-{epoch:02d}-{rmsd:.2f}'
-    )
+    # checkpoint_callback_best_rmsd = ModelCheckpoint(
+    #     monitor='test_loss',
+    #     dirpath=str(trial_output_dir),
+    #     filename='sample-mnist-{epoch:02d}-{rmsd:.2f}'
+    # )
 
     # Setup csv logger
     logger = CSVLogger(str(trial_output_dir / 'logs'))
@@ -342,9 +342,9 @@ def objective(
         callbacks=[
             checkpoint_callback,
             checkpoint_callback_best,
-            checkpoint_callback_best_rmsd,
-            PyTorchLightningPruningCallback(trial, monitor='rmsd'),
-            EarlyStopping('rmsd', patience=10)
+            # checkpoint_callback_best_rmsd,
+            PyTorchLightningPruningCallback(trial, monitor='test_loss'),
+            EarlyStopping('test_loss', patience=10)
         ],
         enable_progress_bar=False,
         max_epochs=3000,
@@ -388,7 +388,7 @@ def objective(
 
     # Train the model
     trainer.fit(model, dataset_train, dataset_test, )
-    return trainer.callback_metrics['rmsd'].item()
+    return trainer.callback_metrics['test_loss'].item()
 
 def test_dataset(train_data, config):
     
