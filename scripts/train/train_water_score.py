@@ -493,7 +493,7 @@ def main(config_path, batch_size=12, num_workers=None):
     rprint(f'Outputting results to: {output}')
 
     dataset = test_dataset(train_data, config)
-    model = test_model(output, config)
+    model = test_model(output, dataset, config)
     # exit()
 
 
