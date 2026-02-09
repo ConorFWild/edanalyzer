@@ -217,7 +217,7 @@ class WaterScoringDataset(Dataset):
 
 
     def __len__(self):
-        return len(self.resampled_indexes)
+        return len(self.data_idx_mapping)
 
     def __getitem__(self, idx: int):
         # Get the data
