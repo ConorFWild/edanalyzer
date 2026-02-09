@@ -259,6 +259,13 @@ class WaterScoringDataset(Dataset):
             sd=self.grid_step
         )
 
+        # Get the xmap sample
+        xmap_sample_data = _sample_xmap(
+            xmap,
+            transform,
+            np.copy(self.sample_array)
+        )
+
         # Get the xmap mask
         decoy_score_mask_grid = _get_ligand_mask_float(
             water_residue,
