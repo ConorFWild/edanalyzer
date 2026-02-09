@@ -372,7 +372,7 @@ def main(config_path, batch_size=12, num_workers=None):
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
 
     # Define the study
-    study_name = config['study_name']
+    study_name = str(config['study_name'])
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
