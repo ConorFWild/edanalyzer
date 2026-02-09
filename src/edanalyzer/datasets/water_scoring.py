@@ -163,7 +163,7 @@ def get_structure_masks(st, water_atom, template, radius=1.5):
             for n_atom, atom in enumerate(res):
                 ns.add_atom(atom, n_chain, n_res, n_atom)
 
-    marks = ns.find_neighbors(water_atom, min_dist=0.1, max_dist=6)
+    marks = ns.find_neighbors(water_atom, min_dist=0.1, max_dist=4)
     rprint(f'Got {len(marks)} marks in cell {ns}!')
 
     # Setup the grids
@@ -185,8 +185,8 @@ def get_structure_masks(st, water_atom, template, radius=1.5):
         rprint(mark)
         pos = mark.pos()
         rprint([pos.x, pos.y, pos.z])
-        image = st.cell.find_nearest_pbc_image(water_atom.pos, mark.to_cra(st[0]).atom.pos, mark.image_idx)
-        rprint(image)
+        # image = st.cell.find_nearest_pbc_image(water_atom.pos, mark.to_cra(st[0]).atom.pos, mark.image_idx)
+        # rprint(image)
         if mark.element.name == 'C':
             mask_carbon.set_points_around(pos, radius, 1.0)
         elif mark.element.name == 'O':
