@@ -274,7 +274,7 @@ class WaterScoringDataset(Dataset):
         image_score_decoy_mask[image_score_decoy_mask >= 0.5] = 1.0
 
         # Get the structure mask
-        structure_masks = get_structure_masks(st, water_residue, xmap)
+        structure_masks = get_structure_masks(st, water_atom, xmap)
 
         # Sample the structure masks
         structure_mask_samples = [
