@@ -275,6 +275,9 @@ class WaterScoringDataset(Dataset):
         )
 
         # Get the xmap sample
+        rprint(xmap)
+        rprint(xmap.spacegroup)
+        rprint(xmap.unit_cell)
         xmap_sample_data = _sample_xmap(
             xmap,
             transform,
