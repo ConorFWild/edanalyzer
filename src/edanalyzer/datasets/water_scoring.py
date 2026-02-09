@@ -141,9 +141,15 @@ def _get_overlap_volume(orientation, centroid, known_hit_pose_residue, decoy_res
 def get_structure(path):
     return gemmi.read_structure(str(path))
 
+# def get_xmap(path):
+#     m = gemmi.read_ccp4_map(str(path), setup=True)
+#     return m.grid
+
 def get_xmap(path):
-    m = gemmi.read_ccp4_map(str(path), setup=True)
-    return m.grid
+    m = gemmi.read_mtz_file(str(path), )
+    grid = m.transform_f_phi_to_map('FWT', 'PHWT', sample_rate=3)
+    return grid
+
 
 def get_water(st, water):
     return st[0][str(water[0])][str(water[1])][0]
