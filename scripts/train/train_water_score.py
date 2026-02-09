@@ -440,7 +440,7 @@ def test_model(trial_output_dir, dataset, config):
     model = LitWaterScoring(
         trial_output_dir, 
         hyperparameters,
-        ).test()
+        ).eval()
     
     data = dataset[0]
     rprint(data)
