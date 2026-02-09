@@ -370,5 +370,6 @@ class WaterScoringDataset(Dataset):
                     axis=0,
                     dtype=np.float32
                 )),
-            torch.from_numpy(np.array(hit, dtype=np.float32))
+            torch.from_numpy(np.array(hit, dtype=np.float32)),
+            centroid
         )
