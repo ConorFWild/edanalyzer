@@ -166,7 +166,7 @@ def _get_train_data(config, input_data, ):
             if idx in annotation_data:
                 train_data[idx] = data
                 train_data[idx]['annotation'] = annotation_data[idx]
-                train_data[idx]['landmark'] = annotation_data[idx]['landmarks'][int(landmark_idx)]
+                train_data[idx]['landmark'] = data['landmarks'][int(landmark_idx)]
                 del train_data[idx]['landmarks']
 
     rprint('Train Data')
