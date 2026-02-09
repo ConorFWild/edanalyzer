@@ -149,7 +149,6 @@ class LitWaterScoring(lt.LightningModule):
         y_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) #* self.max_pos_atom_mask_radius
         rprint(y_hat)
         rprint(y)
-        rprint(y_hat[:, 1])
         rprint(y[:,1 ])
         loss = F.mse_loss(y_hat, y)
 
@@ -202,7 +201,6 @@ class LitWaterScoring(lt.LightningModule):
         y_hat = ((F.hardtanh(self.fc_corr(z_encoding), min_val=-1.0, max_val=1.0) + 1) / 2) #* self.max_pos_atom_mask_radius
         rprint(y_hat)
         rprint(y)
-        rprint(y_hat[:, 1])
         rprint(y[:, 1])
         loss = F.mse_loss(y_hat, y)
         # score = F.sigmoid(self.fc(z_encoding))
