@@ -368,13 +368,5 @@ class WaterScoringDataset(Dataset):
                     axis=0,
                     dtype=np.float32
                 )),
-            torch.from_numpy(
-                np.stack(
-                    [image_score_decoy_mask],
-                    axis=0,
-                    dtype=np.float32
-                )),
-            torch.from_numpy(np.array(rmsd, dtype=np.float32)),
-            torch.from_numpy(np.array(score, dtype=np.float32)),
             torch.from_numpy(np.array(hit, dtype=np.float32))
         )
