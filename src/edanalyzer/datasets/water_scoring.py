@@ -254,7 +254,7 @@ class WaterScoringDataset(Dataset):
         transform = _get_transform_from_orientation_centroid(
             orientation,
             centroid,
-            n=self.grid_size,
+            n=self.grid_sampling,
             sd=self.grid_step
         )
 
