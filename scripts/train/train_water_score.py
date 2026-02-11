@@ -348,7 +348,7 @@ def objective(
         ],
         enable_progress_bar=False,
         max_epochs=3000,
-        check_val_every_n_epoch=50
+        check_val_every_n_epoch=5
     )
 
     # Create the training dataset
