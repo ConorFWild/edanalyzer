@@ -390,7 +390,7 @@ class LitWaterScoring(lt.LightningModule):
         out_file = self.output / 'test_annotations.npy'
 
         new_data = np.array(
-            [[_data['y'], _data['y_hat']] for _data in self.test_annotations],
+            [[self.trainer.current_epoch, _data['y'], _data['y_hat']] for _data in self.test_annotations],
         )
 
         if out_file.exists():
