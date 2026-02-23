@@ -11,7 +11,7 @@ import numpy as np
 import zarr
 from numcodecs import Blosc, Delta
 import pandas as pd
-
+import numpy as np
 
 # from .resnet import resnet18, resnet10
 from .resnet import _resnet, BasicBlock, resnet18, resnet10
@@ -386,6 +386,20 @@ class LitWaterScoring(lt.LightningModule):
         # # self.log('lr', )
 
         # self.log('rmsd', np.sqrt(np.mean(np.square(annotations['corr']-annotations['corr_hat']))), 4, sync_dist=True)
+
+        out_file = self.output_dir / 'test_annotations.npy'
+
+        new_data = np.array(
+            [[_data['y'], _data['y_hat']] for _data in self.test_annotations],
+        )
+
+        if out_file.exists():
+            data = np.load(out_file)
+            output_data = np.concatenate((data, new_data))
+            np.save(out_file, output_data)
+
+        else:
+            np.save(out_file, new_data)
 
 
         self.test_annotations.clear()
