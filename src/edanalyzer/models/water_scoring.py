@@ -387,7 +387,7 @@ class LitWaterScoring(lt.LightningModule):
 
         # self.log('rmsd', np.sqrt(np.mean(np.square(annotations['corr']-annotations['corr_hat']))), 4, sync_dist=True)
 
-        out_file = self.output_dir / 'test_annotations.npy'
+        out_file = self.output / 'test_annotations.npy'
 
         new_data = np.array(
             [[_data['y'], _data['y_hat']] for _data in self.test_annotations],
