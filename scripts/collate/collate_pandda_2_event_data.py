@@ -72,8 +72,6 @@ def main(config_path):
 
     #### COMMENTS BEGIN HERE
 
-
-
     try:
         del root['pandda_2']
     except:
