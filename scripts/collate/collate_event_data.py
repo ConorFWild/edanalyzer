@@ -579,12 +579,12 @@ def add_molecule_conformations(tables: Tables, dry=False):
             mol_conf_idx += 1
 
 
-def _make_valid_smiles_table(pandda_2_group):
-    # try:
-    #     del pandda_2_group['ligand_confs']
-    # except Exception as e:
-    #     print(e)
-    valid_smiles_group = pandda_2_group.create_dataset(
+def _make_valid_smiles_table(group):
+    table_name = 'valid_smiles'
+    if table_name in [x for x in group.keys()]:
+        return group[table_name]
+
+    valid_smiles_group = group.create_dataset(
         'valid_smiles',
         shape=(0,),
         chunks=(1,),
@@ -593,13 +593,12 @@ def _make_valid_smiles_table(pandda_2_group):
     return valid_smiles_group
 
 
-def _make_mol_conf_table(pandda_2_group):
-    # try:
-    #     del pandda_2_group['ligand_confs']
-    # except Exception as e:
-    #     print(e)
+def _make_mol_conf_table(group):
+    table_name = 'valid_smiles'
+    if table_name in [x for x in group.keys()]:
+        return group[table_name]
     
-    mol_conf_group = pandda_2_group.create_dataset(
+    mol_conf_group = group.create_dataset(
             'ligand_confs',
             shape=(0,),
             chunks=(1,),
