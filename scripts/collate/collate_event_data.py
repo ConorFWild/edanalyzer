@@ -101,6 +101,9 @@ def process_pandda_event(
 
 
     events_yaml = dataset_dir / 'events.yaml'
+    if not events_yaml.exists():
+        print(f'\t\t\tSKIPPING EVENT: No event yaml at {events_yaml}')
+        return
     with open(events_yaml, 'r') as f:
         events = yaml.safe_load(f)
 
