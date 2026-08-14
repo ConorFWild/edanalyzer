@@ -110,7 +110,7 @@ def process_pandda_event(
     if len(event_distances) > 0:
         closest_event_id = min(event_centroids, key=lambda _event_num: event_distances[_event_num])
         x, y, z = event_centroids[closest_event_id]
-        rprint(f'\t\t\tClosest event distance is {round(event_distances[closest_event_id, 2])}')
+        rprint(f'\t\t\tClosest event distance is {round(event_distances[closest_event_id], 2)}')
 
     else:
         rprint(
