@@ -410,6 +410,8 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
 
             # Try events until one works
             for _idx, _row in high_conf_table.iterrows():
+                if processed:
+                    continue
         
                 # Unpack the row information
                 dtag, event_idx, bdc, conf, viewed, size, high_resolution, comment, x, y, z = (
@@ -496,6 +498,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
                         st_path=refined_pdb_path,
                         dry=dry
                     ) 
+                print(f"\t\tSUCCESS: Processed {dtag}")
                 return True
         ...
         
