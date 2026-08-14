@@ -350,7 +350,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
     print(f'\tGot {len(pandda_tables)} valid PanDDAs tables!')
 
     if len(pandda_tables) == 0:
-        print(f'\tSKIPPING MODEL BUILDING DIR: No PanDDA tables!')
+        print(f'\tSKIPPING SYSTEM: No PanDDA tables!')
 
         return 
 
@@ -367,7 +367,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
     new_good_refinement_datasets = [dtag for dtag in good_refinement_datasets if dtag not in known_datasets]
     print(f'\tGot {len(new_good_refinement_datasets)} new datasets with good refinements!')
     if len(new_good_refinement_datasets) == 0:
-        print(f'\tSKIPPING PANDDA: No PanDDA tables!')
+        print(f'\tSKIPPING SYSTEM: No PanDDA tables!')
 
         return 
     for dtag in new_good_refinement_datasets:
