@@ -618,7 +618,7 @@ def main(config_path):
     test_systems = config['test']['test_systems']
 
     # Open a file in "w"rite mode
-    zarr_path = '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/event_data_5.zarr'
+    zarr_path = config['collate']['zarr']
     print(f'Updating zarr archive: {zarr_path}')
     root = zarr.open(zarr_path, mode='a')
 
