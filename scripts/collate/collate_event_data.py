@@ -428,17 +428,20 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
                     continue
         
                 # Unpack the row information
-                dtag, event_idx, bdc, conf, viewed, size, high_resolution, comment, x, y, z = (
-                    _row['dtag'], 
-                    _row['event_idx'], 
-                    _row['1-BDC'], 
-                    _row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE], 
-                    _row[constants.PANDDA_INSPECT_VIEWED], 
-                    _row[constants.PANDDA_INSPECT_CLUSTER_SIZE],
-                    _row['high_resolution'],
-                    _row['Comment'],
-                    _row['x'], _row['y'], _row['z']
-                )
+                try:
+                    dtag, event_idx, bdc, conf, viewed, size, high_resolution, comment, x, y, z = (
+                        _row['dtag'], 
+                        _row['event_idx'], 
+                        _row['1-BDC'], 
+                        _row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE], 
+                        _row[constants.PANDDA_INSPECT_VIEWED], 
+                        _row[constants.PANDDA_INSPECT_CLUSTER_SIZE],
+                        _row['high_resolution'],
+                        _row['Comment'],
+                        _row['x'], _row['y'], _row['z']
+                    )
+                except:
+                    continue
         
                 system = _get_system_from_dtag(dtag)
         
