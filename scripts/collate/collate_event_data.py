@@ -750,7 +750,7 @@ def main(config_path):
                 else:
                     for potential_pandda_dir_2 in potential_pandda_dir.glob("*"):
                         if try_exists(potential_pandda_dir_2 / 'analyses' / 'pandda_inspect_events.csv'):
-                            pandda_dirs.append(potential_pandda_dir)
+                            pandda_dirs.append(potential_pandda_dir_2)
 
             print(f'\tGot {len(pandda_dirs)} PanDDA Dirs: {pandda_dirs}')
             if len(pandda_dirs) == 0:
