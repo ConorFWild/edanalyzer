@@ -500,7 +500,6 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
                         dry=dry
                     ) 
                 print(f"\t\tSUCCESS: Processed {dtag}")
-                return True
         ...
         
         
