@@ -40,6 +40,15 @@ from edanalyzer.data.event_data import (
 
 LABXCHEM_DATA_PATH = Path('/dls/labxchem/data')
 
+def try_exists(path):
+    try:
+        if path.exists():
+            return True
+        else: 
+            return False
+    except:
+        return False
+
 @dataclasses.dataclass
 class Tables:
     z_map_sample_metadata_table: Any
@@ -482,12 +491,28 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
 
 def add_valid_smiles(tables: Tables, dry=False):
     df = pd.DataFrame(
-    tables['ligand_data'].get_basic_selection(slice(None), fields=['idx', 'canonical_smiles', ]))
+    tables.ligand_data_table.get_basic_selection(slice(None), fields=['idx', 'canonical_smiles', ]))
 
     unique_smiles_series = df['canonical_smiles'].unique()
 
+    valid_smiles_table = pd.DataFrame(
+    tables.valid_smiles_group.get_basic_selection(slice(None), fields=['idx', 'valid']))
+    print(f'Got {len(valid_smiles_table)} valid smiles')
+
     smiles_validity = {}
+    for j in range(len(df)):
+        ligand_data = df.iloc[j]
+        valid = valid_smiles_table.iloc[j]
+        if valid['valid']:
+            smiles_validity[ligand_data['canonical_smiles']] = True
+        else:
+            smiles_validity[ligand_data['canonical_smiles']] = False
+
+    print(f'Got {len(smiles_validity)} valid smiles')
+
     for idx, smiles in enumerate(unique_smiles_series):
+        if smiles in smiles_validity:
+            continue
         print(f'{idx}/{len(unique_smiles_series)} : {smiles}')
         try:
             m = Chem.MolFromSmiles(smiles)
@@ -502,6 +527,8 @@ def add_valid_smiles(tables: Tables, dry=False):
             smiles_validity[smiles] = False
 
     for _idx, _row in df.iterrows():
+        if _idx < len(smiles_validity):
+            continue
         smiles = _row['canonical_smiles']
         if smiles_validity[smiles]:
             if not dry:
@@ -688,11 +715,11 @@ def main(config_path):
             # Get the pandda dirs
             pandda_dirs = []
             for potential_pandda_dir in analysis_dir.glob('*'):
-                if (potential_pandda_dir / 'analyses' / 'pandda_inspect_events').exists():
+                if try_exists(potential_pandda_dir / 'analyses' / 'pandda_inspect_events'):
                     pandda_dirs.append(potential_pandda_dir)
                 else:
                     for potential_pandda_dir_2 in potential_pandda_dir.glob("*"):
-                        if (potential_pandda_dir_2 / 'analyses' / 'pandda_inspect_events').exists():
+                        if try_exists(potential_pandda_dir_2 / 'analyses' / 'pandda_inspect_events'):
                             pandda_dirs.append(potential_pandda_dir)
 
             print(f'\tGot {len(pandda_dirs)} PanDDA Dirs: {pandda_dirs}')
