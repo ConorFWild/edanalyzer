@@ -61,7 +61,24 @@ comment_dtype = [
     ('comment', 'U150'),
 ]
 
+valid_smiles_dtype = [
+    ('idx', 'i8'),
+    ('valid', '?'),
+]
+
+ligand_conf_dtype = [
+    ('idx', 'i8'),
+    ('ligand_data_idx', 'i8'),
+    ('num_heavy_atoms', 'i8'),
+    ('fragment_canonical_smiles', '<U300'),
+    ('ligand_canonical_smiles', '<U300'),
+    ('positions', '<f4', (150, 3)),
+    ('elements', '<i4', (150,))]
+
 def _make_z_map_sample_metadata_table(group):
+    table_name = 'z_map_sample_metadata'
+    if table_name in [x for x in group.keys()]:
+        return group[table_name]
     table_z_map_sample_metadata = group.create_dataset(
         'z_map_sample_metadata',
         shape=(0,),
@@ -72,6 +89,9 @@ def _make_z_map_sample_metadata_table(group):
 
 
 def _make_z_map_sample_table(group):
+    table_name = 'z_map_sample'
+    if table_name in [x for x in group.keys()]:
+        return group[table_name]
     table_z_map_sample = group.create_dataset(
         'z_map_sample',
         shape=(0,),
@@ -84,6 +104,9 @@ def _make_z_map_sample_table(group):
 
 
 def _make_xmap_sample_table(group):
+    table_name = 'xmap_sample'
+    if table_name in [x for x in group.keys()]:
+        return group[table_name]
     table_xmap_sample = group.create_dataset(
         'xmap_sample',
         shape=(0,),
@@ -95,6 +118,9 @@ def _make_xmap_sample_table(group):
 
 
 def _make_ligand_data_table(group):
+    table_name = 'ligand_data'
+    if table_name in [x for x in group.keys()]:
+        return group[table_name]
     ligand_data_table = group.create_dataset(
         'ligand_data',
         shape=(0,),
@@ -105,6 +131,9 @@ def _make_ligand_data_table(group):
 
 
 def _make_known_hit_pose_table(group):
+    table_name = 'known_hit_pose'
+    if table_name in [x for x in group.keys()]:
+        return group[table_name]
     table_known_hit_pose_sample = group.create_dataset(
         'known_hit_pose',
         shape=(0,),
@@ -116,6 +145,9 @@ def _make_known_hit_pose_table(group):
 
 
 def _make_annotation_table(group):
+    table_name = 'annotation'
+    if table_name in [x for x in group.keys()]:
+        return group[table_name]
     annotation_table = group.create_dataset(
         'annotation',
         shape=(0,),
@@ -127,7 +159,9 @@ def _make_annotation_table(group):
 
 
 def _make_comment_table(group):
-
+    table_name = 'comments'
+    if table_name in [x for x in group.keys()]:
+        return group[table_name]
 
     # def _make_z_map_sample_metadata_table(group):
     annotation_table = group.create_dataset(
@@ -206,16 +240,24 @@ def _get_most_recent_modelled_structure_from_dataset_dir(dataset_dir):
     return model_paths[max(model_paths)]
 
 
+def get_model_path_from_dataset_dir():
+    ...
+
+def get_closest_res_from_st_path(st_path, x, y, z):
+    st = _get_structure_from_path(st_path)
+    hits = _get_st_hits(st)
+    closest_hit_resid, distance = _get_closest_hit(np.array([x, y, z]), hits)
+    
+    return closest_hit_resid, hits[closest_hit_resid], distance
+
 def _get_closest_res_from_dataset_dir(
         dataset_dir,
         x, y, z
 ):
     st_path = _get_most_recent_modelled_structure_from_dataset_dir(dataset_dir)
-    st = _get_structure_from_path(st_path)
-    hits = _get_st_hits(st)
-    closest_hit_resid, distance = _get_closest_hit(np.array([x, y, z]), hits)
+    closest_hit_resid, hits, distance = get_closest_res_from_st_path(st_path, x, y, z)
 
-    return closest_hit_resid, hits[closest_hit_resid], distance
+    return closest_hit_resid, hits, distance
 
 
 def _get_z_map_sample_from_dataset_dir(dataset_dir, x, y, z, idx_z_map):
