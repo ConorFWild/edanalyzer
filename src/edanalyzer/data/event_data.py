@@ -327,9 +327,9 @@ def _get_z_map_metadata_sample_from_dataset_dir(
         event_num,
         conf,
         size,
-x,
-y,
-                    z,
+        x,
+        y,
+        z,
         res
 ):
     z_map_sample_metadata = np.array(

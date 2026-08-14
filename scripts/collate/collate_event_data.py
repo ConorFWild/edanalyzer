@@ -93,15 +93,22 @@ def process_pandda_event(
     
     dataset_dir = pandda_dir / 'processed_datasets' / dtag
 
-    processed_dataset_yaml = dataset_dir / 'processed_dataset.yaml'
-    with open(processed_dataset_yaml, 'r') as f:
-        processed_dataset = yaml.safe_load(f)
+    # processed_dataset_yaml = dataset_dir / 'processed_dataset.yaml'
+    # with open(processed_dataset_yaml, 'r') as f:
+    #     processed_dataset = yaml.safe_load(f)
 
-    selected_model = processed_dataset['Summary']['Selected Model']
+    # selected_model = processed_dataset['Summary']['Selected Model']
+
+
+    events_yaml = dataset_dir / 'events.yaml'
+    with open(events_yaml, 'r') as f:
+        events = yaml.safe_load(f)
+
+    # selected_model = processed_dataset['Summary']['Selected Model']
 
     event_distances = {}
     event_centroids = {}
-    for event_num, event in processed_dataset['Models'][selected_model]['Events'].items():
+    for event_num, event in events.items():
         event_centroid = event['Centroid']
         distance = np.linalg.norm(np.array(event_centroid) - np.array([initial_x, initial_y, initial_z]))
         event_distances[event_num] = distance
@@ -698,7 +705,7 @@ def main(config_path):
     print(f'Got {len(metadata_table)} known events')
     known_datasets = {x for x in metadata_table.loc[metadata_table.index, ['dtag']].values.flatten()}
     print(f'Got {len(known_datasets)} known datasets in zarr archive')
-    print(known_datasets)
+    # print(known_datasets)
 
     # Loop over PanDDA directories
     # for pandda_dir in Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score/').glob('*'):
