@@ -338,7 +338,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
 
     good_refinement_datasets = [x for x in good_refinements['CrystalName']]
     print(f'\tGot {len(good_refinement_datasets)} datasets with good refinement outcomes!')
-
+    print(good_refinement_datasets)
     # Get the PanDDA CSVs
     pandda_tables = {}
     for pandda_dir in pandda_dirs:
