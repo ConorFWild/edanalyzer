@@ -344,12 +344,14 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
     for pandda_dir in pandda_dirs:
         inspect_path = pandda_dir / 'analyses' / 'pandda_inspect_events.csv'
         if not inspect_path.exists():
-            print(f'\tSKIPPING PANDDA: No inspect table at {inspect_path}! ')
+            # print(f'\tSKIPPING PANDDA: No inspect table at {inspect_path}! ')
             continue
         pandda_tables[pandda_dir] = pd.read_csv(inspect_path)
     print(f'\tGot {len(pandda_tables)} valid PanDDAs tables!')
 
     if len(pandda_tables) == 0:
+        print(f'\tSKIPPING MODEL BUILDING DIR: No PanDDA tables!')
+
         return 
 
     # Get the idxs
@@ -359,10 +361,16 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
         idx_ligand_data = len(tables.ligand_data_table),
         annotation_idx = len(tables.annotation_table)    
     )
-    print(idxs)
+    print(f'\tidxs')
 
     # Match each to a high confidence PanDDA event
-    for dtag in good_refinement_datasets:
+    new_good_refinement_datasets = [dtag for dtag in good_refinement_datasets if dtag not in known_datasets]
+    print(f'\tGot {len(new_good_refinement_datasets)} new datasets with good refinements!')
+    if len(new_good_refinement_datasets) == 0:
+        print(f'\tSKIPPING PANDDA: No PanDDA tables!')
+
+        return 
+    for dtag in new_good_refinement_datasets:
         if dtag in known_datasets:
             continue
             # print(f'\tSKIPPING DATASET: Already in known datasets!')
