@@ -371,12 +371,12 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
 
         # Get refined pdb 
         refined_pdb_path = model_building_dir / str(dtag) / 'refine.pdb'
-        if not refined_pdb_path:
+        if not refined_pdb_path.exists():
             print(f'\t\tSKIPPING DATASET: No refined pdb path at {refined_pdb_path}')
             continue
 
         # Check which PanDDA tables have a high conf event
-        valid_panddas = [x for x in pandda_tables if len(pandda_tables[x][(pandda_tables[x]['Confidence'] == 'High') & (pandda_tables[x]['dtag'] == dtag)]) > 0]
+        valid_panddas = [x for x in pandda_tables if len(pandda_tables[x][(pandda_tables[x]['Ligand Confidence'] == 'High') & (pandda_tables[x]['dtag'] == dtag)]) > 0]
 
         if len(valid_panddas) == 0:
             print(f'\t\tSKIPPING DATASET: No PanDDAs high conf events for {dtag} in {[x for x in pandda_tables]}')
@@ -389,7 +389,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
             if processed:
                 continue
             inspect_table = pandda_tables[pandda_dir]
-            high_conf_table = inspect_table[(inspect_table['Confidence'] == 'High') & (inspect_table['dtag'] == dtag)]
+            high_conf_table = inspect_table[(inspect_table['Ligand Confidence'] == 'High') & (inspect_table['dtag'] == dtag)]
             if len(high_conf_table) == 0:
                 continue
             dtag_table = inspect_table[inspect_table['dtag'] == dtag]
