@@ -333,12 +333,12 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
     if 'RefinementOutcome' not in table.columns:
         print(f'\tSKIPPING SYSYEM: Could not read sqlite table!')
         return
-    print(sqlite_path)
-    print(table)
-    print(table['CrystalName'])
-    print([x for x in table.iloc[0]])
-    refinement_outcomes = table.loc[table.index, ['RefinementOutcome']]
-    good_refinements = table[refinement_outcomes.isin(['4 - CompChem ready', '5 - Deposition ready', '6 - Deposited'])]
+    # print(sqlite_path)
+    # print(table)
+    # print(table['CrystalName'])
+    # print([x for x in table.iloc[0]])
+    # refinement_outcomes = table.loc[table.index, ['RefinementOutcome']]
+    good_refinements = table[table['RefinementOutcome'].isin(['4 - CompChem ready', '5 - Deposition ready', '6 - Deposited'])]
 
     good_refinement_datasets = [x for x in good_refinements['CrystalName'].values]
     print(f'\tGot {len(good_refinement_datasets)} datasets with good refinement outcomes!')
