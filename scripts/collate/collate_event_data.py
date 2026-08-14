@@ -361,13 +361,13 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
         idx_ligand_data = len(tables.ligand_data_table),
         annotation_idx = len(tables.annotation_table)    
     )
-    print(f'\tidxs')
+    print(f'\t{idxs}')
 
     # Match each to a high confidence PanDDA event
     new_good_refinement_datasets = [dtag for dtag in good_refinement_datasets if dtag not in known_datasets]
     print(f'\tGot {len(new_good_refinement_datasets)} new datasets with good refinements!')
     if len(new_good_refinement_datasets) == 0:
-        print(f'\tSKIPPING SYSTEM: No PanDDA tables!')
+        print(f'\tSKIPPING SYSTEM: No new good refinement datasets!!')
 
         return 
     for dtag in new_good_refinement_datasets:
