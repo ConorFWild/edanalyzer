@@ -363,7 +363,10 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
         if not inspect_path.exists():
             # print(f'\tSKIPPING PANDDA: No inspect table at {inspect_path}! ')
             continue
-        pandda_tables[pandda_dir] = pd.read_csv(inspect_path)
+        try:
+            pandda_tables[pandda_dir] = pd.read_csv(inspect_path)
+        except Exception as e:
+            continue
     print(f'\tGot {len(pandda_tables)} valid PanDDAs tables!')
 
     if len(pandda_tables) == 0:
