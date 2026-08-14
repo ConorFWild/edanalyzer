@@ -627,7 +627,10 @@ def main(config_path):
     #     del root['pandda_2']
     # except:
     #     rprint(f'No PanDDA 2 group!')
-    pandda_2_group = root.create_group('pandda_2')
+    if 'pandda_2' in [x for x in root.keys()]:
+        pandda_2_group = root['pandda_2']
+    else:
+        pandda_2_group = root.create_group('pandda_2')
 
     tables = Tables(
         z_map_sample_metadata_table = _make_z_map_sample_metadata_table(pandda_2_group),
