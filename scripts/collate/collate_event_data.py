@@ -335,7 +335,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
         return
     print(sqlite_path)
     print(table)
-    print(tables['CrystalName'])
+    print(table['CrystalName'])
     print([x for x in table.iloc[0]])
     refinement_outcomes = table.loc[table.index, ['RefinementOutcome']]
     good_refinements = table[refinement_outcomes.isin(['4 - CompChem ready', '5 - Deposition ready', '6 - Deposited'])]
