@@ -540,7 +540,7 @@ def add_valid_smiles(tables: Tables, dry=False):
     print(f'Got {len(valid_smiles_table)} valid smiles')
 
     smiles_validity = {}
-    for j in range(len(df)):
+    for j in range(len(valid_smiles_table)):
         ligand_data = df.iloc[j]
         valid = valid_smiles_table.iloc[j]
         if valid['valid']:
