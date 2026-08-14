@@ -646,6 +646,7 @@ def main(config_path):
     # PanDDA 2 events
     rprint(f"Querying events...")
     metadata_table = pd.DataFrame(tables.z_map_sample_metadata_table[:])
+    print(f'Got {len(metadata_table)} known events')
     known_datasets = {x for x in metadata_table.loc[metadata_table.index, ['dtag']].values.flatten()}
     print(f'Got {len(known_datasets)} known datasets in zarr archive')
 
