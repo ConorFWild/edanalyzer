@@ -619,6 +619,7 @@ def main(config_path):
 
     # Open a file in "w"rite mode
     zarr_path = '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/event_data_5.zarr'
+    print(f'Updating zarr archive: {zarr_path}')
     root = zarr.open(zarr_path, mode='a')
 
     # Create the tables in the archive
@@ -644,7 +645,7 @@ def main(config_path):
     rprint(f"Querying events...")
     metadata_table = pd.DataFrame(tables.z_map_sample_metadata_table[:])
     known_datasets = {x for x in metadata_table.loc[metadata_table.index, ['dtag']].values.flatten()}
-    print(f'Got {len(known_datasets)} known datasets')
+    print(f'Got {len(known_datasets)} known datasets in zarr archive')
 
     # Loop over PanDDA directories
     # for pandda_dir in Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score/').glob('*'):
@@ -670,8 +671,6 @@ def main(config_path):
             model_building_dir = analysis_dir / 'model_building'
             if not model_building_dir.exists():
                 print(f'SKIPPING VISIT: No model building dir!')
-
-
 
             # Get the sqlite path
             sqlite_path = processing_dir / 'database' / 'soakDBDataFile.sqlite'
