@@ -765,11 +765,11 @@ def main(config_path):
                 tables, 
                 test_systems,
                 known_datasets,
-                dry=True
+                dry=False
             )
 
 
-    add_valid_smiles(tables, dry=True)
+    add_valid_smiles(tables, dry=False)
     # add_molecule_conformations(tables, dry=True)
 
     
