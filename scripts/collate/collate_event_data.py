@@ -367,9 +367,9 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
     new_good_refinement_datasets = [dtag for dtag in good_refinement_datasets if dtag not in known_datasets]
     print(f'\tGot {len(new_good_refinement_datasets)} new datasets with good refinements!')
     if len(new_good_refinement_datasets) == 0:
-        print(f'\tSKIPPING SYSTEM: No new good refinement datasets!!')
-
+        print(f'\tSKIPPING SYSTEM: No new good refinement datasets!')
         return 
+    
     for dtag in new_good_refinement_datasets:
         if dtag in known_datasets:
             continue
@@ -692,6 +692,7 @@ def main(config_path):
     print(f'Got {len(metadata_table)} known events')
     known_datasets = {x for x in metadata_table.loc[metadata_table.index, ['dtag']].values.flatten()}
     print(f'Got {len(known_datasets)} known datasets in zarr archive')
+    print(known_datasets)
 
     # Loop over PanDDA directories
     # for pandda_dir in Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score/').glob('*'):
