@@ -370,6 +370,8 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
         print(f'\tProcessing dataset: {dtag}')
 
         # Get refined pdb 
+        if not isinstance(dtag, str):
+            continue
         refined_pdb_path = model_building_dir / str(dtag) / 'refine.pdb'
         if not refined_pdb_path.exists():
             print(f'\t\tSKIPPING DATASET: No refined pdb path at {refined_pdb_path}')
