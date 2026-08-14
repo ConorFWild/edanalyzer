@@ -161,14 +161,14 @@ def process_pandda_event(
             model_dir,
             res,
             x, y, z,
-            idx_pose
+            idxs.idx_pose
         )
 
     # Get the ligand data
     ligand_data_sample = _get_ligand_data_sample_from_dataset_dir(
         dataset_dir,
         res,
-        idx_ligand_data,
+        idxs.idx_ligand_data,
     )
     if not ligand_data_sample:
         rprint(f'\t\tNO LIGAND DATA! SKIPPING!')
@@ -549,7 +549,9 @@ def add_valid_smiles(tables: Tables, dry=False):
 
 
 def add_molecule_conformations(tables: Tables, dry=False):
-    mol_conf_idx = 0
+    mol_conf_table = pd.DataFrame(
+        tables.mol_conf_table.get_basic_selection(slice(None), fields=['idx', 'ligand_data_idx', ]))
+    mol_conf_idx = len(mol_conf_table)
     
     # for _ligand_data in ligand_data_table:
     z_map_sample_metadata_table = tables.z_map_sample_metadata_table
@@ -559,6 +561,9 @@ def add_molecule_conformations(tables: Tables, dry=False):
     for j, _z_map_sample_metadata in enumerate(high_conf):
         print(f'{j} / {num}')
         if _z_map_sample_metadata['Confidence'] != 'High':
+            continue
+
+        if _z_map_sample_metadata['ligand_data_idx'] in mol_conf_table['ligand_data_idx']:
             continue
     
         _ligand_data = tables.ligand_data_table[_z_map_sample_metadata['ligand_data_idx']]
@@ -687,10 +692,10 @@ def main(config_path):
             processing_dir = subvisit_dir / 'processing'
             try:
                 if not processing_dir.exists():
-                    print(f'SKIPPING VISIT: No processing dir!')
+                    print(f'\tSKIPPING VISIT: No processing dir!')
                     continue
             except:
-                print(f'SKIPPING VISIT: No processing dir!')
+                print(f'\tSKIPPING VISIT: No processing dir!')
                 continue
 
             analysis_dir = processing_dir / 'analysis'
@@ -700,29 +705,32 @@ def main(config_path):
 
             model_building_dir = analysis_dir / 'model_building'
             if not model_building_dir.exists():
-                print(f'SKIPPING VISIT: No model building dir!')
+                print(f'\tSKIPPING VISIT: No model building dir!')
 
             # Get the sqlite path
             sqlite_path = processing_dir / 'database' / 'soakDBDataFile.sqlite'
             try:
                 if not sqlite_path.exists():
-                    print(f'SKIPPING VISIT: No sqlite!')
+                    print(f'\tSKIPPING VISIT: No sqlite!')
                     continue
             except:
-                print(f'SKIPPING VISIT: No sqlite!')
+                print(f'\tSKIPPING VISIT: No sqlite!')
                 continue
 
             # Get the pandda dirs
             pandda_dirs = []
             for potential_pandda_dir in analysis_dir.glob('*'):
-                if try_exists(potential_pandda_dir / 'analyses' / 'pandda_inspect_events'):
+                if try_exists(potential_pandda_dir / 'analyses' / 'pandda_inspect_events.csv'):
                     pandda_dirs.append(potential_pandda_dir)
                 else:
                     for potential_pandda_dir_2 in potential_pandda_dir.glob("*"):
-                        if try_exists(potential_pandda_dir_2 / 'analyses' / 'pandda_inspect_events'):
+                        if try_exists(potential_pandda_dir_2 / 'analyses' / 'pandda_inspect_events.csv'):
                             pandda_dirs.append(potential_pandda_dir)
 
             print(f'\tGot {len(pandda_dirs)} PanDDA Dirs: {pandda_dirs}')
+            if len(pandda_dirs) == 0:
+                print(f'\tSKIPPING VISIT: No PanDDA dirs!')
+                continue    
 
             # Process the model building dir
             process_model_building_dir(
@@ -737,7 +745,7 @@ def main(config_path):
 
 
     add_valid_smiles(tables, dry=True)
-    add_molecule_conformations(tables, dry=True)
+    # add_molecule_conformations(tables, dry=True)
 
     
 
