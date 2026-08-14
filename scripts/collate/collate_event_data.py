@@ -110,13 +110,13 @@ def process_pandda_event(
     if len(event_distances) > 0:
         closest_event_id = min(event_centroids, key=lambda _event_num: event_distances[_event_num])
         x, y, z = event_centroids[closest_event_id]
-        rprint(f'Closest event distance is {event_distances[closest_event_id]}')
+        rprint(f'\t\t\tClosest event distance is {round(event_distances[closest_event_id, 2])}')
 
     else:
         rprint(
-            f'Could not match high confidence ligand {dtag} {event_idx} to an initial event!\n'
-            f'Check model in {dataset_dir} is appropriate!\n'
-            'SKIPPING!'
+            f'\t\t\tSKIPPING EVENT: Could not match high confidence ligand {dtag} {event_idx} to an initial event!\n'
+            # f'\t\t\tCheck model in {dataset_dir} is appropriate!\n'
+            # 'SKIPPING!'
         )
         return
 
@@ -133,13 +133,13 @@ def process_pandda_event(
         )
     except Exception as e:
         print(e)
-        print('Couldn\'t match res! Skipping!')
+        print('\t\t\tSKIPPING EVENT: Couldn\'t match res! Skipping!')
         return
     if (conf == 'High') & (dist > 6.0):
         rprint(
-            f'Could not match high confidence ligand {dtag} {event_idx} to a build!\n'
-            f'Check model in {dataset_dir} is appropriate!\n'
-            'SKIPPING!'
+            f'\t\t\tSKIPPING EVENT: Could not match high confidence ligand {dtag} {event_idx} to a build!\n'
+            # f'Check model in {dataset_dir} is appropriate!\n'
+            # 'SKIPPING!'
         )
         # raise Exception
         return
@@ -171,7 +171,7 @@ def process_pandda_event(
         idxs.idx_ligand_data,
     )
     if not ligand_data_sample:
-        rprint(f'\t\tNO LIGAND DATA! SKIPPING!')
+        rprint(f'\t\t\tSKIPPING EVENT: NO LIGAND DATA! SKIPPING!')
         return
 
     # Get the annotation data
@@ -236,6 +236,8 @@ def process_pandda_event(
         tables.annotation_table.append(annotation_sample)
     idxs.z_map_sample_metadata_idx += 1
     idxs.annotation_idx += 1
+
+    print(f'\t\t\tSUCCESS: Added data for {dtag} {event_idx}')
 
 def process_pandda_dir(pandda_dir, tables: Tables, test_systems, known_datasets):
     # Get indexes to add data
@@ -342,7 +344,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
 
     good_refinement_datasets = [x for x in good_refinements['CrystalName'].values]
     print(f'\tGot {len(good_refinement_datasets)} datasets with good refinement outcomes!')
-    print(good_refinement_datasets)
+    # print(good_refinement_datasets)
     # Get the PanDDA CSVs
     pandda_tables = {}
     for pandda_dir in pandda_dirs:
@@ -355,7 +357,6 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
 
     if len(pandda_tables) == 0:
         print(f'\tSKIPPING SYSTEM: No PanDDA tables!')
-
         return 
 
     # Get the idxs
@@ -377,8 +378,6 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
     for dtag in new_good_refinement_datasets:
         if dtag in known_datasets:
             continue
-            # print(f'\tSKIPPING DATASET: Already in known datasets!')
-
 
         # Get refined pdb 
         if not isinstance(dtag, str):
@@ -427,7 +426,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
         
                 system = _get_system_from_dtag(dtag)
         
-                rprint(f'\t\t\tProcessing event: {dtag} {event_idx} {conf}')
+                rprint(f'\t\tProcessing event: {dtag} {event_idx} {conf}')
         
                 if not viewed:
                     rprint('\t\t\tNot Viewed! Skipping!')
