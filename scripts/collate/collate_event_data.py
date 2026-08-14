@@ -333,6 +333,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
     if 'RefinementOutcome' not in table.columns:
         print(f'\tSKIPPING SYSYEM: Could not read sqlite table!')
         return
+    print(sqlite_path)
     print(table)
     refinement_outcomes = table.loc[table.index, ['RefinementOutcome']]
     good_refinements = table[refinement_outcomes.isin(['4 - CompChem ready', '5 - Deposition ready', '6 - Deposited'])]
