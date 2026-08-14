@@ -100,35 +100,39 @@ def process_pandda_event(
     # selected_model = processed_dataset['Summary']['Selected Model']
 
 
-    events_yaml = dataset_dir / 'events.yaml'
-    if not events_yaml.exists():
-        print(f'\t\t\tSKIPPING EVENT: No event yaml at {events_yaml}')
-        return
-    with open(events_yaml, 'r') as f:
-        events = yaml.safe_load(f)
+    # events_yaml = dataset_dir / 'events.yaml'
+    # if not events_yaml.exists():
+    #     print(f'\t\t\tSKIPPING EVENT: No event yaml at {events_yaml}')
+    #     return
+    # with open(events_yaml, 'r') as f:
+    #     events = yaml.safe_load(f)
 
     # selected_model = processed_dataset['Summary']['Selected Model']
 
-    event_distances = {}
-    event_centroids = {}
-    for event_num, event in events.items():
-        event_centroid = event['Centroid']
-        distance = np.linalg.norm(np.array(event_centroid) - np.array([initial_x, initial_y, initial_z]))
-        event_distances[event_num] = distance
-        event_centroids[event_num] = event_centroid
+    # event_distances = {}
+    # event_centroids = {}
+    # for event_num, event in events.items():
+    #     event_centroid = event['Centroid']
+    #     distance = np.linalg.norm(np.array(event_centroid) - np.array([initial_x, initial_y, initial_z]))
+    #     event_distances[event_num] = distance
+    #     event_centroids[event_num] = event_centroid
 
-    if len(event_distances) > 0:
-        closest_event_id = min(event_centroids, key=lambda _event_num: event_distances[_event_num])
-        x, y, z = event_centroids[closest_event_id]
-        rprint(f'\t\t\tClosest event distance is {round(event_distances[closest_event_id], 2)}')
+    # if len(event_distances) > 0:
+    #     closest_event_id = min(event_centroids, key=lambda _event_num: event_distances[_event_num])
+    #     x, y, z = event_centroids[closest_event_id]
+    #     rprint(f'\t\t\tClosest event distance is {round(event_distances[closest_event_id], 2)}')
 
-    else:
-        rprint(
-            f'\t\t\tSKIPPING EVENT: Could not match high confidence ligand {dtag} {event_idx} to an initial event!\n'
-            # f'\t\t\tCheck model in {dataset_dir} is appropriate!\n'
-            # 'SKIPPING!'
-        )
-        return
+
+    # else:
+    #     rprint(
+    #         f'\t\t\tSKIPPING EVENT: Could not match high confidence ligand {dtag} {event_idx} to an initial event!\n'
+    #         # f'\t\t\tCheck model in {dataset_dir} is appropriate!\n'
+    #         # 'SKIPPING!'
+    #     )
+    #     return
+
+    x, y, z = initial_x, initial_y, initial_z
+
 
     model_dir = dataset_dir / 'modelled_structures'
 
