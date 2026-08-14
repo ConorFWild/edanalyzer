@@ -238,6 +238,7 @@ def process_pandda_event(
     idxs.annotation_idx += 1
 
     print(f'\t\t\tSUCCESS: Added data for {dtag} {event_idx}')
+    return True
 
 def process_pandda_dir(pandda_dir, tables: Tables, test_systems, known_datasets):
     # Get indexes to add data
