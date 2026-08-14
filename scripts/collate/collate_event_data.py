@@ -340,7 +340,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
     refinement_outcomes = table.loc[table.index, ['RefinementOutcome']]
     good_refinements = table[refinement_outcomes.isin(['4 - CompChem ready', '5 - Deposition ready', '6 - Deposited'])]
 
-    good_refinement_datasets = [x for x in good_refinements['CrystalName'].values()]
+    good_refinement_datasets = [x for x in good_refinements['CrystalName'].values]
     print(f'\tGot {len(good_refinement_datasets)} datasets with good refinement outcomes!')
     print(good_refinement_datasets)
     # Get the PanDDA CSVs
