@@ -370,7 +370,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
         print(f'\tProcessing dataset: {dtag}')
 
         # Get refined pdb 
-        refined_pdb_path = model_building_dir / dtag / 'refine.pdb'
+        refined_pdb_path = model_building_dir / str(dtag) / 'refine.pdb'
         if not refined_pdb_path:
             print(f'\t\tSKIPPING DATASET: No refined pdb path at {refined_pdb_path}')
             continue
@@ -491,12 +491,12 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
 
 def add_valid_smiles(tables: Tables, dry=False):
     df = pd.DataFrame(
-    tables.ligand_data_table.get_basic_selection(slice(None), fields=['idx', 'canonical_smiles', ]))
+        tables.ligand_data_table.get_basic_selection(slice(None), fields=['idx', 'canonical_smiles', ]))
 
     unique_smiles_series = df['canonical_smiles'].unique()
 
     valid_smiles_table = pd.DataFrame(
-    tables.valid_smiles_group.get_basic_selection(slice(None), fields=['idx', 'valid']))
+        tables.valid_smiles_group.get_basic_selection(slice(None), fields=['idx', 'valid']))
     print(f'Got {len(valid_smiles_table)} valid smiles')
 
     smiles_validity = {}
@@ -527,7 +527,7 @@ def add_valid_smiles(tables: Tables, dry=False):
             smiles_validity[smiles] = False
 
     for _idx, _row in df.iterrows():
-        if _idx < len(smiles_validity):
+        if _idx in valid_smiles_table['idx']:
             continue
         smiles = _row['canonical_smiles']
         if smiles_validity[smiles]:
