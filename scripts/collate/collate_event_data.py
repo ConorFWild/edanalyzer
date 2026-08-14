@@ -164,11 +164,14 @@ def process_pandda_event(
         x, y, z,
         idxs.z_map_sample_metadata_idx,
     )
-    xmap_sample = _get_xmap_sample_from_dataset_dir(
-        dataset_dir,
-        x, y, z,
-        idxs.z_map_sample_metadata_idx,
-    )
+    try:
+        xmap_sample = _get_xmap_sample_from_dataset_dir(
+            dataset_dir,
+            x, y, z,
+            idxs.z_map_sample_metadata_idx,
+        )
+    except:
+        return 
     if conf == 'High':
         # Get the pose sample
         pose_sample = _get_pose_sample_from_dataset_dir(
