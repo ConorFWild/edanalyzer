@@ -1297,7 +1297,10 @@ def main(config_path, batch_size=12, num_workers=None):
 
         logger = CSVLogger(str(trial_output_dir / 'logs'))
 
+
         print(f'Compiling!')
+        _config.update({'ligand': True})
+
         model = LitEventScoring(trial_output_dir, _config)
         # model = torch.compile(LitEventScoring(output, _config))
         print('Compiled!')
