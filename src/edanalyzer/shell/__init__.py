@@ -15,7 +15,8 @@ PANDDA_JOB_SCRIPT = (
     '--only_datasets="{only_datasets}"'
 )
 
-PANDDA_SUBMIT_COMMAND = 'module load global/cluster; qsub -pe smp {num_cpus} -l m_mem_free={m_mem_free}G -o {out_path} -e {err_path} {script_path}'
+# PANDDA_SUBMIT_COMMAND = 'module load global/cluster; qsub -pe smp {num_cpus} -l m_mem_free={m_mem_free}G -o {out_path} -e {err_path} {script_path}'
+PANDDA_SUBMIT_COMMAND = 'module load global/cluster; sbatch --cpus-per-task={num_cpus} --mem-per-cpu={m_mem_free}G --output={out_path} --error={err_path} {script_path}'
 
 
 CHMOD_COMMAND = 'chmod 777 {path}'
@@ -51,12 +52,12 @@ def submit_script(
     )
     print(submit_command)
 
-    p = subprocess.Popen(
-        submit_command,
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    stdout, stderr = p.communicate()
-    print(str(stdout))
-    print(str(stderr))
+    # p = subprocess.Popen(
+    #     submit_command,
+    #     shell=True,
+    #     stdout=subprocess.PIPE,
+    #     stderr=subprocess.PIPE
+    # )
+    # stdout, stderr = p.communicate()
+    # print(str(stdout))
+    # print(str(stderr))
