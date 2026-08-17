@@ -21,6 +21,7 @@ from .base import (
     _load_xmap_from_path,
     _sample_xmap_and_scale,
     _get_ligand_mask_float,
+    _get_ligand_mask_multi_atom_float,
     _sample_xmap,
     _get_identity_matrix,
     _get_random_orientation,
@@ -684,9 +685,13 @@ class EventScoringDataset(Dataset):
             ligand_centroid,
             n=32
         )
-        ligand_mask_grid = _get_ligand_mask_float(
-            transformed_residue,
-        )
+        # ligand_mask_grid = _get_ligand_mask_float(
+        #     transformed_residue,
+        # )
+        ligand_mask_grid = _get_ligand_mask_multi_atom_float(
+                    transformed_residue,
+                )
+
 
         if self.test_train == 'train':
             mask = np.ones((32,32,32), dtype=np.float32)
@@ -726,13 +731,23 @@ class EventScoringDataset(Dataset):
 
         # Make the image
         if self.ligand:
-            image_ligand_mask = _sample_xmap(
-                ligand_mask_grid,
-                ligand_map_transform,
-                np.copy(ligand_sample_array)
+            image_ligand_mask = np.stack(
+                [
+                    _sample_xmap(
+                        mask,
+                        ligand_map_transform,
+                        np.copy(ligand_sample_array)
+                )
+                for mask in ligand_mask_grid
+                ],
+                axis=0
             )
+                 
         else:
-            image_ligand_mask = np.copy(sample_array)
+            image_ligand_mask = np.stack(
+                [np.copy(sample_array) for j in [0, 1, 2, 3, 4, 5]], 
+                axis = 0,
+                )
 
         if self.ligand:
             _density_mask = (z_map_sample > self.z_cutoff).astype(int)
@@ -766,12 +781,13 @@ class EventScoringDataset(Dataset):
         # )
         # image_z_float = image_z.astype(np.float32) # * mask
 
-        image_mol = np.stack(
-            [
-                image_ligand_mask,
-            ],
-            axis=0
-        )
+        # image_mol = np.stack(
+        #     [
+        #         image_ligand_mask,
+        #     ],
+        #     axis=0
+        # )
+        image_mol = image_ligand_mask
         image_mol_float = image_mol.astype(np.float32)
 
 

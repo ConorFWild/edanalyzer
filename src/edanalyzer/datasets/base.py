@@ -448,6 +448,45 @@ def _get_ligand_mask_float(res, radius=1.0, n=32, r=16.0):
 
     return mask
 
+def _get_ligand_mask_multi_atom_float(res, radius=1.0, n=32, r=16.0):
+    atom_map: {
+        'C': 0,
+        'O': 1,
+        'N': 2,
+        'S': 3,
+        'F': 4,
+        'Cl': 4,
+        'Br': 4,
+    }
+    masks = []
+    for j in [0, 1, 2, 3, 4, 5]:
+        mask = gemmi.FloatGrid(n, n, n)
+        mask.spacegroup = gemmi.find_spacegroup_by_name("P1")
+        mask.set_unit_cell(gemmi.UnitCell(r, r, r, 90.0, 90.0, 90.0))
+
+        # Get the mask
+        for atom in res:
+            element = atom.element.name
+            pos = atom.pos
+
+            if (element not in atom_map) & (j == 5):
+                mask.set_points_around(
+                                pos,
+                                radius=radius,
+                                value=1.0,
+                            )
+            if element in atom_map: 
+                if atom_map[atom.element.name] == j:
+                    mask.set_points_around(
+                                pos,
+                                radius=radius,
+                                value=1.0,
+                            )
+            
+        masks.append(mask)
+
+    return masks
+
 def _get_ed_mask_float(radius=7.5):
     mask = gemmi.FloatGrid(32,32,32)
     mask.spacegroup = gemmi.find_spacegroup_by_name("P1")

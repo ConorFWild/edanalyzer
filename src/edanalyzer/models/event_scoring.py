@@ -222,7 +222,7 @@ class LitEventScoring(lt.LightningModule):
             BasicBlock,
             [config['blocks_1'], config['blocks_2'], config['blocks_3'], config['blocks_4'], ],
             False, False,
-            num_classes=2, num_input=1, headless=True,
+            num_classes=2, num_input=6, headless=True,
                                     drop_rate=config['drop_rate'], config=config).float()
         # self.mol_decoder = SimpleConvolutionalDecoder()
         # self.x_decoder = SimpleConvolutionalDecoder(input_layers=512)
