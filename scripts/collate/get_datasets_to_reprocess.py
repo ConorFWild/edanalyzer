@@ -544,6 +544,7 @@ def main(config_path):
     # print(known_datasets)
 
     new_pandda_dirs = []
+    failed = []
 
     # Loop over PanDDA directories
     # for pandda_dir in Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score/').glob('*'):
@@ -614,6 +615,10 @@ def main(config_path):
                 os.mkdir(new_pandda_dir)
             except:
                 ...
+
+            if not new_pandda_dir.exists():
+                print(f'COULD NOT REPROCESS TO: {new_pandda_dir}')
+                failed.append(new_pandda_dir)
             job_script = PANDDA_JOB_SCRIPT.format(
                 num_cpus=36,
                 data_dirs=model_building_dir,
@@ -625,16 +630,24 @@ def main(config_path):
             # exit()
 
             # Create the submission command
-            submit_script(
-                job_script,
-                new_pandda_dir,
-                script_name=f"pandda2",
-            )
+            if not (new_pandda_dir / 'pandda2.o').exists():
+
+                submit_script(
+                    job_script,
+                    new_pandda_dir,
+                    script_name=f"pandda2",
+                )
 
             new_pandda_dirs.append(new_pandda_dir)
 
+
+    print(f'Submitted!')
     for new_pandda_dir in new_pandda_dirs:
         print(new_pandda_dir)
+
+    print(f'Failed!')
+    for f in failed:
+        print(f)
 
     # add_valid_smiles(tables, dry=False)
     # add_molecule_conformations(tables, dry=True)
