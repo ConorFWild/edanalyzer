@@ -8,7 +8,7 @@ PANDDA_JOB_SCRIPT = (
     'export PYTHONPATH="" \n'
     'source /dls_sw/i04-1/software/PanDDA2/test_venv/bin/activate \n'
     'which python \n'
-    'python /dls_sw/i04-1/software/PanDDA2/scripts/pandda.py -u '
+    'python -u /dls_sw/i04-1/software/PanDDA2/scripts/pandda.py '
     '--local_cpus={num_cpus} ' 
     '--data_dirs={data_dirs} ' 
     '--out_dir={out_dir} '
