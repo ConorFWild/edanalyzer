@@ -605,6 +605,8 @@ def main(config_path):
             )
             print(f'\tDatasets to reprocess: {datasets_to_reprocess}')
             # Create the job script
+            if datasets_to_reprocess is None:
+                continue
             new_pandda_dir = analysis_dir / 'REPROCESSED_pandda_2'
             try:
                 os.mkdir(new_pandda_dir)
