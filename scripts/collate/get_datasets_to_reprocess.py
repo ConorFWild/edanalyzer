@@ -191,7 +191,7 @@ def process_pandda_event(
         rprint(f'\t\t\tSKIPPING EVENT: NO LIGAND DATA! SKIPPING!')
         return
 
-
+    return True
 
 
 
@@ -273,6 +273,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
 
         if len(valid_panddas) == 0:
             print(f'\t\tSKIPPING DATASET: No PanDDAs high conf events for {dtag} in {[x for x in pandda_tables]}')
+            datasets_to_reprocess.append(dtag)
             continue
 
         # Try valid PanDDAs until one produces valid data
@@ -335,7 +336,8 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
                     dry=dry
                 ) 
 
-        datasets_to_reprocess.append(dtag)
+        if not processed:
+            datasets_to_reprocess.append(dtag)
         
         ...
     return datasets_to_reprocess
