@@ -51,10 +51,10 @@ def submit_script(
     )
     print(submit_command)
 
-    # p = subprocess.Popen(
-    #     submit_command,
-    #     shell=True,
-    #     stdout=subprocess.PIPE,
-    #     stderr=subprocess.PIPE
-    # )
-    # p.communicate()
+    p = subprocess.Popen(
+        submit_command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    p.communicate()
