@@ -623,14 +623,14 @@ def main(config_path):
             # exit()
 
             # Create the submission command
-            # submit_script(
-            #     job_script,
-            #     new_pandda_dir,
-            #     script_name=f"pandda2",
-            # )
+            submit_script(
+                job_script,
+                new_pandda_dir,
+                script_name=f"pandda2",
+            )
 
 
-    add_valid_smiles(tables, dry=False)
+    # add_valid_smiles(tables, dry=False)
     # add_molecule_conformations(tables, dry=True)
 
     
