@@ -272,7 +272,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
         valid_panddas = [x for x in pandda_tables if len(pandda_tables[x][(pandda_tables[x]['Ligand Confidence'] == 'High') & (pandda_tables[x]['dtag'] == dtag)]) > 0]
 
         if len(valid_panddas) == 0:
-            print(f'\t\tSKIPPING DATASET: No PanDDAs high conf events for {dtag} in {[x for x in pandda_tables]}')
+            # print(f'\t\tSKIPPING DATASET: No PanDDAs high conf events for {dtag} in {[x for x in pandda_tables]}')
             datasets_to_reprocess.append(dtag)
             continue
 
