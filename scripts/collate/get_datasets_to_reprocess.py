@@ -543,6 +543,8 @@ def main(config_path):
     print(f'Got {len(known_datasets)} known datasets in zarr archive')
     # print(known_datasets)
 
+    new_pandda_dirs = []
+
     # Loop over PanDDA directories
     # for pandda_dir in Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score/').glob('*'):
     #     process_pandda_dir(pandda_dir, tables, test_systems, known_datasets)
@@ -629,6 +631,10 @@ def main(config_path):
                 script_name=f"pandda2",
             )
 
+            new_pandda_dirs.append(new_pandda_dir)
+
+    for new_pandda_dir in new_pandda_dirs:
+        print(new_pandda_dir)
 
     # add_valid_smiles(tables, dry=False)
     # add_molecule_conformations(tables, dry=True)
