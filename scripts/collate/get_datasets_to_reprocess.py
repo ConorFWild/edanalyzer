@@ -273,6 +273,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
 
         if len(valid_panddas) == 0:
             # print(f'\t\tSKIPPING DATASET: No PanDDAs high conf events for {dtag} in {[x for x in pandda_tables]}')
+            print(f'\t\tADDING TO REPROCESS: No PanDDA high conf events')
             datasets_to_reprocess.append(dtag)
             continue
 
@@ -337,6 +338,7 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
                 ) 
 
         if not processed:
+            print(f'\t\tADDING TO REPROCESS: No valid PanDDA')
             datasets_to_reprocess.append(dtag)
         
         ...
