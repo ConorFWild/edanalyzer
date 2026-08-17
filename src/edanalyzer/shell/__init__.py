@@ -3,14 +3,16 @@ import subprocess
 PANDDA_JOB_SCRIPT = (
     '#!/bin/sh \n'
     # 'module load buster \n'
-    # 'export PYTHONPATH="" \n'
-    'source act_con \n'
-    'conda activate pandda2_ray \n'
-    'python -u /dls/science/groups/i04-1/conor_dev/pandda_2_gemmi/scripts/pandda.py '
+    'export PYTHONPATH="" \n'
+    '. /etc/profile.d/modules.sh \n'
+    'export PYTHONPATH="" \n'
+    'source /dls_sw/i04-1/software/PanDDA2/test_venv/bin/activate \n'
+    'which python \n'
+    'python /dls_sw/i04-1/software/PanDDA2/scripts/pandda.py -u '
     '--local_cpus={num_cpus} ' 
     '--data_dirs={data_dirs} ' 
     '--out_dir={out_dir} '
-    # '--only_datasets="{only_datasets}"'
+    '--only_datasets="{only_datasets}"'
 )
 
 PANDDA_SUBMIT_COMMAND = 'module load global/cluster; qsub -pe smp {num_cpus} -l m_mem_free={m_mem_free}G -o {out_path} -e {err_path} {script_path}'

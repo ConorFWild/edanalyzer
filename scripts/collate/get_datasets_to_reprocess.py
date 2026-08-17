@@ -3,6 +3,7 @@ from pathlib import Path
 import dataclasses
 from typing import Any
 import sqlite3
+import os
 
 import fire
 import yaml
@@ -15,6 +16,7 @@ from rdkit.Chem import AllChem
 
 from edanalyzer import constants
 from edanalyzer.data.database import _get_system_from_dtag
+from edanalyzer.shell import PANDDA_JOB_SCRIPT, PANDDA_SUBMIT_COMMAND, submit_script
 
 from edanalyzer.data.event_data import (
     comment_dtype,
@@ -602,6 +604,28 @@ def main(config_path):
                 dry=False
             )
             print(f'\tDatasets to reprocess: {datasets_to_reprocess}')
+            # Create the job script
+            new_pandda_dir = analysis_dir / 'REPROCESSED_pandda_2'
+            try:
+                os.mkdir(new_pandda_dir)
+            except:
+                ...
+            job_script = PANDDA_JOB_SCRIPT.format(
+                num_cpus=36,
+                data_dirs=model_building_dir,
+                out_dir=new_pandda_dir,
+                only_datasets=",".join(datasets_to_reprocess)
+            )
+            rprint(f"Job Script")
+            rprint(job_script)
+            # exit()
+
+            # Create the submission command
+            # submit_script(
+            #     job_script,
+            #     new_pandda_dir,
+            #     script_name=f"pandda2",
+            # )
 
 
     add_valid_smiles(tables, dry=False)
