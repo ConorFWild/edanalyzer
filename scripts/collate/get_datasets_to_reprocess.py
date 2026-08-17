@@ -619,6 +619,8 @@ def main(config_path):
             if not new_pandda_dir.exists():
                 print(f'COULD NOT REPROCESS TO: {new_pandda_dir}')
                 failed.append(new_pandda_dir)
+                continue
+            
             job_script = PANDDA_JOB_SCRIPT.format(
                 num_cpus=36,
                 data_dirs=model_building_dir,
