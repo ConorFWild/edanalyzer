@@ -311,10 +311,10 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
         
                 system = _get_system_from_dtag(dtag)
         
-                rprint(f'\t\tProcessing event: {dtag} {event_idx} {conf}')
+                # rprint(f'\t\tProcessing event: {dtag} {event_idx} {conf}')
         
                 if not viewed:
-                    rprint('\t\t\tNot Viewed! Skipping!')
+                    # rprint('\t\t\tNot Viewed! Skipping!')
                     continue
 
                 processed = process_pandda_event(
