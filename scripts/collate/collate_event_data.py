@@ -789,7 +789,7 @@ def main(config_path):
                 dry=True
             )
 
-    for dataset in new_datasets:
+    for dataset in sorted([x for x in set(new_datasets)]):
         print(dataset)
 
     add_valid_smiles(tables, dry=True)
