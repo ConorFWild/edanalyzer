@@ -779,7 +779,7 @@ def main(config_path):
                 continue    
 
             # Process the model building dir
-            new_datasets += process_model_building_dir(
+            _new_datasets = process_model_building_dir(
                 model_building_dir, 
                 sqlite_path, 
                 pandda_dirs, 
@@ -788,6 +788,8 @@ def main(config_path):
                 known_datasets,
                 dry=True
             )
+            if _new_datasets is not None:
+                new_datasets += _new_datasets
 
     for dataset in sorted([x for x in set(new_datasets)]):
         print(dataset)
