@@ -336,6 +336,7 @@ def process_pandda_dir(pandda_dir, tables: Tables, test_systems, known_datasets)
 
 def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tables, test_systems, known_datasets, dry=False):
     # Get the known good models from sqlite
+    new_datasets = []
     try:
         if not sqlite_path.exists():
             print(f'\tSKIPPING SYSYEM: Could not read sqlite table! ')
@@ -480,6 +481,8 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
                 if not processed:
                     continue
 
+
+                new_datasets += [dtag, ]
             
                 # If an event worked, then get negative, viewed events for that dataset
                 other_events = dtag_table[dtag_table['event_idx'] != event_idx]
@@ -524,7 +527,8 @@ def process_model_building_dir(model_building_dir, sqlite_path, pandda_dirs, tab
                     ) 
                 print(f"\t\tSUCCESS: Processed {dtag}")
         ...
-        
+
+    return new_datasets
         
 
     ...
@@ -726,6 +730,7 @@ def main(config_path):
     # Loop over PanDDA directories
     # for pandda_dir in Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score/').glob('*'):
     #     process_pandda_dir(pandda_dir, tables, test_systems, known_datasets)
+    new_datasets = []
     for visit_dir in LABXCHEM_DATA_PATH.glob('*'):
         if visit_dir.parts[-1][:2] in ['sw', 'in']:  # SKIP INDUSTRIAL VISITS!
             continue
@@ -774,18 +779,20 @@ def main(config_path):
                 continue    
 
             # Process the model building dir
-            process_model_building_dir(
+            new_datasets += process_model_building_dir(
                 model_building_dir, 
                 sqlite_path, 
                 pandda_dirs, 
                 tables, 
                 test_systems,
                 known_datasets,
-                dry=False
+                dry=True
             )
 
+    for dataset in new_datasets:
+        print(dataset)
 
-    add_valid_smiles(tables, dry=False)
+    add_valid_smiles(tables, dry=True)
     # add_molecule_conformations(tables, dry=True)
 
     
