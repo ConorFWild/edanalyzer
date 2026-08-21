@@ -449,7 +449,7 @@ def _get_ligand_mask_float(res, radius=1.0, n=32, r=16.0):
     return mask
 
 def _get_ligand_mask_multi_atom_float(res, radius=1.0, n=32, r=16.0):
-    atom_map: {
+    atom_map = {
         'C': 0,
         'O': 1,
         'N': 2,
