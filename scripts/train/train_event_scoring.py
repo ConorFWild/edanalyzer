@@ -1374,7 +1374,7 @@ def main(config_path, batch_size=12, num_workers=None):
             direction='minimize',
             # directions=['minimize', 'maximize'],
             load_if_exists=True,
-            # pruner=pruner,
+            pruner=pruner,
             sampler=TPESampler(constant_liar=True)
         )
         study.enqueue_trial(
@@ -1402,7 +1402,7 @@ def main(config_path, batch_size=12, num_workers=None):
             study_name=study_name,
             storage=storage_name,
             sampler=TPESampler(constant_liar=True),
-            # pruner=pruner,
+            pruner=pruner,
         )
     study.optimize(objective, n_trials=300)
 
