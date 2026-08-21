@@ -491,7 +491,7 @@ def _get_ligand_mask_multi_atom_float(res, radius=1.0, n=32, r=16.0):
 
         
         masks.append(mask)
-    print(atom_counts)
+    # print(atom_counts)
 
     return masks
 
