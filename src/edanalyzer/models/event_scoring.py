@@ -250,7 +250,8 @@ class LitEventScoring(lt.LightningModule):
             # nn.Linear(512, 256),
             # nn.Dropout(),
             # nn.Linear(16, 2),
-            nn.Linear(config['planes_5'] , 3),
+            # nn.Linear(config['planes_5'] , 3),
+            nn.Linear(config['planes_5'] , 2),
 
         )
         self.train_annotations = []
