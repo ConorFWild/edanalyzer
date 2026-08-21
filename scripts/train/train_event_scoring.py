@@ -1289,11 +1289,11 @@ def main(config_path, batch_size=12, num_workers=None):
             dirpath=str(trial_output_dir),
             filename='sample-mnist-{epoch:02d}-{medianfpr99:.2f}'
         )
-        checkpoint_callback_best_best_scorer_hit = ModelCheckpoint(
-            monitor='best_scorer_hit',
-            dirpath=str(trial_output_dir),
-            filename='sample-mnist-{epoch:02d}-{best_scorer_hit:.2f}'
-        )
+        # checkpoint_callback_best_best_scorer_hit = ModelCheckpoint(
+        #     monitor='best_scorer_hit',
+        #     dirpath=str(trial_output_dir),
+        #     filename='sample-mnist-{epoch:02d}-{best_scorer_hit:.2f}'
+        # )
 
         logger = CSVLogger(str(trial_output_dir / 'logs'))
 
@@ -1316,7 +1316,7 @@ def main(config_path, batch_size=12, num_workers=None):
                 checkpoint_callback_best_99,
                 checkpoint_callback_best_95,
                 checkpoint_callback_best_median99,
-                checkpoint_callback_best_best_scorer_hit,
+                # checkpoint_callback_best_best_scorer_hit,
                 # PyTorchLightningPruningCallback(trial, monitor='best_scorer_hit', ),
                 # EarlyStopping('best_scorer_hit', patience=10, mode='max'),
                 EarlyStopping('medianfpr99', patience=10, mode='min')
