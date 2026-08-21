@@ -213,7 +213,8 @@ class LitEventScoring(lt.LightningModule):
             BasicBlock,
             [config['blocks_1'], config['blocks_2'], config['blocks_3'], config['blocks_4'], ],
             False, False,
-            num_classes=3, num_input=2, headless=True,
+            num_classes=2, num_input=2, headless=True,
+            # num_classes=3, num_input=2, headless=True,
                                   drop_rate=config['drop_rate'], config=config).float()
         # self.x_encoder = SimpleConvolutionalEncoder(input_layers=1)
         # self.mol_encoder = SimpleConvolutionalEncoder(input_layers=1)
@@ -399,10 +400,13 @@ class LitEventScoring(lt.LightningModule):
                     'table': str(idx[0][j]),
                     # "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][0],
                     # "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
-                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][2],
-                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][2],
+                    # "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][2],
+                    # "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][2],
+                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][1],
+                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][1],
                     "low": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
-                    "med": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][1],
+                    # "med": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][1],
+                    "med": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
                     "high": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][2],
                     'set': 0,
                     "system": str(idx[3][j]),
@@ -468,11 +472,14 @@ class LitEventScoring(lt.LightningModule):
                     'table': str(idx[0][j]),
                     # "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][0],
                     # "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
-                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][2],
-                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][2],
+                    # "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][2],
+                    # "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][2],
+                    "y": [float(x) for x in y[j].to(torch.device("cpu")).detach().numpy()][1],
+                    "y_hat": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][1],
                     "low": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
-                    "med": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][1],
-                    "high": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][2],
+                    # "med": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][1],
+                    "med": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][0],
+                    "high": [float(x) for x in score[j].to(torch.device("cpu")).detach().numpy()][1],
                     'set': 1,
                     "system": str(idx[3][j]),
                     "dtag": str(idx[4][j]),
@@ -751,7 +758,7 @@ class LitEventScoring(lt.LightningModule):
             best_scorer_hit = 0.0
         else:
             best_scorer_hit = len(dataset_best[dataset_best['y'] == 1.0]) / len(dataset_best)
-        self.log('best_scorer_hit', best_scorer_hit, 4, sync_dist=True)
+        # self.log('best_scorer_hit', best_scorer_hit, 4, sync_dist=True)
 
         self.test_annotations.clear()
 

@@ -817,23 +817,23 @@ class EventScoringDataset(Dataset):
         #         raise Exception
 
 
-        if conf == 'High':
-            hit = [0.0, 0.0, 1.0]
-        elif conf == 'Medium':
-            hit = [0.0, 1.0, 0.0]
-        elif conf == 'Low':
-            hit = [1.0, 0.0, 0.0]
-        else:
-            raise Exception
-
         # if conf == 'High':
-        #     hit = [0.0, 1.0]
+        #     hit = [0.0, 0.0, 1.0]
         # elif conf == 'Medium':
-        #     hit = [0.5, 0.5]
+        #     hit = [0.0, 1.0, 0.0]
         # elif conf == 'Low':
         #     hit = [1.0, 0.0, 0.0]
         # else:
         #     raise Exception
+
+        if conf == 'High':
+            hit = [0.0, 1.0]
+        elif conf == 'Medium':
+            hit = [0.5, 0.5]
+        elif conf == 'Low':
+            hit = [1.0, 0.0,]
+        else:
+            raise Exception
 
 
         label = np.array(hit)
