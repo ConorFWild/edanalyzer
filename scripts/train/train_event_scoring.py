@@ -1318,7 +1318,7 @@ def main(config_path, batch_size=12, num_workers=None):
                 checkpoint_callback_best_median99,
                 checkpoint_callback_best_best_scorer_hit,
                 # PyTorchLightningPruningCallback(trial, monitor='best_scorer_hit', ),
-                EarlyStopping('best_scorer_hit', patience=10, mode='max'),
+                # EarlyStopping('best_scorer_hit', patience=10, mode='max'),
                 EarlyStopping('medianfpr99', patience=10, mode='min')
             ],
             enable_progress_bar=False,
@@ -1359,7 +1359,7 @@ def main(config_path, batch_size=12, num_workers=None):
         rprint(f"Got {len(dataset_test)} test samples")
 
         trainer.fit(model, dataset_train, dataset_test, )
-        return trainer.callback_metrics['medianfpr99'].item(), trainer.callback_metrics['best_scorer_hit'].item()
+        return trainer.callback_metrics['medianfpr99'].item()#, trainer.callback_metrics['best_scorer_hit'].item()
 
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
     # Unique identifier of the study.
