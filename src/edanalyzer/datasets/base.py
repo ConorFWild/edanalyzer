@@ -458,6 +458,7 @@ def _get_ligand_mask_multi_atom_float(res, radius=1.0, n=32, r=16.0):
         'Cl': 4,
         'Br': 4,
     }
+    atom_counts = {}
     masks = []
     for j in [0, 1, 2, 3, 4, 5]:
         mask = gemmi.FloatGrid(n, n, n)
@@ -468,6 +469,11 @@ def _get_ligand_mask_multi_atom_float(res, radius=1.0, n=32, r=16.0):
         for atom in res:
             element = atom.element.name
             pos = atom.pos
+
+            if element in atom_counts:
+                atom_counts[element] += 1
+            else:
+                atom_counts[element] = 1
 
             if (element not in atom_map) & (j == 5):
                 mask.set_points_around(
@@ -482,8 +488,10 @@ def _get_ligand_mask_multi_atom_float(res, radius=1.0, n=32, r=16.0):
                                 radius=radius,
                                 value=1.0,
                             )
-            
+
+        
         masks.append(mask)
+    print(atom_counts)
 
     return masks
 
