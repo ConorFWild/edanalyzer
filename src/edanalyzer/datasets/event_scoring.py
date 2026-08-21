@@ -734,11 +734,11 @@ class EventScoringDataset(Dataset):
             image_ligand_mask = np.stack(
                 [
                     _sample_xmap(
-                        mask,
+                        _mask,
                         ligand_map_transform,
                         np.copy(ligand_sample_array)
                 )
-                for mask in ligand_mask_grid
+                for _mask in ligand_mask_grid
                 ],
                 axis=0
             )
