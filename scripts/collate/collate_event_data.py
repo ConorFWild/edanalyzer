@@ -148,6 +148,7 @@ def process_pandda_event(
     except Exception as e:
         print(e)
         print('\t\t\tSKIPPING EVENT: Couldn\'t match res! Skipping!')
+        return
 
     
     if (conf == 'High') & (dist > 6.0):
