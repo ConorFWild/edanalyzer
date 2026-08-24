@@ -1379,6 +1379,11 @@ def main(config_path, batch_size=12, num_workers=None):
         )
         study.enqueue_trial(
             {
+                'lr': 0.00043494618102362016, 'wd': 0.005345979495015293, 'fraction_background_replace': 0.9629057056433626, 'xmap_radius': 5.694898546424631, 'max_x_blur': 0.7921493906188535, 'max_z_blur': 2.068510265683764, 'drop_rate': 0.8921364369336485, 'planes_1': 16, 'drop_1': 0.18712058735000692, 'planes_2': 32, 'drop_2': 0.8052544734831436, 'planes_3': 64, 'drop_3': 0.45145701068822086, 'planes_4': 32, 'drop_4': 0.1284595448491023, 'planes_5': 128, 'drop_5': 0.44847593478443115, 'drop_atom_rate': 0.8895334901826567, 'max_pos_atom_mask_radius': 3.58004382871734, 'max_translate': 3.804368925419125, 'max_x_noise': 1.4655413148408631, 'max_z_noise': 0.9871263779489088, 'pos_resample_rate': 10, 'p_flip': 0.222541322722117, 'z_mask_radius': 2.860635392434798, 'z_cutoff': 1.799473189019631, 'combo_layer': 64, 'blocks_1': 2, 'blocks_2': 1, 'blocks_3': 2, 'blocks_4': 2, 'grad_clip': 0.00010558607470242723, 'batch_size': 64
+            }
+        )
+        study.enqueue_trial(
+            {
                 'lr': 0.00027608304667883787, 'wd': 0.004428399357109647,
                 'fraction_background_replace': 0.9977586581425819,
                 'xmap_radius': 5.679885665547368, 'max_x_blur': 0.47417970205607624, 'max_z_blur': 0.6342802782754948,
