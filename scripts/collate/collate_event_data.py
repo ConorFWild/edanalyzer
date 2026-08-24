@@ -871,10 +871,10 @@ def main(config_path):
 
     process_low_conf_pandda_events(all_pandda_dirs, known_events, tables, test_systems, dry=True)
 
-    for dataset in sorted([x for x in set(new_datasets)]):
-        print(dataset)
+    # for dataset in sorted([x for x in set(new_datasets)]):
+    #     print(dataset)
 
-    add_valid_smiles(tables, dry=True)
+    # add_valid_smiles(tables, dry=True)
     # add_molecule_conformations(tables, dry=True)
 
     
