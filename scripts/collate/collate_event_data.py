@@ -798,8 +798,8 @@ def main(config_path):
     print(f'Got {len(known_datasets)} known datasets in zarr archive')
 
     known_events = {(x['dtag'], x['event_idx']) for idx, x in metadata_table[['dtag', 'event_idx']].iterrows()}
-    rprint(known_events)
-    exit()
+    # rprint(known_events)
+    # exit()
     # print(known_datasets)
 
     # Loop over PanDDA directories
