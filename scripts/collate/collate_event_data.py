@@ -693,7 +693,10 @@ def get_best_autobuild(pandda_dir, dtag, event_idx):
     except Exception:
         return None
 
-    autobuild_path = events[event_idx]['Build']['Build Path']
+    try:
+        autobuild_path = events[event_idx]['Build']['Build Path']
+    except Exception as e:
+        return None
     return autobuild_path
 
 def process_low_conf_pandda_events(all_pandda_dirs, known_events, tables, test_systems, dry=True):
