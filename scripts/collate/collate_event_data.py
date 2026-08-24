@@ -766,6 +766,7 @@ def process_low_conf_pandda_events(all_pandda_dirs, known_events, tables, test_s
     print(f'Would add {len(added_events)} low conf events')
 
 def main(config_path):
+    DRY=False
     rprint(f'Running collate_database from config file: {config_path}')
     # Load config
     with open(config_path, 'r') as f:
@@ -874,17 +875,17 @@ def main(config_path):
                 tables, 
                 test_systems,
                 known_datasets,
-                dry=True
+                dry=DRY
             )
             if _new_datasets is not None:
                 new_datasets += _new_datasets
 
-    process_low_conf_pandda_events(all_pandda_dirs, known_events, tables, test_systems, dry=True)
+    process_low_conf_pandda_events(all_pandda_dirs, known_events, tables, test_systems, dry=DRY)
 
     for dataset in sorted([x for x in set(new_datasets)]):
         print(dataset)
 
-    add_valid_smiles(tables, dry=True)
+    add_valid_smiles(tables, dry=DRY)
     # add_molecule_conformations(tables, dry=True)
 
     
