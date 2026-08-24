@@ -686,8 +686,11 @@ def _make_mol_conf_table(group):
 def get_best_autobuild(pandda_dir, dtag, event_idx):
     event_yaml = pandda_dir / 'processed_datasets' / dtag / 'events.yaml'
 
-    with open(event_yaml, 'r') as f:
-        events = yaml.safe_load(f)
+    try:
+        with open(event_yaml, 'r') as f:
+            events = yaml.safe_load(f)
+    except Exception:
+        return None
 
     autobuild_path = events[event_idx]['Build']['Build Path']
     return autobuild_path
@@ -726,6 +729,9 @@ def process_low_conf_pandda_events(all_pandda_dirs, known_events, tables, test_s
 
             # Get the best autobuild for the event
             st_path = get_best_autobuild(pandda_dir, dtag, event_idx)
+
+            if st_path is None:
+                continue
 
             # Otherwise process event
             processed = process_pandda_event(
