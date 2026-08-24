@@ -42,7 +42,7 @@ train:
 #  model_file: /dls/science/groups/i04-1/conor_dev/edanalyzer/workspace_all_data_6/all_data36.pt
   model_file:
 collate:
-  zarr: '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/event_data_5.zarr'
+  zarr: '/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/event_data_6.zarr'
 test:
   initial_epoch: 1
   test_interval: 1
