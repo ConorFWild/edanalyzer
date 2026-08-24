@@ -148,7 +148,8 @@ def process_pandda_event(
     except Exception as e:
         print(e)
         print('\t\t\tSKIPPING EVENT: Couldn\'t match res! Skipping!')
-        return
+
+    
     if (conf == 'High') & (dist > 6.0):
         rprint(
             f'\t\t\tSKIPPING EVENT: Could not match high confidence ligand {dtag} {event_idx} to a build!\n'
@@ -682,7 +683,77 @@ def _make_mol_conf_table(group):
         )
     return mol_conf_group
 
+def get_best_autobuild(pandda_dir, dtag, event_idx):
+    event_yaml = pandda_dir / 'processed_datasets' / dtag / 'events.yaml'
 
+    with open(event_yaml, 'r') as f:
+        events = yaml.safe_load(f)
+
+    autobuild_path = events[event_idx]['Build']['Build Path']
+    return autobuild_path
+
+def process_low_conf_pandda_events(all_pandda_dirs, known_events, tables, test_systems, dry=True):
+    idxs = Idxs(
+        z_map_sample_metadata_idx = len(tables.z_map_sample_metadata_table),
+        idx_pose = len(tables.known_hit_pose_table),
+        idx_ligand_data = len(tables.ligand_data_table),
+        annotation_idx = len(tables.annotation_table)    
+    )
+    added_events = []
+    for pandda_dir in all_pandda_dirs:
+        event_table = pd.read_csv(pandda_dir / 'analyses' / 'pandda_inspect_events.csv')
+        viewed_and_low = event_table[(event_table[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == 'Low') & (event_table[constants.PANDDA_INSPECT_VIEWED] == True)]
+        for _idx, _row in viewed_and_low.iterrows():
+            dtag, event_idx, bdc, conf, viewed, size, high_resolution, comment, x, y, z = (
+                                    _row['dtag'], 
+                                    _row['event_idx'], 
+                                    _row['1-BDC'], 
+                                    _row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE], 
+                                    _row[constants.PANDDA_INSPECT_VIEWED], 
+                                    _row[constants.PANDDA_INSPECT_CLUSTER_SIZE],
+                                    _row['high_resolution'],
+                                    _row['Comment'],
+                                    _row['x'], _row['y'], _row['z']
+                                )
+            
+            system = _get_system_from_dtag(dtag)
+            event_id = (dtag, event_idx)
+
+            # SKIP if potentially known
+            if event_id in known_events:
+                print(f'SKIPPING! Event may be known!')
+                continue
+
+            # Get the best autobuild for the event
+            st_path = get_best_autobuild(pandda_dir, dtag, event_idx)
+
+            # Otherwise process event
+            processed = process_pandda_event(
+                    tables, 
+                    pandda_dir, 
+                    system, 
+                    dtag, 
+                    event_idx, 
+                    size, 
+                    high_resolution, 
+                    conf, 
+                    x, 
+                    y, 
+                    z, 
+                    comment,
+                    test_systems,
+                    idxs,
+                    st_path=st_path,
+                    dry=dry
+                ) 
+            print(f'Would add event: {dtag} {event_idx}: {processed}')
+            if processed:
+                added_events.append(event_id)
+
+    for x in added_events:
+        print(x)
+
+    print(f'Would add {len(added_events)} low conf events')
 
 def main(config_path):
     rprint(f'Running collate_database from config file: {config_path}')
@@ -725,12 +796,17 @@ def main(config_path):
     print(f'Got {len(metadata_table)} known events')
     known_datasets = {x for x in metadata_table.loc[metadata_table.index, ['dtag']].values.flatten()}
     print(f'Got {len(known_datasets)} known datasets in zarr archive')
+
+    known_events = {(x['dtag'], x['event_idx']) for idx, x in metadata_table[['dtag', 'event_idx']].iterrows()}
+    rprint(known_events)
+    exit()
     # print(known_datasets)
 
     # Loop over PanDDA directories
     # for pandda_dir in Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output/pandda_new_score/panddas_new_score/').glob('*'):
     #     process_pandda_dir(pandda_dir, tables, test_systems, known_datasets)
     new_datasets = []
+    all_pandda_dirs = []
     for visit_dir in LABXCHEM_DATA_PATH.glob('*'):
         if visit_dir.parts[-1][:2] in ['sw', 'in']:  # SKIP INDUSTRIAL VISITS!
             continue
@@ -778,6 +854,8 @@ def main(config_path):
                 print(f'\tSKIPPING VISIT: No PanDDA dirs!')
                 continue    
 
+            all_pandda_dirs += pandda_dirs
+
             # Process the model building dir
             _new_datasets = process_model_building_dir(
                 model_building_dir, 
@@ -790,6 +868,8 @@ def main(config_path):
             )
             if _new_datasets is not None:
                 new_datasets += _new_datasets
+
+    process_low_conf_pandda_events(all_pandda_dirs, known_events, tables, test_systems, dry=True)
 
     for dataset in sorted([x for x in set(new_datasets)]):
         print(dataset)
