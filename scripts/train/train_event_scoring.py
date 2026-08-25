@@ -817,7 +817,7 @@ def main(config_path, batch_size=12, num_workers=None):
     output_dir = Path('/dls/data2temp01/labxchem/data/2017/lb18145-17/processing/edanalyzer/output')
 
     # zarr_path = output_dir / 'event_data_with_mtzs_3.zarr'
-    zarr_path = output_dir / 'event_data_5.zarr'
+    zarr_path = output_dir / 'event_data_6.zarr'
 
     root = zarr.open(str(zarr_path), mode='r')
 
@@ -1043,7 +1043,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    study_name = 'event_scoring_prod_67'
+    study_name = 'event_scoring_prod_68'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
