@@ -707,7 +707,8 @@ def process_low_conf_pandda_events(all_pandda_dirs, known_events, tables, test_s
         annotation_idx = len(tables.annotation_table)    
     )
     added_events = []
-    for pandda_dir in all_pandda_dirs:
+    for j, pandda_dir in enumerate(all_pandda_dirs):
+        rprint(f'Processing PanDDA {j} / {len(all_pandda_dirs)}')
         try:
             event_table = pd.read_csv(pandda_dir / 'analyses' / 'pandda_inspect_events.csv')
         except:
