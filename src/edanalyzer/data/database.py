@@ -514,7 +514,7 @@ def _match_atoms(atom_name_array, block):
     match = {}
     for _j, atom_1_id in enumerate(filtered_atom_id_loop):
         for _k, atom_2_id in enumerate(atom_name_array):
-            if atom_1_id == atom_2_id:
+            if atom_1_id.lower() == atom_2_id.lower():
                 match[_j] = _k
 
     if len(match) != len(filtered_atom_id_loop):
