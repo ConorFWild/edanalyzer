@@ -520,7 +520,7 @@ def _match_atoms(atom_name_array, block):
     if len(match) != len(filtered_atom_id_loop):
         rprint(f"Only partial match {len(match)} / {len(filtered_atom_id_loop)}! Skipping!")
         rprint([x for x in atom_name_array])
-        rprint([[x for x in filtered_atom_id_loop]])
+        rprint([x for x in filtered_atom_id_loop])
         return None
 
     else:
