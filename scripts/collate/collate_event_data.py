@@ -708,7 +708,10 @@ def process_low_conf_pandda_events(all_pandda_dirs, known_events, tables, test_s
     )
     added_events = []
     for pandda_dir in all_pandda_dirs:
-        event_table = pd.read_csv(pandda_dir / 'analyses' / 'pandda_inspect_events.csv')
+        try:
+            event_table = pd.read_csv(pandda_dir / 'analyses' / 'pandda_inspect_events.csv')
+        except:
+            continue
         viewed_and_low = event_table[(event_table[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == 'Low') & (event_table[constants.PANDDA_INSPECT_VIEWED] == True)]
         for _idx, _row in viewed_and_low.iterrows():
             dtag, event_idx, bdc, conf, viewed, size, high_resolution, comment, x, y, z = (
