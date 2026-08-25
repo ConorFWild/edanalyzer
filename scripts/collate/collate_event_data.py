@@ -712,6 +712,13 @@ def process_low_conf_pandda_events(all_pandda_dirs, known_events, tables, test_s
             event_table = pd.read_csv(pandda_dir / 'analyses' / 'pandda_inspect_events.csv')
         except:
             continue
+
+        num_high = len(event_table[event_table[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == 'High'])
+
+        if num_high == 0:
+            print(f'SKIPPING PanDDA: No high confidence events marked!')
+            continue
+
         viewed_and_low = event_table[(event_table[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == 'Low') & (event_table[constants.PANDDA_INSPECT_VIEWED] == True)]
         for _idx, _row in viewed_and_low.iterrows():
             try:
