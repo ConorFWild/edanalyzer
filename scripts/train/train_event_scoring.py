@@ -1043,7 +1043,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    study_name = 'event_scoring_prod_68'
+    study_name = 'event_scoring_prod_large_set_partial'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
