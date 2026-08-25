@@ -572,6 +572,8 @@ def add_valid_smiles(tables: Tables, dry=False):
             print(e)
             smiles_validity[smiles] = False
 
+    num_valid = 0
+    num_iinvalid = 0
     for _idx, _row in df.iterrows():
         if _idx in valid_smiles_table['idx']:
             continue
@@ -584,6 +586,7 @@ def add_valid_smiles(tables: Tables, dry=False):
                         dtype=valid_smiles_dtype
                     )
                 )
+                num_valid += 1
         else:
             if not dry:
                 tables.valid_smiles_group.append(
@@ -592,6 +595,9 @@ def add_valid_smiles(tables: Tables, dry=False):
                         dtype=valid_smiles_dtype
                     )
                 )
+                num_iinvalid += 1
+
+    print(f'Got {num_valid} valid smiles and {num_iinvalid} invalid smiles')
 
 
 def add_molecule_conformations(tables: Tables, dry=False):
