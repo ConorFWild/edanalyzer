@@ -714,17 +714,20 @@ def process_low_conf_pandda_events(all_pandda_dirs, known_events, tables, test_s
             continue
         viewed_and_low = event_table[(event_table[constants.PANDDA_INSPECT_HIT_CONDFIDENCE] == 'Low') & (event_table[constants.PANDDA_INSPECT_VIEWED] == True)]
         for _idx, _row in viewed_and_low.iterrows():
-            dtag, event_idx, bdc, conf, viewed, size, high_resolution, comment, x, y, z = (
-                                    _row['dtag'], 
-                                    _row['event_idx'], 
-                                    _row['1-BDC'], 
-                                    _row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE], 
-                                    _row[constants.PANDDA_INSPECT_VIEWED], 
-                                    _row[constants.PANDDA_INSPECT_CLUSTER_SIZE],
-                                    _row['high_resolution'],
-                                    _row['Comment'],
-                                    _row['x'], _row['y'], _row['z']
-                                )
+            try:
+                dtag, event_idx, bdc, conf, viewed, size, high_resolution, comment, x, y, z = (
+                                        _row['dtag'], 
+                                        _row['event_idx'], 
+                                        _row['1-BDC'], 
+                                        _row[constants.PANDDA_INSPECT_HIT_CONDFIDENCE], 
+                                        _row[constants.PANDDA_INSPECT_VIEWED], 
+                                        _row[constants.PANDDA_INSPECT_CLUSTER_SIZE],
+                                        _row['high_resolution'],
+                                        _row['Comment'],
+                                        _row['x'], _row['y'], _row['z']
+                                    )
+            except:
+                continue
             
             system = _get_system_from_dtag(dtag)
             event_id = (dtag, event_idx)
