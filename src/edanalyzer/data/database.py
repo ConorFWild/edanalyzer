@@ -512,7 +512,7 @@ def _match_atoms(atom_name_array, block):
         return None
 
     match = {}
-    for _j, atom_1_id in enumerate([_x for _x, _el in zip(atom_id_loop, filtered_atom_id_loop) if _el != 'H']):
+    for _j, atom_1_id in enumerate(filtered_atom_id_loop):
         for _k, atom_2_id in enumerate(atom_name_array):
             if atom_1_id == atom_2_id:
                 match[_j] = _k
