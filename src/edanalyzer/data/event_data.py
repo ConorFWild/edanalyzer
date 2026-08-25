@@ -397,12 +397,16 @@ def _get_ligand_data_sample_from_dataset_dir(dataset_dir, res, idx_ligand_data):
             compound_dir,
 
         )
-    except:
+    except Exception as e:
+        print(f'SKIPPING! Exception in matching CIFs!: {e}')
         return None
 
     if len(matched_cifs) == 0:
+        print('SKIPPING! ZERO CIFS MATCHED!')
         # rprint(f'NO MATCHED LIGAND DATA!!!!!!')
         return None
+
+    print(f'MATCHED a cif!')
 
     matched_cif = matched_cifs[0]
 
