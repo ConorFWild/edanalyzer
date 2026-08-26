@@ -844,6 +844,7 @@ def main(config_path):
             continue
         for subvisit_dir in visit_dir.glob('*'):
             processing_dir = subvisit_dir / 'processing'
+            
             try:
                 if not processing_dir.exists():
                     print(f'\tSKIPPING VISIT: No processing dir!')

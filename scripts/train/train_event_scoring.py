@@ -1043,7 +1043,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    study_name = 'event_scoring_prod_large_set_partial'
+    study_name = 'event_scoring_prod_large_set'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
@@ -1248,7 +1248,7 @@ def main(config_path, batch_size=12, num_workers=None):
             'max_translate': trial.suggest_uniform('max_translate', 0.0, 5.0),
             'max_x_noise': trial.suggest_uniform('max_x_noise', 0.0, 2.0),
             'max_z_noise': trial.suggest_uniform('max_z_noise', 0.0, 2.0),
-            'pos_resample_rate': trial.suggest_int('pos_resample_rate', 0, 10),
+            'pos_resample_rate': trial.suggest_int('pos_resample_rate', 0, 50),
             'p_flip': trial.suggest_uniform('p_flip', 0.0, 1.0),
             'z_mask_radius': trial.suggest_uniform('z_mask_radius', 1.0, 3.5),
             'z_cutoff': trial.suggest_uniform('z_cutoff', 1.5, 3.0),
