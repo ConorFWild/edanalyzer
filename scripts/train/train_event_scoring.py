@@ -1319,7 +1319,8 @@ def main(config_path, batch_size=12, num_workers=None):
                 # checkpoint_callback_best_best_scorer_hit,
                 # PyTorchLightningPruningCallback(trial, monitor='best_scorer_hit', ),
                 # EarlyStopping('best_scorer_hit', patience=10, mode='max'),
-                EarlyStopping('medianfpr99', patience=10, mode='min')
+                # EarlyStopping('medianfpr99', patience=10, mode='min'),
+                PyTorchLightningPruningCallback(trial, monitor = "medianfpr99")
             ],
             enable_progress_bar=False,
             max_epochs=60
