@@ -482,6 +482,7 @@ class EventScoringDataset(Dataset):
         self.p_flip = config['p_flip']
         self.z_mask_radius = config['z_mask_radius']
         self.z_cutoff = config['z_cutoff']
+        self.rescale_x = config['rescale_x']
 
         self.ligand = config['ligand']
 
@@ -700,11 +701,18 @@ class EventScoringDataset(Dataset):
             mask = np.ones((32,32,32), dtype=np.float32)
 
         # Get sample images
-        xmap_sample = _sample_xmap(
-            xmap,
-            transform,
-            np.copy(sample_array)
-        )
+        if self.rescale_x:
+            xmap_sample = _sample_xmap_and_scale(
+                xmap,
+                transform,
+                np.copy(sample_array)
+            )
+        else:
+            xmap_sample = _sample_xmap(
+                xmap,
+                transform,
+                np.copy(sample_array)
+            )
         # xmap_sample = np.copy(sample_array)
         z_map_sample = _sample_xmap(
             z_map,

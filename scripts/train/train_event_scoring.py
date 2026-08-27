@@ -1043,7 +1043,7 @@ def main(config_path, batch_size=12, num_workers=None):
 
     # Get the model
     rprint('Constructing model...')
-    study_name = 'event_scoring_prod_large_set_prune'
+    study_name = 'event_scoring_prod_large_set_prune_rescale'
     output = output_dir / study_name
     if not output.exists():
         os.mkdir(output)
@@ -1259,6 +1259,7 @@ def main(config_path, batch_size=12, num_workers=None):
             'blocks_4': trial.suggest_categorical('blocks_4', [1, 2, ]),
             'grad_clip': trial.suggest_loguniform('grad_clip', 1e-4, 1e1),
             'batch_size': trial.suggest_categorical('batch_size', [16, 32, 64, 128, ]),
+            'rescale_x': trial.suggest_categorical('rescale_x', [True, False]),
             # "batch_size": tune.choice([32, 64]),
         }
         print(f'Running trial with config:')
@@ -1380,8 +1381,18 @@ def main(config_path, batch_size=12, num_workers=None):
         )
         study.enqueue_trial(
             {
-                'lr': 0.00043494618102362016, 'wd': 0.005345979495015293, 'fraction_background_replace': 0.9629057056433626, 'xmap_radius': 5.694898546424631, 'max_x_blur': 0.7921493906188535, 'max_z_blur': 2.068510265683764, 'drop_rate': 0.8921364369336485, 'planes_1': 16, 'drop_1': 0.18712058735000692, 'planes_2': 32, 'drop_2': 0.8052544734831436, 'planes_3': 64, 'drop_3': 0.45145701068822086, 'planes_4': 32, 'drop_4': 0.1284595448491023, 'planes_5': 128, 'drop_5': 0.44847593478443115, 'drop_atom_rate': 0.8895334901826567, 'max_pos_atom_mask_radius': 3.58004382871734, 'max_translate': 3.804368925419125, 'max_x_noise': 1.4655413148408631, 'max_z_noise': 0.9871263779489088, 'pos_resample_rate': 10, 'p_flip': 0.222541322722117, 'z_mask_radius': 2.860635392434798, 'z_cutoff': 1.799473189019631, 'combo_layer': 64, 'blocks_1': 2, 'blocks_2': 1, 'blocks_3': 2, 'blocks_4': 2, 'grad_clip': 0.00010558607470242723, 'batch_size': 64
-            }
+                'lr': 0.00043494618102362016, 'wd': 0.005345979495015293, 'fraction_background_replace': 0.9629057056433626, 
+                'xmap_radius': 5.694898546424631, 'max_x_blur': 0.7921493906188535, 'max_z_blur': 2.068510265683764, 
+                'drop_rate': 0.8921364369336485, 'planes_1': 16, 'drop_1': 0.18712058735000692, 'planes_2': 32, 
+                'drop_2': 0.8052544734831436, 'planes_3': 64, 'drop_3': 0.45145701068822086, 'planes_4': 32, 
+                'drop_4': 0.1284595448491023, 'planes_5': 128, 'drop_5': 0.44847593478443115, 
+                'drop_atom_rate': 0.8895334901826567, 'max_pos_atom_mask_radius': 3.58004382871734, 
+                'max_translate': 3.804368925419125, 'max_x_noise': 1.4655413148408631, 'max_z_noise': 0.9871263779489088, 
+                'pos_resample_rate': 10, 'p_flip': 0.222541322722117, 'z_mask_radius': 2.860635392434798, 
+                'z_cutoff': 1.799473189019631, 'combo_layer': 64, 'blocks_1': 2, 'blocks_2': 1, 'blocks_3': 2, 
+                'blocks_4': 2, 'grad_clip': 0.00010558607470242723, 'batch_size': 64, 'rescale_x': False
+            },
+            skip_if_exists=True
         )
         study.enqueue_trial(
             {
@@ -1397,11 +1408,78 @@ def main(config_path, batch_size=12, num_workers=None):
                 'max_z_noise': 0.9535320617031404, 'pos_resample_rate': 10, 'p_flip': 0.3678479092419647,
                 'z_mask_radius': 2.659870974428465, 'z_cutoff': 1.892141827304312, 'combo_layer': 64, 'blocks_1': 2,
                 'blocks_2': 2,
-                'blocks_3': 1, 'blocks_4': 2, 'grad_clip': 0.0004551500618521706, 'batch_size': 32
+                'blocks_3': 1, 'blocks_4': 2, 'grad_clip': 0.0004551500618521706, 'batch_size': 32, 'rescale_x': False
 
             },
             skip_if_exists=True
         )
+        study.enqueue_trial(
+
+            {
+                'lr': 0.00043494618102362016, 'wd': 0.005345979495015293, 'fraction_background_replace': 0.9629057056433626, 
+                'xmap_radius': 5.694898546424631, 'max_x_blur': 0.7921493906188535, 'max_z_blur': 2.068510265683764, 
+                'drop_rate': 0.8921364369336485, 'planes_1': 16, 'drop_1': 0.18712058735000692, 'planes_2': 32, 
+                'drop_2': 0.8052544734831436, 'planes_3': 64, 'drop_3': 0.45145701068822086, 'planes_4': 32, 
+                'drop_4': 0.1284595448491023, 'planes_5': 128, 'drop_5': 0.44847593478443115, 'drop_atom_rate': 0.8895334901826567, 
+                'max_pos_atom_mask_radius': 3.58004382871734, 'max_translate': 3.804368925419125, 'max_x_noise': 1.4655413148408631, 
+                'max_z_noise': 0.9871263779489088, 'pos_resample_rate': 10, 'p_flip': 0.222541322722117, 
+                'z_mask_radius': 2.860635392434798, 'z_cutoff': 1.799473189019631, 'combo_layer': 64, 'blocks_1': 2, 'blocks_2': 1, 
+                'blocks_3': 2, 'blocks_4': 2, 'grad_clip': 0.00010558607470242723, 'batch_size': 64, 'rescale_x': False
+            },
+                skip_if_exists=True
+        )
+
+        study.enqueue_trial(
+            {
+                'lr': 0.00043494618102362016, 'wd': 0.005345979495015293, 'fraction_background_replace': 0.9629057056433626, 
+                'xmap_radius': 5.694898546424631, 'max_x_blur': 0.7921493906188535, 'max_z_blur': 2.068510265683764, 
+                'drop_rate': 0.8921364369336485, 'planes_1': 16, 'drop_1': 0.18712058735000692, 'planes_2': 32, 
+                'drop_2': 0.8052544734831436, 'planes_3': 64, 'drop_3': 0.45145701068822086, 'planes_4': 32, 
+                'drop_4': 0.1284595448491023, 'planes_5': 128, 'drop_5': 0.44847593478443115, 
+                'drop_atom_rate': 0.8895334901826567, 'max_pos_atom_mask_radius': 3.58004382871734, 
+                'max_translate': 3.804368925419125, 'max_x_noise': 1.4655413148408631, 'max_z_noise': 0.9871263779489088, 
+                'pos_resample_rate': 10, 'p_flip': 0.222541322722117, 'z_mask_radius': 2.860635392434798, 
+                'z_cutoff': 1.799473189019631, 'combo_layer': 64, 'blocks_1': 2, 'blocks_2': 1, 'blocks_3': 2, 
+                'blocks_4': 2, 'grad_clip': 0.00010558607470242723, 'batch_size': 64, 'rescale_x': True
+            },
+            skip_if_exists=True
+        )
+        study.enqueue_trial(
+            {
+                'lr': 0.00027608304667883787, 'wd': 0.004428399357109647,
+                'fraction_background_replace': 0.9977586581425819,
+                'xmap_radius': 5.679885665547368, 'max_x_blur': 0.47417970205607624, 'max_z_blur': 0.6342802782754948,
+                'drop_rate': 0.34074819841381004, 'planes_1': 16, 'drop_1': 0.04973841976629942, 'planes_2': 32,
+                'drop_2': 0.4773445563051335, 'planes_3': 64, 'drop_3': 0.7220893799410683, 'planes_4': 32,
+                'drop_4': 0.42842911756667934,
+                'planes_5': 256, 'drop_5': 0.8164371048868642, 'drop_atom_rate': 0.6835634852890703,
+                'max_pos_atom_mask_radius': 3.5505538045507197, 'max_translate': 1.504396022687739,
+                'max_x_noise': 0.6267668374814633,
+                'max_z_noise': 0.9535320617031404, 'pos_resample_rate': 10, 'p_flip': 0.3678479092419647,
+                'z_mask_radius': 2.659870974428465, 'z_cutoff': 1.892141827304312, 'combo_layer': 64, 'blocks_1': 2,
+                'blocks_2': 2,
+                'blocks_3': 1, 'blocks_4': 2, 'grad_clip': 0.0004551500618521706, 'batch_size': 32, 'rescale_x': True
+
+            },
+            skip_if_exists=True
+        )
+        study.enqueue_trial(
+
+            {
+                'lr': 0.00043494618102362016, 'wd': 0.005345979495015293, 'fraction_background_replace': 0.9629057056433626, 
+                'xmap_radius': 5.694898546424631, 'max_x_blur': 0.7921493906188535, 'max_z_blur': 2.068510265683764, 
+                'drop_rate': 0.8921364369336485, 'planes_1': 16, 'drop_1': 0.18712058735000692, 'planes_2': 32, 
+                'drop_2': 0.8052544734831436, 'planes_3': 64, 'drop_3': 0.45145701068822086, 'planes_4': 32, 
+                'drop_4': 0.1284595448491023, 'planes_5': 128, 'drop_5': 0.44847593478443115, 'drop_atom_rate': 0.8895334901826567, 
+                'max_pos_atom_mask_radius': 3.58004382871734, 'max_translate': 3.804368925419125, 'max_x_noise': 1.4655413148408631, 
+                'max_z_noise': 0.9871263779489088, 'pos_resample_rate': 10, 'p_flip': 0.222541322722117, 
+                'z_mask_radius': 2.860635392434798, 'z_cutoff': 1.799473189019631, 'combo_layer': 64, 'blocks_1': 2, 'blocks_2': 1, 
+                'blocks_3': 2, 'blocks_4': 2, 'grad_clip': 0.00010558607470242723, 'batch_size': 64, 'rescale_x': True
+            },
+                skip_if_exists=True
+        )
+
+
     else:
         print(f'Loading study!')
         study = optuna.load_study(
