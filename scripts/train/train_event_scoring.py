@@ -1488,7 +1488,7 @@ def main(config_path, batch_size=12, num_workers=None):
             sampler=TPESampler(constant_liar=True),
             pruner=pruner,
         )
-    study.optimize(objective, n_trials=300)
+    study.optimize(objective, n_trials=600)
 
 
 if __name__ == "__main__":
