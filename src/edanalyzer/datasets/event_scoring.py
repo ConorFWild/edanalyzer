@@ -428,6 +428,265 @@ def truncate(xmap, res):
 #             torch.from_numpy(label_float)
 #         )
 
+def get_ligand_array(pandda_2_ligand_data_table, ligand_data_idx, unique_smiles, unique_smiles_frequencies, conf, sample_array, test_train, use_ligand):
+
+    # If training replace with a random ligand
+    if (test_train == 'train') & (conf in ['Low', 'Medium']):
+        smiles = unique_smiles.sample(weights=unique_smiles_frequencies).iloc[0]
+    else:
+        ligand_data = pandda_2_ligand_data_table[ligand_data_idx]
+        smiles = ligand_data['canonical_smiles']
+
+    # Get the molecule
+    try:
+        m = Chem.MolFromSmiles(smiles)
+        m2 = Chem.AddHs(m)
+        cids = AllChem.EmbedMultipleConfs(m2, numConfs=10)
+        m3 = Chem.RemoveHs(m2)
+        embedding = [_conf.GetPositions() for _conf in m3.GetConformers()][0]
+    except Exception as e:
+        print(e)
+        return None
+
+    # Get the ligand
+    valid_poss = (embedding - np.mean(embedding, axis=0)) + np.array([8.0,8.0,8.0])
+    valid_elements = np.array(
+            [m3.GetAtomWithIdx(_atom_idx).GetAtomicNum() for _atom_idx in [a.GetIdx() for a in m3.GetAtoms()]])
+    ligand_sample_array = np.zeros(
+        (32, 32, 32),
+        dtype=np.float32,
+    )
+    ligand_orientation = _get_random_orientation()
+    transformed_residue = _get_res_from_arrays(
+        valid_poss,
+        valid_elements,
+    )
+    ligand_centroid = _get_centroid_from_res(transformed_residue)
+    ligand_map_transform = _get_transform_from_orientation_centroid(
+        ligand_orientation,
+        ligand_centroid,
+        n=32,
+    )
+    ligand_mask_grid = _get_ligand_mask_multi_atom_float(
+                transformed_residue,
+            )
+
+    # Make the image
+    if use_ligand:
+        image_ligand_mask = np.stack(
+            [
+                _sample_xmap(
+                    _mask,
+                    ligand_map_transform,
+                    np.copy(ligand_sample_array)
+            )
+            for _mask in ligand_mask_grid
+            ],
+            axis=0
+        )
+                
+    else:
+        image_ligand_mask = np.stack(
+            [np.copy(sample_array) for j in [0, 1, 2, 3, 4, 5]], 
+            axis = 0,
+            )
+
+    image_mol = image_ligand_mask
+    image_mol_float = image_mol.astype(np.float32)
+    return image_mol_float
+
+def get_label_array(conf):
+    # if self.test_train == 'train':
+    #     # if conf == 'High':
+    #     #     hit = [self.label_noise, 1-self.label_noise]
+    #     # elif conf == 'Medium':
+    #     #     hit = [0.5, 0.5]
+    #     # elif conf == 'Low':
+    #     #     hit = [1-self.label_noise, self.label_noise]
+    #     if conf == 'High':
+    #         hit = [0.0, 1.0]
+    #     elif conf == 'Medium':
+    #         hit = [0.5, 0.5]
+    #     elif conf == 'Low':
+    #         hit = [1.0, 0.0]
+    #     else:
+    #         raise Exception
+    # else:
+    #     if conf == 'High':
+    #         hit = [0.0, 1.0]
+    #     elif conf == 'Medium':
+    #         hit = [0.5, 0.5]
+    #     elif conf == 'Low':
+    #         hit = [1.0, 0.0]
+    #     else:
+    #         raise Exception
+
+
+    # if conf == 'High':
+    #     hit = [0.0, 0.0, 1.0]
+    # elif conf == 'Medium':
+    #     hit = [0.0, 1.0, 0.0]
+    # elif conf == 'Low':
+    #     hit = [1.0, 0.0, 0.0]
+    # else:
+    #     raise Exception
+
+    if conf == 'High':
+        hit = [0.0, 1.0]
+    elif conf == 'Medium':
+        hit = [0.5, 0.5]
+    elif conf == 'Low':
+        hit = [1.0, 0.0,]
+    else:
+        raise Exception
+
+
+    label = np.array(hit)
+    label_float = label.astype(np.float32)
+    return label_float
+    ...
+
+def get_map_array(
+        z_map_sample_metadata, 
+        metadata_table_low_conf, 
+        pandda_2_pose_table, 
+        metadata_table_high_conf, 
+        pandda_2_z_map_sample_table, 
+        pandda_2_xmap_sample_table, 
+        transform,
+        sample_array,
+        test_train, 
+        p_flip, 
+        fraction_background_replace,
+        drop_atom_rate,
+        max_pos_atom_mask_radius,
+        max_x_blur,
+        max_z_blur,
+        rescale_x,
+        max_x_noise,
+        max_z_noise,
+        use_ligand,
+        z_cutoff,
+        z_mask_radius,
+        xmap_radius,
+
+        ):
+    rng = np.random.default_rng()
+
+    # If training symmetrize maps
+    if (rng.uniform(0.0, 1.0) > p_flip) & (test_train == 'train'):
+        if rng.uniform(0.0, 1.0) > 0.5:
+            xmap_sample_data = np.flip(xmap_sample_data, 0)
+            z_map_sample_data = np.flip(z_map_sample_data, 0)
+        if rng.uniform(0.0, 1.0) > 0.5:
+            xmap_sample_data = np.flip(xmap_sample_data, 1)
+            z_map_sample_data = np.flip(z_map_sample_data, 1)
+        if rng.uniform(0.0, 1.0) > 0.5:
+            xmap_sample_data = np.flip(xmap_sample_data, 2)
+            z_map_sample_data = np.flip(z_map_sample_data, 2)
+
+    # If training mess with map background
+    pose_data_idx = z_map_sample_metadata['pose_data_idx']
+    if (rng.uniform(0.0, 1.0) > fraction_background_replace) & (test_train == 'train'):
+        if pose_data_idx != -1:  # High confidence sample: chop in low confidence background
+            pose_data = pandda_2_pose_table[pose_data_idx]
+        else:  # Low confidence sample: chop in low confidence background
+            high_conf_sample = metadata_table_high_conf.sample().iloc[0]
+            pose_data_idx = high_conf_sample['pose_data_idx']
+            pose_data = pandda_2_pose_table[pose_data_idx]
+
+        # Select new background
+        low_conf_sample = metadata_table_low_conf.sample().iloc[0]
+        low_conf_z_map_sample_data = pandda_2_z_map_sample_table[low_conf_sample['idx']]['sample']
+        low_conf_x_map_sample_data = pandda_2_xmap_sample_table[low_conf_sample['idx']]['sample']
+
+        # Mask around ligand and paste in new background
+        _valid_mask = pose_data['elements'] > 1
+        if (test_train == 'train') & (rng.random() > drop_atom_rate):
+            _valid_indicies = np.nonzero(_valid_mask)
+            num_valid = len(_valid_indicies[0])
+            for _j in range(rng.integers(0, max(num_valid - 5, 1))):
+                _valid_indicies = np.nonzero(_valid_mask)
+                _random_drop_index = rng.integers(0, len(_valid_indicies[0]))
+                drop_index = _valid_indicies[0][_random_drop_index]
+                _valid_mask[drop_index] = False
+        _valid_poss = pose_data['positions'][_valid_mask]
+        _valid_elements = pose_data['elements'][_valid_mask]
+        _transformed_residue = _get_res_from_arrays(
+            _valid_poss,
+            _valid_elements,
+        )
+        _radius = rng.uniform(1.0, max_pos_atom_mask_radius)
+        _ligand_mask_grid = _get_ligand_mask_float(
+            _transformed_residue,
+            _radius,
+            90,
+            45.0
+        )
+        _ligand_mask_array = np.array(_ligand_mask_grid) > 0
+
+        z_map_sample_data[~_ligand_mask_array] = low_conf_z_map_sample_data[~_ligand_mask_array]
+        xmap_sample_data[~_ligand_mask_array] = low_conf_x_map_sample_data[~_ligand_mask_array]
+
+    # Blur the map data
+    if test_train == 'train':
+        u_s = rng.uniform(0.0, max_x_blur)
+        xmap_sample_data = gaussian_filter(xmap_sample_data, sigma=u_s)
+
+        u_s = rng.uniform(0.0, max_z_blur)
+        z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
+
+    # Grid the map data
+    xmap = _get_grid_from_hdf5(xmap_sample_data)
+    z_map = _get_grid_from_hdf5(z_map_sample_data)
+
+    # Sample the maps
+    if rescale_x:
+        xmap_sample = _sample_xmap_and_scale(
+            xmap,
+            transform,
+            np.copy(sample_array)
+        )
+    else:
+        xmap_sample = _sample_xmap(
+            xmap,
+            transform,
+            np.copy(sample_array)
+        )
+    z_map_sample = _sample_xmap(
+        z_map,
+        transform,
+        np.copy(sample_array)
+    )
+
+    # Apply noise to the arrays
+    if test_train == 'train':
+        u_s = rng.uniform(0.0, max_x_noise)
+        noise = rng.normal(size=(32,32,32)) * u_s
+        z_map_sample += noise.astype(np.float32)
+
+        u_s = rng.uniform(0.0, max_z_noise)
+        noise = rng.normal(size=(32,32,32)) * u_s
+        xmap_sample += noise.astype(np.float32)
+
+    if use_ligand:
+        _density_mask = (z_map_sample > z_cutoff).astype(int)
+        density_mask = expand_labels(_density_mask, distance=z_mask_radius / 0.5)
+        density_mask[density_mask != 1] = 0
+    else:
+        density_mask = _get_ed_mask_float(radius=xmap_radius)
+
+    # Construct the masked map image array
+    image_z = np.stack(
+        [
+            z_map_sample * density_mask,
+            xmap_sample * density_mask
+        ],
+        axis=0
+    )
+    image_z_float = image_z.astype(np.float32) # * mask
+    return image_z_float
+
 class EventScoringDataset(Dataset):
 
     def __init__(self, config):
@@ -511,87 +770,67 @@ class EventScoringDataset(Dataset):
         annotation = self.pandda_2_annotations[z_map_sample_metadata['event_idx']]
 
 
+        # If training Apply a random translation 
+        if self.test_train == 'train':
+            translation = self.max_translate*(2*(rng.random(3)-0.5))
+            centroid = np.array([22.5,22.5,22.5]) + translation
 
-
-        # If training replace positives with negatives
-        # if (annotation['partition'] == 'train') & (rng.uniform(0.0, 1.0) > 0.5) & (conf == 'High'):
-        #     conf = 'Low'
-        #     low_conf_sample = self.metadata_table_low_conf.sample().iloc[0]
-        #     z_map_sample_data = self.pandda_2_z_map_sample_table[low_conf_sample['idx']]
-
-        #
-        if (rng.uniform(0.0, 1.0) > self.p_flip) & (self.test_train == 'train'):
-            if rng.uniform(0.0, 1.0) > 0.5:
-                xmap_sample_data = np.flip(xmap_sample_data, 0)
-                z_map_sample_data = np.flip(z_map_sample_data, 0)
-            if rng.uniform(0.0, 1.0) > 0.5:
-                xmap_sample_data = np.flip(xmap_sample_data, 1)
-                z_map_sample_data = np.flip(z_map_sample_data, 1)
-            if rng.uniform(0.0, 1.0) > 0.5:
-                xmap_sample_data = np.flip(xmap_sample_data, 2)
-                z_map_sample_data = np.flip(z_map_sample_data, 2)
-
-        # If training
-        pose_data_idx = z_map_sample_metadata['pose_data_idx']
-        if (rng.uniform(0.0, 1.0) > self.fraction_background_replace) & (self.test_train == 'train'):
-            if pose_data_idx != -1:  # High confidence sample: chop in low confidence background
-                pose_data = self.pandda_2_pose_table[pose_data_idx]
-            else:  # Low confidence sample: chop in low confidence background
-                high_conf_sample = self.metadata_table_high_conf.sample().iloc[0]
-                pose_data_idx = high_conf_sample['pose_data_idx']
-                pose_data = self.pandda_2_pose_table[pose_data_idx]
-
-            # Select new background
-            low_conf_sample = self.metadata_table_low_conf.sample().iloc[0]
-            low_conf_z_map_sample_data = self.pandda_2_z_map_sample_table[low_conf_sample['idx']]['sample']
-            low_conf_x_map_sample_data = self.pandda_2_xmap_sample_table[low_conf_sample['idx']]['sample']
-
-            # Mask around ligand and paste in new background
-            _valid_mask = pose_data['elements'] > 1
-            if (self.test_train == 'train') & (rng.random() > self.drop_atom_rate):
-                _valid_indicies = np.nonzero(_valid_mask)
-                num_valid = len(_valid_indicies[0])
-                for _j in range(rng.integers(0, max(num_valid - 5, 1))):
-                    _valid_indicies = np.nonzero(_valid_mask)
-                    _random_drop_index = rng.integers(0, len(_valid_indicies[0]))
-                    drop_index = _valid_indicies[0][_random_drop_index]
-                    _valid_mask[drop_index] = False
-            _valid_poss = pose_data['positions'][_valid_mask]
-            _valid_elements = pose_data['elements'][_valid_mask]
-            _transformed_residue = _get_res_from_arrays(
-                _valid_poss,
-                _valid_elements,
-            )
-            _radius = rng.uniform(1.0, self.max_pos_atom_mask_radius)
-            _ligand_mask_grid = _get_ligand_mask_float(
-                _transformed_residue,
-                _radius,
-                90,
-                45.0
-            )
-            _ligand_mask_array = np.array(_ligand_mask_grid) > 0
-
-            z_map_sample_data[~_ligand_mask_array] = low_conf_z_map_sample_data[~_ligand_mask_array]
-            xmap_sample_data[~_ligand_mask_array] = low_conf_x_map_sample_data[~_ligand_mask_array]
-
-
-        # If training replace with a random ligand
-        if (self.test_train == 'train') & (conf in ['Low', 'Medium']):
-            # smiles = self.unique_smiles[rng.integers(0, len(self.unique_smiles))]
-            smiles = self.unique_smiles.sample(weights=self.unique_smiles_frequencies).iloc[0]
         else:
-            ligand_data = self.pandda_2_ligand_data_table[ligand_data_idx]
-            smiles = ligand_data['canonical_smiles']
+            centroid = np.array([22.5,22.5,22.5])
 
-        # Get the molecule
-        try:
-            m = Chem.MolFromSmiles(smiles)
-            m2 = Chem.AddHs(m)
-            cids = AllChem.EmbedMultipleConfs(m2, numConfs=10)
-            m3 = Chem.RemoveHs(m2)
-            embedding = [_conf.GetPositions() for _conf in m3.GetConformers()][0]
-        except Exception as e:
-            print(f'Got exception in getting conf: {e}')
+        # Get sampling transform for the maps
+        sample_array = np.zeros(
+            (32, 32, 32),
+            dtype=np.float32,
+        )
+        if self.test_train == 'train':
+            orientation = _get_random_orientation()
+        else:
+            orientation = np.eye(3)
+        transform = _get_transform_from_orientation_centroid(
+            orientation,
+            centroid,
+            n=32
+        )
+
+        # Get the map data 
+        image_z_float = get_map_array(
+            z_map_sample_metadata, 
+            self.metadata_table_low_conf, 
+            self.pandda_2_pose_table, 
+            self.metadata_table_high_conf, 
+            self.pandda_2_z_map_sample_table, 
+            self.pandda_2_xmap_sample_table, 
+            transform,
+            sample_array,
+            self.test_train, 
+            self.p_flip, 
+            self.fraction_background_replace,
+            self.drop_atom_rate,
+            self.max_pos_atom_mask_radius,
+            self.max_x_blur,
+            self.max_z_blur,
+            self.rescale_x,
+            self.max_x_noise,
+            self.max_z_noise,
+            self.ligand,
+            self.z_cutoff,
+            self.z_mask_radius,
+            self.xmap_radius,
+        )
+
+        image_mol_float = get_ligand_array(
+            self.pandda_2_ligand_data_table, 
+            ligand_data_idx, 
+            self.unique_smiles, 
+            self.unique_smiles_frequencies, 
+            conf, 
+            sample_array, 
+            self.test_train, 
+            self.ligand
+        )
+        if image_mol_float is None:
+            # print(f'Got exception in getting conf: {e}')
             hit = [1.0, 0.0]
             label = np.array(hit)
             label_float = label.astype(np.float32)
@@ -600,7 +839,7 @@ class EventScoringDataset(Dataset):
                 dtype=np.float32,
             )
             sample_array_mol = np.zeros(
-                (1, 32, 32, 32),
+                (6, 32, 32, 32),
                 dtype=np.float32,
             )
             return (
@@ -619,233 +858,8 @@ class EventScoringDataset(Dataset):
                 torch.from_numpy(label_float)
             )
 
-        #
-        if self.test_train == 'train':
-            u_s = rng.uniform(0.0, self.max_x_blur)
-            xmap_sample_data = gaussian_filter(xmap_sample_data, sigma=u_s)
-
-            u_s = rng.uniform(0.0, self.max_z_blur)
-            z_map_sample_data = gaussian_filter(z_map_sample_data, sigma=u_s)
-
-        # if (annotation['partition'] == 'train') & (rng.uniform(0.0, 1.0) > 0.5):
-        #     xmap_sample_data[:,:,:] = 0.0
-        #     ...
-
-        xmap = _get_grid_from_hdf5(xmap_sample_data)
-        z_map = _get_grid_from_hdf5(z_map_sample_data)
-
-        # if annotation['partition'] == 'train':
-        #
-        #     if res > 2.5:
-        #         truncation_res = res +0.001
-        #     else:
-        #         truncation_res = rng.uniform(res+0.001, 2.5)
-        #
-        #     xmap = truncate(xmap, truncation_res)
-        #     z_map = truncate(z_map, truncation_res)
-
-        # Subsample if training
-        if self.test_train == 'train':
-            translation = self.max_translate*(2*(rng.random(3)-0.5))
-            centroid = np.array([22.5,22.5,22.5]) + translation
-
-        else:
-            centroid = np.array([22.5,22.5,22.5])
-
-        # Get sampling transform for the z map
-        sample_array = np.zeros(
-            (32, 32, 32),
-            dtype=np.float32,
-        )
-        if self.test_train == 'train':
-            orientation = _get_random_orientation()
-        else:
-            orientation = np.eye(3)
-        transform = _get_transform_from_orientation_centroid(
-            orientation,
-            centroid,
-            n=32
-        )
-
-        # Get the ligand
-        valid_poss = (embedding - np.mean(embedding, axis=0)) + np.array([8.0,8.0,8.0])
-        valid_elements = np.array(
-                [m3.GetAtomWithIdx(_atom_idx).GetAtomicNum() for _atom_idx in [a.GetIdx() for a in m3.GetAtoms()]])
-        ligand_sample_array = np.zeros(
-            (32, 32, 32),
-            dtype=np.float32,
-        )
-        ligand_orientation = _get_random_orientation()
-        transformed_residue = _get_res_from_arrays(
-            valid_poss,
-            valid_elements,
-        )
-        ligand_centroid = _get_centroid_from_res(transformed_residue)
-        ligand_map_transform = _get_transform_from_orientation_centroid(
-            ligand_orientation,
-            ligand_centroid,
-            n=32
-        )
-        # ligand_mask_grid = _get_ligand_mask_float(
-        #     transformed_residue,
-        # )
-        ligand_mask_grid = _get_ligand_mask_multi_atom_float(
-                    transformed_residue,
-                )
-
-
-        if self.test_train == 'train':
-            mask = np.ones((32,32,32), dtype=np.float32)
-
-        else:
-            mask = np.ones((32,32,32), dtype=np.float32)
-
-        # Get sample images
-        if self.rescale_x:
-            xmap_sample = _sample_xmap_and_scale(
-                xmap,
-                transform,
-                np.copy(sample_array)
-            )
-        else:
-            xmap_sample = _sample_xmap(
-                xmap,
-                transform,
-                np.copy(sample_array)
-            )
-        # xmap_sample = np.copy(sample_array)
-        z_map_sample = _sample_xmap(
-            z_map,
-            transform,
-            np.copy(sample_array)
-        )
-        # if annotation['partition'] == 'train':
-        #     translate = rng.uniform(-0.5, 0.5)
-        #     scale = rng.uniform(0.9, 1.1)
-        #     z_map_sample = (z_map_sample * scale) + translate
-        #
-        #     translate = rng.uniform(-0.5, 0.5)
-        #     scale = rng.uniform(0.9, 1.1)
-        #     xmap_sample = (xmap_sample * scale) + translate
-
-        if self.test_train == 'train':
-            u_s = rng.uniform(0.0, self.max_x_noise)
-            noise = rng.normal(size=(32,32,32)) * u_s
-            z_map_sample += noise.astype(np.float32)
-
-            u_s = rng.uniform(0.0, self.max_z_noise)
-            noise = rng.normal(size=(32,32,32)) * u_s
-            xmap_sample += noise.astype(np.float32)
-
-        # Make the image
-        if self.ligand:
-            image_ligand_mask = np.stack(
-                [
-                    _sample_xmap(
-                        _mask,
-                        ligand_map_transform,
-                        np.copy(ligand_sample_array)
-                )
-                for _mask in ligand_mask_grid
-                ],
-                axis=0
-            )
-                 
-        else:
-            image_ligand_mask = np.stack(
-                [np.copy(sample_array) for j in [0, 1, 2, 3, 4, 5]], 
-                axis = 0,
-                )
-
-        if self.ligand:
-            _density_mask = (z_map_sample > self.z_cutoff).astype(int)
-            # high_z_mask[high_z_mask == 0] = -1
-            density_mask = expand_labels(_density_mask, distance=self.z_mask_radius / 0.5)
-            density_mask[density_mask != 1] = 0
-        else:
-            density_mask = _get_ed_mask_float(radius=self.xmap_radius)
-
-        image_z = np.stack(
-            [
-                z_map_sample * density_mask,
-                xmap_sample * density_mask
-            ],
-            axis=0
-        )
-        image_z_float = image_z.astype(np.float32) # * mask
-
-        # image_z = np.stack(
-        #     [
-        #         z_map_sample > _cutoff
-        #         for _cutoff
-        #         in Z_LEVELS
-        #
-        #     ] + [
-        #         (xmap_sample > _cutoff) * xmap_mask_float
-        #         for _cutoff
-        #         in X_LEVELS
-        #     ],
-        #     axis=0
-        # )
-        # image_z_float = image_z.astype(np.float32) # * mask
-
-        # image_mol = np.stack(
-        #     [
-        #         image_ligand_mask,
-        #     ],
-        #     axis=0
-        # )
-        image_mol = image_ligand_mask
-        image_mol_float = image_mol.astype(np.float32)
-
-
-        # if self.test_train == 'train':
-        #     # if conf == 'High':
-        #     #     hit = [self.label_noise, 1-self.label_noise]
-        #     # elif conf == 'Medium':
-        #     #     hit = [0.5, 0.5]
-        #     # elif conf == 'Low':
-        #     #     hit = [1-self.label_noise, self.label_noise]
-        #     if conf == 'High':
-        #         hit = [0.0, 1.0]
-        #     elif conf == 'Medium':
-        #         hit = [0.5, 0.5]
-        #     elif conf == 'Low':
-        #         hit = [1.0, 0.0]
-        #     else:
-        #         raise Exception
-        # else:
-        #     if conf == 'High':
-        #         hit = [0.0, 1.0]
-        #     elif conf == 'Medium':
-        #         hit = [0.5, 0.5]
-        #     elif conf == 'Low':
-        #         hit = [1.0, 0.0]
-        #     else:
-        #         raise Exception
-
-
-        # if conf == 'High':
-        #     hit = [0.0, 0.0, 1.0]
-        # elif conf == 'Medium':
-        #     hit = [0.0, 1.0, 0.0]
-        # elif conf == 'Low':
-        #     hit = [1.0, 0.0, 0.0]
-        # else:
-        #     raise Exception
-
-        if conf == 'High':
-            hit = [0.0, 1.0]
-        elif conf == 'Medium':
-            hit = [0.5, 0.5]
-        elif conf == 'Low':
-            hit = [1.0, 0.0,]
-        else:
-            raise Exception
-
-
-        label = np.array(hit)
-        label_float = label.astype(np.float32)
+        # Get the label array
+        label_float = get_label_array(conf)
 
         return (
             [
