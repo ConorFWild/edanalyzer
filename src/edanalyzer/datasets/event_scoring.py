@@ -436,7 +436,7 @@ def get_ligand_array_from_lig_frame(transformed_residue, frame, use_ligand=True)
     ligand_map_transform = _get_transform_from_orientation_centroid(
         frame['orientation'],
         ligand_centroid,
-        n=32,
+        n=frame['n'],
     )
     ligand_mask_grid = _get_ligand_mask_multi_atom_float(
                 transformed_residue,

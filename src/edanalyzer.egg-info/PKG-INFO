@@ -1,0 +1,30 @@
+Metadata-Version: 2.4
+Name: edanalyzer
+Version: 0.0.0
+Summary: One line description of your module
+Classifier: Development Status :: 3 - Alpha
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.9
+Description-Content-Type: text/x-rst
+Requires-Dist: gemmi
+Requires-Dist: loguru
+Requires-Dist: SQLAlchemy
+Requires-Dist: pydantic
+Requires-Dist: networkx
+Requires-Dist: numpy
+Requires-Dist: rich
+Requires-Dist: fire
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: joblib
+Requires-Dist: torch
+Requires-Dist: torchvision
+Requires-Dist: scipy
+Requires-Dist: pyyaml
+Requires-Dist: lightning
+Requires-Dist: pytorch-lightning
+Requires-Dist: zarr
