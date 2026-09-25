@@ -427,6 +427,45 @@ def truncate(xmap, res):
 #             torch.from_numpy(image_decoded_density_float),
 #             torch.from_numpy(label_float)
 #         )
+def get_ligand_array_from_lig_frame(transformed_residue, frame, use_ligand=True):
+    ligand_sample_array = np.zeros(
+        (frame['n'], frame['n'], frame['n']),
+        dtype=np.float32,
+    )
+    ligand_centroid = _get_centroid_from_res(transformed_residue)
+    ligand_map_transform = _get_transform_from_orientation_centroid(
+        frame['orientation'],
+        ligand_centroid,
+        n=32,
+    )
+    ligand_mask_grid = _get_ligand_mask_multi_atom_float(
+                transformed_residue,
+            )
+
+    # Make the image
+    if use_ligand:
+        image_ligand_mask = np.stack(
+            [
+                _sample_xmap(
+                    _mask,
+                    ligand_map_transform,
+                    np.copy(ligand_sample_array)
+            )
+            for _mask in ligand_mask_grid
+            ],
+            axis=0
+        )
+                
+    else:
+        image_ligand_mask = np.stack(
+            [np.copy(ligand_sample_array) for j in [0, 1, 2, 3, 4, 5]], 
+            axis = 0,
+            )
+
+    image_mol = image_ligand_mask
+    image_mol_float = image_mol.astype(np.float32)
+    return image_mol_float
+
 
 def get_ligand_array(pandda_2_ligand_data_table, ligand_data_idx, unique_smiles, unique_smiles_frequencies, conf, sample_array, test_train, use_ligand):
 
@@ -452,48 +491,21 @@ def get_ligand_array(pandda_2_ligand_data_table, ligand_data_idx, unique_smiles,
     valid_poss = (embedding - np.mean(embedding, axis=0)) + np.array([8.0,8.0,8.0])
     valid_elements = np.array(
             [m3.GetAtomWithIdx(_atom_idx).GetAtomicNum() for _atom_idx in [a.GetIdx() for a in m3.GetAtoms()]])
-    ligand_sample_array = np.zeros(
-        (32, 32, 32),
-        dtype=np.float32,
-    )
+
     ligand_orientation = _get_random_orientation()
     transformed_residue = _get_res_from_arrays(
         valid_poss,
         valid_elements,
     )
-    ligand_centroid = _get_centroid_from_res(transformed_residue)
-    ligand_map_transform = _get_transform_from_orientation_centroid(
-        ligand_orientation,
-        ligand_centroid,
-        n=32,
-    )
-    ligand_mask_grid = _get_ligand_mask_multi_atom_float(
-                transformed_residue,
-            )
 
-    # Make the image
-    if use_ligand:
-        image_ligand_mask = np.stack(
-            [
-                _sample_xmap(
-                    _mask,
-                    ligand_map_transform,
-                    np.copy(ligand_sample_array)
-            )
-            for _mask in ligand_mask_grid
-            ],
-            axis=0
-        )
-                
-    else:
-        image_ligand_mask = np.stack(
-            [np.copy(sample_array) for j in [0, 1, 2, 3, 4, 5]], 
-            axis = 0,
-            )
+    ligand_frame = {
+        'n': 32,
+        'd': 0.5,
+        'orientation': ligand_orientation
+    }
 
-    image_mol = image_ligand_mask
-    image_mol_float = image_mol.astype(np.float32)
-    return image_mol_float
+    return get_ligand_array_from_lig_frame(transformed_residue, ligand_frame, use_ligand)
+    
 
 def get_label_array(conf):
     # if self.test_train == 'train':
