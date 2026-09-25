@@ -29,7 +29,6 @@ dependencies = [
     "torchvision",
     "scipy",
     "pyyaml",
-    'lightning',
     'pytorch-lightning',
     'zarr'
 ] # Add project dependencies here, e.g. ["click", "numpy"]
