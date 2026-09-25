@@ -29,7 +29,8 @@ dependencies = [
     "torchvision",
     "scipy",
     "pyyaml",
-    'lightning'
+    'lightning',
+    'pytorch-lightning'
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
